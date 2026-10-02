@@ -106,3 +106,23 @@ Frozen fallback:
 - SHA: `327d32f714129ca633517a8f4158cd84820c1504`
 
 Do not retire it until later V3 parity gates physically pass.
+
+
+## V3-RUN-003 preflight result
+
+Status: **FAIL — expected safety blockers found before launch**
+
+Observed:
+- pinned desktop frontend found;
+- real OpenJarvis desktop inference source: `ollama`;
+- real desktop source is confirmed, so stock launch would auto-start its own Jarvis backend;
+- Node: `v24.19.0` PASS;
+- global npm: `11.17.0`, below pinned desktop requirement `>=11.19 <12`.
+
+Decision:
+- do not modify/delete the user's real OpenJarvis inference configuration;
+- do not globally upgrade npm just for this experiment;
+- launch the desktop under a V3-isolated HOME with no inference source;
+- use pinned npm `11.19.0` locally via `npx`.
+
+Next run: `V3-RUN-004` isolated desktop launch.
