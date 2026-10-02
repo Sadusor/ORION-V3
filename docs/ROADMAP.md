@@ -15,12 +15,21 @@ Exit criteria:
 - real Stop semantics understood;
 - old ORION Remote untouched.
 
-## V3.1 — Deterministic Hand migration
-Adapt proven mechanics from old ORION behind stable names:
-- filesystem.search
-- filesystem.list
-- filesystem.reveal
-- project.publish
+## V3.1 — OpenJarvis tool adoption under ORION authority
+Inventory and reuse the pinned OpenJarvis ToolRegistry first.
+
+Rules:
+- existing OpenJarvis tools stay donor-owned and are governed by ORION leases/adapters;
+- only missing capabilities become small OpenJarvis-native registered extensions;
+- do not create a parallel ORION Hands/tool framework.
+
+Initial capability map:
+- `filesystem.search` — missing upstream; add one registered OpenJarvis extension;
+- `file_read` — reuse OpenJarvis built-in;
+- `file_write` — reuse OpenJarvis built-in;
+- browser/web/shell/patch capabilities — evaluate existing OpenJarvis tools before any custom code.
+
+ORION continues to own authority, trusted-root bindings, evidence normalization and Stop truth.
 
 ## V3.2 — Provider / governor integration
 Use OpenJarvis engine/model registries where they survive policy tests.
