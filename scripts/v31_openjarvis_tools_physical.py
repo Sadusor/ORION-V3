@@ -39,7 +39,7 @@ assert ToolRegistry.contains("orion_filesystem_search")
 leases = LeaseAuthority()
 gateway = AuthorityGateway(leases)
 issued = leases.issue(
-    task_id="V3-RUN-001",
+    task_id="V3-RUN-002",
     operation_id="filesystem.search",
     principal="owner",
     scope={
@@ -66,7 +66,7 @@ executor = ToolExecutor(
 )
 
 call = ToolCall(
-    id="V3-RUN-001-search",
+    id="V3-RUN-002-search",
     name=tool.tool_id,
     arguments=json.dumps(
         {
@@ -93,11 +93,11 @@ evidence = normalize_filesystem_search_evidence(
     lease=issued.lease,
     tool_result=result,
 )
-assert evidence.task_id == "V3-RUN-001"
+assert evidence.task_id == "V3-RUN-002"
 assert evidence.outcome.value == "confirmed"
 assert evidence.result["match_count"] >= 2
 
-print("V3_RUN_ID=V3-RUN-001")
+print("V3_RUN_ID=V3-RUN-002")
 print("OPENJARVIS_FILE_READ_BUILTIN=FOUND")
 print("OPENJARVIS_FILE_WRITE_BUILTIN=FOUND")
 print("OPENJARVIS_CUSTOM_SEARCH_REGISTERED=PASS")
