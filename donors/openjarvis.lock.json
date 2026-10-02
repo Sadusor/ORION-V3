@@ -1,0 +1,9 @@
+{
+  "name": "OpenJarvis",
+  "repository": "https://github.com/Sadusor/OpenJarvis.git",
+  "upstream_repository": "https://github.com/open-jarvis/OpenJarvis.git",
+  "revision": "309a4f1044ccfb2032264832a31fef2f1d314586",
+  "license": "Apache-2.0",
+  "role": "preferred-generic-substrate-candidate",
+  "status": "gate-1-candidate"
+}
