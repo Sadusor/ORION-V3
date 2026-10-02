@@ -41,10 +41,14 @@ Before substantial custom implementation:
 1. classify the ORION layer;
 2. inspect internal/proven ORION mechanics;
 3. inspect serious donors;
-4. compare security, Stop, evidence, Windows behavior, license and replaceability;
-5. run the smallest falsification spike;
-6. record the result;
-7. custom-build only when donors fail a real ORION contract.
+4. **inventory the pinned OpenJarvis registry and built-in tools before writing any tool/Hand code;**
+5. prefer configuring, adapting or wrapping an existing donor tool over reimplementing its capability;
+6. compare security, Stop, evidence, Windows behavior, license and replaceability;
+7. run the smallest falsification spike;
+8. record the result;
+9. custom-build only when donors genuinely lack the capability or fail a real ORION contract.
+
+A missing capability should normally be added as an OpenJarvis-native registered tool, not as a second ORION execution framework.
 
 ## Old ORION protection
 
