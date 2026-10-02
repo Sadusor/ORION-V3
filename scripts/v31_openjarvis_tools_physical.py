@@ -23,6 +23,7 @@ from openjarvis.tools._stubs import ToolExecutor
 from orion_v3.authority import AuthorityGateway, LeaseAuthority
 from orion_v3.substrates.openjarvis import (
     build_gate1_capability_policy,
+    build_registered_filesystem_search_tool,
     normalize_filesystem_search_evidence,
 )
 
@@ -50,9 +51,8 @@ issued = leases.issue(
     ttl_seconds=60,
 )
 
-tool = ToolRegistry.create(
-    "orion_filesystem_search",
-    gateway=gateway,
+tool = build_registered_filesystem_search_tool(
+    gateway,
     lease_token=issued.token,
     trusted_roots={"project": ROOT},
 )
