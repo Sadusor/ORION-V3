@@ -6,7 +6,7 @@ This carries forward the original ORION donor research. Presence here is not ado
 
 | Donor | Role | V3 disposition |
 |---|---|---|
-| OpenJarvis | registries, engines, provider routing, channels, events, skills, UI/runtime | GATE-1 PRIMARY |
+| OpenJarvis | registries, ToolRegistry/ToolExecutor, built-in filesystem/browser/web/shell/patch tools, engines, provider routing, channels, events, skills, UI/runtime | **ADOPTED REPLACEABLE SUBSTRATE** |
 | Jev Harness | proposal -> evidence -> code decides -> host authorizes | ADAPT CONCEPT |
 | WORKSHOP | provider discovery, role mappings, health, fallbacks, safe serialization | ADAPT / BENCHMARK |
 
@@ -98,3 +98,19 @@ For each subsystem:
 6. preserve an exit path.
 
 Borrow capability, not ownership.
+
+## Tool reuse rule
+
+OpenJarvis is the default execution/tool substrate after Gate 1.
+
+Before creating any new ORION execution capability:
+1. inspect `ToolRegistry` and built-in OpenJarvis tools at the pinned donor revision;
+2. reuse the donor tool if it satisfies the ORION contract;
+3. wrap it only as needed for ORION Action Leases, trusted bindings, evidence and Stop;
+4. if the capability is genuinely absent, implement the smallest OpenJarvis-native registered extension;
+5. never create a parallel ORION tool/Hand registry merely for convenience.
+
+V3.1 audit result:
+- `file_read`: present upstream;
+- `file_write`: present upstream;
+- `filesystem.search` exact-basename capability: not found upstream at the pinned revision, so it is the first justified custom registered extension.
