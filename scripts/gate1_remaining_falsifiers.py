@@ -208,23 +208,60 @@ def physical_stop_falsifier() -> None:
                 raise AssertionError("Killable worker did not become ready")
 
             worker_pid = int(ready.read_text(encoding="ascii").strip())
-            assert worker_pid == proc.pid
+            launcher_pid = proc.pid
+            print(f"STOP_LAUNCHER_PID={launcher_pid}")
+            print(f"STOP_WORKER_PID={worker_pid}")
 
             before = int(heartbeat.read_text(encoding="ascii").strip())
             time.sleep(0.25)
             active = int(heartbeat.read_text(encoding="ascii").strip())
             assert active > before, "Worker is not demonstrably running"
 
-            # This is the ORION Stop primitive for Gate 1: terminate the owned
-            # process, wait for OS confirmation, then verify work has ceased.
-            proc.terminate()
-            try:
-                exit_code = proc.wait(timeout=5.0)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                exit_code = proc.wait(timeout=5.0)
+            # On Windows a Python/uv launcher may sit between Popen and the
+            # actual interpreter. The worker-reported PID is therefore the
+            # authority for Stop; never assume launcher PID == worker PID.
+            killed = subprocess.run(
+                ["taskkill", "/PID", str(worker_pid), "/T", "/F"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            )
+            if killed.returncode != 0:
+                raise AssertionError(
+                    "taskkill failed for actual worker PID "
+                    + str(worker_pid)
+                    + ": "
+                    + (killed.stderr or killed.stdout).strip()
+                )
 
-            assert proc.poll() is not None, "Worker process still reports alive"
+            deadline = time.monotonic() + 5.0
+            worker_alive = True
+            while time.monotonic() < deadline:
+                listing = subprocess.run(
+                    [
+                        "tasklist",
+                        "/FI",
+                        f"PID eq {worker_pid}",
+                        "/FO",
+                        "CSV",
+                        "/NH",
+                    ],
+                    stdin=subprocess.DEVNULL,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+                )
+                output = (listing.stdout or "").strip()
+                worker_alive = str(worker_pid) in output and "No tasks are running" not in output
+                if not worker_alive:
+                    break
+                time.sleep(0.05)
+
+            assert not worker_alive, "Windows still reports actual worker PID alive"
+
             stopped_value = heartbeat.read_text(encoding="ascii").strip()
             time.sleep(0.40)
             after_value = heartbeat.read_text(encoding="ascii").strip()
@@ -232,8 +269,17 @@ def physical_stop_falsifier() -> None:
                 "Heartbeat changed after Stop; underlying work continued"
             )
 
-            print(f"STOP_WORKER_PID={worker_pid}")
-            print(f"STOP_WORKER_EXIT={exit_code}")
+            # Reap/clean the launcher handle if it still exists. This is cleanup,
+            # not the proof of Stop; worker PID + heartbeat are the proof.
+            if proc.poll() is None:
+                try:
+                    proc.terminate()
+                    proc.wait(timeout=2.0)
+                except subprocess.TimeoutExpired:
+                    proc.kill()
+                    proc.wait(timeout=2.0)
+
+            print("WORKER_PID_OS_ABSENT=PASS")
             print("UNDERLYING_WORK_GONE=PASS")
             print("PHYSICAL_STOP=PASS")
         finally:
