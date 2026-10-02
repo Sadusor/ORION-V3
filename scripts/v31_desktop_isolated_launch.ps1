@@ -94,18 +94,18 @@ try {
     # stays inert when no inference.json exists, so it cannot auto-start its
     # own Jarvis server or Ollama on this run.
     $launchScript = Join-Path $RuntimeDir 'launch-openjarvis-v3.ps1'
-    @"
-\$env:HOME = '$SandboxHome'
-\$env:OPENJARVIS_ROOT = '$Donor'
-Set-Location '$Frontend'
-& '$tauriBin' dev --config '$OverridePath'
-"@ | Set-Content -LiteralPath $launchScript -Encoding UTF8
+    @(
+        "`$env:HOME = '$SandboxHome'",
+        "`$env:OPENJARVIS_ROOT = '$Donor'",
+        "Set-Location '$Frontend'",
+        "& '$tauriBin' dev --config '$OverridePath'"
+    ) | Set-Content -LiteralPath $launchScript -Encoding UTF8
 
     $child = Start-Process -FilePath 'powershell.exe' -ArgumentList @(
         '-NoProfile',
         '-ExecutionPolicy', 'Bypass',
         '-File', $launchScript
-    ) -PassThru
+    ) -WindowStyle Hidden -PassThru
 
     Write-Host ('DESKTOP_LAUNCHER_PID> ' + $child.Id)
 
