@@ -1,27 +1,9 @@
 from __future__ import annotations
 
 import json
-from contextlib import contextmanager
-from contextvars import ContextVar
-from typing import Any, Callable, Iterator, Mapping
+from typing import Any, Callable, Mapping
 
 from orion_v3.authority import AuthorityDenied, AuthorityGateway, AuthorizedOperation
-
-
-_ACTIVE_ACTION_LEASE: ContextVar[str | None] = ContextVar(
-    "orion_active_action_lease", default=None
-)
-
-
-@contextmanager
-def bind_action_lease(token: str) -> Iterator[None]:
-    """Bind an ORION lease out-of-band from model/tool arguments."""
-
-    marker = _ACTIVE_ACTION_LEASE.set(token)
-    try:
-        yield
-    finally:
-        _ACTIVE_ACTION_LEASE.reset(marker)
 
 
 def build_gate1_capability_policy(agent_id: str):
@@ -37,11 +19,19 @@ def build_gate1_capability_policy(agent_id: str):
 def build_filesystem_search_tool(
     gateway: AuthorityGateway,
     dispatcher: Callable[[AuthorizedOperation], Mapping[str, Any]],
+    *,
+    lease_token: str | None = None,
 ):
-    """Build a Jarvis tool that has zero authority of its own.
+    """Build one OpenJarvis proxy tool instance.
 
-    The model sees search parameters only. The lease is supplied through an
-    ORION-owned execution context and every call crosses AuthorityGateway.
+    The lease is captured privately on the tool instance, never exposed in the
+    model-facing ToolSpec or argument schema. An unbound instance is useful as
+    a deliberate bypass probe: it remains discoverable/invokable by Jarvis but
+    must fail at the ORION Gateway before dispatcher invocation.
+
+    A bound instance is ephemeral authority: ORION creates it only after
+    issuing a lease for the current dispatch. This avoids thread-local/context
+    propagation assumptions inside donor executors.
     """
 
     from openjarvis.core.types import ToolResult
@@ -50,6 +40,9 @@ def build_filesystem_search_tool(
     class OrionFilesystemSearchTool(BaseTool):
         tool_id = "orion_filesystem_search"
         is_local = True
+
+        def __init__(self, token: str | None) -> None:
+            self._orion_lease_token = token
 
         @property
         def spec(self) -> ToolSpec:
@@ -78,7 +71,7 @@ def build_filesystem_search_tool(
         def execute(self, **params: Any) -> ToolResult:
             try:
                 authorized = gateway.authorize(
-                    lease_token=_ACTIVE_ACTION_LEASE.get(),
+                    lease_token=self._orion_lease_token,
                     operation_id="filesystem.search",
                     arguments=params,
                 )
@@ -114,4 +107,4 @@ def build_filesystem_search_tool(
                 },
             )
 
-    return OrionFilesystemSearchTool()
+    return OrionFilesystemSearchTool(lease_token)
