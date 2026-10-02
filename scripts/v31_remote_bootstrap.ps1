@@ -11,7 +11,7 @@ $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $Donor = Join-Path $RepoRoot 'external\OpenJarvis'
 
 Write-Host 'ORION_V3_V31_BOOTSTRAP> START'
-Write-Host 'V3_RUN_ID> V3-RUN-001'
+Write-Host 'V3_RUN_ID> V3-RUN-002'
 
 $Origin = (& git -C $RepoRoot remote get-url origin).Trim()
 if ($LASTEXITCODE -ne 0 -or $Origin -notmatch 'Sadusor/ORION-V3') {
@@ -41,7 +41,7 @@ if ($DonorSha -ne '309a4f1044ccfb2032264832a31fef2f1d314586') {
 Write-Host 'OPENJARVIS_PIN> PASS'
 
 Write-Host 'V31_AUTHORITY_REGRESSION> RUN'
-& uv run --project $RepoRoot --extra dev pytest -q
+& uv run --project $RepoRoot --extra dev pytest (Join-Path $RepoRoot 'tests') -q
 if ($LASTEXITCODE -ne 0) {
     Fail 'V31_AUTHORITY_REGRESSION' 'ORION-V3 regression suite failed.'
 }
