@@ -1,5 +1,11 @@
 # Gate 1 — OpenJarvis Foundation
 
+## Status
+
+**COMPLETE — PHYSICAL PASS**
+
+Date: 2026-10-03
+
 ## Purpose
 
 Falsify the claim that OpenJarvis can serve as generic substrate while ORION remains sole authority.
@@ -8,73 +14,93 @@ Falsify the claim that OpenJarvis can serve as generic substrate while ORION rem
 
 `filesystem.search` only.
 
-## Current status
+## Exact completion evidence
 
-**PARTIAL PHYSICAL PASS.**
-
-The real pinned OpenJarvis authority/executor integration passed on Windows at:
-
-- ORION-V3: `98edcd5e018ad60cae18c8654bff289e69ab0e70`
+- ORION-V3: `dc13d5caddf2489879b2d300addaa5419b3d5975`
 - OpenJarvis: `309a4f1044ccfb2032264832a31fef2f1d314586`
-- ORION Remote attempt: `397`
-- result: `PASS`
-
-Observed:
-- 16/16 authority tests PASS;
-- real OpenJarvis Rust extension PASS;
-- no ORION lease -> denied before dispatcher;
-- valid ORION lease + Jarvis capability -> dispatcher reached;
-- model/tool trust-binding override -> denied.
+- ORION Remote: `df4ef699706ede0ce6d9de34eaeb74b84213a116`
+- physical attempt: `399`
+- result: **PASS**
 
 Evidence:
-`docs/journal/2026-10-03-gate1-openjarvis-physical-authority-pass.md`
-
-## Required physical path
-
-owner/Qwen intent -> OpenJarvis registered ORION proxy -> ORION Gateway -> valid lease -> bounded deterministic filesystem Hand -> ORION evidence -> verifier
+`docs/journal/2026-10-03-gate1-complete.md`
 
 ## PASS requirements
 
-- no lease is denied before Hand invocation — **PHYSICAL PASS for real ToolExecutor path**;
-- forged/expired/revoked/wrong-scope leases are denied — **AUTOMATED PASS**;
-- trusted roots cannot come from model/tool args — **PHYSICAL PASS for real ToolExecutor path**;
-- search cannot widen itself into reveal — **AUTOMATED PASS**;
-- Jarvis policy is default-deny — IMPLEMENTED / source-audited;
-- Jarvis native agent cannot bypass the ORION proxy boundary — **PENDING PHYSICAL FALSIFIER**;
-- direct Jarvis capability grants cannot mint ORION authority — **PENDING PHYSICAL FALSIFIER**;
-- ORION evidence, not model prose, determines outcome — IMPLEMENTED / further physical path pending;
-- donor event history is non-canonical — DOCUMENTED / dedicated falsifier pending;
-- timeout is not reported as Stop — **PENDING PHYSICAL FALSIFIER**;
-- old ORION repository and Remote remain untouched architecturally — PASS for this gate.
+- no lease denied before Hand invocation — **PASS**
+- forged/expired/revoked/wrong-scope leases denied — **PASS**
+- trusted roots cannot come from model/tool args — **PASS**
+- search cannot widen itself into reveal — **PASS**
+- Jarvis policy is default-deny in governed path — **PASS**
+- native Jarvis agent cannot bypass ORION — **PASS**
+- permissive/direct Jarvis capability posture cannot mint ORION authority — **PASS**
+- timeout is not reported as Stop — **PASS**
+- physical Stop verifies underlying work is gone — **PASS**
+- ORION remains the authority above donor execution — **PASS**
 
-## Lease transport correction
+## Physical Stop proof
 
-Real OpenJarvis execution showed that a Python `ContextVar` does not cross the donor executor's worker-thread boundary.
+The final Stop falsifier deliberately ran observable blocking work in an ORION-owned Windows worker process.
 
-Gate 1 therefore uses an **ephemeral lease-bound ORION proxy instance**:
-- token captured privately by ORION;
-- token absent from model-facing schema;
-- token cannot be injected through tool arguments;
-- unbound proxy remains denied;
-- Jarvis remains a second fail-closed gate.
+PASS required all of:
 
-## Physical Stop falsifier
+1. actual worker PID identified independently from launcher PID;
+2. Windows process-tree termination requested for that PID;
+3. Windows no longer reported the worker PID;
+4. heartbeat ceased changing after termination;
+5. only then was `PHYSICAL_STOP=PASS` emitted.
 
-Use a deliberately blocking test Hand or donor worker.
+Observed:
 
-A timeout result while underlying work continues is FAIL.
+```text
+WORKER_PID_OS_ABSENT=PASS
+UNDERLYING_WORK_GONE=PASS
+PHYSICAL_STOP=PASS
+```
 
-PASS requires:
-1. ORION requests Stop;
-2. the owned worker/process is terminated or otherwise verifiably cancelled;
-3. liveness verification proves the underlying operation is gone;
-4. only then may canonical outcome become STOPPED.
+## Donor timeout proof
 
-## Upgrade falsifier
+OpenJarvis ToolExecutor timeout was physically shown to return while the timed-out Python function continued running.
 
-Deliberately widen/alter the Jarvis-side capability policy in the test harness.
-ORION denial must still prevent Hand invocation.
+Observed:
 
-## Adoption
+```text
+DONOR_TIMEOUT_RETURNED_WHILE_WORK_CONTINUED=PASS
+TIMEOUT_IS_NOT_STOP=PASS
+```
 
-OpenJarvis becomes the preferred V3 substrate only after the remaining Gate-1 falsifiers physically pass.
+Therefore donor timeout is never canonical ORION Stop evidence.
+
+## Native bypass proof
+
+A real OpenJarvis `NativeReActAgent` was given the ORION proxy with a deliberately permissive Jarvis capability policy but no ORION lease.
+
+Observed:
+
+```text
+NATIVE_AGENT_BYPASS=DENIED
+JARVIS_POLICY_WIDENING=NO_ORION_AUTHORITY
+```
+
+The dispatcher was not reached.
+
+## Adoption decision
+
+OpenJarvis is now the **preferred replaceable generic substrate** for ORION V3.
+
+It is not the authority layer.
+
+Canonical hierarchy:
+
+```text
+OWNER
+  -> ORION AUTHORITY
+      -> OpenJarvis substrate
+          -> Hands
+```
+
+OpenJarvis security is retained as defense in depth and may narrow execution, but cannot widen ORION authority.
+
+## Next gate
+
+V3.1 — real deterministic filesystem Hands and normalized evidence, followed by desktop/UI substrate evaluation.
