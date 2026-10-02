@@ -4,46 +4,74 @@ Updated: 2026-10-03
 
 ## Stage
 
-Bootstrap / OpenJarvis Foundation Gate 1.
+OpenJarvis Foundation Gate 1 — **physical authority/executor slice passed; remaining falsifiers in progress**.
 
 ORION-V3 is a completely separate repository from the proven ORION implementation.
 
 ## Current claims
 
 - architecture: DOCUMENTED
-- OpenJarvis substrate: CANDIDATE, not adopted
-- Authority Boundary V0: DRAFT
-- ORION authority unit contract: AUTOMATED PASS (16/16)\n- OpenJarvis proxy compatibility contract: AUTOMATED PASS (stubbed donor API)\n- Real OpenJarvis/Windows Gate-1 integration: NOT TESTED
-- old ORION Remote: frozen external fallback; untouched
+- OpenJarvis substrate: CANDIDATE, not yet fully adopted
+- Authority Boundary V0: IMPLEMENTED / UNDER PHYSICAL QUALIFICATION
+- ORION authority unit contract: AUTOMATED PASS (16/16)
+- OpenJarvis proxy compatibility contract: AUTOMATED PASS
+- real pinned OpenJarvis + Windows authority/executor integration: **PHYSICAL PASS**
+- native-agent/direct-bypass falsifier: NOT YET PHYSICALLY PASSED
+- physical Stop falsifier: NOT YET PHYSICALLY PASSED
+- old ORION Remote: proven external transport/fallback; architecture untouched
 
 ## Pinned OpenJarvis donor
 
 `Sadusor/OpenJarvis@309a4f1044ccfb2032264832a31fef2f1d314586`
 
-## Latest evidence\n\n`docs/journal/2026-10-03-gate1-authority-unit-result.md`\n\n`docs/journal/2026-10-03-gate1-openjarvis-proxy-contract-result.md`\n\n## Current bounded task
+## Latest physical evidence
 
-Prove one operation only: `filesystem.search`.
+- ORION-V3 tested SHA: `98edcd5e018ad60cae18c8654bff289e69ab0e70`
+- ORION Remote task SHA: `07e65bb00be29746b201bdeffead68ddcf9a4867`
+- physical attempt: `397`
+- result: **PASS**
+- real OpenJarvis Rust extension: PASS
+- authority tests: **16/16 PASS**
+- no lease -> denied
+- valid lease -> dispatcher reached
+- trusted-binding override -> denied
 
-Target flow:
+Evidence:
+`docs/journal/2026-10-03-gate1-openjarvis-physical-authority-pass.md`
 
-semantic intent -> OpenJarvis ORION proxy -> ORION Action Lease validation -> deterministic filesystem search Hand -> normalized evidence -> verifier
+Earlier evidence:
+- `docs/journal/2026-10-03-gate1-authority-unit-result.md`
+- `docs/journal/2026-10-03-gate1-openjarvis-proxy-contract-result.md`
 
-## Gate-1 attacks
+## Current bounded task
 
-1. no lease;
-2. forged lease;
-3. expired lease;
-4. wrong operation or scope;
-5. native Jarvis agent direct invocation;
-6. side-effect tool outside ORION profile;
-7. Jarvis policy accidentally open-by-default;
-8. Jarvis capability widening while ORION denies;
-9. model attempts to inject trusted roots;
-10. blocking operation plus Stop;
-11. donor telemetry mistaken for canonical state.
+Finish Gate 1 without widening scope beyond `filesystem.search`.
+
+Next physical falsifiers:
+
+1. native Jarvis/direct-tool bypass cannot reach the Hand without ORION authority;
+2. Jarvis-side capability widening cannot override ORION denial;
+3. deliberately blocking work can be physically stopped through an ORION-owned killable worker;
+4. timeout alone never becomes STOPPED;
+5. donor EventBus/session state remains non-canonical.
+
+## Proven target flow so far
+
+```text
+owner intent
+-> ORION issues bounded Action Lease
+-> ephemeral lease-bound OpenJarvis proxy
+-> Jarvis default-deny capability gate
+-> ORION AuthorityGateway revalidates lease/scope/operation
+-> deterministic dispatcher
+```
+
+The lease is not a model/tool argument and Jarvis cannot mint it.
 
 ## Protected fallback
 
 - repo: `Sadusor/Orion`
 - branch: `checkpoint/2026-10-01-orion-remote-project-link`
 - SHA: `327d32f714129ca633517a8f4158cd84820c1504`
+
+Do not modify or retire the fallback until V3 independently passes its later parity gates.
