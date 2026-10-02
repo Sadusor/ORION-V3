@@ -13,14 +13,14 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - architecture: DOCUMENTED
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
-- Gate-1 runtime: NOT TESTED
+- ORION authority unit contract: AUTOMATED PASS (16/16)\n- OpenJarvis/Windows Gate-1 integration: NOT TESTED
 - old ORION Remote: frozen external fallback; untouched
 
 ## Pinned OpenJarvis donor
 
 `Sadusor/OpenJarvis@309a4f1044ccfb2032264832a31fef2f1d314586`
 
-## Current bounded task
+## Latest evidence\n\n`docs/journal/2026-10-03-gate1-authority-unit-result.md`\n\n## Current bounded task
 
 Prove one operation only: `filesystem.search`.
 
