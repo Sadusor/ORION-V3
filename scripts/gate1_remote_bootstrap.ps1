@@ -79,9 +79,34 @@ if ($LASTEXITCODE -ne 0 -or $JarvisDirty.Count -gt 0) {
 }
 Write-Host 'OPENJARVIS_PIN> PASS'
 
-Write-Host 'OPENJARVIS_ENV> SYNC START'
-& uv sync --project $Donor --group desktop-native
-if ($LASTEXITCODE -ne 0) { Fail 'OPENJARVIS_ENV' 'uv sync / Rust extension build failed.' }
+Write-Host 'RUST_TOOLCHAINS> BEGIN'
+try {
+    $Toolchains = @(& rustup toolchain list)
+    if ($LASTEXITCODE -eq 0 -and $Toolchains.Count -gt 0) {
+        foreach ($Line in $Toolchains) { Write-Host ('RUST_TOOLCHAIN> ' + $Line) }
+    } else {
+        Write-Host 'RUST_TOOLCHAIN> none reported'
+    }
+} catch {
+    Write-Host ('RUST_TOOLCHAIN> diagnostic failed: ' + $_.Exception.Message)
+}
+Write-Host 'RUST_TOOLCHAINS> END'
+
+$env:CARGO_NET_RETRY = '5'
+$SyncPassed = $false
+for ($Attempt = 1; $Attempt -le 3; $Attempt++) {
+    Write-Host ('OPENJARVIS_ENV> SYNC ATTEMPT ' + $Attempt + '/3')
+    & uv sync --project $Donor --group desktop-native
+    if ($LASTEXITCODE -eq 0) {
+        $SyncPassed = $true
+        break
+    }
+    if ($Attempt -lt 3) {
+        Write-Host 'OPENJARVIS_ENV> transient build/download failure; retrying after 5 seconds'
+        Start-Sleep -Seconds 5
+    }
+}
+if (-not $SyncPassed) { Fail 'OPENJARVIS_ENV' 'uv sync / Rust extension build failed after 3 bounded attempts.' }
 Write-Host 'OPENJARVIS_ENV> PASS'
 
 Write-Host 'OPENJARVIS_GATE1_SMOKE> RUN'
