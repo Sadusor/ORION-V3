@@ -114,6 +114,12 @@ Write-Host 'OPENJARVIS_GATE1_SMOKE> RUN'
 if ($LASTEXITCODE -ne 0) { Fail 'OPENJARVIS_GATE1_SMOKE' 'Real pinned OpenJarvis smoke failed.' }
 
 Write-Host 'OPENJARVIS_GATE1_SMOKE> PASS'
-Write-Host 'NEXT_GATE> native-agent bypass + physical Stop falsifier'
+
+Write-Host 'GATE1_REMAINING_FALSIFIERS> RUN'
+& uv run --project $Donor python (Join-Path $RepoRoot 'scripts\gate1_remaining_falsifiers.py')
+if ($LASTEXITCODE -ne 0) { Fail 'GATE1_REMAINING_FALSIFIERS' 'Native bypass / timeout / physical Stop falsifier failed.' }
+Write-Host 'GATE1_REMAINING_FALSIFIERS> PASS'
+
+Write-Host 'NEXT_GATE> evaluate Gate 1 completion evidence'
 Write-Host 'STATUS> PASS'
 exit 0
