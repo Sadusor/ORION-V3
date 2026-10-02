@@ -33,8 +33,8 @@ OpenJarvis:
 ORION Remote task:
 `df4ef699706ede0ce6d9de34eaeb74b84213a116`
 
-Physical attempt:
-`399`
+External Remote transport record:
+`attempt 399` — **transport log only; not an ORION-V3 attempt number**
 
 Result:
 **PASS**
@@ -61,6 +61,10 @@ OWNER > ORION AUTHORITY > OpenJarvis SUBSTRATE > HANDS
 ```
 
 OpenJarvis may narrow execution further but may not mint ORION authority.
+
+## ORION-V3 run numbering
+
+ORION-V3 uses its own run IDs beginning with `V3-RUN-001` in V3.1. Old ORION Remote attempt numbers are external transport evidence only and are never counted as ORION-V3 development attempts.
 
 ## Next bounded stage — V3.1 deterministic Hands
 
