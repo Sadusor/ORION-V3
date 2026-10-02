@@ -14,11 +14,15 @@ Pinned OpenJarvis donor:
 ORION Remote transport SHA:
 `Sadusor/Orion@df4ef699706ede0ce6d9de34eaeb74b84213a116`
 
-Remote attempt:
-`399`
+External Remote transport record:
+`attempt 399` — retained only as transport evidence, **not** counted as an ORION-V3 attempt
 
 Result:
 `PASS`
+
+## ORION-V3 numbering note
+
+Gate 1 predates the dedicated V3 run counter. The old ORION Remote's `attempt 399` identifies the transport execution only. ORION-V3 starts its own sequence at `V3-RUN-001` for V3.1.
 
 ## Physically observed PASS evidence
 
