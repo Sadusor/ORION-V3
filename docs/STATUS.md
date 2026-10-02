@@ -4,13 +4,12 @@ Updated: 2026-10-03
 
 ## Stage
 
-**Gate 1 COMPLETE — OpenJarvis accepted as ORION V3's preferred replaceable generic substrate.**
+**Gate 1 COMPLETE — V3.1 donor-first OpenJarvis tool adoption in progress.**
 
-ORION-V3 remains a completely separate repository from the proven ORION implementation.
+ORION-V3 is a separate repository from the proven legacy ORION implementation.
 
-## Current claims
+## Gate-1 claims
 
-- architecture: DOCUMENTED
 - OpenJarvis substrate: **ADOPTED AS REPLACEABLE SUBSTRATE**
 - ORION remains sole authority: **PHYSICALLY PROVEN for Gate-1 scope**
 - Authority Boundary V0: **PHYSICAL PASS**
@@ -20,69 +19,90 @@ ORION-V3 remains a completely separate repository from the proven ORION implemen
 - Jarvis policy widening falsifier: **PHYSICAL PASS**
 - timeout != Stop falsifier: **PHYSICAL PASS**
 - ORION-owned killable worker Stop: **PHYSICAL PASS**
-- old ORION Remote: preserved as proven transport/fallback
 
-## Exact Gate-1 completion evidence
+## Gate-1 evidence identity
 
-ORION-V3:
+ORION-V3 tested SHA:
 `dc13d5caddf2489879b2d300addaa5419b3d5975`
 
 OpenJarvis:
 `Sadusor/OpenJarvis@309a4f1044ccfb2032264832a31fef2f1d314586`
 
-ORION Remote task:
+Legacy ORION Remote transport task:
 `df4ef699706ede0ce6d9de34eaeb74b84213a116`
 
-Physical attempt:
-`399`
+Legacy Remote transport record:
+`attempt 399`
 
-Result:
-**PASS**
+That number is **not an ORION-V3 attempt count**. It is retained only to locate the external transport evidence.
 
-Observed:
-- no lease -> denied;
-- valid lease -> dispatch;
-- trust-binding override -> denied;
-- native ReAct bypass -> denied;
-- permissive Jarvis policy -> still no ORION authority;
-- donor timeout returned while work continued;
-- actual worker PID terminated;
-- Windows reported worker PID absent;
-- heartbeat stopped;
-- only then physical Stop passed.
+## ORION-V3 run numbering
 
-Evidence:
-`docs/journal/2026-10-03-gate1-complete.md`
+ORION-V3 has its own sequence beginning with:
 
-## Authority hierarchy
+`V3-RUN-001`
+
+Legacy ORION Remote attempt counters are never counted as V3 development runs.
+
+## V3.1 architecture correction
+
+Active branch:
+`agent/v3.1-openjarvis-tools`
+
+A parallel `orion_v3.hands` design was drafted on an obsolete branch but rejected **before physical execution** because it duplicated the substrate we had just adopted.
+
+The active architecture is:
 
 ```text
-OWNER > ORION AUTHORITY > OpenJarvis SUBSTRATE > HANDS
+OWNER
+  -> ORION authority / Action Lease / trusted bindings / evidence / Stop truth
+      -> OpenJarvis ToolRegistry + ToolExecutor
+          -> existing OpenJarvis tool
+             OR smallest OpenJarvis-native extension for a demonstrated gap
 ```
 
-OpenJarvis may narrow execution further but may not mint ORION authority.
+There is no second ORION tool/Hand registry.
 
-## Next bounded stage — V3.1 deterministic Hands
+## V3.1 donor inventory
 
-Start with real filesystem capability:
+At pinned OpenJarvis revision `309a4f1044ccfb2032264832a31fef2f1d314586`:
 
-1. `filesystem.search`
-2. `filesystem.list` as a separate operation
-3. `filesystem.reveal` as a separate operation
+- `file_read`: **REUSE DONOR BUILT-IN**
+- `file_write`: **REUSE DONOR BUILT-IN**
+- browser/web/shell/patch/memory tools: **INVENTORY/QUALIFY BEFORE CUSTOM CODE**
+- exact-basename local `filesystem.search`: no dedicated built-in found, therefore one minimal custom **OpenJarvis-registered** extension is justified.
 
-Requirements:
-- each operation gets its own lease;
-- trusted roots remain ORION-owned;
-- no shell fallback for ordinary file operations;
-- real result evidence is normalized by ORION;
-- Stop uses an ORION-owned killable worker boundary where cancellation matters.
+The extension:
+- subclasses OpenJarvis `BaseTool`;
+- registers in OpenJarvis `ToolRegistry`;
+- executes through OpenJarvis `ToolExecutor`;
+- receives ORION lease and trusted roots out of band;
+- does not expose absolute trusted roots to the model;
+- returns structured data that ORION converts into canonical `EvidenceEnvelope`.
 
-After the first real Hand passes, evaluate/launch the pinned OpenJarvis desktop stack for UI/substrate harvesting under ORION governance.
+## Next physical run
+
+`V3-RUN-001`
+
+It will verify on the owner's Windows PC:
+
+1. OpenJarvis built-in `file_read` is present;
+2. OpenJarvis built-in `file_write` is present;
+3. the missing `orion_filesystem_search` extension is registered in OpenJarvis `ToolRegistry`;
+4. real filesystem search executes through OpenJarvis `ToolExecutor`;
+5. ORION Action Lease and trusted-root scope remain authoritative;
+6. absolute trusted roots do not leak;
+7. ORION normalizes the successful ToolResult into canonical evidence.
+
+After this passes, continue donor-first capability qualification and evaluate/launch the pinned OpenJarvis desktop stack.
 
 ## Protected fallback
 
+Legacy ORION remains available as the proven external transport/fallback.
+
+Frozen fallback:
 - repo: `Sadusor/Orion`
 - branch: `checkpoint/2026-10-01-orion-remote-project-link`
 - SHA: `327d32f714129ca633517a8f4158cd84820c1504`
 
-Do not retire the fallback until later V3 parity gates physically pass.
+Do not retire it until later V3 parity gates physically pass.
