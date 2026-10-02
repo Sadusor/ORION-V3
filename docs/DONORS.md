@@ -114,3 +114,18 @@ V3.1 audit result:
 - `file_read`: present upstream;
 - `file_write`: present upstream;
 - `filesystem.search` exact-basename capability: not found upstream at the pinned revision, so it is the first justified custom registered extension.
+
+
+## V3-RUN-002 physical result
+
+The donor-first execution rule is physically proven on Windows.
+
+- OpenJarvis `file_read`: FOUND
+- OpenJarvis `file_write`: FOUND
+- custom exact-basename search: registered as OpenJarvis-native extension
+- OpenJarvis ToolExecutor execution: PASS
+- ORION authority/trusted-root enforcement: PASS
+- ORION evidence normalization: PASS
+
+See:
+`docs/journal/2026-10-03-v3-run-002-openjarvis-tools-pass.md`
