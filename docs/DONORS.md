@@ -9,6 +9,7 @@ This carries forward the original ORION donor research. Presence here is not ado
 | OpenJarvis | registries, ToolRegistry/ToolExecutor, built-in filesystem/browser/web/shell/patch tools, engines, provider routing, channels, events, skills, UI/runtime | **ADOPTED REPLACEABLE SUBSTRATE** |
 | Jev Harness | proposal -> evidence -> code decides -> host authorizes | ADAPT CONCEPT |
 | WORKSHOP | provider discovery, role mappings, health, fallbacks, safe serialization | ADAPT / BENCHMARK |
+| OpenMuse | durable task worker, SQL leases, checkpoints, pause/resume/cancel, idempotent receipts, bounded model-loop and isolated-computer patterns | **MIDDLE-LAYER / DURABILITY DONOR** |
 
 ## Execution Hands
 
@@ -19,8 +20,8 @@ This carries forward the original ORION donor research. Presence here is not ado
 | PinchTab | semantic browser refs, narrow grants, revocable sessions | BROWSER CHALLENGER |
 | OpenBot | human takeover, scoped secret entry, governed computer patterns | ADAPT |
 | Artemis | Android/device Hand | PRIMARY DEVICE CANDIDATE |
-| software-agent-sdk / OpenHands | Coding Hand | ADAPTER CANDIDATE |
-| Claude Code | Coding Hand | ADAPTER CANDIDATE |
+| software-agent-sdk / OpenHands | semantic Coding Hand plus strong editor/terminal primitives; heavy dependency surface | **SEMANTIC CODING-HAND CANDIDATE** |
+| Claude Code | mature semantic Coding Hand / capability baseline | **SEMANTIC CODING-HAND CANDIDATE** |
 | ACP / python-sdk | coding/session protocol | ADAPT |
 | n8n | commodity connectors/workflows | ADAPTER CANDIDATE |
 | OpenSandbox | isolation/runtime | BENCHMARK |
@@ -129,3 +130,21 @@ The donor-first execution rule is physically proven on Windows.
 
 See:
 `docs/journal/2026-10-03-v3-run-002-openjarvis-tools-pass.md`
+
+## 2026-10-03 donor-role correction
+
+Donors are no longer evaluated as candidates to replace ORION wholesale.
+
+- **OpenJarvis** supplies infrastructure/tool/workflow/frontend pieces.
+- **OpenMuse** is especially relevant for durable task execution: leases,
+  checkpoints, pause/resume/cancel, receipts and isolated-computer patterns.
+  It is not ORION's semantic/policy router.
+- **OpenHands / Claude Code** may be used as high-level semantic Coding Hands
+  so ORION does not rebuild internal coding command sequences.
+- **jarvis.institute** remains product/UX inspiration only; the actual product
+  source is proprietary and must not be confused with Stanford OpenJarvis.
+- **KnowledgeOS/memory donors** are now early-core work because canonical
+  continuity is a primary ORION problem, not a late enhancement.
+
+Capability harvesting should prefer existing proven legacy ORION Remote
+mechanics, donor implementations and native Windows APIs before custom code.
