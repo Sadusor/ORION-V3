@@ -177,3 +177,39 @@ V3 fix:
 
 Next run:
 `V3-RUN-006`.
+
+
+## V3-RUN-007 selective OpenJarvis integration
+
+Status: **PHYSICAL PASS**
+
+Exact observed results:
+- V3 regression: **19 passed in 0.06s**
+- OpenJarvis WorkflowEngine: **EXECUTION PASS**
+- autonomous agent loop in workflow path: **NONE**
+- ORION Action Lease: **ENFORCED**
+- ORION workflow evidence adapter: **PASS**
+- stock donor WorkflowStepResult metadata: **DROPPED**
+- decision: **adopt WorkflowEngine mechanics only with ORION evidence adapter**
+
+Low-consumption local helper probe:
+- model: `qwen3.5:9b`
+- OpenJarvis agent: `SimpleAgent`
+- turns: **1**
+- tool calls: **0**
+- route result: **FILE_SEARCH**
+- prompt tokens: **130**
+- completion tokens: **3**
+- total tokens: **133**
+- latency: **4572.7 ms**
+- low-consumption router candidate: **PASS**
+
+Architectural decision:
+- deterministic ORION workflows remain preferred and require no inference;
+- OpenJarvis `SimpleAgent` is retained only as a candidate bounded one-shot
+  classifier/router/planner where deterministic routing is insufficient;
+- multi-turn OpenJarvis agents are not the default ORION execution path;
+- donor workflow telemetry is useful, but canonical evidence remains ORION-owned.
+
+Next priority: **Hand qualification and replacement tournament**. Reuse donor Hands only where
+they satisfy ORION scope/evidence/Stop contracts and actually outperform alternatives.
