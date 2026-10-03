@@ -62,6 +62,11 @@ class IntentResolver:
         self._registry = registry
 
     def resolve(self, proposal: CanonicalIntent) -> IntentResolution:
+        if proposal.contract_violations:
+            raise CapabilityContractError(
+                "Canonical intent has contract violation(s): "
+                + "; ".join(proposal.contract_violations)
+            )
         if proposal.composition:
             return IntentResolution(
                 ResolutionStatus.AMBIGUOUS,
