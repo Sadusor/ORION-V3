@@ -678,3 +678,59 @@ a Remote presentation/focus bug, not a V3-RUN-020 gate failure.
 Next architecture step remains:
 benchmark mature coding-agent / semantic Coding Hand candidates under this same
 exact-SHA, Attempt-owned, verified execution envelope.
+
+
+## V3-RUN-021 staged — semantic Coding Hand benchmark
+
+Status: **GITHUB-CODED-UNVERIFIED / PHYSICAL RUN PENDING**
+
+Purpose:
+benchmark a real mature coding-agent loop as a replaceable semantic Coding Hand
+without granting it ORION authority.
+
+Candidate:
+- OpenHands Agent SDK pinned at
+  `Sadusor/software-agent-sdk@856d99d48e4b11c70c5f1cab21e7830570dbc324`;
+- local model: `ollama/qwen3.5:9b`;
+- model endpoint: loopback Ollama only;
+- paid API key dependency: none;
+- agent tool set: **FileEditorTool only**;
+- TerminalTool: **not exposed**.
+
+Benchmark path:
+```text
+exact-SHA synthetic fixture
+-> disposable candidate worktree
+-> real OpenHands agent loop
+-> actual Git diff/path inspection
+-> deterministic functional check
+-> immutable PATCH WorkPackage
+-> package-bound PROPOSAL/REVIEW/DECISION
+-> current Attempt lease
+-> ORION ACTION
+-> proven RUN-020 WorkPackageExecutor
+-> deterministic verifier/evidence/result
+```
+
+The agent edits only an expendable candidate worktree. Its patch is treated as
+untrusted candidate output. ORION independently freezes, authorizes, executes
+and verifies it.
+
+PASS requires:
+- exact candidate changed path only;
+- no unexpected mutation;
+- unchanged Git HEAD;
+- functional fixture correction;
+- immutable WorkPackage capture;
+- zero candidate execution authority;
+- successful RUN-020 execution envelope;
+- deterministic verifier PASS;
+- source fixture unchanged;
+- cleanup PASS.
+
+This run intentionally tests OpenHands with Qwen3.5-9B first to measure agent
+mechanics at zero API cost. It is not a final model selection or overall agent
+ranking.
+
+Contract:
+`docs/contracts/SEMANTIC_CODING_HAND_BENCHMARK.md`
