@@ -213,3 +213,44 @@ Architectural decision:
 
 Next priority: **Hand qualification and replacement tournament**. Reuse donor Hands only where
 they satisfy ORION scope/evidence/Stop contracts and actually outperform alternatives.
+
+
+## V3-RUN-008 OpenHands Hands-only qualification
+
+Status: **PHYSICAL PASS**
+
+Pinned donor:
+`Sadusor/software-agent-sdk@856d99d48e4b11c70c5f1cab21e7830570dbc324`
+
+No OpenHands agent loop was run.
+
+FileEditor Hand:
+- allowed targeted `str_replace`: **PASS**
+- edit outside explicit file allowlist: **DENIED**
+- before/after structured edit evidence: **PASS**
+- undo edit: **PASS**
+- source audit: `workspace_root` is **NOT** a security boundary;
+  ORION trusted bindings / exact edit allowlists remain required.
+
+Windows Terminal Hand:
+- PowerShell command execution: **PASS**
+- interrupt: **PASS**
+- spawned child process physically absent after interrupt: **PASS**
+- Stop candidate: **PASS for tested child-process scope**
+
+Important cost/runtime finding:
+installing the OpenHands tools package pulls a large dependency surface
+(browser-use, LiteLLM, MCP, cloud-provider SDKs, telemetry and related packages).
+Therefore OpenHands tools should not become an always-loaded ORION core dependency.
+
+Decision:
+- **FileEditor mechanics: STRONG CODING HAND CANDIDATE**
+- **Windows Terminal mechanics: STRONG CODING/COMMAND HAND CANDIDATE**
+- **OpenHands autonomous agent: NOT REQUIRED for these capabilities**
+- integrate as an **on-demand isolated specialist Hand backend** behind ORION authority,
+  rather than embedding the full SDK stack into the ORION control-plane process.
+
+Next falsifier:
+prove ORION can launch the pinned OpenHands Hand backend on demand, pass only
+ORION-authorized logical operations/trusted bindings, receive structured evidence,
+and terminate the backend cleanly without granting it general control-plane authority.
