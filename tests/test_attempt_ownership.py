@@ -83,6 +83,7 @@ def test_expired_lease_cannot_advance_and_new_generation_fences_old_worker(tmp_p
 
     second = attempts.claim(attempt.attempt_id, worker_id="worker-b", ttl_seconds=10)
     assert second.lease.generation == 2
+    assert first.token != second.token
     denied(
         "stale_attempt_lease",
         lambda: attempts.checkpoint(attempt.attempt_id, first.token, {"late": True}),
