@@ -3,8 +3,10 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
+$env:ORION_BENCHMARK_MODEL = 'ollama/qwen3.6:35b-a3b'
+$env:ORION_BENCHMARK_RUN_ID = 'V3-RUN-023'
 
-Write-Host 'V3_RUN_ID> V3-RUN-021'
+Write-Host 'V3_RUN_ID> V3-RUN-023'
 
 Write-Host 'AUTHORING_PREFLIGHT> RUN'
 & uv run --project $RepoRoot python (
