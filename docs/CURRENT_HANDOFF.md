@@ -500,3 +500,92 @@ Decision after RUN-034:
 - candidate correct but Case B cannot terminate cleanly -> move to OpenHands
   tools under an ORION-owned step loop and compare against OpenJarvis;
 - candidate wrong -> classify a real Qwen/runtime task failure.
+
+
+## RUN-034 classification and RUN-035 staged
+
+RUN-034 Remote session:
+`22ff0ef24bb9`
+
+RUN-034 top-level result was FAIL, but it physically proved the compact
+OpenHands/Qwen coding candidate before WorkPackage replay:
+
+- Case B used `stuck_detection=False`;
+- Terminal verification observation contained `All tests passed.`;
+- Terminal exit code was `0`;
+- Terminal observation reported `is_error=false`;
+- Qwen's final assistant message correctly described the exact clamp fix;
+- pinned OpenHands source confirms a normal content response is itself a
+  FINISHED completion path, so FinishTool is optional;
+- RUN-034 only entered WorkPackage execution after exact path, exact expected
+  source, unchanged HEAD, and ORION deterministic functional checks passed.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-034-candidate-pass-patch-replay-gap.md`
+
+### Newly discovered ORION core gap
+
+RUN-034 failed inside the WorkPackage `file_sha256` verifier after replaying a
+PATCH artifact.
+
+Audit of physical RUN-020 shows its successful path used FILE artifact(s), not a
+PATCH artifact. The exact
+`candidate diff -> PATCH artifact -> git apply -> raw working-tree SHA`
+path had not been physically proven.
+
+Do not classify this as an OpenHands/Qwen failure.
+
+Likely portability concern:
+Windows Git working-tree newline/filter behavior can make raw file bytes differ
+after textual patch replay even when source semantics and Git diff are correct.
+
+Keep this as a separate ORION-core PATCH replay gate. Do not weaken the
+deterministic verifier without a dedicated proof.
+
+RUN-034 also exposed a harness cleanup bug:
+`OrionStateStore` was not closed after verifier failure, leaving `core.db`
+locked on Windows. RUN-035 closes it in `finally`.
+
+### V3-RUN-035
+
+Exact V3 SHA:
+`82673b5eb993a42158f4537f7cdf93298e8e6b2f`
+
+Remote staging SHA:
+`ba07c7f82c6cbd9ef4d0962038742f523dffc237`
+
+Purpose:
+qualify compact OpenHands Agent as one ORION runtime candidate without
+conflating runtime quality with the unproven PATCH replay path.
+
+RUN-035 requires:
+- Qwen3.6 + compact ORION prompt;
+- FileEditor + Terminal;
+- `stuck_detection=False`;
+- OpenHands execution status FINISHED;
+- FinishTool recorded only as an advisory metric;
+- real Terminal observation proves exit code 0;
+- actual changed path exactly `src/clamp.py`;
+- unchanged candidate Git HEAD;
+- exact expected source and independent deterministic functional check;
+- exact candidate raw-byte SHA captured;
+- candidate bytes frozen as WorkPackage FILE REPLACE;
+- FILE artifact SHA equals candidate raw-byte SHA;
+- candidate retains zero execution authority;
+- WorkPackage review/decision/action chain;
+- WorkPackage executor applies exact bytes;
+- deterministic file_sha256 verifier equals the candidate raw-byte SHA;
+- Attempt SUCCEEDED;
+- source repo unchanged;
+- cleanup passes;
+- state store closes in finally.
+
+A physical RUN-035 PASS qualifies OpenHands Agent as one runtime for the mixed
+ORION Operator Benchmark.
+
+After that, stop isolated OpenHands benchmarking and begin the mixed-tool
+comparison:
+- OpenHands Agent runtime;
+- ORION-owned tool loop;
+- OpenJarvis runtime/patterns;
+with the same Qwen and normalized tool set.
