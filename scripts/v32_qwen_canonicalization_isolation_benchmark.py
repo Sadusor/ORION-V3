@@ -173,7 +173,7 @@ CASES = [
          {"scope": "downloads", "target": "invoice.pdf"},
          N, None, hard_no_dispatch=True),
     Case("GREEK_WEATHER", "Τι καιρό κάνει στην Κοζάνη;",
-         ("GET_WEATHER",), {"location": "Κοζάνη"},
+         ("GET_WEATHER",), {"location": "Kozani"},
          N, None, hard_no_dispatch=True),
     Case("AMBIGUOUS_FOLDER", "Open the folder.",
          tuple(), None, A, None, is_ambiguous=True, hard_no_dispatch=True),
