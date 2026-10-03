@@ -85,6 +85,11 @@ _SORT_ALIASES = {
     "oldest_modified": "oldest_modified",
 }
 
+_LOCATION_ALIASES = {
+    "kozani": "Kozani",
+    "κοζάνη": "Kozani",
+}
+
 _POLICY_AMBIGUITY_MARKERS = (
     "are you sure",
     "are you certain",
@@ -198,9 +203,12 @@ class IntentCanonicalizer:
                 for item in out["names"]
             ]
 
-        for key in ("url", "relative_path", "path", "project", "location", "target", "component", "subject"):
+        for key in ("url", "relative_path", "path", "project", "target", "component", "subject"):
             if key in out:
                 out[key] = _clean_string(out[key])
+
+        if "location" in out:
+            out["location"] = _alias(out["location"], _LOCATION_ALIASES)
 
         # Exact artifact content must never be stripped or rewritten.
         if intent == SemanticIntent.PUBLISH_EXACT_ARTIFACT and "content" in entities:
