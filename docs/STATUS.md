@@ -387,3 +387,43 @@ It is not yet a production-scale language benchmark.
 Next architectural priority:
 **canonical Memory + append-only local event exchange**, while continuing to
 harvest proven semantic capabilities from legacy ORION.
+
+
+## V3-RUN-015 canonical state / Memory Gate
+
+Status: **PHYSICAL PASS**
+
+Exact tested V3 SHA:
+`b800de5659ce74e3b52b88e41f4af53a5b6eacfd`
+
+Observed regression:
+- **64 passed in 1.00s**
+
+Observed state/memory gate:
+- database initialization: **PASS**
+- project/task persistence setup: **PASS**
+- deterministic event hash: **PASS**
+- physical append-only Event trigger: **PASS**
+- cross-project Event parent: **DENIED**
+- Memory without provenance: **DENIED**
+- cross-project Memory provenance: **DENIED**
+- first Memory promotion: **PASS**
+- silent current-Memory overwrite: **DENIED**
+- explicit Memory supersession: **PASS**
+- L0 project scope: **PASS**
+- L1 current canonical scope: **PASS**
+- L2 provenance expansion: **PASS**
+- close/reopen persistence: **PASS**
+- network/model dependency: **NONE**
+
+This physically proves the first ORION-owned canonical continuity substrate:
+immutable Event history + explicit Memory Gate + project-scoped L0/L1/L2
+retrieval, without relying on model/chat memory.
+
+Next:
+**V3-RUN-016 — local Event Exchange**
+`TASK -> PROPOSAL -> REVIEW -> DECISION -> ACTION -> EVIDENCE -> RESULT`
+
+The next gate must prove idempotent external ingestion, causal/task scope,
+recipient inbox/ack state without mutating Events, bounded task packets,
+restart persistence and no GitHub/network dependency.
