@@ -147,3 +147,17 @@ def test_experimental_capability_is_visible_but_not_claimed_proven():
     assert definition.status == CapabilityStatus.EXPERIMENTAL
     assert definition.validated_sha is None
     assert definition.physical_evidence_refs == ()
+
+
+def test_exact_artifact_content_preserves_leading_and_trailing_whitespace():
+    payload = "  first line\nsecond line\n"
+    resolved = resolve(
+        {
+            "intent": "project.publish_exact_artifact",
+            "params": {
+                "artifact_path": "docs/example.txt",
+                "artifact_content": payload,
+            },
+        }
+    )
+    assert resolved.params["artifact_content"] == payload
