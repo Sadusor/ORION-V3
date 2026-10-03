@@ -595,3 +595,32 @@ Prove:
 
 After that common envelope is physically proven, begin the PC coding-agent /
 semantic Coding Hand benchmark on the same bounded task.
+
+
+## V3-RUN-020 attempt 1 — authoring preflight lesson
+
+Status: **FAIL — ARCHITECTURE NOT REACHED**
+
+Remote staging SHA:
+`d97373e49156a4fda941c248b2d13c51cc038895`
+
+Session:
+`1738e15e6d7f`
+
+Observed:
+- pytest collection stopped before RUN-020 execution-envelope behavior began;
+- root cause was a malformed Python import containing literal escaped `\\n`
+  sequences;
+- this is classified as `AUTHORING_SYNTAX_ERROR`, not an execution-envelope
+  architectural failure.
+
+Promoted correction:
+- added self-contained repository authoring preflight before V3 regression;
+- added reusable in-core Python/JSON preflight;
+- Coding Factory now preflights actual changed source before accepting verifier
+  evidence;
+- added a regression test for the exact escaped-newline failure class;
+- recorded canonical lesson
+  `FAILURE_LESSON-AUTHORING-SYNTAX-001`.
+
+RUN-020 remains the current gate and must be rerun after this correction.
