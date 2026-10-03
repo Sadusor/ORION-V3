@@ -350,7 +350,7 @@ class AttemptAuthority:
         if not token:
             raise AttemptDenied("missing_attempt_lease", "Attempt lease is required.")
         expected = row["lease_token_hash"]
-        if expected is None or self._hash(token) != expected:
+        generation = int(row["lease_generation"])\n        if expected is None or self._hash(f"{generation}:{token}") != expected:
             raise AttemptDenied("stale_attempt_lease", "Attempt lease is not current.")
         if row["lease_revoked_at"] is not None:
             raise AttemptDenied("revoked_attempt_lease", "Attempt lease was revoked.")
