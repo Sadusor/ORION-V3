@@ -230,7 +230,7 @@ A repeated escaped-newline/source-syntax failure is now a permanent regression
 lesson.
 
 Before a V3 physical regression gate may begin, ORION must run deterministic
-authoring preflight over tracked Python and JSON source/configuration.
+authoring preflight over tracked Python, JSON and PowerShell source/configuration.
 
 For Coding Factory execution, changed Python/JSON files must pass the same
 preflight after mechanical application and actual-path verification, but before
