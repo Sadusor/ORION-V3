@@ -222,3 +222,26 @@ deterministic canonical equivalent exists.
 
 Do not hide policy intrusion: canonicalizer may filter it for safe downstream
 resolution, but tests must still record it as a model-contract quality failure.
+
+
+### Authoring preflight rule — 2026-10-03
+
+A repeated escaped-newline/source-syntax failure is now a permanent regression
+lesson.
+
+Before a V3 physical regression gate may begin, ORION must run deterministic
+authoring preflight over tracked Python and JSON source/configuration.
+
+For Coding Factory execution, changed Python/JSON files must pass the same
+preflight after mechanical application and actual-path verification, but before
+ORION may accept verifier evidence or mark the Attempt successful.
+
+Required classification:
+- syntax/preflight failure = `AUTHORING_SYNTAX_ERROR`;
+- architecture/gate under test = `NOT REACHED` when collection/execution never
+  began;
+- do not score a model/Hand or architectural gate as failed merely because the
+  harness/source authored around it was syntactically invalid.
+
+Do not rely on a model remembering to be careful. The guard is executable and
+must remain covered by regression tests.
