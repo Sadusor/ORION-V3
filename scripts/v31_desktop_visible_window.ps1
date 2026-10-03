@@ -4,14 +4,18 @@ function Fail([string]$Code, [string]$Detail) {
     Write-Host ($Code + '> FAIL')
     Write-Host ('DETAIL> ' + $Detail)
     if (Test-Path $LaunchLog) {
-        Write-Host 'DESKTOP_LAUNCH_LOG_TAIL>'
+        Write-Host 'DESKTOP_STDOUT_TAIL>'
         Get-Content -LiteralPath $LaunchLog -Tail 80 -ErrorAction SilentlyContinue
+    }
+    if (Test-Path $LaunchErr) {
+        Write-Host 'DESKTOP_STDERR_TAIL>'
+        Get-Content -LiteralPath $LaunchErr -Tail 160 -ErrorAction SilentlyContinue
     }
     Write-Host 'STATUS> FAIL'
     exit 1
 }
 
-Write-Host 'V3_RUN_ID> V3-RUN-005'
+Write-Host 'V3_RUN_ID> V3-RUN-006'
 Write-Host 'DESKTOP_VISIBLE_WINDOW> START'
 
 $RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
