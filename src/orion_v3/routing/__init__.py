@@ -1,3 +1,4 @@
+from .canonicalizer import CanonicalIntent, IntentCanonicalizer
 from .intent import (
     IntentContractError,
     IntentProposal,
@@ -11,6 +12,8 @@ from .resolver import (
 )
 
 __all__ = [
+    "CanonicalIntent",
+    "IntentCanonicalizer",
     "IntentContractError",
     "IntentProposal",
     "IntentResolution",
