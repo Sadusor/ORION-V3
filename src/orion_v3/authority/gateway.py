@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import PurePosixPath
 from typing import Any, Mapping
 
 from .leases import ActionLease, LeaseAuthority, LeaseDenied
@@ -27,6 +28,16 @@ _FILESYSTEM_SEARCH_ARGS = frozenset(
         "max_depth",
         "max_results",
         "reveal_containing_folders",
+    }
+)
+
+
+_FILE_EDIT_REPLACE_ARGS = frozenset(
+    {
+        "location",
+        "relative_path",
+        "old_str",
+        "new_str",
     }
 )
 
@@ -137,6 +148,81 @@ def _authorize_filesystem_search(
     }
 
 
+def _authorize_file_edit_replace(
+    arguments: Mapping[str, Any],
+    lease: ActionLease,
+) -> dict[str, Any]:
+    if not isinstance(arguments, Mapping):
+        _deny("invalid_arguments", "file.edit.replace arguments must be an object")
+
+    keys = set(arguments)
+    if keys & _TRUST_ANCHOR_NAMES:
+        _deny(
+            "trusted_binding_override",
+            "Model/tool arguments may not provide ORION trust anchors.",
+        )
+    unknown = keys - _FILE_EDIT_REPLACE_ARGS
+    if unknown:
+        _deny(
+            "unknown_argument",
+            "Unsupported file.edit.replace argument: " + sorted(unknown)[0],
+        )
+
+    location = str(arguments.get("location") or "").strip().lower()
+    allowed_locations = {
+        str(x).strip().lower() for x in lease.scope.get("locations", [])
+    }
+    if not location or location not in allowed_locations:
+        _deny("scope_violation", "Requested file location is outside the Action Lease")
+
+    raw_relative = str(arguments.get("relative_path") or "").replace("\\", "/").strip()
+    if not raw_relative:
+        _deny("invalid_argument", "relative_path must be non-empty")
+
+    relative = PurePosixPath(raw_relative)
+    if (
+        relative.is_absolute()
+        or raw_relative.startswith("/")
+        or ":" in raw_relative
+        or any(part in {"", ".", ".."} for part in relative.parts)
+    ):
+        _deny("invalid_argument", "relative_path must be a safe project-relative path")
+
+    clean_relative = relative.as_posix()
+    allowed_paths = {
+        str(x).replace("\\", "/").strip()
+        for x in lease.scope.get("relative_paths", [])
+        if str(x).strip()
+    }
+    if clean_relative not in allowed_paths:
+        _deny("scope_violation", "Requested file is outside the Action Lease")
+
+    old_str = arguments.get("old_str")
+    new_str = arguments.get("new_str")
+    if not isinstance(old_str, str) or not old_str:
+        _deny("invalid_argument", "old_str must be a non-empty string")
+    if not isinstance(new_str, str):
+        _deny("invalid_argument", "new_str must be a string")
+    if new_str == old_str:
+        _deny("invalid_argument", "new_str must differ from old_str")
+
+    max_chars = _bounded_int(
+        lease.scope.get("max_replacement_chars", 20000),
+        field="lease.max_replacement_chars",
+        minimum=1,
+        maximum=200000,
+    )
+    if len(old_str) > max_chars or len(new_str) > max_chars:
+        _deny("scope_violation", "Replacement text exceeds the authorized bound")
+
+    return {
+        "location": location,
+        "relative_path": clean_relative,
+        "old_str": old_str,
+        "new_str": new_str,
+    }
+
+
 class AuthorityGateway:
     """Single Gate-1 authorization point before any substrate Hand dispatch."""
 
@@ -155,10 +241,12 @@ class AuthorityGateway:
         except LeaseDenied as exc:
             raise AuthorityDenied(exc.code, str(exc)) from exc
 
-        if operation_id != "filesystem.search":
-            _deny("unsupported_operation", "Gate 1 authorizes filesystem.search only")
-
-        sanitized = _authorize_filesystem_search(arguments, lease)
+        if operation_id == "filesystem.search":
+            sanitized = _authorize_filesystem_search(arguments, lease)
+        elif operation_id == "file.edit.replace":
+            sanitized = _authorize_file_edit_replace(arguments, lease)
+        else:
+            _deny("unsupported_operation", "ORION does not authorize this operation")
         return AuthorizedOperation(
             operation_id=operation_id,
             arguments=sanitized,
