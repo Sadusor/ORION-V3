@@ -1,3 +1,4 @@
+from .exchange import ExchangeMessage, ExchangePublishResult, LocalEventExchange
 from .store import (
     EventRecord,
     EventType,
@@ -11,6 +12,9 @@ from .store import (
 )
 
 __all__ = [
+    "ExchangeMessage",
+    "ExchangePublishResult",
+    "LocalEventExchange",
     "EventRecord",
     "EventType",
     "MemoryKind",
