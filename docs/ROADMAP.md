@@ -71,13 +71,16 @@ Physically proven foundation:
 - V3-RUN-018: immutable content-addressed Artifact Store;
 - exact-SHA/scope-bound WorkPackage;
 - package-bound PROPOSAL -> REVIEW -> DECISION;
-- accepted candidate still has zero execution authority.
+- accepted candidate still has zero execution authority;
+- V3-RUN-019: durable Attempt ownership, fenced lease generations, checkpoint
+  enforcement, stale-worker rejection, restart recovery and ORION-owned Stop.
 
 Immediate gated sequence:
-1. prove Attempt/lease/checkpoint/Stop ownership;
-2. prove isolated exact-SHA Git worktree execution envelope;
-3. mechanically apply one harmless approved PATCH/FILE WorkPackage;
-4. verify exact changed paths, diff, tests/evidence and resulting SHA;
+1. prove isolated exact-SHA Git worktree execution envelope;
+2. mechanically apply one harmless approved PATCH/FILE WorkPackage under the
+   current Attempt lease;
+3. verify exact changed paths, diff, tests/evidence and resulting SHA;
+4. prove cleanup on PASS/FAIL/Stop with no push/merge;
 5. benchmark mature coding-agent / semantic Coding Hand candidates on the same
    bounded PC case;
 6. connect real cloud coder/reviewer providers only after the execution boundary
