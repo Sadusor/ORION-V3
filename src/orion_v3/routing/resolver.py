@@ -34,6 +34,25 @@ _SCOPE_MAP = {
     "orion_artifacts": "orion_artifacts",
 }
 
+_ALLOWED_ENTITY_KEYS = {
+    SemanticIntent.OPEN_WEB_URL: {"url", "browser"},
+    SemanticIntent.LOCATE_NAMED_FILES: {
+        "names", "scope", "recursive", "reveal_containing_folders"
+    },
+    SemanticIntent.REVEAL_DIRECTORY: {"scope", "relative_path"},
+    SemanticIntent.LIST_LOCAL_ITEMS: {
+        "scope", "item_kind", "sort", "recursive"
+    },
+    SemanticIntent.PUBLISH_EXACT_ARTIFACT: {"path", "content"},
+    SemanticIntent.OPEN_APP: {"app"},
+    SemanticIntent.CLOSE_APP: {"app"},
+    SemanticIntent.RESTART_ORION: {"component"},
+    SemanticIntent.RUN_PROJECT_TESTS: {"project"},
+    SemanticIntent.DELETE_LOCAL_ITEMS: {"scope", "target", "selector"},
+    SemanticIntent.GET_WEATHER: {"location"},
+    SemanticIntent.SYSTEM_STATUS: {"subject"},
+}
+
 
 class IntentResolver:
     """Deterministic semantic intent -> capability resolver."""
@@ -65,6 +84,18 @@ class IntentResolver:
                 None,
                 {},
                 "No semantic intent was resolved.",
+            )
+
+        unknown_entities = (
+            set(proposal.entities)
+            - _ALLOWED_ENTITY_KEYS.get(proposal.intent, set())
+        )
+        if unknown_entities:
+            raise CapabilityContractError(
+                "Unknown entity field(s) for semantic intent "
+                + proposal.intent.value
+                + ": "
+                + ", ".join(sorted(unknown_entities))
             )
 
         mapper = {
