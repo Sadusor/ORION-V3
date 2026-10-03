@@ -67,6 +67,22 @@ GitHub remains source control, not the long-term AI<->PC mailbox.
 
 Automate the currently manual reasoning loop around already-proven Coding Hands.
 
+Physically proven foundation:
+- V3-RUN-018: immutable content-addressed Artifact Store;
+- exact-SHA/scope-bound WorkPackage;
+- package-bound PROPOSAL -> REVIEW -> DECISION;
+- accepted candidate still has zero execution authority.
+
+Immediate gated sequence:
+1. prove Attempt/lease/checkpoint/Stop ownership;
+2. prove isolated exact-SHA Git worktree execution envelope;
+3. mechanically apply one harmless approved PATCH/FILE WorkPackage;
+4. verify exact changed paths, diff, tests/evidence and resulting SHA;
+5. benchmark mature coding-agent / semantic Coding Hand candidates on the same
+   bounded PC case;
+6. connect real cloud coder/reviewer providers only after the execution boundary
+   is proven.
+
 Target:
 - cloud architect AI;
 - cloud reviewer/critic;
