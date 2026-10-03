@@ -734,3 +734,41 @@ ranking.
 
 Contract:
 `docs/contracts/SEMANTIC_CODING_HAND_BENCHMARK.md`
+
+
+## V3-RUN-021 through V3-RUN-027 OpenHands investigation
+
+Status: **ACTIVE INVESTIGATION — AGENT PROMPT/HISTORY PATH IS CURRENT FAULT BOUNDARY**
+
+Canonical handoff:
+`docs/checkpoints/2026-10-03-v3-run-021-027-openhands-investigation-handoff.md`
+
+Current proven chain:
+- Qwen3.6 native Ollama structured tools: **PHYSICAL PASS** (RUN-025);
+- Qwen3.6 through LiteLLM 1.93.0 structured tools: **PHYSICAL PASS** (RUN-026);
+- OpenHands `LLM.generate()` with resolved TerminalTool: **DIAGNOSTIC PASS**;
+- same OpenHands wrapper with security-risk schema injection: **DIAGNOSTIC PASS**;
+- TerminalTool/FileEditorTool registration: **PASS**;
+- real Agent system prompt advertised `terminal,finish,think`: **PASS**.
+
+Full OpenHands Agent/Conversation path still produced plain assistant text
+(`<invoke name="terminal">...`) instead of a structured ActionEvent.
+
+Important reclassification:
+earlier Qwen3.5/Qwen3.6 zero-action Agent runs are failures of the complete
+Agent-loop pairing, but are **not valid proof that the models themselves cannot
+tool-call**. Do not rank/reject the models from those runs alone.
+
+RUN-027 durable session:
+`331806d502d4`.
+
+Its final process result was FAIL only because Windows held the temporary
+Terminal workspace open during cleanup (`WinError 32`). Both actual
+`LLM.generate()` calibration cases passed before cleanup:
+- security schema OFF: structured Terminal tool call PASS;
+- security schema ON: structured Terminal tool call PASS.
+
+Next:
+independent audit, then compare the exact full-Agent prepared messages/system
+prompt/history against the already-proven minimal direct `LLM.generate()`
+request with the same model and resolved tool. Do not swap more models first.
