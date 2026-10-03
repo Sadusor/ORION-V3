@@ -4,6 +4,7 @@ import pytest
 
 from orion_v3.capabilities import CapabilityContractError, inherited_registry_v0
 from orion_v3.routing import (
+    IntentCanonicalizer,
     IntentContractError,
     IntentResolver,
     ResolutionStatus,
@@ -12,9 +13,14 @@ from orion_v3.routing import (
 )
 
 
-def resolve(payload):
+def canonicalize(payload):
     proposal = parse_intent_proposal(payload)
-    return IntentResolver(inherited_registry_v0()).resolve(proposal)
+    return IntentCanonicalizer().canonicalize(proposal)
+
+
+def resolve(payload):
+    canonical = canonicalize(payload)
+    return IntentResolver(inherited_registry_v0()).resolve(canonical)
 
 
 def test_model_intent_contract_rejects_authority_and_capability_fields():
@@ -174,3 +180,71 @@ def test_publish_exact_content_preserves_whitespace_through_resolver():
     )
     assert result.capability_id == "project.publish_exact_artifact"
     assert result.params["artifact_content"] == payload
+
+
+def test_canonicalizer_drops_optional_null_and_normalizes_aliases():
+    canonical = canonicalize(
+        {
+            "intent": "RESTART_ORION",
+            "entities": {"component": None},
+            "ambiguities": [],
+            "composition": False,
+        }
+    )
+    assert canonical.entities == {}
+
+    canonical = canonicalize(
+        {
+            "intent": "DELETE_LOCAL_ITEMS",
+            "entities": {"scope": "My Downloads", "selector": "every"},
+            "ambiguities": [],
+            "composition": False,
+        }
+    )
+    assert canonical.entities == {"scope": "downloads", "selector": "all"}
+
+
+def test_canonicalizer_separates_policy_intrusions_from_semantic_ambiguity():
+    canonical = canonicalize(
+        {
+            "intent": "DELETE_LOCAL_ITEMS",
+            "entities": {"scope": "downloads", "selector": "every"},
+            "ambiguities": [
+                "Does every file include hidden files?",
+                "Are you sure you want to delete them?",
+                "Shell commands are not permitted.",
+            ],
+            "composition": False,
+        }
+    )
+    assert canonical.ambiguities == ("Does every file include hidden files?",)
+    assert canonical.policy_intrusions == (
+        "Are you sure you want to delete them?",
+        "Shell commands are not permitted.",
+    )
+
+
+def test_canonicalizer_preserves_exact_artifact_content():
+    payload = "  exact body\n"
+    canonical = canonicalize(
+        {
+            "intent": "PUBLISH_EXACT_ARTIFACT",
+            "entities": {"path": "docs/x.txt", "content": payload},
+            "ambiguities": [],
+            "composition": False,
+        }
+    )
+    assert canonical.entities["content"] == payload
+
+
+def test_resolver_can_understand_destructive_intent_without_dispatch():
+    result = resolve(
+        {
+            "intent": "DELETE_LOCAL_ITEMS",
+            "entities": {"scope": "downloads", "selector": "every"},
+            "ambiguities": [],
+            "composition": False,
+        }
+    )
+    assert result.status == ResolutionStatus.NO_CAPABILITY
+    assert result.capability_id is None
