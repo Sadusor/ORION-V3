@@ -345,3 +345,81 @@ def test_wrong_package_hash_is_denied_before_worktree(tmp_path):
         )
     assert exc.value.code == "package_hash_mismatch"
     assert not any(case["worktree_root"].iterdir())
+
+
+def test_changed_python_must_pass_authoring_preflight(tmp_path):
+    source_repo, base_sha = init_repo(tmp_path)
+    store = OrionStateStore(tmp_path / "core.db")
+    store.initialize()
+    project = store.create_project("ORION", project_id="orion")
+    task = store.create_task(project.project_id, "syntax guard probe", task_id="task-syntax")
+    attempts = AttemptAuthority(store, token_factory=lambda: "raw-syntax")
+    attempts.initialize()
+    attempt = attempts.create_attempt(task.task_id, attempt_id="attempt-syntax")
+
+    artifacts = ArtifactStore(tmp_path / "artifacts")
+    factory = WorkPackageFactory(artifacts)
+    broken_source = "from math import (\\n    sqrt,\\n)\\n"
+    artifact = factory.file_artifact(
+        "scratch/broken.py",
+        broken_source,
+        operation=FileOperation.CREATE,
+    )
+    package = factory.create(
+        project_id=project.project_id,
+        task_id=task.task_id,
+        attempt_id=attempt.attempt_id,
+        base_sha=base_sha,
+        coder_provider="fixture",
+        coder_model="syntax-bug",
+        prompt_text="create source",
+        response_text="malformed source",
+        artifacts=[artifact],
+        allowed_paths=["scratch"],
+        forbidden_paths=[],
+        verifier_spec={
+            "kind": "file_sha256",
+            "path": "scratch/broken.py",
+            "sha256": hashlib.sha256(broken_source.encode("utf-8")).hexdigest(),
+        },
+    )
+    board = CodingFactoryBlackboard(store, LocalEventExchange(store))
+    proposal = board.submit_candidate(package)
+    review = board.review_candidate(
+        package,
+        proposal.event_id,
+        reviewer_provider="fixture",
+        reviewer_model="reviewer",
+        verdict=ReviewVerdict.ACCEPTABLE,
+    )
+    decision = board.decide_candidate(
+        package,
+        review.event_id,
+        verdict=DecisionVerdict.ACCEPT_CANDIDATE,
+        decided_by="policy",
+    )
+    issued = attempts.claim(attempt.attempt_id, worker_id="worker", ttl_seconds=30)
+    action = board.authorize_execution(
+        package,
+        decision.event_id,
+        lease=issued.lease,
+        authorized_by="policy",
+    )
+    executor = WorkPackageExecutor(
+        store=store,
+        attempts=attempts,
+        factory=factory,
+        source_repo=source_repo,
+        worktree_root=tmp_path / "worktrees",
+    )
+
+    with pytest.raises(ExecutionDenied) as exc:
+        executor.run(
+            manifest_artifact_id=package.manifest_artifact_id,
+            expected_package_sha256=package.package_sha256,
+            action_event_id=action.event_id,
+            lease_token=issued.token,
+        )
+    assert exc.value.code == "authoring_preflight_failed"
+    assert attempts.get_attempt(attempt.attempt_id).status == "FAILED"
+    assert not any((tmp_path / "worktrees").iterdir())
