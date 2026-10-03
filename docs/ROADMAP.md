@@ -33,8 +33,10 @@ Priority:
    V3, OpenJarvis and native Windows/PowerShell;
 2. define one semantic Capability contract;
 3. batch-register/harvest the first useful capability pack;
-4. benchmark Qwen3.5-9B on natural-language intent -> typed capability params;
-5. make ORION deterministic policy choose implementation/risk/approval.
+4. benchmark Qwen3.5-9B on natural language -> literal semantic Intent/entities;
+5. canonicalize Intent/entities deterministically;
+6. resolve canonical Intent -> capability deterministically;
+7. make ORION deterministic policy choose implementation/risk/approval.
 
 Qwen must not write arbitrary shell as the normal path.
 
