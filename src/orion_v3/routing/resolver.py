@@ -8,7 +8,8 @@ from orion_v3.capabilities import (
     CapabilityContractError,
     CapabilityRegistry,
 )
-from .intent import IntentProposal, SemanticIntent
+from .canonicalizer import CanonicalIntent
+from .intent import SemanticIntent
 
 
 class ResolutionStatus(str, Enum):
@@ -60,7 +61,7 @@ class IntentResolver:
     def __init__(self, registry: CapabilityRegistry) -> None:
         self._registry = registry
 
-    def resolve(self, proposal: IntentProposal) -> IntentResolution:
+    def resolve(self, proposal: CanonicalIntent) -> IntentResolution:
         if proposal.composition:
             return IntentResolution(
                 ResolutionStatus.AMBIGUOUS,
