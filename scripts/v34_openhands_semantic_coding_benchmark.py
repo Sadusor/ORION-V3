@@ -27,7 +27,7 @@ from orion_v3.coding_factory import (
 from orion_v3.state import AttemptAuthority, LocalEventExchange, OrionStateStore
 
 
-MODEL = "ollama/qwen3.5:9b"
+MODEL = os.environ.get("ORION_BENCHMARK_MODEL", "ollama/qwen3.5:9b")
 OLLAMA_URL = "http://127.0.0.1:11434"
 RESULT_START = "---ORION_SEMANTIC_HAND_RESULT_START---"
 RESULT_END = "---ORION_SEMANTIC_HAND_RESULT_END---"
@@ -198,6 +198,7 @@ def candidate_functional_check(worktree: Path) -> None:
 def main() -> int:
     print("V3_RUN_ID> V3-RUN-021")
     print("SEMANTIC_CODING_HAND_BENCHMARK> START")
+    print("BENCHMARK_MODEL> " + MODEL)
 
     if not SDK.is_dir() or not WORKER.is_file():
         print("OPENHANDS_PINNED_SDK> MISSING")
