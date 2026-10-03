@@ -325,3 +325,66 @@ Decision after RUN-031:
   and immediately re-test FileEditor+Terminal on the bounded coding fixture;
 - FAIL -> stop debugging OpenHands Agent orchestration and integrate its useful
   tools directly behind ORION's own operator loop.
+
+
+## RUN-031 physical PASS and RUN-032 staged
+
+RUN-031 Remote session:
+`4a651a566a36`
+
+RUN-031 is a **full physical PASS**.
+
+Observed:
+- Remote UI session/live-refresh probe: PASS;
+- authoring + PowerShell preflights: PASS;
+- V3 regression: **113 passed in 9.19s**;
+- exact compact ORION system prompt observed: PASS;
+- real OpenHands Agent loop: PASS;
+- structured Terminal ActionEvent: PASS;
+- exact harmless command executed: PASS;
+- expected Terminal observation: PASS;
+- Finish ActionEvent: PASS;
+- AgentErrorEvents: 0;
+- clean conversation/tool shutdown: PASS.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-031-compact-openhands-agent-pass.md`
+
+Architectural consequence:
+stop debugging OpenHands' stock system prompt. The full Agent/Conversation
+machinery is viable as an optional ORION operator runtime when ORION supplies
+the compact prompt and controls the exposed tool set.
+
+### V3-RUN-032
+
+Exact V3 SHA:
+`d544425ceb3243a081ec36ff0a72b94ebadbc9b9`
+
+Remote staging SHA:
+`aa2a0f71b9cd9c909c189a0308f87a41c760c7e4`
+
+Purpose:
+repeat the original bounded clamp coding task using:
+- compact ORION system prompt;
+- FileEditorTool;
+- TerminalTool;
+- FinishTool;
+- disposable exact-SHA candidate worktree.
+
+PASS requires:
+- real OpenHands Agent loop;
+- FileEditor used for the source edit;
+- Terminal used for project-local verification;
+- Finish emitted;
+- only `src/clamp.py` changed;
+- Git HEAD unchanged;
+- exact functional fix produced;
+- candidate patch frozen as immutable WorkPackage;
+- candidate has zero execution authority;
+- review/decision/action chain passes;
+- final application occurs only through the proven RUN-020 WorkPackage executor;
+- deterministic verifier and cleanup pass.
+
+If RUN-032 passes, stop treating OpenHands as the benchmark target and move to
+the mixed-tool **ORION Operator Benchmark** across OpenHands, OpenJarvis and
+ORION-native Hands.
