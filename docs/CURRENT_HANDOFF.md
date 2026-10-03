@@ -668,3 +668,48 @@ OpenHands-specific gates:
 - approval/wait/resume;
 - cloud-AI capabilities;
 - Qwen9B vs Qwen35B on identical benchmark cases.
+
+
+## RUN-036R physical FAIL classification and RUN-036S staged
+
+RUN-036R Remote session:
+`90afa1902ab6`
+
+RUN-036R physically reached the mixed Qwen operator:
+- V3 regression: **134 passed in 8.97s**;
+- OpenHands SDK: PASS;
+- mixed Agent loaded 3 tools;
+- Qwen reached SEARCH_CASE;
+- Qwen selected the OpenJarvis-backed search tool family correctly.
+
+Failure:
+`RuntimeError: SEARCH_CASE missing expected OpenJarvis evidence`
+
+Because the wrong-tool-family check had already passed, this is **not** a tool
+selection failure. It means the search action/result did not contain both
+expected files. RUN-036R did not print the exact search action/observation before
+raising, so argument error vs donor/tool result remained ambiguous.
+
+### V3-RUN-036S
+
+Exact V3 SHA:
+`a7b16e3af4ba1a4f9fbab89bedd67c3c72dabe91`
+
+Remote staging SHA:
+`3659e1b3f281374e7681580deeeddc59b23c0770`
+
+Purpose:
+- first call the same OpenJarvis search deterministically with exact known args;
+- require it to return both `pyproject.toml` and
+  `src/orion_v3/authority/gateway.py`;
+- expose the model-facing location as typed
+  `Literal["active_project"]`;
+- explicitly tell the tool schema to include every requested exact basename;
+- print the exact Qwen SEARCH_CASE action trace and observation trace before
+  scoring;
+- then run the same four mixed-tool cases.
+
+Interpretation:
+- direct control FAIL -> donor/tool bridge bug;
+- direct control PASS + Qwen search FAIL -> model argument/result-use defect;
+- search PASS -> continue status/edit/denial mixed routing cases.
