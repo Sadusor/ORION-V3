@@ -27,6 +27,7 @@ $SandboxInference = Join-Path $SandboxOpenJarvis 'inference.json'
 $RuntimeDir = Join-Path $env:LOCALAPPDATA 'OrionV3\desktop-runtime'
 $LaunchLog = Join-Path $RuntimeDir 'openjarvis-desktop-v3.log'
 $LaunchErr = Join-Path $RuntimeDir 'openjarvis-desktop-v3.err.log'
+$ViteOverride = Join-Path $Frontend 'vite.orion-v3.config.ts'
 
 if (-not (Test-Path $Donor)) {
     Fail 'OPENJARVIS_PIN' 'Pinned OpenJarvis checkout is missing.'
@@ -56,11 +57,29 @@ if (-not (Test-Path $tauriBin)) {
 }
 Write-Host 'TAURI_CLI> FOUND'
 
+@'
+import { defineConfig, mergeConfig } from 'vite';
+import baseConfig from './vite.config.ts';
+
+export default mergeConfig(
+  baseConfig,
+  defineConfig({
+    server: {
+      watch: {
+        ignored: ['**/src-tauri/target/**'],
+      },
+    },
+  }),
+);
+'@ | Set-Content -LiteralPath $ViteOverride -Encoding UTF8
+
+Write-Host 'VITE_RUST_TARGET_IGNORE> INSTALLED'
+
 $OverridePath = Join-Path $RuntimeDir 'tauri-orion-v3.json'
 @'
 {
   "build": {
-    "beforeDevCommand": "npx --yes npm@11.19.0 run dev"
+    "beforeDevCommand": "npx vite --config vite.orion-v3.config.ts"
   }
 }
 '@ | Set-Content -LiteralPath $OverridePath -Encoding UTF8
@@ -70,7 +89,10 @@ Remove-Item -LiteralPath $LaunchLog,$LaunchErr -Force -ErrorAction SilentlyConti
 # Clean only stale V3 desktop launchers from the previous isolated run.
 # Match the exact V3 runtime script in the command line before killing any tree.
 $stale = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-    $_.CommandLine -and $_.CommandLine -like '*launch-openjarvis-v3.ps1*'
+    $_.CommandLine -and (
+        $_.CommandLine -like '*launch-openjarvis-v3.ps1*' -or
+        $_.CommandLine -like '*launch-openjarvis-v3-visible.ps1*'
+    )
 }
 foreach ($proc in $stale) {
     Write-Host ('STALE_V3_DESKTOP_LAUNCHER> CLEAN ' + $proc.ProcessId)
@@ -124,6 +146,8 @@ $visible.Refresh()
 Write-Host ('OPENJARVIS_WINDOW_PID> ' + $visible.Id)
 Write-Host ('OPENJARVIS_WINDOW_TITLE> ' + $visible.MainWindowTitle)
 Write-Host 'OPENJARVIS_VISIBLE_WINDOW> PASS'
+Remove-Item -LiteralPath $ViteOverride -Force -ErrorAction SilentlyContinue
+Write-Host 'VITE_OVERRIDE_CLEANUP> PASS'
 
 # Verify the sandbox still has no confirmed source. The UI may write a pending
 # file only after explicit user interaction; a confirmed source here would mean
