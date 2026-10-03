@@ -72,7 +72,7 @@ $SdkRoot = Join-Path $RepoRoot 'external\OpenHands-software-agent-sdk'
 
 Write-Host 'OPENHANDS_LLM_WRAPPER_CALIBRATION> RUN'
 & uv run --project $SdkRoot --package openhands-tools python (
-    Join-Path $RepoRoot 'scripts\v34_openhands_llm_wrapper_calibration.py'
+    Join-Path $RepoRoot 'scripts\v34_openhands_llm_wrapper_calibration_r2.py'
 )
 if ($LASTEXITCODE -ne 0) {
     Write-Host 'OPENHANDS_LLM_WRAPPER_CALIBRATION> FAIL'
