@@ -112,3 +112,80 @@ The final ORION interface is ORION-owned.
 - Reuse useful OpenJarvis frontend/runtime components selectively.
 - Continue the ORION-specific interface after donor capability qualification,
   using publicly observable Jarvis Institute UX/workflow ideas where useful.
+
+## Architecture freeze — 2026-10-03
+
+Read `docs/ORION_SYSTEM_MODEL.md` before changing architecture.
+
+Do not conflate:
+- ORION Core;
+- the Coding Factory workflow;
+- the lightweight personal assistant;
+- the Whole-PC Computer Hand;
+- the ORION-owned Jarvis-style interface.
+
+### Qwen governor rule
+
+Qwen3.5-9B is a semantic governor candidate, not an authority layer.
+
+Qwen may infer intent, entities, ambiguity and small compositions.
+Qwen must not choose risk policy, mint permissions, widen scope, declare PASS,
+promote Memory or write arbitrary shell as the normal control path.
+
+Rule: **Qwen proposes; ORION disposes.**
+
+### Semantic Capability Registry rule
+
+ORION may maintain a semantic/policy Capability Registry without violating the
+ban on a parallel low-level Hand/tool registry.
+
+The distinction is mandatory:
+- OpenJarvis/donor ToolRegistry = concrete low-level implementation/tool registry;
+- ORION Capability Registry = stable semantic intent, typed params, policy,
+  trusted scope, implementation binding, Stop/evidence/postcondition contract.
+
+Do not register a capability and assume it is safe. Implementations must
+validate before effects and ORION must verify evidence/postconditions after.
+
+### Guard rule
+
+Do not solve routine guard friction by deleting the guard.
+
+Preferred normal path:
+`typed intent -> registered capability -> deterministic policy -> vetted implementation`.
+
+Direct, unambiguous user requests should count as authorization for routine
+bounded Class-0/Class-1 actions where policy says so. Avoid redundant prompts.
+
+### Coding Factory rule
+
+The Coding Factory is a workflow on ORION Core.
+
+Existing Coding Hands are already proven useful. Do not rebuild coding command
+sequencing one primitive at a time merely because a donor exposes file/shell tools.
+
+A mature coding agent may be treated as one semantic Coding Hand when useful,
+inside a bounded workspace/envelope with ORION-owned Stop and verification.
+
+### Memory rule
+
+Continuity is a primary system requirement.
+
+Canonical project state, decisions, failures/lessons, capabilities and evidence
+must be reconstructable without relying on chat/model memory.
+
+PASS/FAIL records are evidence, not auto-training data. Promotion to canonical
+Memory requires provenance, contradiction handling and an explicit gate.
+
+### Current priority
+
+Do not run staged `V3-RUN-009` as the next step.
+
+Current work order:
+1. inventory proven existing capabilities;
+2. define semantic Capability contract;
+3. harvest/register a first batch;
+4. benchmark Qwen intent routing;
+5. implement canonical Memory + local append-only exchange;
+6. automate Coding Factory;
+7. Whole-PC escalation later.
