@@ -388,3 +388,52 @@ PASS requires:
 If RUN-032 passes, stop treating OpenHands as the benchmark target and move to
 the mixed-tool **ORION Operator Benchmark** across OpenHands, OpenJarvis and
 ORION-native Hands.
+
+
+## RUN-032 physical FAIL classification and RUN-033 staged
+
+RUN-032 Remote session:
+`9413cebf74f3`
+
+RUN-032 process result was FAIL, but the failure was specifically:
+
+`RuntimeError: agent never emitted Finish`
+
+Because the benchmark checked tool use in order, reaching that line physically
+proves:
+- compact OpenHands Agent path was reached;
+- FileEditor was used;
+- Terminal was used;
+- no earlier unexpected-tool check failed.
+
+The harness aborted before checking the actual candidate file, functional
+correctness, WorkPackage, or RUN-020 execution envelope.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-032-finish-signal-not-candidate-failure.md`
+
+Architecture correction:
+OpenHands Finish is an advisory/model completion signal, not canonical ORION
+completion truth. ORION's deterministic candidate verifier and final
+Attempt/Evidence/Result state determine accepted completion.
+
+### V3-RUN-033
+
+Exact V3 SHA:
+`a3fd820ee0436b6f73dcb33a1731a048a1385af0`
+
+Remote staging SHA:
+`4970cb3144ec506fcfb2e57e44c1b05eebcf672a`
+
+RUN-033:
+- allows up to 12 bounded Agent iterations;
+- prints execution status, exact tool-call trace, Terminal commands and final
+  response before acceptance checks;
+- still hard-requires FileEditor and Terminal;
+- records Finish as PASS or `FAIL_NONBLOCKING`;
+- continues to exact changed-path/file-byte/functional verification;
+- freezes and executes a WorkPackage only if deterministic candidate checks pass;
+- keeps any scope/path/wrong-code/authority violation as a hard FAIL.
+
+This gate determines whether RUN-032 was merely poor completion signalling or an
+actual coding failure.
