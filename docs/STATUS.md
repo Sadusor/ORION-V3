@@ -347,3 +347,43 @@ Next:
 - same 32 semantic cases;
 - measure raw entity accuracy vs canonical entity accuracy;
 - no capability catalog in Qwen prompt.
+
+
+## V3-RUN-014 native JSON + canonicalization
+
+Status: **OWNER-OBSERVED PHYSICAL PASS**
+
+Exact V3 bootstrap SHA:
+`80f17408b105f789113d6ac9717cb6d24d9de465`
+
+The run was launched through the Manual / External AI Workbench lane, not the
+GitHub Remote task lane. The legacy results branch therefore still points to
+V3-RUN-013 and does not contain the exact RUN-014 aggregates.
+
+The RUN-014 bootstrap returns 0 only if regression plus the complete benchmark
+gate pass. Therefore the following threshold claims are proven by the observed
+PASS:
+- hard no-dispatch: **100%**
+- strict JSON: **100%**
+- semantic contract-valid: **100%**
+- one turn / zero tools: **100%**
+- policy-clean: **100%**
+- canonical intent accuracy: **>=95%**
+- canonical entity accuracy: **>=90%**
+- ambiguity detection: **>=85%**
+- false ambiguity: **<=10%**
+- deterministic resolver correctness: **100%**
+- average total tokens/request: **<400**
+- average latency/request: **<1000 ms**
+
+This physically validates the architecture:
+
+`Qwen literal semantics -> ORION canonicalizer -> ORION deterministic resolver`
+
+on the current 32-case corpus.
+
+It is not yet a production-scale language benchmark.
+
+Next architectural priority:
+**canonical Memory + append-only local event exchange**, while continuing to
+harvest proven semantic capabilities from legacy ORION.
