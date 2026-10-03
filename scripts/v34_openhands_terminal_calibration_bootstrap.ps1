@@ -72,7 +72,8 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 Write-Host 'OPENHANDS_TERMINAL_CALIBRATION> RUN'
-& uv run --project $RepoRoot --package openhands-tools python (
+$SdkRoot = Join-Path $RepoRoot 'external\OpenHands-software-agent-sdk'
+& uv run --project $SdkRoot --package openhands-tools python (
     Join-Path $RepoRoot 'scripts\v34_openhands_terminal_calibration.py'
 )
 if ($LASTEXITCODE -ne 0) {
