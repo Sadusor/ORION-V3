@@ -102,3 +102,66 @@ GitHub source change does not prove the currently running Remote process has
 activated the fix. Self-update/restart the Remote onto the new branch SHA, then
 physically verify that a named task changes RUNNING -> PASS/FAIL on the open
 phone UI without pressing REFRESH UI.
+
+
+## DeepSeek review #2 and RUN-028
+
+DeepSeek's second review agrees with the current physical evidence:
+- RUN-025 eliminated native Ollama tool-calling failure;
+- RUN-026 eliminated direct LiteLLM tool-call loss;
+- RUN-027 eliminated direct OpenHands `LLM.generate()`, actual TerminalTool
+  schema, and security-risk schema injection.
+
+The remaining fault boundary is the full OpenHands Agent/Conversation message
+preparation/runtime path.
+
+Pinned-source follow-up performed after the review:
+- no literal `<invoke` string was found in the pinned SDK search;
+- the stock `other` system-prompt snapshot contains no `<invoke>`,
+  `<function=...>`, or XML tool protocol;
+- `prepare_llm_messages()` simply converts the current conversation View's
+  events to LLM Messages, optionally condenses, and appends additional messages;
+- `LocalConversation.send_message()` eagerly initializes a normal Agent before
+  appending the user message, creating the real SystemPromptEvent;
+- `LocalConversation.close()` explicitly closes tool executors and is the
+  correct cleanup boundary for the Windows temp-workspace lock seen in RUN-027.
+
+Therefore RUN-028 is the current staged gate.
+
+### V3-RUN-028
+
+Exact V3 SHA:
+`4d072b3936f682679b97e2ef3d97bfd4e2036f24`
+
+Remote staging SHA:
+`dee0156a2180cfa1fc7713597b0cc27b7e0b6c1e`
+
+Script:
+`scripts/v34_openhands_agent_message_isolation_bootstrap.ps1`
+
+Purpose:
+compare, with the same Qwen3.6 model and the same resolved TerminalTool:
+
+A. known-good minimal direct Messages;
+
+B. exact first-turn Messages produced by the real initialized OpenHands Agent
+conversation via `prepare_llm_messages(conversation.state.view, ...)`.
+
+The diagnostic does not call `conversation.run()` or `agent.step()`.
+
+It captures:
+- message count, role, length and SHA-256;
+- whether each message contains `<invoke`, `<function=`, XML, or tool-related
+  text;
+- native_tool_calling;
+- resolved tool names;
+- structured tool-call count and response text for A and B.
+
+If A passes and B fails, the same run removes the system message as Case C.
+If Case C passes, the Agent system message is sufficient to change model
+behavior.
+
+The harness explicitly calls `conversation.close()` in `finally` before the
+temporary workspace exits, preventing the RUN-027 WinError 32 cleanup mistake.
+
+Do not swap models before RUN-028 evidence is inspected.
