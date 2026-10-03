@@ -75,3 +75,30 @@ Do not ask the owner to paste PowerShell unless Remote cannot execute the gate.
 
 Always inspect durable named-session JSON before accepting phone UI PASS/FAIL as
 truth.
+
+
+## Legacy Remote UI live-refresh note
+
+A separate legacy Remote presentation regression was found on 2026-10-03:
+the phone/operator status only appeared current after manual page refresh.
+
+Canonical Remote checkpoint:
+
+`Sadusor/Orion/docs/checkpoints/2026-10-03-live-status-auto-refresh-regression.md`
+
+GitHub source fix:
+- live refresh implementation commit:
+  `ddc5bd41c197a91d5eb6f98208b4af136cd9362c`
+- regression-probe commit:
+  `85b762f01e655fa1223ab547f67dbb4d8512a9f0`
+- Remote documentation checkpoint:
+  `01d3a0b25fd75f6e8582e25209704c27a2bb4c6b`
+
+The fix restores automatic polling using a non-overlapping self-scheduling
+refresh loop, explicit browser no-store, and visibility/focus/pageshow kicks.
+
+Important:
+GitHub source change does not prove the currently running Remote process has
+activated the fix. Self-update/restart the Remote onto the new branch SHA, then
+physically verify that a named task changes RUNNING -> PASS/FAIL on the open
+phone UI without pressing REFRESH UI.
