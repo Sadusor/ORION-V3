@@ -126,3 +126,25 @@ Decision:
 - use pinned npm `11.19.0` locally via `npx`.
 
 Next run: `V3-RUN-004` isolated desktop launch.
+
+
+## V3-RUN-004 correction
+
+Remote transport reported PASS, but the owner observed **no visible desktop window**.
+
+What V3-RUN-004 genuinely proved:
+- V3-isolated OpenJarvis HOME created;
+- user's real `~/.openjarvis` left untouched;
+- pinned npm `11.19.0` usable locally;
+- `npm ci` completed;
+- local Tauri CLI present;
+- sandbox had no confirmed inference source;
+- standalone Jarvis/Ollama autostart was prevented by the sandbox.
+
+What it did **not** prove:
+- that a real OpenJarvis top-level desktop window appeared.
+
+The prior `DESKTOP_UI_PROCESS=RUNNING` marker referred only to the hidden Tauri launcher process and is not accepted as UI evidence.
+
+Next run:
+`V3-RUN-005` requires Windows to report an actual visible top-level window with title matching `OpenJarvis` before PASS.
