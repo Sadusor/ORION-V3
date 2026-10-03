@@ -269,3 +269,59 @@ This separates:
 
 Diagnostic success returns process PASS even when
 `OPENHANDS_AGENT_SYSTEM_PATH> FAIL`.
+
+
+## DeepSeek operator architecture review and RUN-031 staged
+
+Independent review checkpoint:
+`docs/checkpoints/2026-10-04-deepseek-operator-architecture-review.md`
+
+Accepted:
+- model proposals remain outside authority;
+- Hands may be exposed as tool-shaped interfaces;
+- OpenHands/OpenJarvis are donors, not authority peers;
+- cloud AIs may be probabilistic capabilities;
+- phone approval binds to exact immutable WorkPackage state;
+- the real target is an ORION Operator Benchmark.
+
+Correction:
+ORION will use a two-lane operator model.
+
+Lane A:
+`Qwen Intent/entities -> deterministic resolver -> capability`
+for routine known operations.
+
+Lane B:
+Qwen receives a task-scoped allowed tool catalog and may select the next tool
+for novel/multi-step work, but ORION validates/authorizes every call and the
+model cannot widen its own capability set.
+
+This distinguishes:
+- model-owned proposal/planning loop;
+- ORION-owned authority/execution loop.
+
+### V3-RUN-031
+
+Exact V3 SHA:
+`06f2bca1ea5ebc84533b89cf4066e5156dd016a3`
+
+Remote staging SHA:
+`31220ab3ca0d3e639f4a1308f2ee0118963a245a`
+
+Purpose:
+physically test the full real OpenHands Agent/Conversation loop with Qwen3.6,
+TerminalTool and a compact ORION-owned inline system prompt.
+
+PASS requires:
+- exact inline ORION system prompt observed;
+- real Agent loop runs;
+- structured Terminal ActionEvent emitted;
+- exact expected harmless command executed;
+- expected observation received;
+- clean conversation/tool shutdown.
+
+Decision after RUN-031:
+- PASS -> keep selected OpenHands Agent machinery as an optional operator runtime
+  and immediately re-test FileEditor+Terminal on the bounded coding fixture;
+- FAIL -> stop debugging OpenHands Agent orchestration and integrate its useful
+  tools directly behind ORION's own operator loop.
