@@ -285,10 +285,13 @@ class OrionStateStore:
             raise StateStoreError("event limit must be between 1 and 100")
         rows = self.connect().execute(
             """
-            SELECT * FROM events
-            WHERE project_id=? AND task_id=?
-            ORDER BY rowid ASC
-            LIMIT ?
+            SELECT * FROM (
+                SELECT rowid AS _seq, * FROM events
+                WHERE project_id=? AND task_id=?
+                ORDER BY rowid DESC
+                LIMIT ?
+            )
+            ORDER BY _seq ASC
             """,
             (project_id, task_id, limit),
         ).fetchall()
