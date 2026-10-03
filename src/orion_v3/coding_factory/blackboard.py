@@ -3,7 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable
 
-from orion_v3.state import EventRecord, EventType, LocalEventExchange, OrionStateStore, StateStoreError
+from orion_v3.state import (\n    AttemptLease,\n    EventRecord,\n    EventType,\n    LocalEventExchange,\n    OrionStateStore,\n    StateStoreError,\n)
 
 from .workpackage import WorkPackage, WorkPackageError
 
@@ -126,6 +126,61 @@ class CodingFactoryBlackboard:
                 "execution_authority": False,
             },
             parent_event_id=review.event_id,
+            attempt_id=package.attempt_id,
+        ).event
+
+    def authorize_execution(
+        self,
+        package: WorkPackage,
+        decision_event_id: str,
+        *,
+        lease: AttemptLease,
+        authorized_by: str,
+    ) -> EventRecord:
+        """Bind one accepted WorkPackage to the current Attempt lease generation."""
+        self._require_package_task(package)
+        decision = self._require_package_event(
+            package,
+            decision_event_id,
+            expected_type=EventType.DECISION,
+        )
+        body = decision.payload.get("body")
+        if not isinstance(body, dict):
+            raise StateStoreError("WorkPackage decision has no body")
+        if body.get("verdict") != DecisionVerdict.ACCEPT_CANDIDATE.value:
+            raise StateStoreError("rejected WorkPackage cannot be authorized")
+        if body.get("execution_authority") is not False:
+            raise StateStoreError("unexpected WorkPackage decision authority state")
+
+        actor = authorized_by.strip()
+        if not actor:
+            raise WorkPackageError("authorized_by must be non-empty")
+        if (
+            lease.attempt_id != package.attempt_id
+            or lease.project_id != package.project_id
+            or lease.task_id != package.task_id
+        ):
+            raise StateStoreError("Attempt lease does not belong to WorkPackage")
+
+        return self.exchange.publish(
+            package.project_id,
+            package.task_id,
+            EventType.ACTION,
+            actor_kind="orion",
+            actor_id=actor,
+            recipient="coding_factory_executor",
+            body={
+                "kind": "WORKPACKAGE_EXECUTION_AUTHORIZATION",
+                "package_id": package.package_id,
+                "package_sha256": package.package_sha256,
+                "manifest_artifact_id": package.manifest_artifact_id,
+                "base_sha": package.base_sha,
+                "attempt_id": package.attempt_id,
+                "lease_generation": lease.generation,
+                "worker_id": lease.worker_id,
+                "execution_authority": True,
+            },
+            parent_event_id=decision.event_id,
             attempt_id=package.attempt_id,
         ).event
 
