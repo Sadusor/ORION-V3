@@ -38,9 +38,10 @@ Do not rely on model recollection or reviewer attention.
 Every V3 physical regression gate must run a self-contained authoring preflight
 before pytest/probe execution.
 
-The current mandatory preflight validates tracked:
+The current mandatory repo preflight validates tracked:
 - Python through Python `compile(..., "exec")`;
-- JSON through the standard JSON parser.
+- JSON through the standard JSON parser;
+- PowerShell through `System.Management.Automation.Language.Parser` before the regression suite.
 
 Coding Factory execution additionally preflights actual changed Python/JSON
 files after mechanical application and actual Git-path scope validation, before
