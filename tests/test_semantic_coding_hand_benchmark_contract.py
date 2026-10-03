@@ -27,3 +27,15 @@ def test_openhands_semantic_benchmark_routes_candidate_through_workpackage_execu
     assert "WorkPackageExecutor(" in source
     assert "executor.run(" in source
     assert 'print("AGENT_EXECUTION_AUTHORITY> NONE")' in source
+
+
+def test_openhands_worker_uses_pinned_final_response_api():
+    worker = ROOT / "scripts" / "v34_openhands_semantic_coding_worker_fixed.py"
+    source = worker.read_text(encoding="utf-8")
+    assert "get_agent_final_response" in source
+    assert ".get_messages()" not in source
+
+
+def test_benchmark_points_to_corrected_worker():
+    source = BENCHMARK.read_text(encoding="utf-8")
+    assert "v34_openhands_semantic_coding_worker_fixed.py" in source
