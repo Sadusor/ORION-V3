@@ -538,3 +538,60 @@ Next:
 
 Agent benchmarks are therefore planned, but the agent remains a replaceable
 Hand under ORION authority rather than becoming the control plane.
+
+
+## V3-RUN-019 Attempt ownership / lease / checkpoint / Stop
+
+Status: **PHYSICAL PASS**
+
+Exact tested V3 SHA:
+`8388fb3f1b445be377c460defdd66a8010b198a4`
+
+Remote staging SHA:
+`aadf31b927ef439c91ba0f9d126277e541e7bc38`
+
+Named-task session:
+`11afb5138e9d`
+
+Observed regression:
+- **84 passed in 3.43s**
+
+Observed Attempt ownership gate:
+- Attempt creation: **PASS**
+- one active execution lease: **PASS**
+- second active claimant: **DENIED**
+- checkpoint without current lease: **DENIED**
+- expired lease advance: **DENIED**
+- reclaim after expiry: **PASS**
+- stale late worker/result after replacement: **DENIED**
+- close/reopen recovery: **PASS**
+- Stop invalidates ownership: **PASS**
+- checkpoint/result after Stop: **DENIED**
+- network/model execution dependency: **NONE**
+
+This physically proves the first durable execution-ownership layer above the
+existing low-level ActionLease primitive.
+
+A WorkPackage still does not gain authority merely by existing or being reviewed.
+Execution must belong to a durable Attempt, and only the current fenced lease may
+advance checkpoint/result truth. A late worker may still physically finish work,
+but ORION rejects its stale state transition.
+
+### Current next priority
+
+**V3-RUN-020 — isolated exact-SHA WorkPackage execution envelope**
+
+Prove:
+1. disposable Git worktree at the exact approved base SHA;
+2. clean/identity checks before effects;
+3. immutable WorkPackage reload by manifest/hash;
+4. one harmless mechanically applied FILE/PATCH artifact;
+5. only allowed paths changed;
+6. exact diff/hash/evidence captured;
+7. deterministic verifier passes;
+8. Attempt lease/checkpoint ownership is used;
+9. cleanup happens on PASS/FAIL/Stop;
+10. no push/merge and no cloud/model dependency.
+
+After that common envelope is physically proven, begin the PC coding-agent /
+semantic Coding Hand benchmark on the same bounded task.
