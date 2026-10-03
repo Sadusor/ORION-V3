@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Mapping
 from uuid import uuid4
 
+from orion_v3.authoring import AuthoringPreflightError, require_preflight
 from orion_v3.state import (
     AttemptAuthority,
     AttemptDenied,
@@ -193,6 +194,13 @@ class WorkPackageExecutor:
             if not changed:
                 raise ExecutionDenied("no_effect", "WorkPackage produced no Git-visible change.")
             self._require_changed_paths(package, changed)
+            try:
+                require_preflight(prepared.worktree, changed)
+            except AuthoringPreflightError as exc:
+                raise ExecutionDenied(
+                    "authoring_preflight_failed",
+                    str(exc),
+                ) from exc
 
             diff_text = self._git(
                 prepared.worktree,
