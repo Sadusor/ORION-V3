@@ -84,7 +84,9 @@ def inherited_registry_v0() -> CapabilityRegistry:
             status=CapabilityStatus.PROVEN_ACTIVE,
             parameters={
                 "artifact_path": ParameterSpec("string", max_length=1024),
-                "artifact_content": ParameterSpec("string", max_length=2_000_000),
+                "artifact_content": ParameterSpec(
+                    "string", max_length=2_000_000, strip_whitespace=False
+                ),
             },
             effect_class=EffectClass.BOUNDED_MODIFICATION,
             approval_class=ApprovalClass.BOUNDED_MODIFICATION,
