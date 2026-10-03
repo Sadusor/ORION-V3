@@ -33,6 +33,7 @@ class PackageArtifact:
     size_bytes: int
     relative_path: str | None = None
     operation: FileOperation | None = None
+    target_paths: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -109,15 +110,24 @@ class WorkPackageFactory:
             operation=operation,
         )
 
-    def patch_artifact(self, patch_text: str) -> PackageArtifact:
+    def patch_artifact(
+        self,
+        patch_text: str,
+        *,
+        target_paths: Iterable[str],
+    ) -> PackageArtifact:
         if not isinstance(patch_text, str) or not patch_text.strip():
             raise WorkPackageError("patch text must be non-empty")
+        targets = tuple(sorted({_normalize_relpath(p) for p in target_paths}))
+        if not targets:
+            raise WorkPackageError("PATCH artifact requires declared target paths")
         ref = self.artifact_store.put_text(patch_text)
         return PackageArtifact(
             kind=ArtifactKind.PATCH,
             artifact_id=ref.artifact_id,
             sha256=ref.sha256,
             size_bytes=ref.size_bytes,
+            target_paths=targets,
         )
 
     def create(
@@ -228,6 +238,7 @@ class WorkPackageFactory:
                     FileOperation(item["operation"])
                     if item.get("operation") else None
                 ),
+                target_paths=tuple(item.get("target_paths") or ()),
             )
             for item in manifest["artifacts"]
         )
@@ -282,12 +293,24 @@ class WorkPackageFactory:
                 size_bytes=item.size_bytes,
                 relative_path=path,
                 operation=item.operation,
+                target_paths=(),
             )
 
         if item.kind == ArtifactKind.PATCH:
             if item.relative_path is not None or item.operation is not None:
                 raise WorkPackageError("PATCH artifact cannot carry file operation")
-            return item
+            targets = tuple(sorted({_normalize_relpath(p) for p in item.target_paths}))
+            if not targets:
+                raise WorkPackageError("PATCH artifact requires declared target paths")
+            for path in targets:
+                self._require_allowed(path, allowed, forbidden)
+            return PackageArtifact(
+                kind=item.kind,
+                artifact_id=item.artifact_id,
+                sha256=item.sha256,
+                size_bytes=item.size_bytes,
+                target_paths=targets,
+            )
 
         raise WorkPackageError("unsupported artifact kind")
 
@@ -320,4 +343,5 @@ class WorkPackageFactory:
             "size_bytes": item.size_bytes,
             "relative_path": item.relative_path,
             "operation": item.operation.value if item.operation else None,
+            "target_paths": list(item.target_paths),
         }
