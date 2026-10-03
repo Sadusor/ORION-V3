@@ -63,6 +63,16 @@ $OverridePath = Join-Path $RuntimeDir 'tauri-orion-v3.json'
 
 Remove-Item -LiteralPath $LaunchLog,$LaunchErr -Force -ErrorAction SilentlyContinue
 
+# Clean only stale V3 desktop launchers from the previous isolated run.
+# Match the exact V3 runtime script in the command line before killing any tree.
+$stale = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+    $_.CommandLine -and $_.CommandLine -like '*launch-openjarvis-v3.ps1*'
+}
+foreach ($proc in $stale) {
+    Write-Host ('STALE_V3_DESKTOP_LAUNCHER> CLEAN ' + $proc.ProcessId)
+    & taskkill /PID $proc.ProcessId /T /F *> $null
+}
+
 $launchScript = Join-Path $RuntimeDir 'launch-openjarvis-v3-visible.ps1'
 @(
     "`$env:HOME = '$SandboxHome'",
