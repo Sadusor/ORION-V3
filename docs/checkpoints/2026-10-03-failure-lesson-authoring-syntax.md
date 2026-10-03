@@ -65,3 +65,33 @@ It changed future ORION behavior:
 
 This is the intended ORION learning pattern:
 `evidence -> classified lesson -> explicit promotion -> deterministic guard -> regression replay`.
+
+
+## Physical replay evidence
+
+V3-RUN-020 attempt 2 physically proved the promoted guard itself.
+
+Remote staging SHA:
+`7dee2b31ff31413a52221fb945b4911ce827533e`
+
+Session:
+`8a1ee466c6cb`
+
+Observed:
+```text
+AUTHORING_PREFLIGHT> START
+AUTHORING_PREFLIGHT_FILES> 60
+AUTHORING_PREFLIGHT_DETAIL> src/orion_v3/coding_factory/blackboard.py: python_syntax_error line=6 unexpected character after line continuation character
+AUTHORING_FAILURE_CLASS> AUTHORING_SYNTAX_ERROR
+ARCHITECTURE_GATE_STATE> NOT_REACHED
+AUTHORING_PREFLIGHT> FAIL
+STATUS> FAIL
+```
+
+Meaning:
+the lesson is no longer merely coded/documented. The physical Remote path
+actually stopped the repeated malformed-source failure before pytest and before
+the RUN-020 architecture under test was entered.
+
+The underlying file was then repaired by replacing the seven literal escaped
+newline byte sequences in the import block with real newline characters.
