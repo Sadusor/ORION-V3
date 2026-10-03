@@ -134,7 +134,7 @@ def main() -> int:
         attempts = AttemptAuthority(
             store,
             token_factory=iter(
-                ["token-pass", "token-stop", "token-fail"]
+                ["token-pass", "token-stop", "token-fail", "token-syntax"]
             ).__next__,
         )
         attempts.initialize()
@@ -266,6 +266,37 @@ def main() -> int:
         assert not any((root / "worktrees").iterdir())
         print("VERIFIER_FAILURE> DENIED")
         print("FAIL_CLEANUP> PASS")
+
+        syntax_payload = "from math import (\\n    sqrt,\\n)\\n"
+        syntax_attempt, syntax_package, syntax_issued, syntax_action = accepted_package(
+            store=store,
+            attempts=attempts,
+            board=board,
+            factory=factory,
+            project_id=project.project_id,
+            task_id=task.task_id,
+            attempt_id="attempt-syntax",
+            base_sha=base_sha,
+            relative_path="scratch/broken.py",
+            payload=syntax_payload,
+            verifier_sha=hashlib.sha256(syntax_payload.encode("utf-8")).hexdigest(),
+            worker_id="worker-syntax",
+        )
+        try:
+            executor.run(
+                manifest_artifact_id=syntax_package.manifest_artifact_id,
+                expected_package_sha256=syntax_package.package_sha256,
+                action_event_id=syntax_action.event_id,
+                lease_token=syntax_issued.token,
+            )
+        except ExecutionDenied as exc:
+            assert exc.code == "authoring_preflight_failed"
+        else:
+            raise AssertionError("malformed generated Python unexpectedly passed")
+        assert attempts.get_attempt(syntax_attempt.attempt_id).status == "FAILED"
+        assert not any((root / "worktrees").iterdir())
+        print("AUTHORING_SYNTAX_GUARD> DENIED")
+        print("AUTHORING_SYNTAX_CLEANUP> PASS")
 
         chain = store.list_task_events(project.project_id, task.task_id, limit=50)
         pass_chain = [
