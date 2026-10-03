@@ -76,15 +76,18 @@ Physically proven foundation:
   enforcement, stale-worker rejection, restart recovery and ORION-owned Stop.
 
 Immediate gated sequence:
-1. prove isolated exact-SHA Git worktree execution envelope;
-2. mechanically apply one harmless approved PATCH/FILE WorkPackage under the
+1. **COMPLETE — V3-RUN-020:** isolated exact-SHA Git worktree execution envelope;
+2. **COMPLETE — V3-RUN-020:** harmless approved PATCH/FILE execution under the
    current Attempt lease;
-3. verify exact changed paths, diff, tests/evidence and resulting SHA;
-4. prove cleanup on PASS/FAIL/Stop with no push/merge;
-5. benchmark mature coding-agent / semantic Coding Hand candidates on the same
-   bounded PC case;
-6. connect real cloud coder/reviewer providers only after the execution boundary
-   is proven.
+3. **COMPLETE — V3-RUN-020:** exact changed paths, diff/tree evidence and
+   deterministic verification;
+4. **COMPLETE — V3-RUN-020:** cleanup on PASS/FAIL/Stop with no push/merge/commit;
+5. **CURRENT — V3-RUN-021:** benchmark a mature coding-agent / semantic Coding
+   Hand on the same bounded candidate -> WorkPackage -> ORION execution pattern;
+6. compare additional mature Coding Hand candidates on the same benchmark
+   without changing ORION authority;
+7. connect real cloud coder/reviewer providers only after candidate mechanics
+   are physically qualified.
 
 Target:
 - cloud architect AI;
