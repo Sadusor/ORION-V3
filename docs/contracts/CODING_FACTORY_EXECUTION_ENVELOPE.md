@@ -47,10 +47,11 @@ Execution must:
 6. mechanically apply only WorkPackage FILE/PATCH artifacts;
 7. stage changes only inside the disposable worktree;
 8. compare actual Git changed paths against allowed/forbidden scope;
-9. capture exact binary diff SHA-256 and resulting Git tree SHA;
-10. run a deterministic verifier;
-11. persist checkpoint/result truth;
-12. remove the worktree on PASS, FAIL or Stop.
+9. run deterministic authoring preflight on changed Python/JSON source;
+10. capture exact binary diff SHA-256 and resulting Git tree SHA;
+11. run a deterministic verifier;
+12. persist checkpoint/result truth;
+13. remove the worktree on PASS, FAIL or Stop.
 
 ## Declared paths are not trusted evidence
 
@@ -84,3 +85,15 @@ Remote exact-SHA/worktree/cleanup pattern.
 
 OpenMuse remains useful for broader isolated-computer/container patterns, but it
 does not replace this Git-specific envelope or ORION authority.
+
+
+## Promoted failure lesson
+
+`FAILURE_LESSON-AUTHORING-SYNTAX-001` is mandatory.
+
+A WorkPackage whose resulting changed Python/JSON source is syntactically
+invalid is not eligible for verifier acceptance even if the requested file hash
+matches the malformed bytes.
+
+This is intentionally separate from model judgment: syntax validity is a
+deterministic precondition.
