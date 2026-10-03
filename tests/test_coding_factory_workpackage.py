@@ -41,7 +41,8 @@ def make_package(factory: WorkPackageFactory):
         "+++ b/src/orion_v3/example.py\n"
         "@@\n"
         "-VALUE = 0\n"
-        "+VALUE = 1\n"
+        "+VALUE = 1\n",
+        target_paths=["src/orion_v3/example.py"],
     )
     return factory.create(
         project_id="orion",
@@ -226,3 +227,31 @@ def test_blackboard_persists_across_reopen(tmp_path: Path):
     assert loaded.package_sha256 == package.package_sha256
     assert reopened.get_event(proposal.event_id) is not None
     assert reopened.get_event(review.event_id) is not None
+
+
+def test_patch_declared_targets_must_stay_in_scope(tmp_path: Path):
+    _, _, _, factory, _, _, _ = setup_factory(tmp_path)
+    patch = factory.patch_artifact(
+        "diff --git a/docs/outside.txt b/docs/outside.txt\n"
+        "--- a/docs/outside.txt\n"
+        "+++ b/docs/outside.txt\n"
+        "@@\n"
+        "-old\n"
+        "+new\n",
+        target_paths=["docs/outside.txt"],
+    )
+    with pytest.raises(WorkPackageError, match="outside allowed"):
+        factory.create(
+            project_id="orion",
+            task_id="task-wp",
+            attempt_id="attempt-3",
+            base_sha="1" * 40,
+            coder_provider="groq",
+            coder_model="model",
+            prompt_text="x",
+            response_text="y",
+            artifacts=[patch],
+            allowed_paths=["src/orion_v3"],
+            forbidden_paths=[],
+            verifier_spec={},
+        )
