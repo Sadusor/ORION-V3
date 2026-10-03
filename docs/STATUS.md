@@ -148,3 +148,32 @@ The prior `DESKTOP_UI_PROCESS=RUNNING` marker referred only to the hidden Tauri 
 
 Next run:
 `V3-RUN-005` requires Windows to report an actual visible top-level window with title matching `OpenJarvis` before PASS.
+
+
+## V3-RUN-005 desktop visibility result
+
+Status: **FAIL — donor dev-mode watcher bug identified**
+
+The frontend itself started successfully:
+- Vite 8.3.0 ready on localhost:5173.
+
+The failure was:
+`EBUSY: resource busy or locked`
+
+Vite attempted to watch a Rust build DLL under:
+`frontend/src-tauri/target/debug/deps/`
+
+while Cargo was compiling the Tauri desktop. Windows locked the DLL and Vite's watcher crashed, causing Tauri's `beforeDevCommand` to exit non-zero before a visible window appeared.
+
+This is not an ORION authority failure and not a Rust compiler failure.
+
+V3 fix:
+- keep the pinned donor tracked source untouched;
+- create a temporary untracked V3 Vite config;
+- import the donor's real `vite.config.ts`;
+- add `server.watch.ignored = ['**/src-tauri/target/**']`;
+- launch Tauri using that override;
+- PASS only if Windows reports a visible OpenJarvis top-level window.
+
+Next run:
+`V3-RUN-006`.
