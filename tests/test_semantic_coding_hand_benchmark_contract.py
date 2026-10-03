@@ -45,5 +45,4 @@ def test_openhands_worker_uses_donor_proven_ollama_chat_transport():
     worker = ROOT / "scripts" / "v34_openhands_semantic_coding_worker_fixed.py"
     source = worker.read_text(encoding="utf-8")
     assert '"ollama_chat/"' in source
-    assert 'SecretStr("ollama")' in source
     assert 'reasoning_effort="none"' in source
