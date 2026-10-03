@@ -28,6 +28,7 @@ from orion_v3.state import AttemptAuthority, LocalEventExchange, OrionStateStore
 
 
 MODEL = os.environ.get("ORION_BENCHMARK_MODEL", "ollama/qwen3.5:9b")
+RUN_ID = os.environ.get("ORION_BENCHMARK_RUN_ID", "V3-RUN-021")
 OLLAMA_URL = "http://127.0.0.1:11434"
 RESULT_START = "---ORION_SEMANTIC_HAND_RESULT_START---"
 RESULT_END = "---ORION_SEMANTIC_HAND_RESULT_END---"
@@ -196,7 +197,7 @@ def candidate_functional_check(worktree: Path) -> None:
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-021")
+    print("V3_RUN_ID> " + RUN_ID)
     print("SEMANTIC_CODING_HAND_BENCHMARK> START")
     print("BENCHMARK_MODEL> " + MODEL)
 
