@@ -3,7 +3,14 @@ from __future__ import annotations
 from enum import Enum
 from typing import Iterable
 
-from orion_v3.state import (\n    AttemptLease,\n    EventRecord,\n    EventType,\n    LocalEventExchange,\n    OrionStateStore,\n    StateStoreError,\n)
+from orion_v3.state import (
+    AttemptLease,
+    EventRecord,
+    EventType,
+    LocalEventExchange,
+    OrionStateStore,
+    StateStoreError,
+)
 
 from .workpackage import WorkPackage, WorkPackageError
 
