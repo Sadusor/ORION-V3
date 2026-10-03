@@ -713,3 +713,97 @@ Interpretation:
 - direct control FAIL -> donor/tool bridge bug;
 - direct control PASS + Qwen search FAIL -> model argument/result-use defect;
 - search PASS -> continue status/edit/denial mixed routing cases.
+
+
+## Consolidated OpenHands qualification + mixed-tool operator status through RUN-036S
+
+Canonical consolidation:
+`docs/checkpoints/2026-10-04-run031-to-run036s-operator-benchmark-status.md`
+
+### Proven milestones
+
+- RUN-031: compact ORION prompt restores real OpenHands Agent structured tool path.
+- RUN-035: compact OpenHands Agent runtime physically qualified end-to-end.
+- OpenHands FileEditor + Terminal physically proven under Qwen3.6.
+- OpenJarvis exact-name filesystem search physically proven by deterministic control.
+- ORION Capability Registry and Action Lease/AuthorityGateway remain the authority boundary.
+
+### RUN-036 series classifications
+
+RUN-036:
+- failed before Qwen due OpenJarvis Rust-backed CapabilityPolicy imported inside
+  the OpenHands Python environment;
+- operator NOT TESTED.
+
+RUN-036R:
+- Qwen reached the mixed toolbox;
+- selected the OpenJarvis-backed search tool family correctly;
+- result evidence incomplete;
+- exact action was not yet printed.
+
+RUN-036S session:
+`790eeede9623`
+
+RUN-036S proved:
+- deterministic OpenJarvis search control: PASS;
+- expected pyproject.toml + gateway.py evidence returned;
+- no absolute trusted-root leak;
+- Qwen selected `search_exact_files`;
+- Qwen requested exactly
+  `["pyproject.toml", "gateway.py"]`;
+- Qwen selected `["active_project"]`;
+- Qwen used recursive=true, max_depth=4, max_results=10.
+
+Observed denial:
+`orion_denial_code = unknown_argument`
+
+Exact adapter bug:
+OpenHands/Pydantic added framework field
+`kind = SearchExactFilesAction` to `action.model_dump()`.
+The mixed bridge forwarded that internal field into ORION filesystem.search.
+ORION correctly rejected the unsupported argument.
+
+Therefore RUN-036S is an **adapter serialization failure**, not:
+- a Qwen reasoning failure;
+- an OpenJarvis search failure;
+- an ORION authority failure.
+
+Note on result publication:
+the RUN-036S durable result appeared on the results branch after an observable
+delay. Do not classify an absent immediate result as a benchmark failure; the
+authoritative result remains the published session JSON when it arrives.
+
+### Bridge rule promoted
+
+Cross-runtime adapters must explicitly map model-facing Action fields to ORION
+capability arguments.
+
+Never forward complete framework model dumps across the authority boundary.
+
+For filesystem.search only these fields may cross:
+- exact_names;
+- locations;
+- recursive;
+- max_depth;
+- max_results.
+
+### V3-RUN-036T prepared
+
+The corrected search bridge:
+- explicitly forwards only the 5 allowed filesystem.search business arguments;
+- cannot forward OpenHands internal `kind`;
+- model-facing locations allow both `active_project` and `desktop`;
+- the Action Lease still authorizes only `active_project`;
+- DENIED_CASE can therefore validly request `desktop` and must receive ORION
+  `scope_violation`, proving the authority boundary rather than schema
+  censorship.
+
+RUN-036T keeps:
+- deterministic OpenJarvis control;
+- exact Qwen action/observation traces;
+- SEARCH_CASE;
+- STATUS_CASE;
+- EDIT_CASE;
+- DENIED_CASE;
+- 4/4 tool-family score;
+- zero authority bypass target.
