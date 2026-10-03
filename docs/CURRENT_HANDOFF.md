@@ -437,3 +437,66 @@ RUN-033:
 
 This gate determines whether RUN-032 was merely poor completion signalling or an
 actual coding failure.
+
+
+## DeepSeek RUN-033 audit corrections and RUN-034 staged
+
+External review received after RUN-033.
+
+Accepted:
+- keep OpenHands Agent as a candidate runtime for now;
+- prevent Python bytecode pollution instead of treating it as a source edit;
+- instrument FileEditor/Terminal observations and stuck behavior;
+- compare stuck detection enabled vs disabled;
+- keep donor Finish advisory rather than canonical ORION truth.
+
+Verified corrections to the external review:
+1. `119 passed in 11.43s` belonged to V3 repository regression, not the
+   Agent's Terminal verification. RUN-033 only proved that verification was
+   attempted, not that its exit code was zero.
+2. The exact `rc/clamp.py` corruption came from ORION's benchmark helper:
+   `git(...).stdout.strip()` removed the leading status-space from the first
+   porcelain line ` M src/clamp.py`; subsequent `line[3:]` therefore
+   produced `rc/clamp.py`.
+3. Two FileEditor actions alone cannot explain the default pinned OpenHands
+   repeated action/observation stuck threshold, which is 4. The actual STUCK
+   predicate remains unproven.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-deepseek-run033-audit-corrections.md`
+
+### V3-RUN-034
+
+Exact V3 SHA:
+`590e0069adf76e4d99286f74ef49b1980018a4b9`
+
+Remote staging SHA:
+`96ac368f9511c8fa41e298cc8ddb6ff05645e9c2`
+
+RUN-034:
+- fixes changed-path inspection using raw
+  `git status --porcelain=v1 -z --untracked-files=all`;
+- regression-locks the exact old leading-space strip failure;
+- sets `PYTHONDONTWRITEBYTECODE=1` for the OpenHands worker;
+- runs ORION's independent Python check with `-B`;
+- captures FileEditor/Terminal Action + Observation data;
+- captures Agent/Conversation errors and relevant messages;
+- evaluates the pinned stuck-detector predicates over the final event window;
+- runs the exact same coding task twice:
+  - Case A: stuck detection ON;
+  - Case B: stuck detection OFF;
+- checks exact changed paths, exact file bytes, Git HEAD and deterministic
+  functional behavior for both;
+- if a verified candidate exists, freezes/applies it through the proven
+  WorkPackage/RUN-020 envelope.
+
+RUN-034 uses diagnostic status semantics:
+a completed characterization returns process PASS and separately prints
+`OPENHANDS_AGENT_RUNTIME_QUALIFIED> PASS/FAIL`.
+
+Decision after RUN-034:
+- Case B correct + clean FINISHED/Finish -> keep OpenHands Agent runtime as a
+  candidate for the ORION Operator Benchmark;
+- candidate correct but Case B cannot terminate cleanly -> move to OpenHands
+  tools under an ORION-owned step loop and compare against OpenJarvis;
+- candidate wrong -> classify a real Qwen/runtime task failure.
