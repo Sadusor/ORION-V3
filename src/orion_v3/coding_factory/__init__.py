@@ -1,7 +1,6 @@
 from .artifacts import ArtifactRef, ArtifactStore, ArtifactStoreError
 from .workpackage import (
     ArtifactKind,
-    CommandSpec,
     FileOperation,
     PackageArtifact,
     WorkPackage,
@@ -16,7 +15,6 @@ __all__ = [
     "ArtifactStore",
     "ArtifactStoreError",
     "CodingFactoryBlackboard",
-    "CommandSpec",
     "DecisionVerdict",
     "FileOperation",
     "PackageArtifact",
