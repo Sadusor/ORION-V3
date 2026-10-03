@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import shutil
+import subprocess
 import sys
 import time
 from dataclasses import dataclass
@@ -9,8 +12,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DONOR = ROOT / "external" / "OpenJarvis"
 OPENJARVIS_SRC = DONOR / "src"
+EXPECTED_DONOR_SHA = "309a4f1044ccfb2032264832a31fef2f1d314586"
 if not OPENJARVIS_SRC.exists():
     raise SystemExit("Pinned OpenJarvis donor is missing.")
+
+pin = subprocess.run(
+    ["git", "-C", str(DONOR), "rev-parse", "HEAD"],
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True,
+    check=False,
+)
+if pin.returncode != 0 or pin.stdout.strip() != EXPECTED_DONOR_SHA:
+    raise SystemExit("Pinned OpenJarvis SHA mismatch: " + pin.stdout.strip())
 
 sys.path.insert(0, str(OPENJARVIS_SRC))
 sys.path.insert(0, str(ROOT / "src"))
@@ -276,7 +290,23 @@ def main() -> int:
     print(f"BENCHMARK_CASES> {len(CASES)}")
 
     engine = OllamaEngine(host="http://127.0.0.1:11434", timeout=90.0)
+    started_ollama = None
     try:
+        if not engine.health():
+            ollama = shutil.which("ollama.exe") or shutil.which("ollama")
+            if not ollama:
+                raise RuntimeError("Ollama is offline and executable was not found")
+            creationflags = getattr(subprocess, "CREATE_NO_WINDOW", 0) if os.name == "nt" else 0
+            started_ollama = subprocess.Popen(
+                [ollama, "serve"],
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=creationflags,
+            )
+            deadline = time.monotonic() + 25.0
+            while time.monotonic() < deadline and not engine.health():
+                time.sleep(0.5)
         if not engine.health():
             raise RuntimeError("Ollama is not reachable on 127.0.0.1:11434")
         models = engine.list_models()
@@ -469,6 +499,9 @@ def main() -> int:
         return 0 if pass_gate else 1
     finally:
         engine.close()
+        # If this bounded benchmark had to start Ollama, leave it running.
+        # ORION already treats local inference as an on-demand shared service;
+        # killing it here could terminate another local consumer.
 
 
 if __name__ == "__main__":
