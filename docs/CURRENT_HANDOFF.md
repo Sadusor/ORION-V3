@@ -213,3 +213,59 @@ RUN-029 changes diagnostic status semantics:
 a successfully completed diagnostic returns process PASS even when it proves
 `OPENHANDS_AGENT_SYSTEM_PATH> FAIL`. Harness/control failures still return
 process FAIL.
+
+
+## RUN-029 physical PASS and RUN-030 staged
+
+RUN-029 Remote session:
+`a3dd91b76edc`
+
+RUN-029 is a **physical diagnostic PASS**.
+
+Proven:
+- minimal request without call_context -> structured Terminal call PASS;
+- minimal request with call_context -> structured Terminal call PASS;
+- full 15240-character Agent system message without call_context -> structured
+  tool call FAIL;
+- first 8 rendered static prompt sections (5523 chars) -> PASS;
+- last 8 rendered static prompt sections (9715 chars) -> PASS;
+- full 16-section prompt -> FAIL.
+
+Therefore:
+- call_context is eliminated;
+- the full Agent system message is independently sufficient to suppress native
+  Qwen tool calling in this calibration;
+- neither top-level prompt half is independently sufficient;
+- current classification is
+  `STATIC_PROMPT_INTERACTION_OR_LENGTH_EFFECT`.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-03-v3-run-029-static-prompt-interaction.md`
+
+### V3-RUN-030
+
+Exact V3 SHA:
+`8469426defd54ce91637f6dfda5eeec59232d75a`
+
+Remote staging SHA:
+`6404824f0ab328c20e5a3d0cf2c770974eb03db5`
+
+RUN-030 keeps the same Qwen3.6 model and resolved TerminalTool and compares:
+- full original prompt;
+- same exact sections with halves swapped;
+- same exact sections fully reversed;
+- neutral system text at the same character length;
+- incremental original-order prefixes from section 8 onward.
+
+At the first failing prefix it additionally tests:
+- the newly-added boundary section alone;
+- the prior passing prefix plus neutral text replacing that section at the same
+  character length.
+
+This separates:
+- raw prompt length/instruction-density effects;
+- section-order interactions;
+- cumulative semantic interactions at a specific boundary.
+
+Diagnostic success returns process PASS even when
+`OPENHANDS_AGENT_SYSTEM_PATH> FAIL`.
