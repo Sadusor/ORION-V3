@@ -4,7 +4,7 @@ Updated: 2026-10-03
 
 ## Stage
 
-**Gate 1 COMPLETE — V3.1 donor-first OpenJarvis tool adoption in progress.**
+**Gate 1 COMPLETE — architecture frozen around ORION Core + Capability Registry + canonical Memory; capability inventory is the next priority.**
 
 ORION-V3 is a separate repository from the proven legacy ORION implementation.
 
@@ -80,21 +80,20 @@ The extension:
 - does not expose absolute trusted roots to the model;
 - returns structured data that ORION converts into canonical `EvidenceEnvelope`.
 
-## Next physical run
+## Current priority
 
-`V3-RUN-001`
+Earlier `Next physical run` notes below are historical unless explicitly marked current.
 
-It will verify on the owner's Windows PC:
+Current sequence after the 2026-10-03 architecture freeze:
+1. inventory proven capabilities in legacy ORION Remote, V3, OpenJarvis and native Windows/PowerShell;
+2. define the semantic Capability contract;
+3. batch-register/harvest the first capability pack;
+4. benchmark Qwen3.5-9B on typed intent/parameter routing;
+5. bring canonical Memory and the local append-only AI/Hand exchange forward;
+6. automate the cloud-AI Coding Factory around existing Coding Hands;
+7. add Whole-PC Computer Hand escalation later.
 
-1. OpenJarvis built-in `file_read` is present;
-2. OpenJarvis built-in `file_write` is present;
-3. the missing `orion_filesystem_search` extension is registered in OpenJarvis `ToolRegistry`;
-4. real filesystem search executes through OpenJarvis `ToolExecutor`;
-5. ORION Action Lease and trusted-root scope remain authoritative;
-6. absolute trusted roots do not leak;
-7. ORION normalizes the successful ToolResult into canonical evidence.
-
-After this passes, continue donor-first capability qualification and evaluate/launch the pinned OpenJarvis desktop stack.
+See `docs/ORION_SYSTEM_MODEL.md`.
 
 ## Protected fallback
 
@@ -254,3 +253,59 @@ Next falsifier:
 prove ORION can launch the pinned OpenHands Hand backend on demand, pass only
 ORION-authorized logical operations/trusted bindings, receive structured evidence,
 and terminate the backend cleanly without granting it general control-plane authority.
+
+## 2026-10-03 architecture freeze — supersedes primitive-Hand next steps
+
+A major project clarification is now authoritative.
+
+ORION is not one agent.
+
+Shared ORION Core owns Memory, Task/Event state, semantic capabilities,
+deterministic policy, authority, evidence, verification, Stop and continuity.
+
+Distinct execution concepts:
+- **Lightweight assistant:** Qwen semantic intent -> ORION policy -> known
+  capability/workflow -> fast proven Hand.
+- **Coding Factory:** cloud architect/reviewer workflow -> Qwen coordinator
+  where useful -> existing/qualified Coding Hands -> tests/diff/evidence.
+- **Whole-PC Computer Hand:** explicit escalation for novel GUI work only.
+- **ORION interface:** ORION-owned Jarvis-style product experience; not a donor
+  agent and not the Coding Factory.
+
+Qwen rule:
+- Qwen decides semantic intent/entities/ambiguity.
+- ORION deterministically selects capability implementation, authority, risk,
+  approval and scope.
+- Qwen does not write arbitrary PowerShell as the normal path.
+
+Capability Registry rule:
+- semantic/policy registry, not a second low-level tool registry;
+- known operations map to vetted implementations;
+- direct unambiguous user requests should not trigger redundant approvals for
+  routine bounded actions;
+- implementation validates before effects and ORION verifies evidence after.
+
+Memory/local exchange:
+- Memory is an early core problem because long-running model/chat context is not
+  reliable enough for ORION continuity;
+- GitHub remains source control;
+- future live AI<->PC transport should use local canonical Task/Event state plus
+  an append-only event log for PROPOSAL/REVIEW/DECISION/ACTION/EVIDENCE/RESULT.
+
+OpenMuse audit:
+- strong donor for durable worker/task patterns, SQL leases, checkpoints,
+  pause/resume/cancel, idempotent receipts, bounded loops and isolated-computer
+  patterns;
+- not ORION routing authority.
+
+### V3-RUN-009 disposition
+
+`V3-RUN-009` was staged but **must not be run as the current next step**.
+
+It wrapped one OpenHands primitive edit operation. The code is retained as
+experimental reference, but the architecture changed before execution:
+continuing to wrap coding primitives one-by-one risks rebuilding command
+sequencing already solved by mature Coding Hands/agents.
+
+Next implementation work is the capability inventory and semantic contract, not
+another primitive OpenHands wrapper.
