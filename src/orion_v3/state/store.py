@@ -142,6 +142,25 @@ BEGIN
     SELECT RAISE(ABORT, 'ORION events are append-only');
 END;
 
+CREATE TABLE IF NOT EXISTS exchange_receipts (
+    event_id TEXT NOT NULL REFERENCES events(event_id),
+    recipient TEXT NOT NULL,
+    acknowledged_at TEXT NOT NULL,
+    PRIMARY KEY(event_id, recipient)
+);
+
+CREATE TRIGGER IF NOT EXISTS exchange_receipts_no_update
+BEFORE UPDATE ON exchange_receipts
+BEGIN
+    SELECT RAISE(ABORT, 'ORION exchange receipts are append-only');
+END;
+
+CREATE TRIGGER IF NOT EXISTS exchange_receipts_no_delete
+BEFORE DELETE ON exchange_receipts
+BEGIN
+    SELECT RAISE(ABORT, 'ORION exchange receipts are append-only');
+END;
+
 CREATE TABLE IF NOT EXISTS memories (
     memory_id TEXT PRIMARY KEY,
     project_id TEXT NOT NULL REFERENCES projects(project_id),
@@ -248,6 +267,33 @@ class OrionStateStore:
             metadata=json.loads(row["metadata_json"]),
         )
 
+    def get_task(self, task_id: str) -> TaskRecord | None:
+        return self._get_task(task_id)
+
+    def list_task_events(
+        self,
+        project_id: str,
+        task_id: str,
+        *,
+        limit: int = 50,
+    ) -> list[EventRecord]:
+        self._require_project(project_id)
+        task = self._get_task(task_id)
+        if task is None or task.project_id != project_id:
+            raise StateStoreError("task does not belong to project")
+        if limit < 1 or limit > 100:
+            raise StateStoreError("event limit must be between 1 and 100")
+        rows = self.connect().execute(
+            """
+            SELECT * FROM events
+            WHERE project_id=? AND task_id=?
+            ORDER BY rowid ASC
+            LIMIT ?
+            """,
+            (project_id, task_id, limit),
+        ).fetchall()
+        return [self._row_to_event(row) for row in rows]
+
     def create_task(
         self,
         project_id: str,
@@ -310,6 +356,12 @@ class OrionStateStore:
                 raise StateStoreError("parent event does not exist")
             if parent.project_id != project_id:
                 raise StateStoreError("parent event belongs to another project")
+            if (
+                task_id is not None
+                and parent.task_id is not None
+                and parent.task_id != task_id
+            ):
+                raise StateStoreError("parent event belongs to another task")
 
         actor_kind = actor_kind.strip()
         actor_id = actor_id.strip()
