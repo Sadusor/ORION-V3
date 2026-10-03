@@ -309,3 +309,41 @@ sequencing already solved by mature Coding Hands/agents.
 
 Next implementation work is the capability inventory and semantic contract, not
 another primitive OpenHands wrapper.
+
+
+## V3-RUN-012 intent abstraction
+
+Status: **FAIL / INCOMPLETE**
+
+Remote task SHA:
+`8725e62d9b7c3ee36f4d50d0246b16dacac32367`
+
+Remote attempt:
+`413`
+
+Exact V3 SHA:
+`37db0cdd5b724d2a3279398294fc9e488826fc87`
+
+Important:
+- the benchmark crashed after case 29/32 because the Windows console used cp1252
+  and could not print Greek text;
+- no valid final aggregate score exists;
+- the run nevertheless exposed that the benchmark over-specified raw model
+  surface form (null-vs-omitted, every-vs-all) and mixed semantic ambiguity with
+  policy/approval concerns.
+
+Decision:
+insert a deterministic ORION canonicalizer between Qwen semantic interpretation
+and capability resolution.
+
+Authoritative decision:
+`docs/decisions/0004-intent-canonicalization.md`
+
+Next:
+**V3-RUN-013 — Canonicalization Isolation**
+- force UTF-8 output;
+- score canonicalized semantics rather than raw surface spelling;
+- keep policy-intrusion evidence visible;
+- same 32 semantic cases;
+- measure raw entity accuracy vs canonical entity accuracy;
+- no capability catalog in Qwen prompt.
