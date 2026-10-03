@@ -44,6 +44,8 @@ def main() -> int:
     if not isinstance(model, str) or not model.strip():
         emit({"success": False, "error": "invalid_model"})
         return 2
+    if model.startswith("ollama/"):
+        model = "ollama_chat/" + model.removeprefix("ollama/")
     if not isinstance(base_url, str) or not base_url.startswith(
         ("http://127.0.0.1:", "http://localhost:")
     ):
