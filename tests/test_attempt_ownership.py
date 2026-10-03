@@ -178,3 +178,32 @@ def test_restart_preserves_attempt_checkpoint_and_current_ownership(tmp_path):
     )
     assert checkpoint.checkpoint_seq == 2
     assert checkpoint.checkpoint == {"phase": "resumed"}
+
+
+def test_generation_fences_even_if_token_factory_repeats_raw_token(tmp_path):
+    store = OrionStateStore(tmp_path / "repeat.db")
+    store.initialize()
+    project = store.create_project("ORION", project_id="orion-repeat")
+    task = store.create_task(project.project_id, "repeat token test", task_id="task-repeat")
+    clock = Clock()
+    attempts = AttemptAuthority(
+        store,
+        clock=clock,
+        token_factory=lambda: "same-raw-token",
+    )
+    attempts.initialize()
+    attempt = attempts.create_attempt(task.task_id, attempt_id="attempt-repeat")
+
+    first = attempts.claim(attempt.attempt_id, worker_id="worker-a", ttl_seconds=5)
+    clock.value = first.lease.expires_at
+    second = attempts.claim(attempt.attempt_id, worker_id="worker-b", ttl_seconds=10)
+
+    assert second.lease.generation == 2
+    denied(
+        "stale_attempt_lease",
+        lambda: attempts.checkpoint(
+            attempt.attempt_id,
+            first.token,
+            {"worker": "a"},
+        ),
+    )
