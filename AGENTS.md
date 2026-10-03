@@ -189,3 +189,36 @@ Current work order:
 5. implement canonical Memory + local append-only exchange;
 6. automate Coding Factory;
 7. Whole-PC escalation later.
+
+
+### Semantic interpretation / canonicalization rule — 2026-10-03
+
+Qwen must not be benchmarked or prompted as if surface-form canonicalization is
+its job.
+
+Normal lightweight path:
+
+`user -> Qwen literal semantic Intent/entities -> ORION canonicalizer ->
+deterministic Intent resolver -> capability policy -> Hand`
+
+Qwen owns:
+- semantic intent;
+- literal entity extraction;
+- genuine linguistic ambiguity;
+- multi-action/composition detection.
+
+ORION canonicalizer owns:
+- null vs omitted optional fields;
+- aliases/canonical vocabulary;
+- stable quantifier normalization;
+- logical scope/app/location normalization;
+- entity schema regularization;
+- logging/filtering of policy-style ambiguity text.
+
+Resolver owns capability selection. Policy owns authorization.
+
+Do not score model output against one arbitrary surface spelling when a
+deterministic canonical equivalent exists.
+
+Do not hide policy intrusion: canonicalizer may filter it for safe downstream
+resolution, but tests must still record it as a model-contract quality failure.
