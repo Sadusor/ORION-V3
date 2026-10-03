@@ -152,10 +152,9 @@ class AttemptAuthority:
         if ttl_seconds <= 0:
             raise ValueError("ttl_seconds must be positive")
 
-        token = self._token_factory()
-        if not token:
+        raw_token = self._token_factory()
+        if not raw_token:
             raise ValueError("token factory returned an empty token")
-        token_hash = self._hash(token)
         now = float(self._clock())
         conn = self._store.connect()
         try:
@@ -168,6 +167,8 @@ class AttemptAuthority:
                 raise AttemptDenied("unknown_attempt", "Attempt does not exist.")
             self._ensure_claimable(row, now)
             generation = int(row["lease_generation"]) + 1
+            token = f"{generation}.{raw_token}"
+            token_hash = self._hash(token)
             expires_at = now + float(ttl_seconds)
             conn.execute(
                 """
