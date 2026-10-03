@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SDK = ROOT / "external" / "OpenHands-software-agent-sdk"
-WORKER = ROOT / "scripts" / "v34_openhands_semantic_coding_worker.py"
+WORKER = ROOT / "scripts" / "v34_openhands_semantic_coding_worker_fixed.py"
 sys.path.insert(0, str(ROOT / "src"))
 
 from orion_v3.coding_factory import (
