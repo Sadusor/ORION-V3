@@ -215,6 +215,7 @@ def main() -> int:
     local_name = MODEL.removeprefix("ollama/")
     if local_name not in model_names:
         print("LOCAL_MODEL_AVAILABLE> FAIL " + local_name)
+        print("OLLAMA_INSTALLED_MODELS> " + ",".join(sorted(model_names)))
         print("STATUS> FAIL")
         return 1
 
