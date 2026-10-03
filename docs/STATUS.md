@@ -427,3 +427,39 @@ Next:
 The next gate must prove idempotent external ingestion, causal/task scope,
 recipient inbox/ack state without mutating Events, bounded task packets,
 restart persistence and no GitHub/network dependency.
+
+
+## V3-RUN-016 local Event Exchange
+
+Status: **OWNER-OBSERVED PHYSICAL PASS**
+
+Exact tested V3 SHA:
+`0f77a8e07da6936e811936b50a1d201887a1ca93`
+
+The owner reported PASS for:
+`scripts/v33_local_event_exchange_bootstrap.ps1`
+
+This physically validates the first local mailbox layer over the Event Ledger:
+- exact external duplicate ingestion is idempotent;
+- conflicting external duplicate is denied;
+- recipient inbox/acknowledgement works without mutating Events;
+- exchange receipt state is append-only;
+- PROPOSAL -> REVIEW -> DECISION -> ACTION -> EVIDENCE -> RESULT causal chain persists;
+- cross-task parent links are denied;
+- bounded task packets remain project/task scoped;
+- close/reopen preserves exchange state;
+- no GitHub/network/model dependency is required by the gate.
+
+Architectural consequence:
+GitHub can remain source control while live AI<->ORION<->Hands coordination moves to the local Event Exchange.
+
+### Remote transport correction
+
+The temporary manual-PowerShell step was caused by the ChatGPT GitHub connector refusing writes to legacy `CURRENT_TASK.ps1`.
+
+Legacy ORION already contained an exact-SHA named-task dispatcher driven by
+`REMOTE_TASKS.json`.
+
+That path is now being activated for V3 so future gates can use:
+`CHECK GITHUB -> named V3 task -> RUN`
+with a data-only `V3_GATE.json`, rather than copying PowerShell manually.
