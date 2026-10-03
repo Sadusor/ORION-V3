@@ -44,8 +44,9 @@ No model, donor agent, UI or Hand becomes an authority peer.
 
 This is the normal Jarvis-style daily path.
 
-User request -> Qwen governor -> typed intent/entities -> ORION deterministic
-policy -> known capability/workflow -> proven lightweight Hand -> evidence.
+User request -> Qwen literal semantic intent/entities -> ORION deterministic
+canonicalizer -> ORION deterministic resolver/policy -> known capability/workflow
+-> proven lightweight Hand -> evidence.
 
 Examples:
 - open/close an application;
@@ -61,7 +62,8 @@ Examples:
 The normal path must not start a heavy whole-PC agent merely to perform a known
 operation.
 
-Qwen does **semantic routing**, not implementation selection and not authority.
+Qwen does **semantic interpretation**, not capability selection, implementation
+selection or authority.
 
 Qwen may decide:
 - user intent;
@@ -70,8 +72,13 @@ Qwen may decide:
 - whether the request contains one intent or a composition;
 - whether clarification/human escalation is needed.
 
-ORION decides deterministically:
-- which registered capability implements that intent;
+ORION canonicalizes deterministically:
+- null/omitted optional entities;
+- aliases, logical scopes, quantifiers and other stable vocabulary;
+- separation of semantic ambiguity from policy/approval text.
+
+ORION then decides deterministically:
+- which registered capability implements the canonical intent;
 - which implementation is currently preferred;
 - whether the request authorizes the effect;
 - scope / binding validity;
@@ -82,8 +89,10 @@ ORION decides deterministically:
 
 Rule: **Qwen proposes; ORION disposes.**
 
-Qwen should emit typed intent + parameters. It should not generate arbitrary
-PowerShell as the normal control path.
+Qwen should emit semantic intent + literal entities + genuine ambiguity.
+It should not emit capability IDs or generate arbitrary PowerShell as the normal
+control path. Surface variants are normalized by ORION, not prompt-engineered
+into the model.
 
 ### 2. Coding Factory workflow
 
@@ -212,7 +221,8 @@ model -> raw shell text -> guard must understand arbitrary command -> allow/bloc
 
 Target path:
 
-Qwen -> typed intent -> ORION Capability Registry -> deterministic policy ->
+Qwen -> literal semantic intent/entities -> ORION canonicalizer ->
+deterministic intent resolver -> ORION Capability Registry/policy ->
 vetted implementation -> evidence verification
 
 A registered name is not automatically safe.
