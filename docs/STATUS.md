@@ -624,3 +624,57 @@ Promoted correction:
   `FAILURE_LESSON-AUTHORING-SYNTAX-001`.
 
 RUN-020 remains the current gate and must be rerun after this correction.
+
+
+## V3-RUN-020 isolated exact-SHA WorkPackage execution envelope
+
+Status: **PHYSICAL PASS**
+
+Exact tested V3 SHA:
+`cefb32ae61a126390f429294b800db92b5246b80`
+
+Remote staging SHA:
+`b8ebe02b595f77fb0373b1a75d45e6ebd9d797bb`
+
+Named-task session:
+`04065be68128`
+
+Observed regression:
+- **96 passed in 9.92s**
+
+Observed preflight:
+- repository Python/JSON authoring preflight: **PASS**
+- tracked PowerShell syntax preflight: **PASS**
+
+Observed execution-envelope gate:
+- source exact SHA + clean state: **PASS**
+- immutable WorkPackage reload: **PASS**
+- lease-bound execution ACTION: **PASS**
+- detached exact-SHA worktree: **PASS**
+- harmless FILE application: **PASS**
+- actual changed-path verification: **PASS**
+- exact diff hash + Git tree evidence: **PASS**
+- deterministic verifier: **PASS**
+- PASS cleanup: **PASS**
+- push/merge/commit authority: **NONE**
+- Stop before effect: **DENIED**
+- Stop cleanup: **PASS**
+- verifier failure: **DENIED**
+- FAIL cleanup: **PASS**
+- learned malformed-source guard: **DENIED**
+- malformed-source cleanup: **PASS**
+- ACTION -> EVIDENCE -> RESULT chain: **PASS**
+- network/model dependency: **NONE**
+
+This physically proves the common bounded execution envelope required before
+benchmarking mature coding-agent / semantic Coding Hand candidates.
+
+### Important UI evidence correction
+
+The owner-facing phone UI displayed a stale previous FAIL while this session had
+already completed PASS. Durable named-session evidence is authoritative. This is
+a Remote presentation/focus bug, not a V3-RUN-020 gate failure.
+
+Next architecture step remains:
+benchmark mature coding-agent / semantic Coding Hand candidates under this same
+exact-SHA, Attempt-owned, verified execution envelope.
