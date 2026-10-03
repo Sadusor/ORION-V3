@@ -167,3 +167,111 @@ def test_model_arguments_cannot_supply_trust_anchors(field):
             lease_token=issued.token, operation_id="filesystem.search", arguments=args
         ),
     )
+
+
+def build_file_edit_gate():
+    clock = Clock()
+    leases = LeaseAuthority(clock=clock, token_factory=lambda: "edit-token")
+    gateway = AuthorityGateway(leases)
+    issued = leases.issue(
+        task_id="edit-task",
+        operation_id="file.edit.replace",
+        principal="owner",
+        scope={
+            "locations": ["project"],
+            "relative_paths": ["src/example.py"],
+            "max_replacement_chars": 100,
+        },
+        ttl_seconds=60,
+    )
+    return gateway, issued
+
+
+def edit_request(**overrides):
+    value = {
+        "location": "project",
+        "relative_path": "src/example.py",
+        "old_str": "VALUE = 1",
+        "new_str": "VALUE = 2",
+    }
+    value.update(overrides)
+    return value
+
+
+def test_file_edit_replace_authorizes_exact_scoped_file():
+    gateway, issued = build_file_edit_gate()
+
+    authorized = gateway.authorize(
+        lease_token=issued.token,
+        operation_id="file.edit.replace",
+        arguments=edit_request(),
+    )
+
+    assert authorized.arguments["location"] == "project"
+    assert authorized.arguments["relative_path"] == "src/example.py"
+    assert authorized.arguments["old_str"] == "VALUE = 1"
+    assert authorized.arguments["new_str"] == "VALUE = 2"
+
+
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "../outside.py",
+        "/absolute.py",
+        "C:/absolute.py",
+        "src/../outside.py",
+    ],
+)
+def test_file_edit_replace_rejects_unsafe_paths(relative_path):
+    gateway, issued = build_file_edit_gate()
+
+    assert_denied(
+        "invalid_argument",
+        lambda: gateway.authorize(
+            lease_token=issued.token,
+            operation_id="file.edit.replace",
+            arguments=edit_request(relative_path=relative_path),
+        ),
+    )
+
+
+def test_file_edit_replace_cannot_edit_unleased_file():
+    gateway, issued = build_file_edit_gate()
+
+    assert_denied(
+        "scope_violation",
+        lambda: gateway.authorize(
+            lease_token=issued.token,
+            operation_id="file.edit.replace",
+            arguments=edit_request(relative_path="src/other.py"),
+        ),
+    )
+
+
+@pytest.mark.parametrize("field", ["roots", "repo_root", "credential", "opener"])
+def test_file_edit_replace_cannot_supply_trust_anchor(field):
+    gateway, issued = build_file_edit_gate()
+    args = edit_request()
+    args[field] = "attacker-controlled"
+
+    assert_denied(
+        "trusted_binding_override",
+        lambda: gateway.authorize(
+            lease_token=issued.token,
+            operation_id="file.edit.replace",
+            arguments=args,
+        ),
+    )
+
+
+def test_file_edit_replace_respects_text_bound():
+    gateway, issued = build_file_edit_gate()
+
+    assert_denied(
+        "scope_violation",
+        lambda: gateway.authorize(
+            lease_token=issued.token,
+            operation_id="file.edit.replace",
+            arguments=edit_request(new_str="x" * 101),
+        ),
+    )
