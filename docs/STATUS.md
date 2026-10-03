@@ -463,3 +463,78 @@ Legacy ORION already contained an exact-SHA named-task dispatcher driven by
 That path is now being activated for V3 so future gates can use:
 `CHECK GITHUB -> named V3 task -> RUN`
 with a data-only `V3_GATE.json`, rather than copying PowerShell manually.
+
+
+## V3-RUN-017 named-task transport
+
+Status: **PHYSICAL PASS**
+
+Remote SHA:
+`98b1a78beb3edcab95f7dfe22fbf4b87d7c3580e`
+
+Named task:
+`v3-current-gate`
+
+Session:
+`8ba1ec0b741c`
+
+Result:
+`PASS`
+
+This proves the restored normal transport:
+`CHECK GITHUB -> APPROVE & RUN -> exact named V3 gate`
+
+ORION Remote remains a separate operator/transport repo. ORION-V3 remains the
+core under test. The bridge is data-driven through `V3_GATE.json`.
+
+## V3-RUN-018 Coding Factory WorkPackage
+
+Status: **PHYSICAL PASS**
+
+Exact V3 SHA:
+`6ef6e9ccd3bea7a9e56c5761173ed76609c47ddc`
+
+Remote staging SHA:
+`4544acdd1aebb23769392eff9bd4dc5f78e8dc68`
+
+Named-task session:
+`3c93b3f33491`
+
+Observed regression:
+- **77 passed in 3.02s**
+
+Observed WorkPackage gate:
+- artifact deduplication: **PASS**
+- artifact tamper detection: **PASS**
+- deterministic package identity: **PASS**
+- manifest reload/integrity: **PASS**
+- out-of-scope FILE: **DENIED**
+- out-of-scope PATCH target: **DENIED**
+- non-exact base SHA: **DENIED**
+- package-bound PROPOSAL -> REVIEW -> DECISION chain: **PASS**
+- candidate execution authority: **NONE**
+- cross-package review reuse: **DENIED**
+- reopen persistence: **PASS**
+- network/model/execution dependency: **NONE**
+
+This physically proves the first immutable candidate-output side of the Coding
+Factory. A cloud coder can eventually hand ORION exact PATCH/FILE bytes and
+ORION can freeze them into a scope-bound, base-SHA-bound WorkPackage before any
+execution authority exists.
+
+### Current next priority
+
+Do **not** connect a cloud coder directly to a real checkout yet.
+
+Next:
+1. Attempt/lease ownership + checkpoint + Stop truth.
+2. Isolated exact-SHA Git worktree execution envelope.
+3. One harmless mechanically applied WorkPackage with exact path/diff/evidence
+   verification.
+4. Then benchmark mature coding-agent / semantic Coding Hand candidates on the
+   same bounded PC task.
+5. Only after those gates, connect real cloud coder/reviewer providers through
+   the already-existing Provider Vault / Reviewer Connector contracts.
+
+Agent benchmarks are therefore planned, but the agent remains a replaceable
+Hand under ORION authority rather than becoming the control plane.
