@@ -42,6 +42,7 @@ class ParameterSpec:
     min_value: int | None = None
     max_value: int | None = None
     max_length: int | None = None
+    strip_whitespace: bool = True
 
     def normalize(self, name: str, value: Any) -> Any:
         if value is None:
@@ -52,8 +53,9 @@ class ParameterSpec:
         if self.kind == "string":
             if not isinstance(value, str):
                 raise CapabilityContractError(f"{name} must be a string")
-            value = value.strip()
-            if not value and self.required:
+            if self.strip_whitespace:
+                value = value.strip()
+            if value == "" and self.required:
                 raise CapabilityContractError(f"{name} must be non-empty")
             if self.max_length is not None and len(value) > self.max_length:
                 raise CapabilityContractError(f"{name} exceeds max length")
