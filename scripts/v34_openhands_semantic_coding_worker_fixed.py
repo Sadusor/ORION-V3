@@ -69,9 +69,12 @@ def main() -> int:
     started = time.monotonic()
     try:
         llm = LLM(
+            usage_id="run-021-openhands",
             model=model,
             base_url=base_url,
+            reasoning_effort="none",
             temperature=0.0,
+            num_retries=2,
             timeout=90,
             caching_prompt=False,
         )
