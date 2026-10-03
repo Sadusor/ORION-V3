@@ -75,3 +75,40 @@ ORION-V3 is currently public. Fixtures must be synthetic.
 ## Evidence labels
 
 DOCUMENTED / GITHUB-CODED-UNVERIFIED / AUTOMATED PASS / PHYSICAL PASS / PARTIAL / FAIL / BLOCKED / NOT TESTED
+
+## Workflow-first rule
+
+ORION is workflow-first, not autonomous-agent-first.
+
+Normal execution:
+- owner / strong external AI chat supplies reasoning or intent;
+- ORION chooses or constructs a bounded workflow;
+- ORION owns authority, leases, trusted bindings, Stop and evidence;
+- donor Hands/tools execute the bounded steps;
+- results/evidence return to the owner or reasoning source.
+
+OpenJarvis autonomous agent loops are donor candidates only. Do not make
+`orchestrator`, `native_react`, `native_openhands`, managed agents or
+other self-looping donor agents the default ORION control plane.
+
+A local model may be used as a low-cost helper for a narrowly defined job
+such as one-shot classification/routing. It must not gain authority merely
+because OpenJarvis calls it an agent.
+
+Prefer in order:
+1. deterministic workflow with no inference;
+2. one-shot bounded local routing/planning when needed;
+3. strong external AI chat reasoning plus ORION Hands;
+4. autonomous/multi-turn agent loops only as explicit, separately qualified
+   capabilities when a workflow cannot reasonably do the job.
+
+## Product interface direction
+
+The final ORION interface is ORION-owned.
+
+- Stanford OpenJarvis is an infrastructure/tool/runtime donor.
+- `jarvis.institute` is a product/UX reference, not the OpenJarvis source tree.
+- Do not turn the stock OpenJarvis desktop into the final product by accident.
+- Reuse useful OpenJarvis frontend/runtime components selectively.
+- Continue the ORION-specific interface after donor capability qualification,
+  using publicly observable Jarvis Institute UX/workflow ideas where useful.
