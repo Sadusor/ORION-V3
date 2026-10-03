@@ -165,3 +165,51 @@ The harness explicitly calls `conversation.close()` in `finally` before the
 temporary workspace exits, preventing the RUN-027 WinError 32 cleanup mistake.
 
 Do not swap models before RUN-028 evidence is inspected.
+
+
+## RUN-028 physical result and RUN-029 staged
+
+RUN-028 Remote session:
+`789be97afc8b`
+
+RUN-028 was a **diagnostic success despite process FAIL**.
+
+Physical evidence:
+- minimal direct user message -> structured Terminal tool call PASS;
+- exact Agent-prepared first-turn messages -> 0 structured tool calls and plain
+  fenced PowerShell text;
+- removing the Agent system message -> structured Terminal tool call PASS.
+
+The real prepared system message was 15240 characters and contained no literal
+`<invoke`, no literal `<function=`, and no XML keyword.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-03-v3-run-028-agent-system-message-isolation.md`
+
+Precision note:
+RUN-028 Case B also supplied the conversation `call_context`, while the
+minimal/no-system controls did not. The system message is the leading boundary,
+but RUN-029 explicitly eliminates that last confound before declaring it
+sufficient by itself.
+
+### V3-RUN-029
+
+Exact V3 SHA:
+`8035cc70949cd373551738f36870c83dd8e987af`
+
+Remote staging SHA:
+`5f484c81ab923865e3021be57580ecd61be57dcd`
+
+RUN-029:
+1. proves whether `call_context` alone affects native tool calling;
+2. tests the full Agent system message without `call_context`;
+3. isolates static vs dynamic system-message blocks;
+4. if one static block independently fails, recursively bisects rendered
+   top-level OpenHands sections;
+5. confirms whether a single section is sufficient and whether removing it
+   restores tool calling.
+
+RUN-029 changes diagnostic status semantics:
+a successfully completed diagnostic returns process PASS even when it proves
+`OPENHANDS_AGENT_SYSTEM_PATH> FAIL`. Harness/control failures still return
+process FAIL.
