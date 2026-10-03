@@ -9,6 +9,7 @@ from openhands.sdk import Agent, Conversation, LLM, Tool
 from openhands.sdk.conversation.response_utils import get_agent_final_response
 from openhands.sdk.event import ActionEvent
 from openhands.tools.file_editor import FileEditorTool
+from pydantic import SecretStr
 
 
 RESULT_START = "---ORION_SEMANTIC_HAND_RESULT_START---"
@@ -30,7 +31,7 @@ def main() -> int:
 
     workspace_raw = request.get("workspace")
     prompt = request.get("prompt")
-    model = request.get("model", "ollama/qwen3.5:9b")
+    model = request.get("model", "ollama_chat/qwen3.5:9b")
     base_url = request.get("base_url", "http://127.0.0.1:11434")
     max_iterations = int(request.get("max_iterations", 8))
 
