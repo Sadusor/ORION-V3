@@ -146,8 +146,7 @@ $visible.Refresh()
 Write-Host ('OPENJARVIS_WINDOW_PID> ' + $visible.Id)
 Write-Host ('OPENJARVIS_WINDOW_TITLE> ' + $visible.MainWindowTitle)
 Write-Host 'OPENJARVIS_VISIBLE_WINDOW> PASS'
-Remove-Item -LiteralPath $ViteOverride -Force -ErrorAction SilentlyContinue
-Write-Host 'VITE_OVERRIDE_CLEANUP> PASS'
+Write-Host 'PINNED_DONOR_TRACKED_FILES> UNCHANGED'
 
 # Verify the sandbox still has no confirmed source. The UI may write a pending
 # file only after explicit user interaction; a confirmed source here would mean
