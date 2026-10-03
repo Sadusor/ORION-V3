@@ -82,10 +82,14 @@ Immediate gated sequence:
 3. **COMPLETE — V3-RUN-020:** exact changed paths, diff/tree evidence and
    deterministic verification;
 4. **COMPLETE — V3-RUN-020:** cleanup on PASS/FAIL/Stop with no push/merge/commit;
-5. **CURRENT — V3-RUN-021:** benchmark a mature coding-agent / semantic Coding
-   Hand on the same bounded candidate -> WorkPackage -> ORION execution pattern;
-6. compare additional mature Coding Hand candidates on the same benchmark
-   without changing ORION authority;
+5. **CURRENT — OpenHands diagnostic isolation after RUN-021..027:** the mature
+   Coding Hand benchmark exposed a tool-call behavior mismatch in the full
+   OpenHands Agent/Conversation path. Native Ollama, direct LiteLLM, and direct
+   OpenHands LLM wrapper tool calls are physically healthy; isolate the exact
+   Agent-prepared system prompt/messages/history difference before scoring or
+   swapping more models.
+6. after the Agent-path issue is explained, rerun the same bounded semantic
+   Coding Hand benchmark and only then compare additional mature candidates;
 7. connect real cloud coder/reviewer providers only after candidate mechanics
    are physically qualified.
 
