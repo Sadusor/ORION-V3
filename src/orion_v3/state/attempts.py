@@ -210,6 +210,20 @@ class AttemptAuthority:
         )
         return IssuedAttemptLease(token=token, lease=lease)
 
+    def validate(
+        self,
+        attempt_id: str,
+        token: str | None,
+    ) -> AttemptRecord:
+        """Return current Attempt truth only when the supplied lease still owns it."""
+        row = self._validated_row(
+            self._store.connect(),
+            attempt_id,
+            token,
+            float(self._clock()),
+        )
+        return self._row_to_attempt(row)
+
     def checkpoint(
         self,
         attempt_id: str,
