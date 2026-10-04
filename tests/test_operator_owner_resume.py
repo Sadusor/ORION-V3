@@ -252,6 +252,9 @@ def test_owner_resumed_result_completes_from_cumulative_verified_evidence(tmp_pa
         },
         actor_id="qwen35-9b-orion",
     )
+    proposal_event = store.get_event(proposal["event_id"])
+    assert proposal_event is not None
+    assert proposal_event.parent_event_id == resumed.owner_input_event_id
 
     def resumed_runner(task_id, params, trusted_roots):
         return (
