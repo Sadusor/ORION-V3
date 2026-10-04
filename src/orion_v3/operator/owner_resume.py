@@ -12,6 +12,9 @@ from .control import OperatorControlDenied, OperatorControlPlane
 from .result_grounding import verified_result_packet
 
 
+OWNER_RESUME_TOOL_NAME = "orion_continue_owner_authorized_search"
+
+
 class OwnerResumeChoice(str, Enum):
     PROVIDE_NEW_SEARCH_SCOPE = "provide_new_search_scope"
 
@@ -305,6 +308,72 @@ def owner_resume_packet(
     }
 
 
+def owner_resume_governor_tool_spec() -> dict[str, Any]:
+    """Expose one bound continuation control without model-retyped scope.
+
+    The exact missing names and new locations come only from canonical owner
+    continuation input already stored by ORION.
+    """
+    return {
+        "type": "function",
+        "function": {
+            "name": OWNER_RESUME_TOOL_NAME,
+            "description": (
+                "Continue the exact owner-authorized search amendment already "
+                "bound by ORION. This tool has no model-controlled arguments."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": [],
+                "additionalProperties": False,
+            },
+        },
+    }
+
+
+def dispatch_bound_owner_resumed_search(
+    control: OperatorControlPlane,
+    *,
+    task_id: str,
+    owner_resume: Mapping[str, Any],
+    tool_name: str,
+    arguments: Mapping[str, Any],
+    actor_id: str,
+) -> dict[str, Any]:
+    """Dispatch the exact owner amendment without model-retyping identity."""
+    if tool_name != OWNER_RESUME_TOOL_NAME:
+        raise OperatorControlDenied(
+            "owner_resume_capability_mismatch",
+            "Owner resume requires the bound continuation control.",
+        )
+    if dict(arguments):
+        raise OperatorControlDenied(
+            "owner_resume_arguments_forbidden",
+            "Bound owner resume accepts no model-controlled arguments.",
+        )
+    proposal = control.propose_capability_action(
+        task_id,
+        capability_id="fs.search_exact",
+        params={
+            "exact_names": list(owner_resume.get("missing_names") or []),
+            "locations": list(owner_resume.get("new_locations") or []),
+        },
+        proposed_by=actor_id,
+        parent_event_id=str(owner_resume.get("owner_input_event_id") or ""),
+    )
+    return {
+        "kind": "capability_proposal",
+        "status": "PROPOSED",
+        "event_id": proposal.event_id,
+        "capability_id": proposal.action.capability_id,
+        "capability_version": proposal.action.capability_version,
+        "action_sha256": proposal.action.action_sha256,
+        "approval_class": int(proposal.approval_class),
+        "params": dict(proposal.action.params),
+    }
+
+
 def dispatch_owner_resumed_search(
     control: OperatorControlPlane,
     *,
@@ -575,11 +644,14 @@ def decide_resumed_exact_search_progress(
 
 
 __all__ = [
+    "OWNER_RESUME_TOOL_NAME",
     "OwnerResumeChoice",
     "OwnerScopeResume",
     "ResumedProgressDecision",
     "apply_owner_scope_resume",
     "decide_resumed_exact_search_progress",
+    "dispatch_bound_owner_resumed_search",
     "dispatch_owner_resumed_search",
+    "owner_resume_governor_tool_spec",
     "owner_resume_packet",
 ]
