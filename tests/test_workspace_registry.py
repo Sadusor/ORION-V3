@@ -328,3 +328,67 @@ def test_scope_caps_and_empty_scope_fail_closed(tmp_path: Path):
     with pytest.raises(RegistryDenied) as exc:
         empty_registry.resolve_scope("registered_projects")
     assert exc.value.code == "empty_scope"
+
+
+def test_direct_current_project_row_tamper_fails_closed(tmp_path: Path):
+    store, registry = make_registry(tmp_path)
+    add_project(
+        registry,
+        project_id="a",
+        name="Alpha",
+        root=tmp_path / "a",
+        revision="sha-a",
+    )
+
+    store.connect().execute(
+        """
+        UPDATE workspace_registry_projects
+        SET trusted_root=?
+        WHERE project_id='a'
+        """,
+        (str((tmp_path / "evil").resolve()),),
+    )
+    store.connect().commit()
+
+    with pytest.raises(RegistryDenied) as exc:
+        registry.get_project("a")
+    assert exc.value.code == "registry_integrity_failure"
+
+    with pytest.raises(RegistryDenied) as exc:
+        registry.resolve_scope("project:a")
+    assert exc.value.code == "registry_integrity_failure"
+
+
+def test_direct_current_group_membership_tamper_fails_closed(tmp_path: Path):
+    store, registry = make_registry(tmp_path)
+    for project_id in ("a", "b"):
+        add_project(
+            registry,
+            project_id=project_id,
+            name=project_id.upper(),
+            root=tmp_path / project_id,
+        )
+    registry.upsert_group(
+        actor_kind="owner",
+        owner_id="owner-test",
+        group_id="work",
+        name="Work",
+        member_project_ids=["a"],
+    )
+
+    store.connect().execute(
+        """
+        UPDATE workspace_registry_groups
+        SET member_project_ids_json='["a","b"]'
+        WHERE group_id='work'
+        """
+    )
+    store.connect().commit()
+
+    with pytest.raises(RegistryDenied) as exc:
+        registry.get_group("work")
+    assert exc.value.code == "registry_integrity_failure"
+
+    with pytest.raises(RegistryDenied) as exc:
+        registry.resolve_scope("project_group:work")
+    assert exc.value.code == "registry_integrity_failure"
