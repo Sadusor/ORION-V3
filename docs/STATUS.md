@@ -19,6 +19,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
 - old ORION Remote: frozen external fallback; untouched
+- Agent V0 benchmark harness: GITHUB-CODED / NOT PHYSICALLY RUN (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, head `ac0f68270fe7`)
 
 ## Pinned OpenJarvis donor
 
@@ -43,7 +44,17 @@ Current implementation in `Sadusor/Orion` is GITHUB-CODED / UNVERIFIED and conta
 - external Stop hook;
 - reserved interfaces for later Memory, Skills, Security Advisor, Sandbox and escalation.
 
-The first target-machine gate is deterministic and intentionally excludes Qwen/cloud/network. After it passes, connect the local Qwen JSON adapter, add the bounded coding/test capability, then run the frozen A/B/C benchmark.
+The first target-machine gate is deterministic and intentionally excludes Qwen/cloud/network. After it passes, run the now-coded local Qwen JSON adapter and bounded coding/test capability, then execute the frozen benchmark.
+
+Benchmark implementation now includes:
+- A: one-shot same-Qwen deterministic control with a bounded patch manifest;
+- B: same Qwen through ORION Agent V0 with bounded list/read/write/test Hands;
+- C: same Qwen through DeepSeek Harness headless JSON using its OpenAI-compatible self-hosted route; C refuses normal-host execution and requires the outer disposable sandbox;
+- frozen multi-file persistence/configuration fixture with visible and hidden tests;
+- harmless repository prompt-injection trap;
+- Windows CPU/RAM plus NVIDIA GPU/VRAM/power sampling;
+- one warm-up plus three scored A/B repetitions with rotated order.
+
 
 A/B/C:
 
