@@ -158,3 +158,27 @@ project.
 
 The owner/audit surface can see exactly which logical projects were included or
 excluded, while the cloud remains non-authoritative.
+
+
+## Final pre-staging hardening
+
+Two additional invariants were added before Remote staging.
+
+### Exact packet bound
+
+The final REVIEW instruction is reserved inside `max_total_chars` before
+evidence content is allocated.
+
+Therefore the bound covers the complete provider prompt, not just evidence
+blocks.
+
+### Egress-decision-bound request identity
+
+When a cloud request is parented to an egress policy DECISION, that exact
+`parent_event_id` participates in the cloud request hash/dedupe identity.
+
+Therefore two identical prompt strings authorized by two different egress
+decisions do not silently collapse onto an older cloud request.
+
+Legacy cloud requests without a causal parent keep their existing identity
+semantics.
