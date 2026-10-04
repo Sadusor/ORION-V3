@@ -55,3 +55,14 @@ A safe planner proposal may omit ORION-owned deny fields, but it must never be a
 5. reject any supplied value other than `"denied"`.
 
 The frozen executable plan remains ORION's complete canonical contract, not the model's raw JSON.
+
+
+## Surgical remediation
+
+Implemented in `Sadusor/Orion` commit:
+
+`c7ca42f4fecbae5e118767b811ca0b10334c4715`
+
+The intake now permits only the omission of the two ORION-owned deny fields, deterministically restores them as `denied`, and still fails closed on unknown fields, missing execution-bearing fields, or any conflicting value.
+
+No UI code changed.
