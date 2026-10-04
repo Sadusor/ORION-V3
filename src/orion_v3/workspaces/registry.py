@@ -369,6 +369,48 @@ class WorkspaceRegistry:
                 "unknown_registered_project",
                 "Registered project does not exist.",
             )
+
+        material = {
+            "project_id": row["project_id"],
+            "name": row["name"],
+            "repo_identity": row["repo_identity"],
+            "trusted_root": row["trusted_root"],
+            "trust_class": row["trust_class"],
+            "archive_state": row["archive_state"],
+            "read_policy": row["read_policy"],
+            "write_policy": row["write_policy"],
+            "no_cloud": bool(row["no_cloud"]),
+            "license_state": row["license_state"],
+            "revision": row["revision"],
+            "version": int(row["version"]),
+        }
+        digest = _sha256(material)
+        if digest != row["record_sha256"]:
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project registry checksum does not match its contents.",
+            )
+        revision = self.store.connect().execute(
+            """
+            SELECT record_json,record_sha256 FROM workspace_registry_project_revisions
+            WHERE revision_id=? AND project_id=? AND version=?
+            """,
+            (row["revision_id"], row["project_id"], int(row["version"])),
+        ).fetchone()
+        if revision is None:
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project registry revision is missing.",
+            )
+        if (
+            revision["record_sha256"] != digest
+            or json.loads(revision["record_json"]) != material
+        ):
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project registry row disagrees with its immutable revision.",
+            )
+
         return RegistryProject(
             project_id=row["project_id"],
             name=row["name"],
@@ -491,10 +533,43 @@ class WorkspaceRegistry:
                 "unknown_project_group",
                 "Registered project group does not exist.",
             )
+        members = list(json.loads(row["member_project_ids_json"]))
+        material = {
+            "group_id": row["group_id"],
+            "name": row["name"],
+            "member_project_ids": members,
+            "version": int(row["version"]),
+        }
+        digest = _sha256(material)
+        if digest != row["record_sha256"]:
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project-group checksum does not match its contents.",
+            )
+        revision = self.store.connect().execute(
+            """
+            SELECT record_json,record_sha256 FROM workspace_registry_group_revisions
+            WHERE revision_id=? AND group_id=? AND version=?
+            """,
+            (row["revision_id"], row["group_id"], int(row["version"])),
+        ).fetchone()
+        if revision is None:
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project-group revision is missing.",
+            )
+        if (
+            revision["record_sha256"] != digest
+            or json.loads(revision["record_json"]) != material
+        ):
+            raise RegistryDenied(
+                "registry_integrity_failure",
+                "Current project-group row disagrees with its immutable revision.",
+            )
         return RegistryGroup(
             group_id=row["group_id"],
             name=row["name"],
-            member_project_ids=tuple(json.loads(row["member_project_ids_json"])),
+            member_project_ids=tuple(members),
             version=int(row["version"]),
             record_sha256=row["record_sha256"],
             revision_id=row["revision_id"],
