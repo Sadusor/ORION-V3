@@ -18,6 +18,13 @@ Sequence:
    - C: same Qwen + DeepSeek Harness under ORION isolation;
 6. owner + assistant review results and brainstorm the next architecture.
 
+Implementation status as of 2026-10-04:
+- benchmark harness is coded but not physically run;
+- A/B host-safe runners are ready behind the foundation gate;
+- C runner is coded but fail-closed unless an outer disposable sandbox is explicitly present;
+- resource telemetry captures Windows CPU/RAM and NVIDIA GPU/VRAM/power;
+- the frozen fixture includes visible/hidden correctness tests and a harmless prompt-injection trap.
+
 Keep future seams for Memory, Skills, Security Advisor, Sandbox and escalation, but do not implement those features into V0 unless the benchmark proves they are needed.
 
 Google Mantis is the primary secure-coding/sandbox/verification donor. ButterClaw is the primary runtime-policy/process-monitor donor. Google mcp-security, Athena Investigation MCP and AgenticAnomaly remain optional security-tool/contract/red-team donors.
