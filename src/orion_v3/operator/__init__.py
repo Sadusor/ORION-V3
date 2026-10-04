@@ -55,6 +55,14 @@ __all__ = [
     "dispatch_owner_resumed_search",
     "owner_resume_governor_tool_spec",
     "owner_resume_packet",
+    "WORKSPACE_SEARCH_CAPABILITY_ID",
+    "WORKSPACE_SEARCH_CAPABILITY_VERSION",
+    "WorkspaceSearchExecution",
+    "WorkspaceSearchProposal",
+    "WorkspaceSearchRunner",
+    "execute_workspace_search",
+    "propose_workspace_search",
+    "workspace_search_tool_spec",
 ]
 
 from .governor import (
@@ -103,4 +111,15 @@ from .owner_resume import (
     dispatch_owner_resumed_search,
     owner_resume_governor_tool_spec,
     owner_resume_packet,
+)
+
+from .workspace_search import (
+    WORKSPACE_SEARCH_CAPABILITY_ID,
+    WORKSPACE_SEARCH_CAPABILITY_VERSION,
+    WorkspaceSearchExecution,
+    WorkspaceSearchProposal,
+    WorkspaceSearchRunner,
+    execute_workspace_search,
+    propose_workspace_search,
+    workspace_search_tool_spec,
 )
