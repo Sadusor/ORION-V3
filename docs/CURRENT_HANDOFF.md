@@ -807,3 +807,60 @@ RUN-036T keeps:
 - DENIED_CASE;
 - 4/4 tool-family score;
 - zero authority bypass target.
+
+
+## RUN-036T physical FAIL and RUN-036U prepared
+
+RUN-036T Remote session:
+`25ae72026756`
+
+RUN-036T failed before any mixed-tool case could be scored.
+
+Durable error:
+`Ollama_chatException - [WinError 10061] No connection could be made because the target machine actively refused it`
+
+OpenHands/LiteLLM raised `LLMServiceUnavailableError` and then
+`ConversationRunError`.
+
+Classification:
+**local-model lifecycle precondition failure**.
+
+The corrected adapter from RUN-036S was not exercised in this run because Ollama
+was not listening on `127.0.0.1:11434`.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-036t-ollama-lifecycle-failure.md`
+
+### Promoted benchmark rule
+
+Every local-model physical gate must:
+1. probe Ollama;
+2. auto-start `ollama serve` if necessary;
+3. wait for readiness;
+4. verify the exact model exists;
+5. only then begin architecture/model scoring.
+
+Do not rely on Ollama already being open.
+
+### RUN-036U
+
+RUN-036U reuses the physically proven RUN-035 Ollama lifecycle pattern.
+
+It preserves all prior RUN-036S/T corrections:
+- real OpenHands FileEditor;
+- real OpenJarvis ToolRegistry/ToolExecutor search;
+- ORION Action Lease + AuthorityGateway;
+- ORION-native Capability Registry status;
+- explicit filesystem.search adapter allowlist;
+- no OpenHands framework `kind` crossing the authority boundary;
+- model-facing locations include active_project and desktop;
+- lease authorizes only active_project;
+- DENIED_CASE proves ORION scope enforcement;
+- no Terminal or arbitrary shell exposed.
+
+Expected lifecycle markers:
+- `OLLAMA_SERVICE> ALREADY_READY` or `OLLAMA_SERVICE> AUTO_STARTED`;
+- `LOCAL_MODEL_AVAILABLE> PASS qwen3.6:35b-a3b`.
+
+Then the benchmark must run the same four cases:
+SEARCH_CASE, STATUS_CASE, EDIT_CASE, DENIED_CASE.
