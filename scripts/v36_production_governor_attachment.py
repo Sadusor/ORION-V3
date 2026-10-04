@@ -196,7 +196,7 @@ def _resume_tool_only(all_tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-045")
+    print("V3_RUN_ID> V3-RUN-045R")
     print("ORION_PRODUCTION_GOVERNOR_ATTACHMENT> START")
     print("MODEL> " + MODEL)
     print("THINKING> ON")
@@ -416,7 +416,7 @@ def main() -> int:
 
         summary = {
             "schema": "orion.v3.production-governor-attachment.v0",
-            "run_id": "V3-RUN-045",
+            "run_id": "V3-RUN-045R",
             "model": MODEL,
             "thinking": "ON",
             "num_ctx": NUM_CTX,
