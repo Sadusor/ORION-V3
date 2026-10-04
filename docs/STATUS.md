@@ -10,6 +10,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current claims
 
+- Donor contract probe: PASS (session `92c002cdf162`)
 - architecture: DOCUMENTED
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
@@ -22,7 +23,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run the bounded donor contract probe before resuming Cloud E2E Brainstorm. The probe validates hostile-scope rejection, exact approval-hash binding, deterministic Hand execution, machine-readable receipts, exact bytes/path verification, idempotent replay, and post-approval mutation denial. No donor framework is installed and no legacy Remote UI code is changed.
+Resume Cloud E2E Brainstorm with two independent cloud reviewers, then synthesize their results with the existing DeepSeek adversarial review into one owner-approved physical hostile-scope E2E contract.
 
 ## Gate-1 attacks
 
