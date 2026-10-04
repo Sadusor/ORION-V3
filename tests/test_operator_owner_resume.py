@@ -8,12 +8,15 @@ from orion_v3.operator import (
     OperatorControlDenied,
     OperatorControlPlane,
     TaskProgressState,
+    OWNER_RESUME_TOOL_NAME,
     apply_owner_scope_resume,
     decide_exact_search_continuation,
     decide_exact_search_task_progress,
     decide_resumed_exact_search_progress,
+    dispatch_bound_owner_resumed_search,
     dispatch_owner_resumed_search,
     execute_read_only_proposal,
+    owner_resume_governor_tool_spec,
     owner_resume_packet,
 )
 from orion_v3.state import EventType, OrionStateStore
@@ -327,3 +330,54 @@ def test_owner_resumed_result_completes_from_cumulative_verified_evidence(tmp_pa
     )
     assert duplicate.duplicate is True
     assert duplicate.decision_event_id == decision.decision_event_id
+
+
+def test_bound_owner_resume_tool_has_no_model_arguments(tmp_path: Path):
+    store, _, task, _, continuation = make_waiting_owner(tmp_path)
+    resumed = apply_owner_scope_resume(
+        store,
+        task_id=task.task_id,
+        continuation_event_id=continuation.continuation_event_id,
+        new_locations=["orion_artifacts"],
+    )
+    packet = owner_resume_packet(
+        store,
+        task_id=task.task_id,
+        owner_input_event_id=resumed.owner_input_event_id,
+    )
+
+    tool = owner_resume_governor_tool_spec()
+    assert tool["function"]["name"] == OWNER_RESUME_TOOL_NAME
+    assert tool["function"]["parameters"] == {
+        "type": "object",
+        "properties": {},
+        "required": [],
+        "additionalProperties": False,
+    }
+
+    control = OperatorControlPlane(store)
+    control.initialize()
+    proposal = dispatch_bound_owner_resumed_search(
+        control,
+        task_id=task.task_id,
+        owner_resume=packet,
+        tool_name=OWNER_RESUME_TOOL_NAME,
+        arguments={},
+        actor_id="qwen35-9b-orion",
+    )
+    event = store.get_event(proposal["event_id"])
+    assert event is not None
+    assert event.parent_event_id == resumed.owner_input_event_id
+    assert proposal["params"]["exact_names"] == [MISSING]
+    assert proposal["params"]["locations"] == ["orion_artifacts"]
+
+    with pytest.raises(OperatorControlDenied) as exc:
+        dispatch_bound_owner_resumed_search(
+            control,
+            task_id=task.task_id,
+            owner_resume=packet,
+            tool_name=OWNER_RESUME_TOOL_NAME,
+            arguments={"locations": ["active_project"]},
+            actor_id="qwen35-9b-orion",
+        )
+    assert exc.value.code == "owner_resume_arguments_forbidden"
