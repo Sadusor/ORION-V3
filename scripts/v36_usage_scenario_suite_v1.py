@@ -191,7 +191,7 @@ def call_governor(prompt: str, tools: list[dict[str, Any]], *, label: str) -> tu
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-USAGE-SUITE-001")
+    print("V3_RUN_ID> V3-RUN-056")
     print("ORION_USAGE_SCENARIO_SUITE_V1> START")
     print("MODEL> " + MODEL)
     print("THINKING> ON")
@@ -922,7 +922,8 @@ def main() -> int:
 
         summary = {
             "schema": "orion.v3.usage-scenario-suite.v1",
-            "run_id": "V3-USAGE-SUITE-001",
+            "run_id": "V3-RUN-056",
+            "suite_id": "V3-USAGE-SUITE-001",
             "scenario_count": len(results),
             "pass_count": pass_count,
             "blocked_expected_count": blocked_count,
