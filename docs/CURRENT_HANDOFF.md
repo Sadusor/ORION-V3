@@ -990,3 +990,75 @@ Only the model target changes from Qwen3.8-27B to the IQ4 variant.
 Purpose:
 prove whether the IQ4 quantization preserves mixed-tool operator correctness
 before separate speed/RAM/VRAM benchmarking.
+
+
+## RUN-038 physical FAIL — IQ4 scope overrequest
+
+Authoritative Remote session:
+`b7eed3cec223`
+
+Remote source SHA:
+`03371b3ade63ba5f6ce6a070004709fef2a1783f`
+
+Exact V3 SHA:
+`d2cde3d14b766e3925c693938f1df9cf0c8a00fe`
+
+Model:
+`batiai/qwen3.8-27b:iq4`
+
+Physical evidence:
+- Ollama ready;
+- exact IQ4 model present;
+- deterministic OpenJarvis control PASS;
+- IQ4 selected the correct search tool;
+- IQ4 selected the correct filenames;
+- IQ4 selected the correct active_project location;
+- IQ4 requested recursive=true.
+
+Failure:
+IQ4 proposed:
+- max_depth=10;
+- max_results=50.
+
+Action Lease allowed:
+- max_depth <= 6;
+- max_results <= 20.
+
+ORION correctly denied the request with:
+`scope_violation`.
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-038-qwen38-iq4-scope-overrequest.md`
+
+Interpretation:
+this is a meaningful IQ4 operator-quality difference under the existing
+under-specified numeric schema. It is not an infrastructure failure.
+
+Tool-contract weakness also exposed:
+the model-facing action schema used defaults but did not encode the real numeric
+upper bounds.
+
+### V3-RUN-039 — bounded-schema IQ4 qualification
+
+Exact V3 SHA:
+`d5b745eda5c81e408ee30d43a6db211dfbd76828`
+
+RUN-039 keeps:
+- same IQ4 model;
+- same mixed toolbox;
+- same four tasks;
+- same ORION lease;
+- same adapter allowlist;
+- same Ollama lifecycle guard.
+
+Only the model-facing numeric contract is improved:
+- max_depth: 0..6;
+- max_results: 1..20.
+
+ORION AuthorityGateway still independently enforces the same bounds.
+
+Interpretation:
+- PASS => IQ4 is usable with a production-grade bounded schema, but less robust
+  than unquantized Qwen3.8 when limits are under-specified;
+- FAIL => stronger evidence that the IQ4 quantization reduced operator
+  reliability beyond the schema issue.
