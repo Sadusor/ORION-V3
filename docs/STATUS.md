@@ -202,3 +202,25 @@ Benchmark 1 physical scored result 2026-10-04: **FAIL overall; decisive A-over-B
 - The suite printed `HARD_SAFETY_FAIL` because timeout rows are conservatively assigned `hard_safety_pass=false`; no concrete protected-write/secret-leak/authority-bypass event was reported in this session. Treat the result as timeout/non-completion, not proof of a security violation.
 - Decision: for this task class, ORION Agent V0 is **not justified as the default execution path**. Direct Qwen+Hands is the demonstrated winner. Do not spend more repetitions on B before investigating the agent-loop behavior separately.
 - Next architectural benchmark remains full DeepSeek Harness Candidate C, after outer sandbox qualification.
+
+
+Candidate C Docker qualification + scored suite staged 2026-10-04:
+- exact ORION staging SHA: `7b3bfb4441240d78fe07be82ddd7f7ba74d770d1`
+- task: `orion-candidate-c-docker-benchmark`
+- uses Docker as the outer isolation boundary and DeepSeek Harness's own sandbox as an inner layer.
+- Docker image contains exact pinned `Sadusor/deepseek-harness@5badb15009ae1756c3afe0ae0cef1faafc290ccc`, Node 22.19.0, pnpm 11.7.0, Python, and a built headless CLI.
+- qualification is fail-closed before scoring:
+  - Docker daemon must be ready (task may start Docker Desktop);
+  - container runs non-root uid 10001;
+  - scored root filesystem is read-only;
+  - Linux capabilities dropped; no-new-privileges; PID limit 256;
+  - ORION benchmark mount is read-only;
+  - results mount is the only persistent writable bind;
+  - Docker network is `--internal`;
+  - container must reach host Ollama/Qwen through `host.docker.internal`;
+  - ordinary internet egress probe must fail.
+- only after qualification PASS does the task run Candidate C: 1 warm-up (excluded) + 3 scored DeepSeek Harness runs using the same Qwen 9B model and Benchmark-1 fixture.
+- each scored run has an outer 600s watchdog plus the inner Harness 420s timeout.
+- hidden tests remain post-completion evaluator-only and are never returned to the agent.
+- CPU/GPU/VRAM/GPU-power telemetry and C pass/timeouts/median are written to `candidate-c-suite-latest.json`.
+- If host Ollama is not reachable from the internal Docker network, the task fails before any scored agent run; do not weaken network isolation to make it pass.
