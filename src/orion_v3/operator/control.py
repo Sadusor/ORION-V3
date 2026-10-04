@@ -315,7 +315,6 @@ class OperatorControlPlane:
                 actor_kind="local_operator",
                 actor_id=requested_by,
                 task_id=task_id,
-                parent_event_id=parent_event_id,
                 commit=False,
             )
 
@@ -747,6 +746,7 @@ class OperatorControlPlane:
                 actor_kind="local_operator",
                 actor_id=requested_by,
                 task_id=task_id,
+                parent_event_id=parent_event_id,
                 commit=False,
             )
 
