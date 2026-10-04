@@ -167,6 +167,48 @@ def test_pending_cannot_execute_and_approved_action_is_single_use(tmp_path: Path
     assert events[2].parent_event_id == events[1].event_id
 
 
+def test_approved_action_can_be_revoked_before_consumption(tmp_path: Path):
+    _, control, task, _ = make_control(tmp_path)
+    requested = control.request_approval(
+        task.task_id,
+        capability_id="project.publish_exact_artifact",
+        params={
+            "artifact_path": "docs/revoked.txt",
+            "artifact_content": "cancel me",
+        },
+        requested_by="operator",
+    )
+    control.approve(requested.approval.approval_id, approved_by="owner")
+    revoked = control.revoke(
+        requested.approval.approval_id,
+        revoked_by="owner",
+        reason="changed my mind before execution",
+    )
+    duplicate = control.revoke(
+        requested.approval.approval_id,
+        revoked_by="owner",
+        reason="changed my mind before execution",
+    )
+
+    assert revoked.approval.status == ApprovalStatus.REVOKED
+    assert duplicate.duplicate is True
+
+    with pytest.raises(OperatorControlDenied) as exc:
+        control.consume_approved_action(
+            requested.approval.approval_id,
+            task_id=task.task_id,
+            consumed_by="orion",
+        )
+    assert exc.value.code == "approval_revoked"
+
+    with pytest.raises(OperatorControlDenied) as exc:
+        control.approve(
+            requested.approval.approval_id,
+            approved_by="owner",
+        )
+    assert exc.value.code == "approval_revoked"
+
+
 def test_rejected_approval_never_becomes_executable(tmp_path: Path):
     _, control, task, _ = make_control(tmp_path)
     requested = control.request_approval(
