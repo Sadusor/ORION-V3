@@ -27,6 +27,7 @@ class ApprovalStatus(str, Enum):
     PENDING = "PENDING"
     APPROVED = "APPROVED"
     REJECTED = "REJECTED"
+    REVOKED = "REVOKED"
     CONSUMED = "CONSUMED"
 
 
@@ -316,6 +317,11 @@ class OperatorControlPlane:
                     "approval_rejected",
                     "This approval was rejected and cannot be approved later.",
                 )
+            if status == ApprovalStatus.REVOKED:
+                raise OperatorControlDenied(
+                    "approval_revoked",
+                    "This approval was revoked and cannot be approved later.",
+                )
 
             event = self.store.append_event(
                 row["project_id"],
@@ -382,7 +388,7 @@ class OperatorControlPlane:
             if status == ApprovalStatus.APPROVED:
                 raise OperatorControlDenied(
                     "approval_already_granted",
-                    "Approved action must be explicitly consumed or superseded.",
+                    "Use revoke() to cancel an already-approved action.",
                 )
 
             event = self.store.append_event(
@@ -411,6 +417,90 @@ class OperatorControlPlane:
                 """,
                 (rejected_by, event.event_id, now, approval_id),
             )
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
+
+        return ApprovalDecisionResult(
+            approval=self.get_approval(approval_id),
+            duplicate=False,
+        )
+
+    def revoke(
+        self,
+        approval_id: str,
+        *,
+        revoked_by: str,
+        reason: str,
+    ) -> ApprovalDecisionResult:
+        revoked_by = self._required_text(revoked_by, "revoked_by")
+        reason = self._required_text(reason, "reason")
+        conn = self.store.connect()
+
+        try:
+            conn.execute("BEGIN IMMEDIATE")
+            row = self._approval_row(approval_id)
+            status = ApprovalStatus(row["status"])
+
+            if status == ApprovalStatus.REVOKED:
+                conn.commit()
+                return ApprovalDecisionResult(
+                    approval=self._row_to_approval(row),
+                    duplicate=True,
+                )
+            if status == ApprovalStatus.CONSUMED:
+                raise OperatorControlDenied(
+                    "stale_approval",
+                    "Consumed approval cannot be revoked.",
+                )
+            if status == ApprovalStatus.REJECTED:
+                raise OperatorControlDenied(
+                    "approval_rejected",
+                    "Rejected approval cannot be revoked.",
+                )
+            if status == ApprovalStatus.PENDING:
+                raise OperatorControlDenied(
+                    "approval_not_granted",
+                    "Pending approval must be rejected, not revoked.",
+                )
+            if not row["decision_event_id"]:
+                raise OperatorControlDenied(
+                    "approval_state_corrupt",
+                    "Approved action has no decision event.",
+                )
+
+            event = self.store.append_event(
+                row["project_id"],
+                EventType.DECISION,
+                {
+                    "operator_control_version": 1,
+                    "kind": "approval_revoked",
+                    "approval_id": approval_id,
+                    "decision": "REVOKED",
+                    "reason": reason,
+                    "action_sha256": row["action_sha256"],
+                },
+                actor_kind="human",
+                actor_id=revoked_by,
+                task_id=row["task_id"],
+                parent_event_id=row["decision_event_id"],
+                commit=False,
+            )
+            now = _utc_now()
+            conn.execute(
+                """
+                UPDATE operator_approvals
+                SET status='REVOKED',decided_by=?,decision_event_id=?,updated_at=?
+                WHERE approval_id=? AND status='APPROVED'
+                """,
+                (revoked_by, event.event_id, now, approval_id),
+            )
+            if conn.execute("SELECT changes()").fetchone()[0] != 1:
+                raise OperatorControlDenied(
+                    "stale_approval",
+                    "Approval changed before revocation completed.",
+                )
             conn.commit()
         except Exception:
             conn.rollback()
@@ -450,6 +540,11 @@ class OperatorControlPlane:
                 raise OperatorControlDenied(
                     "approval_rejected",
                     "Rejected approval cannot be consumed.",
+                )
+            if status == ApprovalStatus.REVOKED:
+                raise OperatorControlDenied(
+                    "approval_revoked",
+                    "Revoked approval cannot be consumed.",
                 )
             if status == ApprovalStatus.CONSUMED:
                 raise OperatorControlDenied(
