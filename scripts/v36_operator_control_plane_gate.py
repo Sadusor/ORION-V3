@@ -134,6 +134,36 @@ def main() -> int:
         )
         print("SINGLE_USE_APPROVAL> PASS")
 
+        revoke_req = control.request_approval(
+            task.task_id,
+            capability_id="project.publish_exact_artifact",
+            params={
+                "artifact_path": "docs/revoked.txt",
+                "artifact_content": "approved then cancelled",
+            },
+            requested_by="qwen35-9b-orion",
+        )
+        control.approve(
+            revoke_req.approval.approval_id,
+            approved_by="owner",
+        )
+        revoked = control.revoke(
+            revoke_req.approval.approval_id,
+            revoked_by="owner",
+            reason="owner cancelled before any effect",
+        )
+        if revoked.approval.status != ApprovalStatus.REVOKED:
+            raise RuntimeError("approval did not become REVOKED")
+        expect_denied(
+            "approval_revoked",
+            lambda: control.consume_approved_action(
+                revoke_req.approval.approval_id,
+                task_id=task.task_id,
+                consumed_by="orion",
+            ),
+        )
+        print("APPROVED_THEN_REVOKED_BEFORE_EFFECT> PASS")
+
         rejected_req = control.request_approval(
             task.task_id,
             capability_id="project.publish_exact_artifact",
