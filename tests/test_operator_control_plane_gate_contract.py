@@ -51,3 +51,9 @@ def test_run044_has_no_model_network_or_execution_dependency():
     assert "MODEL_DEPENDENCY> NONE" in text
     assert "NETWORK_DEPENDENCY> NONE" in text
     assert "EXECUTION_SIDE_EFFECT> NONE" in text
+
+
+def test_run044_proves_human_can_revoke_after_approval_before_effect():
+    text = gate_source()
+    assert "APPROVED_THEN_REVOKED_BEFORE_EFFECT> PASS" in text
+    assert '"approval_revoked"' in text
