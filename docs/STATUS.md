@@ -100,3 +100,43 @@ Detailed donor record: `docs/reference/2026-10-04-agent-security-donor-analysis.
 Benchmark routing lesson 2026-10-04: first physical attempt at `23543a9444e5` did NOT execute the benchmark. Remote prioritized the stale single named task `orion-agent-v0-cloud-council` from `REMOTE_TASKS.json`; that task failed because no configured-free cloud reviewer was available. This is not an Agent V0 benchmark failure. `REMOTE_TASKS.json` is now replaced with the single benchmark task `orion-agent-v0-ab-benchmark`, which invokes the committed `CURRENT_TASK.ps1` in the approved exact-SHA worktree.
 
 Benchmark physical attempt 2026-10-04 at `9a6a5fc216b6`: routing was correct and benchmark compile/Ollama readiness passed, but execution stopped before scoring because the task expected model name `qwen3.5-9b-orion` while the physical Ollama catalog reports the intended ORION model as `qwen35-9b-orion:latest`. This is an environment-name mismatch, not an A/B result. Resolver now accepts the ORION aliases and still avoids silently selecting vanilla `qwen3.5:9b`. Restaged at `c6f175738593`.
+
+
+## Benchmark 2 — Intelligence Architecture Tournament (2026-10-04)
+
+Status: **GITHUB-CODED / FOUNDATION PHYSICAL PROOF STAGED / SCORED CLOUD RUN NOT STARTED**
+
+Implementation:
+- repo/branch: `Sadusor/Orion@agent/coding-mode-github-loop-v0`
+- staged exact SHA: `3fb9a3cf7ed9458d18959b07874e0cd484e3ab43`
+- program: `spikes/coding_mode_github_loop/benchmark_v1/benchmark2.py`
+
+Frozen candidate matrix:
+- A = one configured-free cloud model + deterministic Hands;
+- B = same cloud model + ORION Agent V0 + bounded Hands;
+- C = three-AI council + deterministic Hands;
+- D = same three-AI council + ORION Agent V0 + bounded Hands.
+
+Owner-requested council protocol is coded:
+- Round 0: three independent proposals from the same frozen context;
+- Cross-review Round 1: each AI receives all three Round-0 answers and must identify problems in all proposals, including its own, before revising;
+- Cross-review Round 2: each AI receives all three Round-1 answers and repeats adversarial review/revision;
+- within-round inputs are frozen so no reviewer gains order advantage;
+- ORION uses deterministic visible evidence for arbitration; no LLM judge;
+- hidden tests remain evaluator-only and are never fed back;
+- scored council runs require exactly three distinct configured-free cloud reviewers and fail closed otherwise.
+
+Synthetic PayDay fixture includes a misleading deprecated implementation, API/UI compatibility requirements, hidden salary edge cases, repository prompt injection, protected files, path-traversal rejection, and a planted fake secret. Only three approved source files are writable.
+
+Local pre-push program self-test: PASS:
+- expected broken baseline confirmed;
+- reference visible tests PASS;
+- reference hidden tests PASS;
+- secret removed from model context;
+- prompt-injection trap present;
+- protected-file and traversal writes rejected;
+- council topology = 3 models + 2 cross-review rounds.
+
+The staged Remote task is intentionally foundation-only and makes **zero cloud calls**. It compiles the exact committed program and runs its self-test on the physical target. Scored A/B/C/D execution is a later gate.
+
+Benchmark 1 note: the alias-fixed Agent mechanics run at `c6f175738593` was not yet physically scored before Benchmark 2 program construction was staged; do not treat it as completed evidence.
