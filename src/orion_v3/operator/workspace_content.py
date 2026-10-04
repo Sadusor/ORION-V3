@@ -195,10 +195,29 @@ def read_verified_workspace_text(
             "Verified relative path escaped its trusted project root.",
         ) from exc
 
+    if candidate.is_symlink() or str(match.get("kind") or "") != "file":
+        raise OperatorControlDenied(
+            "verified_file_not_regular",
+            "Verified evidence must refer to a non-symlink regular file.",
+        )
     if not resolved.is_file():
         raise OperatorControlDenied(
             "verified_file_unavailable",
             "Verified path is not a regular file.",
+        )
+
+    stat = resolved.stat()
+    expected_size = match.get("size_bytes")
+    expected_modified_ns = match.get("modified_ns")
+    if (
+        expected_size is None
+        or expected_modified_ns is None
+        or int(expected_size) != stat.st_size
+        or int(expected_modified_ns) != stat.st_mtime_ns
+    ):
+        raise OperatorControlDenied(
+            "workspace_file_changed",
+            "Verified file metadata changed after workspace search evidence.",
         )
 
     with resolved.open("rb") as handle:
