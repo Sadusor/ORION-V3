@@ -227,7 +227,20 @@ def build_cloud_egress_packet(
         + ("\n".join(excluded_lines) if excluded_lines else "- none")
         + "\n\n"
     )
-    remaining = max_total_chars - len(header) - len(excluded_block)
+    review_request = (
+        "\nREVIEW REQUEST\n"
+        "Analyze only the permitted evidence above. Mention any policy-excluded "
+        "project only as unavailable evidence. Return concise headings: FINDINGS, "
+        "RISKS, RECOMMENDATION.\n"
+    )
+    evidence_prefix = "PERMITTED EVIDENCE\n\n"
+    remaining = (
+        max_total_chars
+        - len(header)
+        - len(excluded_block)
+        - len(evidence_prefix)
+        - len(review_request)
+    )
     if remaining < 1:
         raise OperatorControlDenied(
             "cloud_egress_bound_too_small",
@@ -299,12 +312,9 @@ def build_cloud_egress_packet(
     prompt = (
         header
         + excluded_block
-        + "PERMITTED EVIDENCE\n\n"
+        + evidence_prefix
         + "\n".join(evidence_blocks)
-        + "\nREVIEW REQUEST\n"
-        + "Analyze only the permitted evidence above. Mention any policy-excluded "
-        "project only as unavailable evidence. Return concise headings: FINDINGS, "
-        "RISKS, RECOMMENDATION.\n"
+        + review_request
     )
     if len(prompt) > max_total_chars:
         raise OperatorControlDenied(
