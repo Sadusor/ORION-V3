@@ -3,6 +3,8 @@ from pathlib import Path
 import hashlib
 import pytest
 
+from orion_v3.evidence import EvidenceEnvelope, Outcome
+
 from orion_v3.operator import (
     OperatorControlDenied,
     execute_workspace_search,
@@ -18,6 +20,48 @@ from orion_v3.workspaces import (
     WorkspaceRegistry,
     WritePolicy,
 )
+
+
+def deterministic_workspace_runner(task_id, exact_names, project_ids, trusted_roots):
+    matches = []
+    wanted = {name.casefold() for name in exact_names}
+    for project_id in project_ids:
+        root = Path(trusted_roots[project_id]).resolve()
+        for entry in sorted(root.rglob("*"), key=lambda p: p.as_posix().casefold()):
+            if not entry.is_file():
+                continue
+            if entry.name.casefold() not in wanted:
+                continue
+            stat = entry.stat()
+            matches.append(
+                {
+                    "location": project_id,
+                    "relative_path": entry.relative_to(root).as_posix(),
+                    "name": entry.name,
+                    "kind": "file",
+                    "size_bytes": stat.st_size,
+                    "modified_ns": stat.st_mtime_ns,
+                }
+            )
+    return (
+        EvidenceEnvelope(
+            task_id=task_id,
+            lease_id="lease-unit-workspace",
+            operation_id="filesystem.search",
+            implementation_id="openjarvis.tool.orion_filesystem_search.v1",
+            outcome=Outcome.CONFIRMED,
+            result={
+                "operation_id": "filesystem.search",
+                "implementation_id": "openjarvis.tool.orion_filesystem_search.v1",
+                "searched_locations": list(project_ids),
+                "matches": matches,
+                "match_count": len(matches),
+                "truncated": False,
+            },
+            verifier="orion.openjarvis.filesystem_search.v1",
+        ),
+        "lease-unit-workspace",
+    )
 
 
 def make_runtime(tmp_path: Path):
@@ -68,6 +112,7 @@ def make_runtime(tmp_path: Path):
         registry,
         task_id=task.task_id,
         proposal_event_id=proposal.event_id,
+        search_runner=deterministic_workspace_runner,
     )
     return store, registry, task, roots, execution
 
@@ -232,6 +277,7 @@ def test_bounded_read_reports_truncation_explicitly(tmp_path: Path):
         registry,
         task_id=task.task_id,
         proposal_event_id=proposal.event_id,
+        search_runner=deterministic_workspace_runner,
     )
     item = search.verified_result["matches"][0]
     result = read_verified_workspace_text(
