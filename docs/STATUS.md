@@ -25,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Qwen Thinking ON vs OFF - Reasoning V2 physically PASS at source `b4016372556db0005123b53b136b2fb0275fb115`, session `05f36317dcc8`. Result supports an adaptive policy rather than always ON: OFF was 23/36 critical passes at 1.649 s median; ON was 25/36 at 9.274 s median. Some classes require ON, while path-scope and cloud-approval provenance were unreliable in both modes and must remain behind deterministic ORION checks / stronger-model or human escalation. Next bounded step: owner acceptance of adaptive-thinking policy, then re-freeze Proof V2 using the selected mode for its simple exact bounded-write request before execution.
+Run `Local Model Tournament - Download + Benchmark` from Orion source `438791c52b19d03e037a629f5abb092395593f13`. One approved Remote run preflights disk space, downloads missing official Ollama-library challengers, then runs the same 12-case Reasoning V2 benchmark with three repetitions. Candidates: existing qwen35-9b-orion baseline, Gemma 2 9B, Gemma 4 12B, Llama 3.1 8B, Ministral 3 8B, Phi-4 Mini 3.8B, and Granite 4 Tiny-H 7B/A1B. Qwen and Gemma 4 also run their thinking modes. NVIDIA Nemotron Nano 9B V2 is excluded from auto-pull until an official/qualified Ollama-compatible quant source is approved. Benchmark has no Hand dispatch; only intended side effect is model downloads.
 
 ## Gate-1 attacks
 
