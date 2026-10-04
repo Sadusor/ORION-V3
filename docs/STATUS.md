@@ -224,3 +224,12 @@ Candidate C Docker qualification + scored suite staged 2026-10-04:
 - hidden tests remain post-completion evaluator-only and are never returned to the agent.
 - CPU/GPU/VRAM/GPU-power telemetry and C pass/timeouts/median are written to `candidate-c-suite-latest.json`.
 - If host Ollama is not reachable from the internal Docker network, the task fails before any scored agent run; do not weaken network isolation to make it pass.
+
+
+Candidate C Docker attempt 2026-10-04 at `7b3bfb444124...`: **FAIL before qualification/scoring**.
+- session `951d38db1a2b`
+- Docker image dependency install completed, but Harness source build failed at `git rev-parse HEAD` because ORION intentionally created the Linux Docker context from a clean `git archive`, which contains no `.git` metadata.
+- This is an ORION packaging/setup failure, not a DeepSeek Harness agent benchmark result.
+- Harness build code explicitly supports `DSH_CLIENT_COMMIT_HASH` for non-Git build environments. Candidate C Dockerfile fixed at `Sadusor/Orion@78cd20d8d0adb71ffbcc01535fc7d583614f3e04` by setting that variable to the exact pinned Harness SHA `5badb15009ae1756c3afe0ae0cef1faafc290ccc`.
+- Clean archive-based build context remains preserved; no fake repository is created and Windows build artifacts/node_modules are not copied into the Linux image.
+- Outer sandbox qualification and Candidate C scored runs remain NOT RUN.
