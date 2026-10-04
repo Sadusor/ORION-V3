@@ -19,7 +19,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
 - old ORION Remote: frozen external fallback; untouched
-- Agent V0 benchmark harness: GITHUB-CODED / NOT PHYSICALLY RUN (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, head `ac0f68270fe7`)
+- Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN STAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `23543a9444e5`)
 
 ## Pinned OpenJarvis donor
 
