@@ -140,3 +140,6 @@ Local pre-push program self-test: PASS:
 The staged Remote task is intentionally foundation-only and makes **zero cloud calls**. It compiles the exact committed program and runs its self-test on the physical target. Scored A/B/C/D execution is a later gate.
 
 Benchmark 1 note: the alias-fixed Agent mechanics run at `c6f175738593` was not yet physically scored before Benchmark 2 program construction was staged; do not treat it as completed evidence.
+
+
+Benchmark 1 evidence recovery note 2026-10-04: owner reports the alias-fixed physical run at `c6f175738593` showed PASS on the phone, but the GitHub results branch contains no published session/result for that SHA; its head still ends with the earlier `9a6a5fc216b6` pre-score model-name failure. Do not infer A/B winner from the UI PASS alone. A read-only recovery task is staged at `Sadusor/Orion@2e761eb5c61f46ed1db994dc97c7be7daba30f12` to read the already-saved local `agent-v0-ab-latest.json` and publish compact A/B scores/telemetry without rerunning models or using cloud calls.
