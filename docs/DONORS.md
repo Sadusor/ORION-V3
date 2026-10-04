@@ -18,6 +18,7 @@ This carries forward the original ORION donor research. Presence here is not ado
 | Aegis | hardened browser containment | CONTROL / REUSE PROVEN IDEAS |
 | PinchTab | semantic browser refs, narrow grants, revocable sessions | BROWSER CHALLENGER |
 | OpenBot | human takeover, scoped secret entry, governed computer patterns | ADAPT |
+| CLI-Anything | deterministic agent-facing CLI Hands, JSON receipts, real-backend verification, preview/trajectory bundles | HIGH-PRIORITY HANDS DONOR / PROBE FIRST |
 | Artemis | Android/device Hand | PRIMARY DEVICE CANDIDATE |
 | software-agent-sdk / OpenHands | Coding Hand | ADAPTER CANDIDATE |
 | Claude Code | Coding Hand | ADAPTER CANDIDATE |
@@ -62,6 +63,8 @@ This carries forward the original ORION donor research. Presence here is not ado
 | Orion-Copilot | Android companion patterns | INTERNAL DONOR |
 | PizzaBot | background-work / needs-you UX | REFERENCE |
 | Orca | workflow/UX patterns | REFERENCE |
+| OpenMuse | frozen proposal hashes, approval binding, idempotent execution, receipts, uncertain-outcome semantics | HIGH-PRIORITY AUTHORITY/EXECUTION DONOR |
+| Octop | tool guards, HITL policy, plugin registry, remote surfaces, ACP adapters | SECURITY/PLUGIN/REMOTE DONOR; REJECT AGENT AUTHORITY |
 
 ## Voice
 
@@ -98,3 +101,11 @@ For each subsystem:
 6. preserve an exit path.
 
 Borrow capability, not ownership.
+## Recent fork review — 2026-10-04
+
+- CLI-Anything: test Hand/evidence contract patterns before adopting anything.
+- OpenMuse: adapt exact-hash approval and one-shot/idempotent receipt patterns.
+- Octop: study security/tool/plugin/remote patterns only; ORION remains authority.
+- GhostTrack: no ORION runtime value found; no license reported; do not adopt.
+
+See `docs/decisions/0003-donor-contract-patterns.md`.
