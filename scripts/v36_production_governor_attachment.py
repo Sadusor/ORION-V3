@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from contextlib import ExitStack
 import shutil
 import subprocess
 import sys
@@ -204,9 +205,11 @@ def main() -> int:
 
     ensure_ollama_and_model()
 
-    with tempfile.TemporaryDirectory(prefix="orion-run045-") as td:
+    with ExitStack() as stack:
+        td = stack.enter_context(tempfile.TemporaryDirectory(prefix="orion-run045-"))
         store = OrionStateStore(Path(td) / "orion.db")
         store.initialize()
+        stack.callback(store.close)
         project = store.create_project("RUN-045", project_id="run045-project")
         simple_task = store.create_task(
             project.project_id,
@@ -265,14 +268,14 @@ def main() -> int:
         print("SIMPLE_HAND_EXECUTION> 0")
 
         # 2) Approval request, human decision, exact frozen resume.
-        exact_content = "RUN045_PRODUCTION_GOVERNOR\n"
+        exact_content = "RUN045_PRODUCTION_GOVERNOR"
         name, args, approval_trace = _single_tool_call(
             label="APPROVAL_REQUEST",
             tools=initial_tools,
             prompt=(
                 "Owner request: publish exactly one repository artifact at "
                 "docs/run045.txt with exact UTF-8 content "
-                "'RUN045_PRODUCTION_GOVERNOR\\n'. "
+                "'RUN045_PRODUCTION_GOVERNOR'. "
                 "Use the registered ORION capability. Do not execute the publish yourself. "
                 "If approval is required, let ORION create the approval request."
             ),
@@ -444,8 +447,6 @@ def main() -> int:
             "ORION_PRODUCTION_GOVERNOR_SUMMARY> "
             + json.dumps(summary, ensure_ascii=False, sort_keys=True)
         )
-        store.close()
-
     print("ORION_PRODUCTION_GOVERNOR_ATTACHMENT> PASS")
     print("STATUS> PASS")
     return 0
