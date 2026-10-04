@@ -231,3 +231,36 @@ def test_evidence_scope_mismatch_fails_before_result(tmp_path: Path):
         EventType.EVIDENCE,
     ]
     assert all(event.event_type != EventType.RESULT for event in events)
+
+
+def test_read_only_proposal_cannot_be_dispatched_twice(tmp_path: Path):
+    store, control, task = make_control(tmp_path)
+
+    proposal = control.propose_capability_action(
+        task.task_id,
+        capability_id="fs.search_exact",
+        params={
+            "exact_names": ["README.md"],
+            "locations": ["active_project"],
+        },
+        proposed_by="qwen35-9b-orion",
+    )
+
+    execute_read_only_proposal(
+        store,
+        task_id=task.task_id,
+        proposal_event_id=proposal.event_id,
+        trusted_roots={"active_project": tmp_path},
+        search_runner=confirmed_search_runner,
+    )
+
+    with pytest.raises(OperatorControlDenied) as exc:
+        execute_read_only_proposal(
+            store,
+            task_id=task.task_id,
+            proposal_event_id=proposal.event_id,
+            trusted_roots={"active_project": tmp_path},
+            search_runner=confirmed_search_runner,
+        )
+
+    assert exc.value.code == "proposal_already_dispatched"
