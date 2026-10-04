@@ -1,6 +1,6 @@
 # ORION V3 Status
 
-Updated: 2026-10-03
+Updated: 2026-10-04
 
 ## Stage
 
@@ -22,11 +22,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Prove one operation only: `filesystem.search`.
-
-Target flow:
-
-semantic intent -> OpenJarvis ORION proxy -> ORION Action Lease validation -> deterministic filesystem search Hand -> normalized evidence -> verifier
+Run the bounded donor contract probe before resuming Cloud E2E Brainstorm. The probe validates hostile-scope rejection, exact approval-hash binding, deterministic Hand execution, machine-readable receipts, exact bytes/path verification, idempotent replay, and post-approval mutation denial. No donor framework is installed and no legacy Remote UI code is changed.
 
 ## Gate-1 attacks
 
