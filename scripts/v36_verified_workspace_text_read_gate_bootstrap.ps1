@@ -8,7 +8,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-RUN-057R'
+Write-Host 'V3_RUN_ID> V3-RUN-058'
 Write-Host 'MODE> verified workspace evidence identity -> bounded text read -> hash/truncation/staleness'
 
 & uv run --project $RepoRoot python (Join-Path $RepoRoot 'scripts\v3_authoring_preflight.py')
