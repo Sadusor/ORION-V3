@@ -165,3 +165,26 @@ Remote task catalog correction 2026-10-04: prior staging repeatedly replaced `RE
 
 
 Benchmark 1 hang diagnosis/fix 2026-10-04: physical rerun at `6d0c93f87c1e...` reached `WARMUP_A PASS 11.740s` then remained inside warmup B for >10 minutes. Root cause in harness: Agent V0 had an internal 360s wall-clock budget, but parent `run_ab_suite.py` called `sample_while_process()` with no parent deadline, so a wedged candidate/model call could hold the suite indefinitely. The hung session must be STOPPED and is not valid timing evidence. Fix staged at `Sadusor/Orion@ca19785241e6968a7aadd7cb27b39e9fed94fac8`: parent hard deadlines A=300s/B=480s, process-tree termination on timeout, TIMEOUT result classification, and 30s live benchmark heartbeats. Multi-task Remote catalog remains intact.
+
+
+Candidate C preparation physical result 2026-10-04: **PASS**.
+- ORION source SHA: `ca19785241e6968a7aadd7cb27b39e9fed94fac8`
+- task: `orion-candidate-c-prepare`
+- session: `88df048a5bb3`
+- exact pinned DeepSeek Harness built successfully
+- headless CLI smoke: PASS
+- Harness Windows ACL sandbox: BUILT
+- Ollama: PASS
+- Qwen model: PASS `qwen35-9b-orion:latest`
+- Ollama OpenAI-compatible endpoint: PASS
+- Docker CLI: PRESENT
+- Docker daemon: NOT READY
+- Windows Sandbox: ABSENT OR DISABLED
+- WSL: PRESENT
+- Harness tracked tree remained clean: PASS
+- readiness JSON SHA256: `5334fa409f802c1df588fdc061c2c983e07603cc6201eafc176c695c12a65fc5`
+- evidence pack: `88df048a5bb3-evidence-pack.zip`, SHA256 `7129dd712cd40d5d0cdc976d85a2d03c41a426e83d6255e21f9cee1cba27f264`
+- outer sandbox qualification: PENDING
+- scored Candidate C run: NOT RUN
+
+Interpretation: all Candidate C software/runtime prerequisites are physically prepared. The remaining blocker before a safe scored run is qualifying an outer isolation boundary. Docker is installed but its daemon was not running; WSL is present; Windows Sandbox is not available. The Harness built-in Windows ACL sandbox is useful as an inner write boundary but is not by itself accepted as the stronger outer sandbox because its own documentation describes it as same-world/partial confinement.
