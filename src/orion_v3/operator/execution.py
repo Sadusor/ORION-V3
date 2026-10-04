@@ -312,6 +312,21 @@ def execute_read_only_proposal(
             "No production routine executor is registered for this capability.",
         )
 
+    existing_dispatch = store.connect().execute(
+        """
+        SELECT event_id FROM events
+        WHERE parent_event_id=? AND event_type=?
+        ORDER BY rowid ASC
+        LIMIT 1
+        """,
+        (proposal.event_id, EventType.ACTION.value),
+    ).fetchone()
+    if existing_dispatch is not None:
+        raise OperatorControlDenied(
+            "proposal_already_dispatched",
+            "This semantic proposal has already entered execution.",
+        )
+
     action_event = store.append_event(
         proposal.project_id,
         EventType.ACTION,
