@@ -31,6 +31,9 @@ Use OpenJarvis engine/model registries where they survive policy tests.
 Qwen 3.5 9B remains the leading lightweight governor candidate.
 WORKSHOP remains a donor for provider discovery, roles, health, fallback and safe serialization.
 
+## V3.2A — Phone UI alpha
+After Proof V2 stabilizes the natural-language -> ORION contract boundary, build the new V3 phone/UI alpha before the broad Hands tournament. Target one interaction for low-risk requests, at most one confirmation for bounded writes, explicit confirmation for high-risk actions, auto-refresh, global STOP and inline evidence. Legacy Remote remains frozen fallback.
+
 ## V3.3 — Browser Hand tournament
 Control: Aegis containment evidence.
 Challengers: PinchTab, CUA browser mode, specialist extraction donors where useful.
