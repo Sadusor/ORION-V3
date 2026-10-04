@@ -29,10 +29,21 @@ __all__ = [
     "capability_tool_specs",
     "dispatch_governor_tool",
     "governor_control_tool_specs",
+    "CloudProviderResponse",
+    "CloudProviderSpec",
+    "call_openai_compatible_advisory",
+    "groq_gptoss_120b_spec",
 ]
 
 from .governor import (
     capability_tool_specs,
     dispatch_governor_tool,
     governor_control_tool_specs,
+)
+
+from .cloud_provider import (
+    CloudProviderResponse,
+    CloudProviderSpec,
+    call_openai_compatible_advisory,
+    groq_gptoss_120b_spec,
 )
