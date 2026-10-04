@@ -68,6 +68,12 @@ __all__ = [
     "VerifiedTextReadResult",
     "read_verified_workspace_text",
     "verified_text_read_tool_spec",
+    "CloudEgressDecision",
+    "CloudEgressItem",
+    "CloudEgressPacket",
+    "build_cloud_egress_packet",
+    "queue_cloud_review_from_egress",
+    "record_cloud_egress_decision",
 ]
 
 from .governor import (
@@ -135,4 +141,13 @@ from .workspace_content import (
     VerifiedTextReadResult,
     read_verified_workspace_text,
     verified_text_read_tool_spec,
+)
+
+from .cloud_egress import (
+    CloudEgressDecision,
+    CloudEgressItem,
+    CloudEgressPacket,
+    build_cloud_egress_packet,
+    queue_cloud_review_from_egress,
+    record_cloud_egress_decision,
 )
