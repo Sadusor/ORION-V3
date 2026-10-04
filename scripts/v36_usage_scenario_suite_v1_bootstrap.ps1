@@ -8,7 +8,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-USAGE-SUITE-001'
+Write-Host 'V3_RUN_ID> V3-RUN-056'
 Write-Host 'MODE> batched ordinary usage scenarios with independent PASS/BLOCKED_EXPECTED/FAIL results'
 
 & uv run --project $RepoRoot python (Join-Path $RepoRoot 'scripts\v3_authoring_preflight.py')
