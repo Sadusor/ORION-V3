@@ -2,8 +2,8 @@
 
 All milestones are gated by physical evidence.
 
-## V3.0A — Donor contract probe
-Before resuming the current cloud E2E proof, validate the combined donor contract: hostile scope rejection, exact frozen-plan hash approval, deterministic Hand receipt, exact artifact verification, replay protection, and post-approval mutation denial. No donor framework is installed and the frozen legacy Remote UI is not modified.
+## V3.0A — Donor contract probe — PASS
+Physical PASS on 2026-10-04. Hostile scope rejection, exact frozen-plan hash approval, post-approval mutation denial, deterministic Hand receipt, exact artifact verification, replay protection, and no-network/model execution all passed. Evidence: `docs/evidence/2026-10-04-donor-contract-probe-pass.md`.
 
 
 ## V3.0 — Foundation Gate 1
