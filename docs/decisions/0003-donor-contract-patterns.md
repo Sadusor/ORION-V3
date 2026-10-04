@@ -1,7 +1,7 @@
 # Decision 0003 — Donor contract patterns before E2E continuation
 
 Date: 2026-10-04  
-Status: ACCEPTED FOR PROBE, NOT YET ADOPTED IN RUNTIME
+Status: PROBE PASS — CONTRACT PATTERNS ACCEPTED FOR E2E USE
 
 ## Context
 
@@ -131,3 +131,18 @@ After this probe passes:
 3. perform the human-approved hostile-scope physical E2E proof;
 4. repeat with Qwen 9B;
 5. benchmark OpenHands/OpenJarvis-style substrate vs Qwen 9B + deterministic Hands using the same frozen contract.
+
+
+## Probe result
+
+Physical run PASS:
+
+- source SHA: `8971d855e0867f980afeebad7db7636d569f274f`
+- session: `92c002cdf162`
+- all required gates PASS
+- Evidence Pack ready
+- no network/model dependency during execution
+
+Evidence record: `docs/evidence/2026-10-04-donor-contract-probe-pass.md`
+
+This accepts the contract patterns for ORION's next E2E proof. It does not adopt donor runtimes as authority.
