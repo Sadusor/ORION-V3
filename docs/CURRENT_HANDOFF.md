@@ -1286,3 +1286,50 @@ Optimization goal:
 **fast + good + low consumption**.
 Do not prefer a larger model merely for size/capability if the 9B passes the
 same ORION authority/routing workload materially faster and lighter.
+
+
+## RUN-042 PHYSICAL PASS — 9B wins current daily-operator benchmark
+
+Authoritative Remote session:
+`8be7dbf86752`
+
+Remote source SHA:
+`41934e96759d5b1374b59e8e63db99dbae55fdc3`
+
+Exact V3 SHA:
+`d172b255f50aa2a5a289243f82db28c7fd072aad`
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-042-fast-good-low-consumption-pass.md`
+
+All five controlled candidates passed the same 4096-context mixed-tool workload.
+
+Results:
+- 9B_OFF: 45.644 s, 6 actions, +1461.8 MB RAM, +6420 MB GPU, 100% GPU
+- 35B_OFF: 61.136 s, 4 actions, +9770.6 MB RAM, +14529 MB GPU, 39%/61% CPU/GPU
+- 27B_OFF: 168.155 s, 6 actions, +6626.7 MB RAM, +13786 MB GPU, 29%/71% CPU/GPU
+- IQ4_OFF: 84.393 s, 5 actions, +2387.3 MB RAM, +14141 MB GPU, 7%/93% CPU/GPU
+- IQ4_ON: 152.464 s, 5 actions, +3157.2 MB RAM, +14148 MB GPU, 7%/93% CPU/GPU
+
+Automatic benchmark winners:
+- fastest: 9B_OFF
+- lowest peak RAM: 9B_OFF
+- lowest peak GPU: 9B_OFF
+- fewest actions: 35B_OFF
+
+Current local-operator recommendation:
+`qwen35-9b-orion:latest`, thinking OFF, context 4096.
+
+Preferred heavier fallback:
+`qwen3.6:35b-a3b`.
+
+Do not use Qwen3.8-27B or IQ4 as the default routine local operator from current
+physical evidence.
+
+IQ4 thinking ON did not improve correctness and increased wall time materially.
+
+Important limitation:
+RUN-042 is still a small mixed-tool smoke. Before freezing 9B as the only local
+operator, next qualification should challenge it on multi-step chains,
+failure/recovery, approval/wait/resume, larger tool catalog, cloud routing and
+forbidden/stale-approval restraint.
