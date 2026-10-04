@@ -10,6 +10,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current claims
 
+- Evidence Pack concurrency repair: PASS (`aee352d7f379`)
 - E2E Authority Proof V1: PASS (prepare `71c7f7cbccb3`, execute `9c623d9e5be6`)
 - Donor contract probe: PASS (session `92c002cdf162`)
 - architecture: DOCUMENTED
@@ -24,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run the observer-only `Evidence Pack Concurrency Probe` to qualify the race repair. This changes no task authority and does not rerun Proof V1. After PASS, stage Proof V2 with Qwen 9B as the natural-language interpretation/proposal layer. The new V3 phone UI alpha is scheduled immediately after Proof V2 and before the broad Hands tournament.
+Run `E2E Authority V2 - Qwen Freeze Plan` only. Qwen 9B may interpret the owner-language goal, but it has advisory authority only. ORION must canonicalize the exact contract, add deny-by-default policy, perform no Hand write, publish the exact runtime plan SHA-256, and stop for owner approval. New V3 phone UI alpha begins after V2 PASS.
 
 ## Gate-1 attacks
 
