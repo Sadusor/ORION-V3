@@ -347,6 +347,7 @@ class OrionStateStore:
         attempt_id: str | None = None,
         parent_event_id: str | None = None,
         event_id: str | None = None,
+        commit: bool = True,
     ) -> EventRecord:
         self._require_project(project_id)
         if task_id is not None:
@@ -406,7 +407,8 @@ class OrionStateStore:
                 record.parent_event_id,
             ),
         )
-        self.connect().commit()
+        if commit:
+            self.connect().commit()
         return record
 
     def get_event(self, event_id: str) -> EventRecord | None:
