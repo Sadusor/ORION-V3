@@ -503,6 +503,8 @@ def execute_workspace_search(
                 "relative_path": relative_path,
                 "name": name,
                 "kind": str(item.get("kind") or ""),
+                "size_bytes": item.get("size_bytes"),
+                "modified_ns": item.get("modified_ns"),
                 "path_identity_sha256": _sha256(
                     {
                         "project_id": project_id,
