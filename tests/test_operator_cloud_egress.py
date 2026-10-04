@@ -305,3 +305,46 @@ def test_queue_rejects_packet_not_matching_egress_decision(tmp_path: Path):
         )
 
     assert exc.value.code == "cloud_egress_packet_mismatch"
+
+
+def test_identical_prompt_under_new_egress_decision_does_not_reuse_old_request(tmp_path: Path):
+    store, control, project, task = make_store(tmp_path)
+    source = append_verified_text(
+        store,
+        project_id=project.project_id,
+        task_id=task.task_id,
+        logical_project_id="a",
+        project_name="A",
+        relative_path="a.py",
+        text="same bounded evidence",
+        no_cloud=False,
+    )
+    packet = build_cloud_egress_packet(
+        store,
+        task_id=task.task_id,
+        verified_text_result_event_ids=[source.event_id],
+        provider_id="groq",
+        model_id="openai/gpt-oss-120b",
+        purpose="Review same packet.",
+    )
+    decision_one = record_cloud_egress_decision(store, packet=packet)
+    request_one = queue_cloud_review_from_egress(
+        control,
+        packet=packet,
+        egress_decision_event_id=decision_one.event_id,
+        requested_by="orion",
+    )
+    decision_two = record_cloud_egress_decision(store, packet=packet)
+    request_two = queue_cloud_review_from_egress(
+        control,
+        packet=packet,
+        egress_decision_event_id=decision_two.event_id,
+        requested_by="orion",
+    )
+
+    assert request_one.duplicate is False
+    assert request_two.duplicate is False
+    assert request_one.request.request_id != request_two.request.request_id
+    assert request_one.request.request_sha256 != request_two.request.request_sha256
+    assert store.get_event(request_one.request.event_id).parent_event_id == decision_one.event_id
+    assert store.get_event(request_two.request.event_id).parent_event_id == decision_two.event_id
