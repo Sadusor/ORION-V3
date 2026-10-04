@@ -70,7 +70,7 @@ def count_read_actions(store: OrionStateStore, project_id: str, task_id: str) ->
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-057R")
+    print("V3_RUN_ID> V3-RUN-058")
     print("ORION_VERIFIED_TEXT_READ> START")
     print("MODE> verified workspace evidence identity -> bounded current text read")
     print("MODEL_CALLS> 0")
@@ -94,9 +94,9 @@ def main() -> int:
         beta_content = "def solution():\n    return 'beta verified content'\n"
         big_content = "Z" * 512
 
-        (alpha_root / TARGET).write_text(alpha_content, encoding="utf-8")
-        (beta_root / TARGET).write_text(beta_content, encoding="utf-8")
-        (alpha_root / BIG).write_text(big_content, encoding="utf-8")
+        (alpha_root / TARGET).write_bytes(alpha_content.encode("utf-8"))
+        (beta_root / TARGET).write_bytes(beta_content.encode("utf-8"))
+        (alpha_root / BIG).write_bytes(big_content.encode("utf-8"))
 
         store = OrionStateStore(temp / "orion.db")
         store.initialize()
@@ -326,7 +326,7 @@ def main() -> int:
 
         summary = {
             "schema": "orion.v3.verified-workspace-text-read.v0",
-            "run_id": "V3-RUN-057R",
+            "run_id": "V3-RUN-058",
             "model_calls": 0,
             "external_provider_calls": 0,
             "prerequisite_real_workspace_hand_calls": 1,
