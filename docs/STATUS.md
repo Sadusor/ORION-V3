@@ -25,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run `Qwen Thinking ON vs OFF - Hard Test`. This is interpretation-only: no Hand dispatch and no real filesystem/network/install/send/delete side effects. Compare deterministic structured accuracy, critical-policy cases, latency, and token cost. Keep the current V2 thinking-ON frozen plan unexecuted until this benchmark decides the preferred Qwen mode.
+Run `Qwen Thinking ON vs OFF - Reasoning V2`, the 12-case DeepSeek-informed interpretation-only benchmark. It performs no Hand dispatch or real side effects. Compare three repetitions per mode, critical-policy stability, quality fields, median latency, and output-token cost. Keep the current V2 frozen execution plan unexecuted until this benchmark determines whether Qwen should use OFF, ON, or an adaptive policy.
 
 ## Gate-1 attacks
 
