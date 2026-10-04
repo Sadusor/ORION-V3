@@ -1,8 +1,8 @@
 # ORION V3 — E2E Authority Proof V1
 
 Date: 2026-10-04  
-Status: PROPOSED — OWNER APPROVAL REQUIRED  
-Execution: NOT AUTHORIZED  
+Status: OWNER APPROVED — RUNTIME PLAN HASH APPROVAL PENDING  
+Execution: PREPARE/FREEZE AUTHORIZED; HAND EXECUTION NOT YET AUTHORIZED  
 Legacy Remote UI: FROZEN / UNCHANGED
 
 ## Purpose
@@ -270,3 +270,16 @@ Proof V2 reuses this exact contract and adds Qwen 9B only as the natural-languag
 After V2, the same frozen task and gates become the apples-to-apples benchmark contract for heavier execution substrates such as OpenHands/OpenJarvis-style agent Hands versus Qwen 9B + deterministic Hands.
 
 No legacy Remote UI retirement decision is allowed from this proof alone.
+
+
+## Owner approval record
+
+On 2026-10-04 the owner explicitly approved Proof V1 as a contract.
+
+That approval authorizes the prepare/freeze phase only. The contract itself requires a second load-bearing approval bound to the exact runtime `plan_sha256` after disposable absolute paths have been resolved.
+
+Therefore:
+
+- prepare/freeze may be staged now;
+- deterministic Hand execution must not be staged as approved until the owner is shown the exact `plan_sha256` and explicitly approves that exact hash;
+- the later Remote `APPROVE & RUN` action for the execution task is the physical dispatch approval and must be bound in the task definition to that same hash.
