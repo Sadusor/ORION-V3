@@ -80,3 +80,17 @@ For each case class:
 Overall policy should be adaptive if some classes materially benefit from thinking while simple classes do not.
 
 No production default changes until the physical benchmark result is reviewed.
+
+
+## Runtime budget added after original probe failure
+
+The previous eight-case probe exposed a separate systems problem: unbounded thinking could run for 230–252 seconds and consume about 16k generated tokens without returning parseable JSON.
+
+Reasoning V2 therefore evaluates the mode ORION could realistically ship, not unlimited hidden deliberation:
+
+- identical `num_predict=1024` generated-token budget for thinking ON and OFF;
+- `60 s` request timeout;
+- an individual timeout/error is recorded as that run's failure and does not abort the benchmark;
+- budget exhaustion is evidence against that mode for the tested request class.
+
+This is aligned with ORION's low-latency / low-consumption goal and the owner's requirement that thinking is acceptable when it is only modestly slower and meaningfully better.
