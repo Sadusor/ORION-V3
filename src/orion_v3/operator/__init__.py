@@ -35,6 +35,8 @@ __all__ = [
     "CloudProviderSpec",
     "call_openai_compatible_advisory",
     "groq_gptoss_120b_spec",
+    "RoutineExecutionResult",
+    "execute_read_only_proposal",
 ]
 
 from .governor import (
@@ -50,4 +52,9 @@ from .cloud_provider import (
     CloudProviderSpec,
     call_openai_compatible_advisory,
     groq_gptoss_120b_spec,
+)
+
+from .execution import (
+    RoutineExecutionResult,
+    execute_read_only_proposal,
 )
