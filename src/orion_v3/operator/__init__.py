@@ -1,5 +1,6 @@
 from .control import (
     ApprovalDecisionResult,
+    CapabilityActionProposal,
     ApprovalRecord,
     ApprovalRequestResult,
     ApprovalStatus,
@@ -13,6 +14,7 @@ from .control import (
 
 __all__ = [
     "ApprovalDecisionResult",
+    "CapabilityActionProposal",
     "ApprovalRecord",
     "ApprovalRequestResult",
     "ApprovalStatus",
