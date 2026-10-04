@@ -315,6 +315,7 @@ class OperatorControlPlane:
                 actor_kind="local_operator",
                 actor_id=requested_by,
                 task_id=task_id,
+                parent_event_id=parent_event_id,
                 commit=False,
             )
 
@@ -693,6 +694,7 @@ class OperatorControlPlane:
         specialty: str,
         task: str,
         requested_by: str,
+        parent_event_id: str | None = None,
     ) -> CloudQueueResult:
         task_record = self._require_task(task_id)
         specialty = self._required_text(specialty, "specialty").lower()
