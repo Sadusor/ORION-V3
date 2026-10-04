@@ -41,6 +41,10 @@ __all__ = [
     "TaskProgressDecision",
     "TaskProgressState",
     "decide_exact_search_task_progress",
+    "ContinuationDecision",
+    "ContinuationState",
+    "decide_exact_search_continuation",
+    "owner_input_packet",
 ]
 
 from .governor import (
@@ -69,4 +73,11 @@ from .task_progress import (
     TaskProgressDecision,
     TaskProgressState,
     decide_exact_search_task_progress,
+)
+
+from .continuation import (
+    ContinuationDecision,
+    ContinuationState,
+    decide_exact_search_continuation,
+    owner_input_packet,
 )
