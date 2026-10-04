@@ -69,7 +69,7 @@ def register(
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-059")
+    print("V3_RUN_ID> V3-RUN-059R")
     print("ORION_CROSS_PROJECT_CLOUD_EGRESS> START")
     print("MODE> verified local evidence -> no_cloud filter -> canonical egress decision -> real Groq REVIEW")
     print("PROVIDER> groq")
@@ -331,7 +331,7 @@ def main() -> int:
 
             summary = {
                 "schema": "orion.v3.cross-project-cloud-egress.v0",
-                "run_id": "V3-RUN-059",
+                "run_id": "V3-RUN-059R",
                 "provider": provider.provider_id,
                 "requested_model": provider.model_id,
                 "served_model": response.served_model,
