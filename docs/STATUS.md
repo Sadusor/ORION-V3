@@ -23,7 +23,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Owner review of `docs/contracts/E2E_AUTHORITY_PROOF_V1.md`. Execution is NOT authorized until the owner explicitly approves or changes that exact contract. No new runtime task should be staged before approval.
+Run `E2E Authority V1 - Freeze Plan` only. This prepare phase may call the two cloud planners and freeze the exact runtime plan hash, but it must perform no Hand write. After PASS, show the owner the exact `FROZEN_PLAN_SHA256`; Hand execution remains blocked until that exact hash is explicitly approved and bound into the execution task.
 
 ## Gate-1 attacks
 
