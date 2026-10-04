@@ -1543,3 +1543,87 @@ hard problem
 
 Production approval/wait/resume and stale-authority behavior belongs in ORION
 state logic rather than the model loop.
+
+
+## Production operator implementation started — V3-RUN-044 staged
+
+Broad local-model benchmarking is frozen.
+
+The current product policy remains:
+- default routine local operator: `qwen35-9b-orion:latest`, thinking OFF, ctx 4096;
+- difficult architecture/coding/review: bounded cloud specialists;
+- offline fallback: `qwen3.6:35b-a3b`;
+- IQ4: experimental/offline alternative.
+
+### New production control plane
+
+Decision:
+`docs/decisions/0015-production-operator-control-plane-v0.md`
+
+Staged checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-044-production-operator-control-plane-staged.md`
+
+New module:
+`src/orion_v3/operator/control.py`
+
+The control plane owns:
+- exact capability-action freezing;
+- canonical action SHA256;
+- task-bound approval identity;
+- duplicate approval-request suppression;
+- duplicate human approval idempotency;
+- pending/approved/rejected/revoked/consumed state;
+- human revoke after approval but before effect;
+- single-use approval consumption;
+- wrong-task/stale/rejected/revoked denial;
+- frozen-action tamper detection;
+- idempotent cloud-specialist queue records.
+
+Resume is intentionally model-independent:
+`consume_approved_action()` accepts approval id + task id, not replacement
+capability parameters.
+
+The model cannot rewrite the approved action during resume.
+
+### Event atomicity
+
+`OrionStateStore.append_event()` now has a backwards-compatible
+`commit: bool = True` option.
+
+Operator authority transitions use `commit=False` inside a caller-owned SQLite
+transaction so authority state and append-only Event history commit/rollback
+together.
+
+### Cloud escalation V0
+
+`queue_cloud_specialist()` supports:
+- architecture;
+- coding;
+- review.
+
+No provider/network call happens in RUN-044.
+
+The frozen request is persisted and emitted as an Event Exchange-compatible
+PROPOSAL addressed to `cloud:<specialty>`.
+
+### Human cancel boundary
+
+Approval history now distinguishes:
+- PENDING -> REJECTED
+- PENDING -> APPROVED
+- APPROVED -> REVOKED before effect
+- APPROVED -> CONSUMED exactly once
+
+After consumption, cancellation moves to AttemptAuthority/Stop rather than
+rewriting approval history.
+
+### V3-RUN-044
+
+RUN-044 is a deterministic zero-model / zero-network / zero-effect physical gate.
+
+It proves the authority substrate before attaching the 9B operator.
+
+If PASS, next slice:
+attach `qwen35-9b-orion:latest` to the production control plane for real
+proposal/routing behavior, while ORION remains the only source of approval and
+execution authority.
