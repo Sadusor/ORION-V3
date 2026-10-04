@@ -10,6 +10,8 @@ from orion_v3.capabilities import (
     inherited_registry_v0,
 )
 
+from orion_v3.state import EventType, LocalEventExchange, OrionStateStore
+
 from .control import OperatorControlDenied, OperatorControlPlane
 
 
@@ -173,6 +175,90 @@ def governor_control_tool_specs(
             }
         )
     return tools
+
+
+def pending_advisory_reviews(
+    store: OrionStateStore,
+    *,
+    project_id: str,
+    task_id: str,
+    limit: int = 5,
+) -> list[dict[str, Any]]:
+    """Return normalized pending cloud REVIEW messages for the governor.
+
+    Cloud response text is data, never authority. Any malformed/non-advisory
+    exchange message addressed to the governor fails closed.
+    """
+    exchange = LocalEventExchange(store)
+    messages = exchange.inbox(
+        project_id,
+        task_id,
+        "orion:governor",
+        limit=limit,
+        pending_only=True,
+    )
+    reviews: list[dict[str, Any]] = []
+    for message in messages:
+        if message.event_type != EventType.REVIEW:
+            raise OperatorControlDenied(
+                "invalid_governor_review",
+                "Governor inbox contained a non-REVIEW cloud response.",
+            )
+        body = dict(message.body)
+        if body.get("kind") != "cloud_specialist_response":
+            raise OperatorControlDenied(
+                "invalid_governor_review",
+                "Governor REVIEW has an unknown response kind.",
+            )
+        if body.get("authority") != "advisory_only":
+            raise OperatorControlDenied(
+                "invalid_governor_review_authority",
+                "Cloud REVIEW is not explicitly advisory_only.",
+            )
+        required = (
+            "request_id",
+            "request_sha256",
+            "specialty",
+            "provider_id",
+            "model_id",
+            "response_text",
+            "response_sha256",
+        )
+        missing = [name for name in required if not body.get(name)]
+        if missing:
+            raise OperatorControlDenied(
+                "invalid_governor_review",
+                "Cloud REVIEW missing field(s): " + ", ".join(missing),
+            )
+        reviews.append(
+            {
+                "event_id": message.event_id,
+                "parent_event_id": message.parent_event_id,
+                "request_id": body["request_id"],
+                "request_sha256": body["request_sha256"],
+                "specialty": body["specialty"],
+                "provider_id": body["provider_id"],
+                "model_id": body["model_id"],
+                "response_text": body["response_text"],
+                "response_sha256": body["response_sha256"],
+                "authority": "advisory_only",
+            }
+        )
+    return reviews
+
+
+def acknowledge_advisory_review(
+    store: OrionStateStore,
+    *,
+    project_id: str,
+    event_id: str,
+) -> None:
+    """Record receipt only; acknowledgement never means acceptance/approval."""
+    LocalEventExchange(store).acknowledge(
+        project_id,
+        event_id,
+        "orion:governor",
+    )
 
 
 def dispatch_governor_tool(
