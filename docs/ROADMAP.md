@@ -82,6 +82,24 @@ Human takeover/secrets donor: OpenBot.
 Use adapters, not another coding agent.
 Candidates: software-agent-sdk/OpenHands, Claude Code, ACP-compatible runtimes.
 
+## V3.6A — Full-agent substrate tournament
+Full agents remain fallback execution substrates, never ORION authority.
+
+First-priority candidate: **DeepSeek Harness** (pinned review SHA `5badb15009ae1756c3afe0ae0cef1faafc290ccc`).
+
+Compare against Qwen 9B + deterministic Hands and other qualified agent substrates on:
+- task success and latency;
+- CPU/GPU/VRAM/RAM;
+- tool-call count and token cost;
+- hostile scope widening;
+- exact-approval binding;
+- network denial;
+- background-job/subagent containment;
+- STOP/process-tree cleanup;
+- evidence quality.
+
+Initial DeepSeek Harness qualification should use its headless JSON runner, a disposable workspace, ORION monotonic tool guard, restricted tool set, bounded step/time budgets, and local/self-hosted model routing where physically proven.
+
 ## V3.7 — Android / device
 Primary donor: Artemis.
 Transport/client donors: KIRA and Orion-Copilot patterns.
