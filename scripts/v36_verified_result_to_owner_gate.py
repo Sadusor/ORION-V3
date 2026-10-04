@@ -227,7 +227,7 @@ def call_result_governor(packet: dict[str, Any]) -> tuple[dict[str, Any], dict[s
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-050")
+    print("V3_RUN_ID> V3-RUN-050R")
     print("ORION_VERIFIED_RESULT_TO_OWNER> START")
     print("MODEL> " + MODEL)
     print("THINKING> ON")
@@ -356,7 +356,7 @@ def main() -> int:
 
             summary_record = {
                 "schema": "orion.v3.verified-result-to-owner.v0",
-                "run_id": "V3-RUN-050",
+                "run_id": "V3-RUN-050R",
                 "model": MODEL,
                 "thinking": "ON",
                 "num_ctx": NUM_CTX,
