@@ -63,6 +63,11 @@ __all__ = [
     "execute_workspace_search",
     "propose_workspace_search",
     "workspace_search_tool_spec",
+    "VERIFIED_TEXT_READ_CAPABILITY_ID",
+    "VERIFIED_TEXT_READ_VERSION",
+    "VerifiedTextReadResult",
+    "read_verified_workspace_text",
+    "verified_text_read_tool_spec",
 ]
 
 from .governor import (
@@ -122,4 +127,12 @@ from .workspace_search import (
     execute_workspace_search,
     propose_workspace_search,
     workspace_search_tool_spec,
+)
+
+from .workspace_content import (
+    VERIFIED_TEXT_READ_CAPABILITY_ID,
+    VERIFIED_TEXT_READ_VERSION,
+    VerifiedTextReadResult,
+    read_verified_workspace_text,
+    verified_text_read_tool_spec,
 )
