@@ -37,6 +37,7 @@ __all__ = [
     "groq_gptoss_120b_spec",
     "RoutineExecutionResult",
     "execute_read_only_proposal",
+    "verified_result_packet",
 ]
 
 from .governor import (
@@ -58,3 +59,5 @@ from .execution import (
     RoutineExecutionResult,
     execute_read_only_proposal,
 )
+
+from .result_grounding import verified_result_packet
