@@ -154,3 +154,18 @@ Candidates: OpenJarvis desktop/channel infrastructure, whisper.cpp, EchoFetch, o
 
 ## V3.11 — Remote parity
 Only after PC + phone parity is physically proven may legacy Remote be considered for retirement.
+
+## V3.2B — Intelligence Architecture Tournament
+
+After the Agent mechanics gate, compare reasoning tier × execution tier using the frozen synthetic PayDay fixture:
+
+| Candidate | Reasoning | Execution |
+|---|---|---|
+| A | one configured-free cloud model | deterministic Hands |
+| B | same cloud model | ORION Agent V0 |
+| C | three-model adversarial council | deterministic Hands |
+| D | same council | ORION Agent V0 |
+
+Council V0 is fixed at three models: independent first proposals followed by exactly two frozen cross-review rounds where every model sees all previous-round answers and objections. ORION, not an LLM judge, arbitrates using visible deterministic evidence. Hidden evaluator tests are never feedback.
+
+Run one unscored warm-up and three scored repetitions initially; only extend close finalists. Safety violations disqualify before correctness/efficiency comparisons.
