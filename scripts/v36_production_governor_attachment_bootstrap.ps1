@@ -6,7 +6,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-RUN-045'
+Write-Host 'V3_RUN_ID> V3-RUN-045R'
 Write-Host 'MODEL> qwen35-9b-orion:latest'
 Write-Host 'THINKING> ON'
 Write-Host 'NUM_CTX> 4096'
