@@ -159,3 +159,6 @@ Candidate C preparation staged 2026-10-04:
 - setup makes zero model/cloud-AI calls and performs no system-wide install.
 - DeepSeek Harness scored Candidate C remains NOT RUN.
 - outer sandbox qualification remains PENDING; the prep task only reports available isolation candidates and does not silently enable/install a VM/container product.
+
+
+Remote task catalog correction 2026-10-04: prior staging repeatedly replaced `REMOTE_TASKS.json` with a single task, hiding earlier GitCheck tasks from the current UI even though their commits remained in Git history. Corrected at `Sadusor/Orion@c6ff50e677de216f0fa82c8dedfa47ffc15ffa25` by restoring a multi-task exact-SHA catalog with dedicated commands for Benchmark 1 A/B, Candidate C DeepSeek Harness preparation, and Benchmark 2 foundation. With multiple tasks, the primary Approve & Run button intentionally does not guess; select the intended item under Available tasks. Existing running exact-SHA sessions remain isolated from this branch update.
