@@ -201,6 +201,7 @@ class OperatorControlPlane:
         capability_id: str,
         params: Mapping[str, Any],
         proposed_by: str,
+        parent_event_id: str | None = None,
     ) -> CapabilityActionProposal:
         """Validate and freeze one non-approval capability proposal.
 
@@ -239,6 +240,7 @@ class OperatorControlPlane:
             actor_kind="local_operator",
             actor_id=proposed_by,
             task_id=task_id,
+            parent_event_id=parent_event_id,
         )
         return CapabilityActionProposal(
             project_id=task.project_id,
