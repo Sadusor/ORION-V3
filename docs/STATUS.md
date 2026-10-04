@@ -10,6 +10,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current claims
 
+- E2E Authority Proof V1: PASS (prepare `71c7f7cbccb3`, execute `9c623d9e5be6`)
 - Donor contract probe: PASS (session `92c002cdf162`)
 - architecture: DOCUMENTED
 - OpenJarvis substrate: CANDIDATE, not adopted
@@ -23,7 +24,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Re-run `E2E Authority V1 - Freeze Plan` after fail-closed attempt 01. Surgical fix: ORION now owns/defaults only `network=denied` and `extra_writes=denied`; all execution-bearing planner fields must still match exactly and unknown/conflicting fields fail closed. Hand execution remains blocked until an exact frozen plan SHA is produced and explicitly approved.
+Repair and qualify the observer-only Evidence Pack generation race seen after the successful Proof V1 execution. Do not rerun the successful Hand just to regenerate screenshots. After the visual evidence path is qualified, proceed to Proof V2 with Qwen 9B as the natural-language interpretation/proposal layer under the same frozen authority contract.
 
 ## Gate-1 attacks
 
