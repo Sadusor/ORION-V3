@@ -25,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run `Qwen Thinking ON vs OFF - Reasoning V2`, the 12-case DeepSeek-informed interpretation-only benchmark. It performs no Hand dispatch or real side effects. Compare three repetitions per mode, critical-policy stability, quality fields, median latency, and output-token cost. Keep the current V2 frozen execution plan unexecuted until this benchmark determines whether Qwen should use OFF, ON, or an adaptive policy.
+Qwen Thinking ON vs OFF - Reasoning V2 physically PASS at source `b4016372556db0005123b53b136b2fb0275fb115`, session `05f36317dcc8`. Result supports an adaptive policy rather than always ON: OFF was 23/36 critical passes at 1.649 s median; ON was 25/36 at 9.274 s median. Some classes require ON, while path-scope and cloud-approval provenance were unreliable in both modes and must remain behind deterministic ORION checks / stronger-model or human escalation. Next bounded step: owner acceptance of adaptive-thinking policy, then re-freeze Proof V2 using the selected mode for its simple exact bounded-write request before execution.
 
 ## Gate-1 attacks
 
