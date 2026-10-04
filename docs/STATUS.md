@@ -11,6 +11,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 ## Current claims
 
 - Evidence Pack concurrency repair: PASS (`aee352d7f379`)
+- Local Model Tournament Reasoning V2: PASS (`2e43a124646f`) — Qwen 3.5 9B ORION won FAST and THINKING
 - E2E Authority Proof V1: PASS (prepare `71c7f7cbccb3`, execute `9c623d9e5be6`)
 - Donor contract probe: PASS (session `92c002cdf162`)
 - architecture: DOCUMENTED
@@ -25,7 +26,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run `Local Model Tournament - Download + Benchmark` from Orion source `438791c52b19d03e037a629f5abb092395593f13`. One approved Remote run preflights disk space, downloads missing official Ollama-library challengers, then runs the same 12-case Reasoning V2 benchmark with three repetitions. Candidates: existing qwen35-9b-orion baseline, Gemma 2 9B, Gemma 4 12B, Llama 3.1 8B, Ministral 3 8B, Phi-4 Mini 3.8B, and Granite 4 Tiny-H 7B/A1B. Qwen and Gemma 4 also run their thinking modes. NVIDIA Nemotron Nano 9B V2 is excluded from auto-pull until an official/qualified Ollama-compatible quant source is approved. Benchmark has no Hand dispatch; only intended side effect is model downloads.
+Local Model Tournament Reasoning V2 physically PASS. Qwen 3.5 9B ORION remains the leading general local interpreter; Gemma 4 12B is the closest challenger. No model passed every critical case, so deterministic ORION policy remains mandatory. Next model gates are role-specific rather than another generic tournament: Personal-vs-Project concurrency, coding/project-coordinator quality, and exact-runtime vision/personal-file retrieval. UI work can use STRATA as the V3 foundation with multi-lane extensions.
 
 ## Newly documented owner direction
 
