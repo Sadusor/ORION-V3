@@ -315,7 +315,7 @@ def build_cloud_egress_packet(
         + evidence_prefix
         + "\n".join(evidence_blocks)
         + review_request
-    )
+    ).strip()
     if len(prompt) > max_total_chars:
         raise OperatorControlDenied(
             "cloud_egress_internal_bound_failure",
