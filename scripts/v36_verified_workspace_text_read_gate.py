@@ -70,7 +70,7 @@ def count_read_actions(store: OrionStateStore, project_id: str, task_id: str) ->
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-057")
+    print("V3_RUN_ID> V3-RUN-057R")
     print("ORION_VERIFIED_TEXT_READ> START")
     print("MODE> verified workspace evidence identity -> bounded current text read")
     print("MODEL_CALLS> 0")
@@ -326,7 +326,7 @@ def main() -> int:
 
         summary = {
             "schema": "orion.v3.verified-workspace-text-read.v0",
-            "run_id": "V3-RUN-057",
+            "run_id": "V3-RUN-057R",
             "model_calls": 0,
             "external_provider_calls": 0,
             "prerequisite_real_workspace_hand_calls": 1,
