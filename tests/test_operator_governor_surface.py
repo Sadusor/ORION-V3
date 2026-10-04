@@ -1,7 +1,10 @@
+import pytest
+
 from pathlib import Path
 
 from orion_v3.operator import (
     ApprovalStatus,
+    OperatorControlDenied,
     OperatorControlPlane,
     dispatch_governor_tool,
     governor_control_tool_specs,
@@ -36,6 +39,38 @@ def test_governor_tools_are_registry_derived_and_not_raw_hands():
     assert "PowerShell" not in encoded
     assert "subprocess" not in encoded
 
+
+
+def test_search_governor_surface_exposes_semantics_not_execution_knobs():
+    tools = governor_control_tool_specs()
+    search_tool = next(
+        item
+        for item in tools
+        if item["function"]["name"] == "orion_capability_fs__search_exact"
+    )
+    schema = search_tool["function"]["parameters"]
+    assert set(schema["properties"]) == {"exact_names", "locations"}
+    assert set(schema["required"]) == {"exact_names", "locations"}
+    assert schema["additionalProperties"] is False
+
+
+def test_search_governor_hidden_execution_knobs_fail_closed(tmp_path: Path):
+    _, control, task = make_runtime(tmp_path)
+
+    with pytest.raises(OperatorControlDenied) as exc:
+        dispatch_governor_tool(
+            control,
+            task_id=task.task_id,
+            tool_name="orion_capability_fs__search_exact",
+            arguments={
+                "exact_names": ["README.md"],
+                "locations": ["active_project"],
+                "max_depth": 6,
+            },
+            actor_id="qwen35-9b-orion",
+        )
+
+    assert exc.value.code == "governor_hidden_parameter"
 
 def test_read_only_governor_proposal_is_validated_and_recorded(tmp_path: Path):
     store, control, task = make_runtime(tmp_path)
