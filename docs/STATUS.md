@@ -23,7 +23,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run `E2E Authority V1 - Freeze Plan` only. This prepare phase may call the two cloud planners and freeze the exact runtime plan hash, but it must perform no Hand write. After PASS, show the owner the exact `FROZEN_PLAN_SHA256`; Hand execution remains blocked until that exact hash is explicitly approved and bound into the execution task.
+Re-run `E2E Authority V1 - Freeze Plan` after fail-closed attempt 01. Surgical fix: ORION now owns/defaults only `network=denied` and `extra_writes=denied`; all execution-bearing planner fields must still match exactly and unknown/conflicting fields fail closed. Hand execution remains blocked until an exact frozen plan SHA is produced and explicitly approved.
 
 ## Gate-1 attacks
 
