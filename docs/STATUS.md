@@ -19,7 +19,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
 - old ORION Remote: frozen external fallback; untouched
-- Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN STAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `23543a9444e5`)
+- Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN RESTAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `9a6a5fc216b6`)
 
 ## Pinned OpenJarvis donor
 
@@ -97,3 +97,4 @@ Detailed donor record: `docs/reference/2026-10-04-agent-security-donor-analysis.
 - repo: `Sadusor/Orion`
 - branch: `checkpoint/2026-10-01-orion-remote-project-link`
 - SHA: `327d32f714129ca633517a8f4158cd84820c1504`
+Benchmark routing lesson 2026-10-04: first physical attempt at `23543a9444e5` did NOT execute the benchmark. Remote prioritized the stale single named task `orion-agent-v0-cloud-council` from `REMOTE_TASKS.json`; that task failed because no configured-free cloud reviewer was available. This is not an Agent V0 benchmark failure. `REMOTE_TASKS.json` is now replaced with the single benchmark task `orion-agent-v0-ab-benchmark`, which invokes the committed `CURRENT_TASK.ps1` in the approved exact-SHA worktree.
