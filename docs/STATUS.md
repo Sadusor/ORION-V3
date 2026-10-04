@@ -146,3 +146,16 @@ Benchmark 1 evidence recovery note 2026-10-04: owner reports the alias-fixed phy
 
 
 Benchmark 1 evidence recovery 2026-10-04: read-only recovery session `209973ead547` at SHA `2e761eb5c61f4` FAILED because `%LOCALAPPDATA%\Orion\benchmarks\agent-v0-ab-latest.json` was missing. Combined with the absence of any published session for `c6f175738593`, the prior green phone PASS is not accepted as Benchmark-1 evidence; it is consistent with the known stale-status class. Benchmark 1 is restaged for an actual physical rerun at `Sadusor/Orion@6d0c93f87c1e6878f744679ca241160ac179b272`, with A/B summary fields explicitly emitted into the published session output.
+
+
+Candidate C preparation staged 2026-10-04:
+- exact ORION staging SHA: `85a3f7bf566f1db47480417466191c7047a12001`
+- task: `orion-candidate-c-prepare`
+- pinned Harness fork: `Sadusor/deepseek-harness@5badb15009ae1756c3afe0ae0cef1faafc290ccc`
+- private portable Node pin: `22.19.0`
+- private pnpm pin: `11.7.0`
+- install scope: `%LOCALAPPDATA%\Orion\benchmarks\candidate-c` plus ORION private toolchain cache
+- setup performs exact-SHA fetch, frozen-lockfile install, source build, headless CLI smoke, Ollama/Qwen availability check, and reports Docker/Windows Sandbox/WSL availability.
+- setup makes zero model/cloud-AI calls and performs no system-wide install.
+- DeepSeek Harness scored Candidate C remains NOT RUN.
+- outer sandbox qualification remains PENDING; the prep task only reports available isolation candidates and does not silently enable/install a VM/container product.
