@@ -9,7 +9,6 @@ from orion_v3.capabilities import inherited_registry_v0
 from orion_v3.state import EventType, OrionStateStore
 
 from .control import OperatorControlDenied, OperatorControlPlane
-from .governor import dispatch_governor_tool
 from .result_grounding import verified_result_packet
 
 
@@ -331,13 +330,23 @@ def dispatch_owner_resumed_search(
             "owner_resume_proposal_mismatch",
             "Governor resume proposal does not exactly match owner-authorized missing names and new scope.",
         )
-    return dispatch_governor_tool(
-        control,
-        task_id=task_id,
-        tool_name=tool_name,
-        arguments=actual,
-        actor_id=actor_id,
+    proposal = control.propose_capability_action(
+        task_id,
+        capability_id="fs.search_exact",
+        params=actual,
+        proposed_by=actor_id,
+        parent_event_id=str(owner_resume.get("owner_input_event_id") or ""),
     )
+    return {
+        "kind": "capability_proposal",
+        "status": "PROPOSED",
+        "event_id": proposal.event_id,
+        "capability_id": proposal.action.capability_id,
+        "capability_version": proposal.action.capability_version,
+        "action_sha256": proposal.action.action_sha256,
+        "approval_class": int(proposal.approval_class),
+        "params": dict(proposal.action.params),
+    }
 
 
 def decide_resumed_exact_search_progress(
