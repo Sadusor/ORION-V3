@@ -24,7 +24,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Repair and qualify the observer-only Evidence Pack generation race seen after the successful Proof V1 execution. Do not rerun the successful Hand just to regenerate screenshots. After the visual evidence path is qualified, proceed to Proof V2 with Qwen 9B as the natural-language interpretation/proposal layer under the same frozen authority contract.
+Run the observer-only `Evidence Pack Concurrency Probe` to qualify the race repair. This changes no task authority and does not rerun Proof V1. After PASS, stage Proof V2 with Qwen 9B as the natural-language interpretation/proposal layer. The new V3 phone UI alpha is scheduled immediately after Proof V2 and before the broad Hands tournament.
 
 ## Gate-1 attacks
 
