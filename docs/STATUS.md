@@ -25,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Run `E2E Authority V2 - Qwen Freeze Plan` only. Qwen 9B may interpret the owner-language goal, but it has advisory authority only. ORION must canonicalize the exact contract, add deny-by-default policy, perform no Hand write, publish the exact runtime plan SHA-256, and stop for owner approval. New V3 phone UI alpha begins after V2 PASS.
+Re-run `E2E Authority V2 - Qwen Freeze Plan` with Qwen thinking ON. The earlier thinking-OFF prepare PASS is retained as evidence but its frozen plan hash is superseded and must not be executed. V2 now binds `interpreter_thinking=true` into the canonical plan hash. New V3 phone UI alpha begins after full V2 PASS.
 
 ## Gate-1 attacks
 
