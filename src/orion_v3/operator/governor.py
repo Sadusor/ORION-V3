@@ -19,6 +19,18 @@ _CAPABILITY_TOOL_PREFIX = "orion_capability_"
 _CLOUD_TOOL = "orion_request_cloud_specialist"
 _RESUME_TOOL = "orion_resume_approved_action"
 
+# Model-facing semantic surface. Execution-policy knobs stay ORION-owned.
+_GOVERNOR_PARAMETER_ALLOWLIST: dict[str, frozenset[str]] = {
+    "fs.search_exact": frozenset({"exact_names", "locations"}),
+}
+
+
+def _governor_parameter_names(capability_id: str, definition) -> frozenset[str]:
+    return _GOVERNOR_PARAMETER_ALLOWLIST.get(
+        capability_id,
+        frozenset(definition.parameters),
+    )
+
 
 def _tool_name(capability_id: str) -> str:
     return _CAPABILITY_TOOL_PREFIX + capability_id.replace(".", "__")
@@ -69,14 +81,16 @@ def capability_tool_specs(
         if definition.status in {CapabilityStatus.BLOCKED, CapabilityStatus.RETIRED}:
             continue
 
+        exposed_names = _governor_parameter_names(capability_id, definition)
         properties = {
             name: _parameter_schema(spec)
             for name, spec in definition.parameters.items()
+            if name in exposed_names
         }
         required = [
             name
             for name, spec in definition.parameters.items()
-            if spec.required
+            if name in exposed_names and spec.required
         ]
         if definition.approval_class.value >= ApprovalClass.BOUNDED_MODIFICATION.value:
             authority_note = (
@@ -278,6 +292,14 @@ def dispatch_governor_tool(
         capability_id = tool_name[len(_CAPABILITY_TOOL_PREFIX):].replace("__", ".")
         definition = control.registry.get(capability_id)
         params = dict(arguments)
+        exposed_names = _governor_parameter_names(capability_id, definition)
+        hidden = set(params) - set(exposed_names)
+        if hidden:
+            raise OperatorControlDenied(
+                "governor_hidden_parameter",
+                "Model may not control ORION-owned execution parameter(s): "
+                + ", ".join(sorted(hidden)),
+            )
 
         if definition.approval_class.value >= ApprovalClass.BOUNDED_MODIFICATION.value:
             result = control.request_approval(
