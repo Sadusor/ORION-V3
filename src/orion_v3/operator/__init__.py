@@ -45,6 +45,13 @@ __all__ = [
     "ContinuationState",
     "decide_exact_search_continuation",
     "owner_input_packet",
+    "OwnerResumeChoice",
+    "OwnerScopeResume",
+    "ResumedProgressDecision",
+    "apply_owner_scope_resume",
+    "decide_resumed_exact_search_progress",
+    "dispatch_owner_resumed_search",
+    "owner_resume_packet",
 ]
 
 from .governor import (
@@ -80,4 +87,14 @@ from .continuation import (
     ContinuationState,
     decide_exact_search_continuation,
     owner_input_packet,
+)
+
+from .owner_resume import (
+    OwnerResumeChoice,
+    OwnerScopeResume,
+    ResumedProgressDecision,
+    apply_owner_scope_resume,
+    decide_resumed_exact_search_progress,
+    dispatch_owner_resumed_search,
+    owner_resume_packet,
 )
