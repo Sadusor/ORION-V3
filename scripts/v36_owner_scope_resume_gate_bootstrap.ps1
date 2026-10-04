@@ -8,7 +8,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-RUN-053'
+Write-Host 'V3_RUN_ID> V3-RUN-053R'
 Write-Host 'MODE> waiting_owner -> exact owner scope amendment -> bounded 9B resume -> real Hand -> cumulative completion'
 
 & uv run --project $RepoRoot python (Join-Path $RepoRoot 'scripts\v3_authoring_preflight.py')
