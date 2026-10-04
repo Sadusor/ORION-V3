@@ -8,7 +8,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-RUN-050'
+Write-Host 'V3_RUN_ID> V3-RUN-050R'
 Write-Host 'MODE> real read-only Hand -> verified RESULT packet -> grounded 9B owner response'
 
 & uv run --project $RepoRoot python (Join-Path $RepoRoot 'scripts\v3_authoring_preflight.py')
