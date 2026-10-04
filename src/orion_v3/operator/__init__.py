@@ -38,6 +38,9 @@ __all__ = [
     "RoutineExecutionResult",
     "execute_read_only_proposal",
     "verified_result_packet",
+    "TaskProgressDecision",
+    "TaskProgressState",
+    "decide_exact_search_task_progress",
 ]
 
 from .governor import (
@@ -61,3 +64,9 @@ from .execution import (
 )
 
 from .result_grounding import verified_result_packet
+
+from .task_progress import (
+    TaskProgressDecision,
+    TaskProgressState,
+    decide_exact_search_task_progress,
+)
