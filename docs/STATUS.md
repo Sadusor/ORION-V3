@@ -143,3 +143,6 @@ Benchmark 1 note: the alias-fixed Agent mechanics run at `c6f175738593` was not 
 
 
 Benchmark 1 evidence recovery note 2026-10-04: owner reports the alias-fixed physical run at `c6f175738593` showed PASS on the phone, but the GitHub results branch contains no published session/result for that SHA; its head still ends with the earlier `9a6a5fc216b6` pre-score model-name failure. Do not infer A/B winner from the UI PASS alone. A read-only recovery task is staged at `Sadusor/Orion@2e761eb5c61f46ed1db994dc97c7be7daba30f12` to read the already-saved local `agent-v0-ab-latest.json` and publish compact A/B scores/telemetry without rerunning models or using cloud calls.
+
+
+Benchmark 1 evidence recovery 2026-10-04: read-only recovery session `209973ead547` at SHA `2e761eb5c61f4` FAILED because `%LOCALAPPDATA%\Orion\benchmarks\agent-v0-ab-latest.json` was missing. Combined with the absence of any published session for `c6f175738593`, the prior green phone PASS is not accepted as Benchmark-1 evidence; it is consistent with the known stale-status class. Benchmark 1 is restaged for an actual physical rerun at `Sadusor/Orion@6d0c93f87c1e6878f744679ca241160ac179b272`, with A/B summary fields explicitly emitted into the published session output.
