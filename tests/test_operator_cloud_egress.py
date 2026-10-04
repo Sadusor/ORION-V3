@@ -126,6 +126,7 @@ def test_no_cloud_content_is_excluded_from_prompt_and_canonical_egress(tmp_path:
     assert private_marker not in packet.prompt
     assert "EXCLUDED_BY_LOCAL_POLICY=no_cloud" in packet.prompt
     assert packet.prompt_sha256 == _sha(packet.prompt)
+    assert packet.prompt == packet.prompt.strip()
 
     decision = record_cloud_egress_decision(store, packet=packet)
     event = store.get_event(decision.event_id)
