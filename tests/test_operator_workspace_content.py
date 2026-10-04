@@ -79,9 +79,8 @@ def make_runtime(tmp_path: Path):
     ):
         root = tmp_path / project_id
         root.mkdir()
-        (root / "target.txt").write_text(
-            "alpha content\n" if project_id == "p-a" else "beta content\n",
-            encoding="utf-8",
+        (root / "target.txt").write_bytes(
+            b"alpha content\n" if project_id == "p-a" else b"beta content\n"
         )
         roots[project_id] = root
         registry.upsert_project(
