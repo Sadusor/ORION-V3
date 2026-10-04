@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from orion_v3.capabilities import (
     ApprovalClass,
+    CapabilityProposal,
     CapabilityRegistry,
     inherited_registry_v0,
 )
@@ -55,6 +56,16 @@ class ApprovalRecord:
     consumed_event_id: str | None
     created_at: str
     updated_at: str
+
+
+@dataclass(frozen=True)
+class CapabilityActionProposal:
+    project_id: str
+    task_id: str
+    action: FrozenCapabilityAction
+    approval_class: ApprovalClass
+    event_id: str
+    proposed_by: str
 
 
 @dataclass(frozen=True)
@@ -174,6 +185,66 @@ class OperatorControlPlane:
     def initialize(self) -> None:
         self.store.connect().executescript(_OPERATOR_SCHEMA)
         self.store.connect().commit()
+
+    def propose_capability_action(
+        self,
+        task_id: str,
+        *,
+        capability_id: str,
+        params: Mapping[str, Any],
+        proposed_by: str,
+    ) -> CapabilityActionProposal:
+        """Validate and freeze one non-approval capability proposal.
+
+        This records intent only. It does not execute a Hand and does not mint
+        execution authority. Bounded/consequential capabilities must use the
+        explicit approval lane instead.
+        """
+        task = self._require_task(task_id)
+        proposed_by = self._required_text(proposed_by, "proposed_by")
+
+        resolved = self.registry.resolve(
+            CapabilityProposal(intent=capability_id, params=dict(params))
+        )
+        definition = resolved.definition
+        if definition.approval_class.value >= ApprovalClass.BOUNDED_MODIFICATION.value:
+            raise OperatorControlDenied(
+                "approval_required",
+                "This capability requires the explicit approval lane.",
+            )
+
+        action_payload = {
+            "capability_id": definition.capability_id,
+            "capability_version": definition.version,
+            "params": dict(resolved.params),
+        }
+        action_sha = _sha256(action_payload)
+        event = self.store.append_event(
+            task.project_id,
+            EventType.PROPOSAL,
+            {
+                "operator_control_version": 1,
+                "kind": "capability_action_proposed",
+                "action_sha256": action_sha,
+                "action": action_payload,
+            },
+            actor_kind="local_operator",
+            actor_id=proposed_by,
+            task_id=task_id,
+        )
+        return CapabilityActionProposal(
+            project_id=task.project_id,
+            task_id=task_id,
+            action=FrozenCapabilityAction(
+                capability_id=definition.capability_id,
+                capability_version=definition.version,
+                params=dict(resolved.params),
+                action_sha256=action_sha,
+            ),
+            approval_class=definition.approval_class,
+            event_id=event.event_id,
+            proposed_by=proposed_by,
+        )
 
     def request_approval(
         self,
