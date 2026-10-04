@@ -164,7 +164,7 @@ def call_governor(prompt: str, tools: list[dict[str, Any]]) -> tuple[str, dict[s
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-049")
+    print("V3_RUN_ID> V3-RUN-049R")
     print("ORION_ROUTINE_HAND_EXECUTION> START")
     print("MODEL> " + MODEL)
     print("THINKING> ON")
@@ -303,7 +303,7 @@ def main() -> int:
 
             summary = {
                 "schema": "orion.v3.routine-hand-execution.v0",
-                "run_id": "V3-RUN-049",
+                "run_id": "V3-RUN-049R",
                 "model": MODEL,
                 "thinking": "ON",
                 "num_ctx": NUM_CTX,
