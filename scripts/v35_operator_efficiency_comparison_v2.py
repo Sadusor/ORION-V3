@@ -259,8 +259,8 @@ def run_model(model: str, ollama: str) -> dict:
 
 
 def main() -> int:
-    print("V3_RUN_ID> V3-RUN-040")
-    print("ORION_OPERATOR_EFFICIENCY_COMPARISON> START")
+    print("V3_RUN_ID> V3-RUN-040B")
+    print("ORION_OPERATOR_EFFICIENCY_COMPARISON_4MODEL> START")
 
     if not OPENHANDS.is_dir() or not BENCH.is_file():
         raise RuntimeError("required benchmark substrate missing")
@@ -277,7 +277,7 @@ def main() -> int:
             + json.dumps(row, ensure_ascii=False, sort_keys=True)
         )
         if not row["correctness_pass"]:
-            print("ORION_OPERATOR_EFFICIENCY_COMPARISON> FAIL")
+            print("ORION_OPERATOR_EFFICIENCY_COMPARISON_4MODEL> FAIL")
             print("STATUS> FAIL")
             return 1
 
@@ -304,7 +304,7 @@ def main() -> int:
     }
 
     print("ORION_OPERATOR_EFFICIENCY_SUMMARY> " + json.dumps(summary, ensure_ascii=False, sort_keys=True))
-    print("ORION_OPERATOR_EFFICIENCY_COMPARISON> PASS")
+    print("ORION_OPERATOR_EFFICIENCY_COMPARISON_4MODEL> PASS")
     print("STATUS> PASS")
     return 0
 
