@@ -2,6 +2,30 @@
 
 All milestones are gated by physical evidence.
 
+## Immediate owner-approved build — ORION Agent V0
+
+Build the smallest ORION-native bounded agent loop before making any Agent V1 decision.
+
+Sequence:
+
+1. deterministic Agent V0 foundation gate;
+2. Qwen structured-proposal adapter;
+3. bounded test/build Hand;
+4. reusable benchmark fixture;
+5. A/B/C benchmark:
+   - A: Qwen + deterministic Hands;
+   - B: same Qwen + ORION Agent V0 + same Hands;
+   - C: same Qwen + DeepSeek Harness under ORION isolation;
+6. owner + assistant review results and brainstorm the next architecture.
+
+Keep future seams for Memory, Skills, Security Advisor, Sandbox and escalation, but do not implement those features into V0 unless the benchmark proves they are needed.
+
+Google Mantis is the primary secure-coding/sandbox/verification donor. ButterClaw is the primary runtime-policy/process-monitor donor. Google mcp-security, Athena Investigation MCP and AgenticAnomaly remain optional security-tool/contract/red-team donors.
+
+Canonical decision: `docs/decisions/0014-build-orion-native-agent-v0.md`.
+
+Full donor analysis: `docs/reference/2026-10-04-agent-security-donor-analysis.md`.
+
 ## V3.0A — Donor contract probe — PASS
 Physical PASS on 2026-10-04. Hostile scope rejection, exact frozen-plan hash approval, post-approval mutation denial, deterministic Hand receipt, exact artifact verification, replay protection, and no-network/model execution all passed. Evidence: `docs/evidence/2026-10-04-donor-contract-probe-pass.md`.
 
