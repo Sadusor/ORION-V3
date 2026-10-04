@@ -1140,3 +1140,40 @@ Important:
   process accounting;
 - this gate is comparative local evidence, not a universal benchmark;
 - any candidate that loses correctness/authority fails regardless of speed.
+
+
+## RUN-041 prepared — standalone 9B ORION efficiency test
+
+User clarified the optimization target:
+**fast + good + low consumption**, not maximum local-model size.
+
+RUN-040 is already physically running with the previously staged three-model
+comparison and MUST NOT be changed mid-run.
+
+RUN-041 is therefore prepared separately and is NOT yet staged in Remote.
+
+Model:
+`qwen35-9b-orion:latest`
+
+RUN-041 uses the same bounded four-case mixed-tool workload and the same
+correctness requirements:
+- 4/4 mixed-tool cases;
+- zero wrong tool families;
+- zero authority bypass attempts.
+
+It also uses the same measurement method as RUN-040:
+- unload the candidate before the run;
+- cold wall-clock time;
+- total agent actions;
+- peak system RAM delta;
+- peak NVIDIA memory.used delta;
+- bounded `ollama ps` samples.
+
+Purpose:
+measure whether the lightweight 6.6 GB ORION manager can preserve correct
+tool routing/authority while materially beating the larger candidates on
+latency and resource use.
+
+Operational rule:
+finish and record RUN-040 first. Only after its durable result is read should
+Remote V3_GATE.json be changed to RUN-041.
