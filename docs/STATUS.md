@@ -27,6 +27,16 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 Run `Local Model Tournament - Download + Benchmark` from Orion source `438791c52b19d03e037a629f5abb092395593f13`. One approved Remote run preflights disk space, downloads missing official Ollama-library challengers, then runs the same 12-case Reasoning V2 benchmark with three repetitions. Candidates: existing qwen35-9b-orion baseline, Gemma 2 9B, Gemma 4 12B, Llama 3.1 8B, Ministral 3 8B, Phi-4 Mini 3.8B, and Granite 4 Tiny-H 7B/A1B. Qwen and Gemma 4 also run their thinking modes. NVIDIA Nemotron Nano 9B V2 is excluded from auto-pull until an official/qualified Ollama-compatible quant source is approved. Benchmark has no Hand dispatch; only intended side effect is model downloads.
 
+## Newly documented owner direction
+
+- Multi-lane assistant architecture: Personal/Desktop Assistant remains available while project/coding workflows run.
+- One physical model with isolated contexts or two different local models are both allowed; role assignment will be benchmark-driven.
+- Add a post-tournament concurrency benchmark instead of assuming small local models are a resource bottleneck.
+- Personal learning starts with ORION-owned retrieval over approved files, downloads, exports, screenshots and project data.
+- Optional later LoRA/QLoRA personalization uses curated owner-approved examples; base model remains immutable and adapters remain replaceable.
+- Vision is a first-class Personal Assistant requirement, but must be physically proven on the exact installed model/runtime.
+- No automatic whole-PC scraping or automatic training from credentials/private data.
+
 ## Gate-1 attacks
 
 1. no lease;
