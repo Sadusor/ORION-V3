@@ -1,7 +1,7 @@
 # Decision 0009 — Local Small-Model Tournament V1
 
 Date: 2026-10-04  
-Status: STAGED
+Status: PHYSICAL PASS
 
 ## Goal
 
@@ -96,3 +96,18 @@ The benchmark itself has:
 - no real task side effects.
 
 No production ORION model/default is changed by the tournament.
+
+
+## Result
+
+Physical PASS session: `2e43a124646f`  
+Source SHA: `438791c52b19d03e037a629f5abb092395593f13`
+
+Winners:
+
+- FAST / normal-mode winner: `qwen35-9b-orion`
+- THINKING winner: `qwen35-9b-orion`
+
+Closest challenger: `gemma4:12b`.
+
+The existing Qwen 3.5 9B ORION therefore remains the leading general local interpretation candidate for the next V3 gates. This does not freeze it as the coding, vision, or concurrent multi-lane winner; those roles remain separately benchmarked.
