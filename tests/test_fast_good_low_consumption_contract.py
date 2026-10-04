@@ -69,3 +69,10 @@ def test_run042_measures_speed_ram_gpu_actions_and_runtime_residency():
     assert '"size_vram_bytes"' in text
     assert '"context_length"' in text
     assert "ollama_ps_samples" in text
+
+
+def test_run042_finishes_all_candidates_then_fails_if_any_candidate_fails():
+    text = decision_source()
+    assert '"FAILED_CANDIDATES> "' in text
+    assert 'if failed_labels:' in text
+    assert 'print("STATUS> FAIL")' in text
