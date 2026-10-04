@@ -74,7 +74,7 @@ def call_openai_compatible_advisory(
         "messages": [{"role": "user", "content": prompt}],
         "temperature": 0.1,
         "stream": False,
-        "max_tokens": 1200,
+        "max_tokens": 700,
     }
     if spec.provider_id == "groq" and spec.model_id == "openai/gpt-oss-120b":
         body["reasoning_effort"] = "medium"
