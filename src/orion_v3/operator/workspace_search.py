@@ -4,7 +4,7 @@ import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
-from typing import Any, Mapping
+from typing import Any, Callable, Mapping
 
 from orion_v3.authority import AuthorityGateway, LeaseAuthority
 from orion_v3.evidence import EvidenceEnvelope, Outcome
@@ -353,12 +353,19 @@ def _run_openjarvis_search(
     return evidence, issued.lease.lease_id
 
 
+WorkspaceSearchRunner = Callable[
+    [str, list[str], list[str], Mapping[str, str | Path]],
+    tuple[EvidenceEnvelope, str],
+]
+
+
 def execute_workspace_search(
     store: OrionStateStore,
     workspace_registry: WorkspaceRegistry,
     *,
     task_id: str,
     proposal_event_id: str,
+    search_runner: WorkspaceSearchRunner | None = None,
 ) -> WorkspaceSearchExecution:
     proposal, action, action_sha = _reload_proposal(
         store,
@@ -405,11 +412,19 @@ def execute_workspace_search(
         parent_event_id=proposal.event_id,
     )
 
-    evidence, lease_id = _run_openjarvis_search(
-        task_id=task_id,
-        exact_names=list(action["exact_names"]),
-        project_ids=project_ids,
-        trusted_roots=trusted_roots,
+    runner = search_runner or (
+        lambda task_id, exact_names, project_ids, trusted_roots: _run_openjarvis_search(
+            task_id=task_id,
+            exact_names=exact_names,
+            project_ids=project_ids,
+            trusted_roots=trusted_roots,
+        )
+    )
+    evidence, lease_id = runner(
+        task_id,
+        list(action["exact_names"]),
+        project_ids,
+        trusted_roots,
     )
     evidence_event = store.append_event(
         proposal.project_id,
@@ -543,6 +558,7 @@ __all__ = [
     "WORKSPACE_SEARCH_CAPABILITY_VERSION",
     "WorkspaceSearchExecution",
     "WorkspaceSearchProposal",
+    "WorkspaceSearchRunner",
     "execute_workspace_search",
     "propose_workspace_search",
     "workspace_search_tool_spec",
