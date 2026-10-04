@@ -449,7 +449,19 @@ def main() -> int:
     else:
         print("NINE_B_OPERATOR_QUALIFIED> PASS")
 
+    failed_labels = [
+        str(row["label"])
+        for row in rows
+        if not row["correctness_pass"]
+    ]
+    print(
+        "FAILED_CANDIDATES> "
+        + (",".join(failed_labels) if failed_labels else "NONE")
+    )
     print("ORION_FAST_GOOD_LOW_CONSUMPTION> COMPLETE")
+    if failed_labels:
+        print("STATUS> FAIL")
+        return 1
     print("STATUS> PASS")
     return 0
 
