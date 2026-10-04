@@ -711,6 +711,8 @@ class OperatorControlPlane:
             "specialty": specialty,
             "task": task_text,
         }
+        if parent_event_id is not None:
+            request_body["parent_event_id"] = parent_event_id
         request_sha = _sha256(request_body)
         recipient = "cloud:" + specialty
         now = _utc_now()
