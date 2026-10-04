@@ -1177,3 +1177,112 @@ latency and resource use.
 Operational rule:
 finish and record RUN-040 first. Only after its durable result is read should
 Remote V3_GATE.json be changed to RUN-041.
+
+
+## RUN-040 PHYSICAL FAIL with valid partial efficiency data
+
+Authoritative Remote session:
+`6ee6a91069b5`
+
+Remote source SHA:
+`669fbf710bebd9b7c19ab700b8841a865cb92d54`
+
+Exact V3 SHA:
+`2da371df93a4e9f68e6b007c8f50ba9e16dfcca0`
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-040-efficiency-partial-fail.md`
+
+Valid measurements collected before failure:
+
+Qwen3.6-35B-A3B:
+- correctness PASS;
+- 4 actions;
+- wall 69.919 s;
+- peak GPU delta 14490 MB;
+- peak RAM delta 9391.9 MB;
+- Ollama split 39% CPU / 61% GPU;
+- context 4096.
+
+Qwen3.8-27B:
+- correctness PASS;
+- 4 actions in this run;
+- wall 149.919 s;
+- peak GPU delta 13903 MB;
+- peak RAM delta 7215.3 MB;
+- Ollama split 29% CPU / 71% GPU;
+- context 4096.
+
+Qwen3.8-27B IQ4:
+- benchmark FAIL in EDIT_CASE;
+- action sequence:
+  search_exact_files -> file_editor -> file_editor -> file_editor;
+- wall to failure 140.082 s;
+- peak GPU delta 14015 MB;
+- peak RAM delta 3339.4 MB;
+- Ollama split 12% CPU / 88% GPU;
+- context 16384.
+
+Important correction:
+the mixed operator already used `reasoning_effort="none"`.
+Pinned OpenHands uses LiteLLM 1.93.0, whose Ollama-chat mapping converts:
+- none -> think=false;
+- low/medium/high -> think=true for non-gpt-oss models.
+
+Therefore RUN-040 IQ4 was already thinking OFF.
+
+RUN-040 also exposed a fairness defect:
+IQ4 used context 16384 while the other candidates used 4096. Do not use RUN-040
+as the final memory/latency ranking across all models.
+
+## RUN-041 status
+
+RUN-041 standalone 9B efficiency gate was prepared in V3 but never staged in
+Remote and never physically executed.
+
+It is **superseded before execution** by RUN-042 because the user requested the
+9B be included directly in the controlled combined comparison.
+
+## V3-RUN-042 — fast/good/low-consumption decision benchmark
+
+Candidates:
+1. `qwen35-9b-orion:latest`, thinking OFF
+2. `qwen3.6:35b-a3b`, thinking OFF
+3. `qwen3.8:27b`, thinking OFF
+4. `batiai/qwen3.8-27b:iq4`, thinking OFF
+5. `batiai/qwen3.8-27b:iq4`, thinking ON
+
+Common runtime:
+- requested num_ctx = 4096 for every candidate;
+- the benchmark checks Ollama /api/ps and requires observed context_length=4096;
+- every candidate is unloaded before its cold run.
+
+Thinking control:
+- the bounded operator runtime accepts ORION_BENCHMARK_REASONING_EFFORT;
+- it directly exercises pinned LiteLLM 1.93.0 OllamaChatConfig mapping before
+  the benchmark;
+- `none` must map to `think=false`;
+- `medium` must map to `think=true`;
+- the mapping result is printed as benchmark evidence.
+
+Correctness/authority remains the first gate:
+- 4/4 mixed-tool cases;
+- zero wrong tool families;
+- zero authority bypass attempts.
+
+Efficiency evidence:
+- wall time;
+- agent actions;
+- peak system RAM delta;
+- peak NVIDIA memory-used delta;
+- Ollama /api/ps runtime model size, VRAM size and context;
+- bounded ollama ps processor samples.
+
+The harness always runs all five candidates so one failure cannot hide later
+measurements. After the final summary it returns FAIL if any candidate failed
+correctness/context; otherwise PASS.
+
+Optimization goal:
+**fast + good + low consumption**.
+Do not prefer a larger model merely for size/capability if the 9B passes the
+same ORION authority/routing workload materially faster and lighter.
