@@ -8,7 +8,7 @@ $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUTF8 = '1'
 $env:PYTHONDONTWRITEBYTECODE = '1'
 
-Write-Host 'V3_RUN_ID> V3-RUN-059'
+Write-Host 'V3_RUN_ID> V3-RUN-059R'
 Write-Host 'MODE> verified local project evidence -> no_cloud egress policy -> real Groq advisory REVIEW'
 
 & uv run --project $RepoRoot python (Join-Path $RepoRoot 'scripts\v3_authoring_preflight.py')
