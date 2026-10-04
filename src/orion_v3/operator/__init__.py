@@ -24,4 +24,13 @@ __all__ = [
     "FrozenCapabilityAction",
     "OperatorControlDenied",
     "OperatorControlPlane",
+    "capability_tool_specs",
+    "dispatch_governor_tool",
+    "governor_control_tool_specs",
 ]
+
+from .governor import (
+    capability_tool_specs,
+    dispatch_governor_tool,
+    governor_control_tool_specs,
+)
