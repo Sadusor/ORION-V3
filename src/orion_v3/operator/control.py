@@ -15,7 +15,7 @@ from orion_v3.capabilities import (
     CapabilityRegistry,
     inherited_registry_v0,
 )
-from orion_v3.state import EventType, OrionStateStore, StateStoreError
+from orion_v3.state import EventType, LocalEventExchange, OrionStateStore, StateStoreError
 
 
 class OperatorControlDenied(StateStoreError):
@@ -103,6 +103,14 @@ class CloudRequestRecord:
 @dataclass(frozen=True)
 class CloudQueueResult:
     request: CloudRequestRecord
+    duplicate: bool
+
+
+@dataclass(frozen=True)
+class CloudResponseResult:
+    request: CloudRequestRecord
+    event_id: str
+    response_sha256: str
     duplicate: bool
 
 
@@ -784,6 +792,78 @@ class OperatorControlPlane:
             duplicate=False,
         )
 
+    def ingest_cloud_specialist_response(
+        self,
+        request_id: str,
+        *,
+        source_system: str,
+        external_message_id: str,
+        provider_id: str,
+        model_id: str,
+        response_text: str,
+    ) -> CloudResponseResult:
+        """Bind one external specialist response to an exact queued request.
+
+        The response is immutable advisory REVIEW evidence. It does not approve,
+        execute, consume authority, or mutate the original cloud request.
+        """
+        request = self.get_cloud_request(request_id)
+        source_system = self._required_text(source_system, "source_system")
+        external_message_id = self._required_text(
+            external_message_id,
+            "external_message_id",
+        )
+        provider_id = self._required_text(provider_id, "provider_id")
+        model_id = self._required_text(model_id, "model_id")
+        response_text = str(response_text)
+        if not response_text.strip():
+            raise OperatorControlDenied(
+                "invalid_argument",
+                "response_text must be non-empty.",
+            )
+        if len(response_text) > 2_000_000:
+            raise OperatorControlDenied(
+                "invalid_argument",
+                "response_text exceeds maximum length.",
+            )
+
+        response_payload = {
+            "operator_control_version": 1,
+            "kind": "cloud_specialist_response",
+            "request_id": request.request_id,
+            "request_sha256": request.request_sha256,
+            "specialty": request.specialty,
+            "provider_id": provider_id,
+            "model_id": model_id,
+            "response_text": response_text,
+            "authority": "advisory_only",
+        }
+        response_sha = _sha256(response_payload)
+        body = {
+            **response_payload,
+            "response_sha256": response_sha,
+        }
+
+        exchange = LocalEventExchange(self.store)
+        published = exchange.ingest_external(
+            request.project_id,
+            request.task_id,
+            EventType.REVIEW,
+            source_system=source_system,
+            external_message_id=external_message_id,
+            actor_kind="cloud_specialist",
+            actor_id=provider_id + ":" + model_id,
+            recipient="orion:governor",
+            body=body,
+            parent_event_id=request.event_id,
+        )
+        return CloudResponseResult(
+            request=request,
+            event_id=published.event.event_id,
+            response_sha256=response_sha,
+            duplicate=published.duplicate,
+        )
+
     def get_approval(self, approval_id: str) -> ApprovalRecord:
         return self._row_to_approval(self._approval_row(approval_id))
 
@@ -879,6 +959,7 @@ __all__ = [
     "ApprovalStatus",
     "CloudQueueResult",
     "CloudRequestRecord",
+    "CloudResponseResult",
     "ConsumedApproval",
     "FrozenCapabilityAction",
     "OperatorControlDenied",
