@@ -23,7 +23,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Resume Cloud E2E Brainstorm with two independent cloud reviewers, then synthesize their results with the existing DeepSeek adversarial review into one owner-approved physical hostile-scope E2E contract.
+Owner review of `docs/contracts/E2E_AUTHORITY_PROOF_V1.md`. Execution is NOT authorized until the owner explicitly approves or changes that exact contract. No new runtime task should be staged before approval.
 
 ## Gate-1 attacks
 
