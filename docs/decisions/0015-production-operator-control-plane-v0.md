@@ -63,6 +63,23 @@ frozen action already approved.
 This prevents a model from changing the target or content after the human has
 approved it.
 
+### Human revoke before effect
+
+An approval is not irreversible merely because it became APPROVED.
+
+Before consumption, the human may explicitly revoke it:
+
+`APPROVED -> REVOKED`
+
+A revoked approval:
+- cannot be consumed;
+- cannot later be re-approved;
+- remains auditable through a causal DECISION event.
+
+This is the pre-effect human cancel boundary. Once the approval has been
+consumed into execution ownership, later cancellation belongs to the execution
+Attempt/Stop layer rather than rewriting approval history.
+
 ### Single use
 
 An approved action may be consumed exactly once.
@@ -70,7 +87,7 @@ An approved action may be consumed exactly once.
 After consumption:
 - replay is stale;
 - a foreign task cannot reuse it;
-- a rejected approval can never become executable.
+- a rejected or revoked approval can never become executable.
 
 ### Tamper protection
 
