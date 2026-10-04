@@ -25,7 +25,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Re-run `E2E Authority V2 - Qwen Freeze Plan` with Qwen thinking ON. The earlier thinking-OFF prepare PASS is retained as evidence but its frozen plan hash is superseded and must not be executed. V2 now binds `interpreter_thinking=true` into the canonical plan hash. New V3 phone UI alpha begins after full V2 PASS.
+Run `Qwen Thinking ON vs OFF - Hard Test`. This is interpretation-only: no Hand dispatch and no real filesystem/network/install/send/delete side effects. Compare deterministic structured accuracy, critical-policy cases, latency, and token cost. Keep the current V2 thinking-ON frozen plan unexecuted until this benchmark decides the preferred Qwen mode.
 
 ## Gate-1 attacks
 
