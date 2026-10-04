@@ -4,7 +4,7 @@ Updated: 2026-10-04
 
 ## Stage
 
-Bootstrap / OpenJarvis Foundation Gate 1.
+ORION Agent V0 bounded-loop foundation build.
 
 ORION-V3 is a completely separate repository from the proven ORION implementation.
 
@@ -26,7 +26,36 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-Local Model Tournament Reasoning V2 physically PASS. Qwen 3.5 9B ORION remains the leading general local interpreter; Gemma 4 12B is the closest challenger. No model passed every critical case, so deterministic ORION policy remains mandatory. Next model gates are role-specific rather than another generic tournament: Personal-vs-Project concurrency, coding/project-coordinator quality, and exact-runtime vision/personal-file retrieval. UI work can use STRATA as the V3 foundation with multi-lane extensions.
+**Physically qualify the first ORION Agent V0 foundation before adding Qwen to the loop.**
+
+Owner approved building a small ORION-native agent with explicit future seams, then benchmarking it before deciding the next architecture.
+
+Current implementation in `Sadusor/Orion` is GITHUB-CODED / UNVERIFIED and contains:
+
+- strict structured proposals;
+- one-action-at-a-time loop;
+- frozen task-scoped Hand registry;
+- task-state binding;
+- idempotency guard;
+- hash-chained Journal;
+- bounded observations;
+- model/tool/time/rejection budgets;
+- external Stop hook;
+- reserved interfaces for later Memory, Skills, Security Advisor, Sandbox and escalation.
+
+The first target-machine gate is deterministic and intentionally excludes Qwen/cloud/network. After it passes, connect the local Qwen JSON adapter, add the bounded coding/test capability, then run the frozen A/B/C benchmark.
+
+A/B/C:
+
+- A: Qwen + deterministic Hands;
+- B: same Qwen + ORION Agent V0 + same Hands;
+- C: same Qwen + DeepSeek Harness under ORION isolation.
+
+Google Mantis is now the primary secure-coding/sandbox/verification donor; ButterClaw is the primary runtime-policy/process-monitor donor.
+
+Canonical decision: `docs/decisions/0014-build-orion-native-agent-v0.md`.
+
+Detailed donor record: `docs/reference/2026-10-04-agent-security-donor-analysis.md`.
 
 ## Newly documented owner direction
 
