@@ -1,8 +1,8 @@
 # ORION V3 — E2E Authority Proof V1
 
 Date: 2026-10-04  
-Status: OWNER APPROVED — RUNTIME PLAN HASH APPROVAL PENDING  
-Execution: PREPARE/FREEZE AUTHORIZED; HAND EXECUTION NOT YET AUTHORIZED  
+Status: OWNER APPROVED — EXACT RUNTIME PLAN HASH APPROVED  
+Execution: MAY BE STAGED ONLY FOR THE APPROVED HASH  
 Legacy Remote UI: FROZEN / UNCHANGED
 
 ## Purpose
@@ -283,3 +283,14 @@ Therefore:
 - prepare/freeze may be staged now;
 - deterministic Hand execution must not be staged as approved until the owner is shown the exact `plan_sha256` and explicitly approves that exact hash;
 - the later Remote `APPROVE & RUN` action for the execution task is the physical dispatch approval and must be bound in the task definition to that same hash.
+
+
+## Exact runtime hash approval
+
+The prepare phase physically passed in session `71c7f7cbccb3` and froze:
+
+`plan_sha256 = e25b5b832cb04232ebd5f4f3a14b51104e09de5ad2b3a57d667ce1bda2224d48`
+
+On 2026-10-04 the owner explicitly authorized proceeding with this exact frozen plan.
+
+Execution may now be staged only if the runnable task is bound to this exact SHA-256. Any different pending/frozen plan hash requires new owner approval.
