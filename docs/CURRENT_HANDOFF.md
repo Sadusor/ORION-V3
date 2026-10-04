@@ -1455,3 +1455,91 @@ Selection order:
 Exit decision:
 if 9B passes all hard cases and remains materially faster/lighter, freeze it as
 the default local ORION operator and move to the next roadmap feature.
+
+
+## RUN-043 PHYSICAL PASS — valid tournament, no 5/5 candidate
+
+Authoritative session:
+`f6f321c9d9a8`
+
+Remote source SHA:
+`eac12d9b993a78746f4310e0304fccf548e4808d`
+
+Exact V3 SHA:
+`f47069797c12f8a025c8b2a8a13a00acf646ce7e`
+
+Canonical checkpoint:
+`docs/checkpoints/2026-10-04-v3-run-043-final-local-operator-tournament-pass.md`
+
+Aggregate:
+- valid_labels = [9B_OFF, IQ4_OFF, IQ4_ON]
+- qualified_labels = []
+
+Remote PASS means the tournament itself executed correctly. It does not mean
+every model passed every hard case.
+
+The durable result tail preserves the final aggregate and detailed IQ4_ON tail,
+but not complete 9B_OFF and IQ4_OFF case rows. Do not invent missing details.
+
+Preserved IQ4_ON:
+- 3/5 cases;
+- MULTI_STEP PASS;
+- TRANSIENT_RECOVERY PASS;
+- CLOUD_ESCALATION PASS;
+- APPROVAL_RESUME failed the exact-sequence scorer because approval_request and
+  approved_replace were each emitted more than once;
+- STALE_AUTHORITY reached the expected stale_approval denial, but the strict
+  scorer also rejected preceding FileEditor read-only views;
+- 220.935 s;
+- +2423.3 MB RAM;
+- +14152 MB GPU;
+- 15 actions;
+- context 4096.
+
+Architectural lesson:
+exact approval identity, wait/resume state, duplicate handling and stale
+authority remain deterministic ORION responsibilities. Model action minimality
+is not the authority boundary.
+
+### Frozen model policy
+
+Default routine local operator:
+`qwen35-9b-orion:latest`
+- thinking OFF
+- context 4096
+
+Cloud models:
+- difficult reasoning
+- architecture
+- coding
+- review
+
+Offline fallback:
+`qwen3.6:35b-a3b`
+
+IQ4:
+experimental/offline alternative, not default.
+
+Stop broad local-model benchmarking here. Resume only when a concrete future
+ORION task exposes a specific capability gap.
+
+### Next implementation priority
+
+Move from benchmark composition into the production operator path:
+
+```text
+user
+-> 9B local operator
+-> ORION Capability Registry / canonical state / authority
+-> bounded Hand
+-> evidence / verifier
+
+hard problem
+-> 9B selects bounded cloud-specialist capability
+-> ORION queues and records the request
+-> cloud proposal or review returns
+-> ORION remains authority
+```
+
+Production approval/wait/resume and stale-authority behavior belongs in ORION
+state logic rather than the model loop.
