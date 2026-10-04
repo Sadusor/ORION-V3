@@ -229,6 +229,12 @@ def dispatch_governor_tool(
         }
 
     if tool_name == _CLOUD_TOOL:
+        unknown = set(arguments) - {"specialty", "task"}
+        if unknown:
+            raise OperatorControlDenied(
+                "unknown_governor_argument",
+                "Unknown cloud-request argument(s): " + ", ".join(sorted(unknown)),
+            )
         specialty = str(arguments.get("specialty") or "")
         task = str(arguments.get("task") or "")
         queued = control.queue_cloud_specialist(
@@ -250,6 +256,12 @@ def dispatch_governor_tool(
         }
 
     if tool_name == _RESUME_TOOL:
+        unknown = set(arguments) - {"approval_id"}
+        if unknown:
+            raise OperatorControlDenied(
+                "unknown_governor_argument",
+                "Resume accepts approval_id only.",
+            )
         approval_id = str(arguments.get("approval_id") or "")
         if not approval_id:
             raise OperatorControlDenied(
