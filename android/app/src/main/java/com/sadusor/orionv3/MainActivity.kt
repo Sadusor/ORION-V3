@@ -163,11 +163,19 @@ private fun OrionWebSurface(
                     ) {
                         Log.i(TAG, "page finished: $url")
                         view.evaluateJavascript(
-                            "(function(){return JSON.stringify({title:document.title,ready:document.readyState,app:!!document.getElementById('app'),body:document.body&&document.body.innerText.slice(0,120)});})()"
+                            "(function(){return JSON.stringify({title:document.title,ready:document.readyState,app:!!document.getElementById('app'),core:!!document.getElementById('core'),composer:!!document.getElementById('inp'),scripts:document.scripts.length,styles:document.styleSheets.length,ua:navigator.userAgent,body:document.body&&document.body.innerText.slice(0,220)});})()"
                         ) { result ->
                             Log.i(TAG, "DOM probe: $result")
                         }
-                        onLoaded()
+                        view.evaluateJavascript(
+                            "Boolean(document.getElementById('app')&&document.getElementById('core')&&document.getElementById('inp'))"
+                        ) { ok ->
+                            if (ok == "true") {
+                                onLoaded()
+                            } else {
+                                onError("ORION UI failed to render")
+                            }
+                        }
                     }
 
                     override fun onReceivedError(
