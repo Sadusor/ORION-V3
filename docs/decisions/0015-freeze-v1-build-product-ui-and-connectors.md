@@ -5,7 +5,7 @@ Status: ACCEPTED / OWNER DIRECTIVE
 
 ## Decision
 
-The existing V1 Remote is frozen.
+The existing V1 Remote is frozen **and remains the dedicated ORION engineering Remote even after the new ORION product UI launches**.
 
 ORION development must **not** modify, redesign, refactor, extend, replace, migrate, or recreate V1 Remote. There is no active "Remote V2" product lane.
 
@@ -21,7 +21,7 @@ The new ORION product is built separately from Remote:
 4. connect those UIs to ORION/backend/connectors;
 5. physically qualify each connected capability.
 
-The PC and phone surfaces are two views of the ORION product, not Remote V2 and not parity clones of V1.
+The PC and phone surfaces are two views of the ORION product, not Remote V2 and not parity clones of V1. They are a separate app/surface by design and may run alongside V1 indefinitely.
 
 Chrome may be used during development to inspect a web-rendered product UI when useful. That does not make Chrome a new Remote or a replacement control path.
 
@@ -39,7 +39,7 @@ Chrome may be used during development to inspect a web-rendered product UI when 
 
 This decision supersedes `docs/decisions/REMOTE_V1_V2_SHADOW_MIGRATION.md` as an active architecture plan.
 
-That ADR is retained as historical context only. Its V2 Remote/parity-adapter phases are not current work.
+That ADR is retained as historical context only. Its V2 Remote/parity-adapter phases are not current work. There is no planned cutover where the product UI replaces V1 Remote.
 
 ## Relationship to Decision 0002
 
