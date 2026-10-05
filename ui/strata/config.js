@@ -1,7 +1,7 @@
-/* ORION product UI configuration. This surface is separate from the frozen V1 Remote. */
+/* ORION product UI configuration. This surface is separate from the manual engineering Remote. */
 window.STRATA_CONFIG={
  product:{name:'ORION',surface:'product-ui',remoteFrozen:true},
- /* No legacy/Remote links are rendered in the product UI. V1 is used separately as the engineering control path. */
+ /* No engineering-Remote links are rendered here. Manual engineering execution is handled separately by TheHands. */
  legacy:[],
  poll:{idleMs:2000,activeMs:800,hiddenMs:8000,statusTimeoutMs:8000,commandTimeoutMs:30000},
  link:{staleAfterMs:6000,reconnectingAfterMs:20000,offlineAfterMs:90000},
