@@ -233,3 +233,19 @@ Candidate C Docker attempt 2026-10-04 at `7b3bfb444124...`: **FAIL before qualif
 - Harness build code explicitly supports `DSH_CLIENT_COMMIT_HASH` for non-Git build environments. Candidate C Dockerfile fixed at `Sadusor/Orion@78cd20d8d0adb71ffbcc01535fc7d583614f3e04` by setting that variable to the exact pinned Harness SHA `5badb15009ae1756c3afe0ae0cef1faafc290ccc`.
 - Clean archive-based build context remains preserved; no fake repository is created and Windows build artifacts/node_modules are not copied into the Linux image.
 - Outer sandbox qualification and Candidate C scored runs remain NOT RUN.
+
+
+Candidate C Docker retry result and native pivot 2026-10-04/05:
+- Docker retry source SHA `78cd20d8d0adb71ffbcc01535fc7d583614f3e04`, task `orion-candidate-c-docker-benchmark`, session `2a92e53eb3f1`: FAIL before sandbox qualification/scoring.
+- The pinned Harness Docker image did build successfully, including the exact commit metadata injection fix, but ORION's PowerShell cleanup command `docker network rm orion-candidate-c-internal` treated the expected "network not found" stderr as a terminating error under `$ErrorActionPreference='Stop'`.
+- Therefore this is still NOT a DeepSeek Harness agent result. No scored Candidate C run occurred on Docker.
+- Owner requested no unnecessary residue and questioned Docker necessity. Decision: Docker is dropped from the current Candidate C benchmark path. The obsolete Docker task/files were removed from the current branch (retained only in Git history).
+- Current native staging SHA: `Sadusor/Orion@7e6e20a64d92520fd86fbb7ee720888282f49816`.
+- Current task: `orion-candidate-c-native-benchmark` / "Candidate C - Native Windows DeepSeek Harness Benchmark".
+- The task first removes only ORION-owned benchmark residue: known ORION temp prefixes, Candidate-C Docker build context/archive/results, named `orion-c-*` containers, `orion-candidate-c-internal` network, and `orion/deepseek-harness-c:5badb15009ae` image. It never calls global Docker/system/builder prune, and it preserves any pre-existing Docker Desktop state unless the cleanup task itself had to start Docker.
+- Durable/needed assets are retained: pinned Harness checkout/build, portable Node/pnpm toolchain, readiness.json, final native suite result, published GitHub session result/evidence pack.
+- Native sandbox qualification directly exercises DeepSeek Harness's built Windows ACL restricted-token backend before scoring. It must prove an inside-workspace write succeeds and an outside-workspace write is denied. Probe workspace/temp are deleted afterward.
+- Boundary is reported truthfully as `WINDOWS_ACL_WRITE_RESTRICTED_PARTIAL`; read isolation=false and network isolation=false. This is accepted only for the disposable synthetic benchmark, not as a production unattended-agent boundary.
+- Headless benchmark runs use `workspace-write` sandbox policy, owner-start-as-approval (`approval: never` only to avoid interactive headless prompts), telemetry disabled, DSH_HOME inside each disposable run, web/jobs/skills/subagents/workflows disabled, same Qwen 9B/Ollama route, same Benchmark-1 fixture, hidden tests evaluator-only.
+- Candidate C scoring: 1 warmup excluded + 3 scored runs, outer watchdog 600s/run, inner Harness timeout 420s with Windows process-tree termination, CPU/GPU/VRAM/GPU-power telemetry, cleanup in finally paths.
+- Benchmark safety and sandbox strength are separate facts: native runs may report `benchmark_safety_pass`, but `hard_safety_pass` is intentionally not claimed because the Windows backend does not isolate reads/network.
