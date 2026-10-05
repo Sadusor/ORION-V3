@@ -361,3 +361,13 @@ V2-001 lifecycle regression found and fixed 2026-10-05:
 - Added `spikes/orion_v2_ui/launch_v2_detached.py`, which starts V2 with separate process-group/no-window flags, DEVNULL stdin, log-file stdout/stderr, and closed inherited handles.
 - `start_shadow_ui.ps1` now launches V2 through this short-lived helper, verifies the detached PID, then performs the same V1 parity checks and exits.
 - Next physical gate: old attached V2/task is stopped; run the same single V2-001 task at `12f14dda...`; PASS requires the GitCheck session itself to terminate/publish PASS while V2 remains reachable on 8770.
+
+
+Primary STOP blocked V2 progression — 2026-10-05:
+- operator confirmed the big STOP still does not stop the active named dispatch run.
+- Root cause: STOP routing was corrected in Git (stop_active_run routes to active dispatch), but the currently running Remote V1 process is still serving older code. The fix had not yet been installed/restarted into the live canonical V1 server.
+- V2 work is paused until STOP is physically proven.
+- active ORION source SHA: fc0434a7cfdf0f3661f2cf973dee597a61e697b4.
+- exactly one runnable task: orion-install-primary-stop-fix / ORION Remote - Install Primary STOP Fix.
+- task uses the existing bounded install_primary_stop_fix.ps1: verifies exact approved SHA, clean canonical branch, fast-forward only, preserves bind address/port, schedules a Windows-owned server-only restart, leaves ZeroTier online, and restarts V1 on the same endpoint.
+- after installation/restart, next gate is a small disposable named task used only to physically prove the primary big STOP routes to the active dispatch session and kills its process tree. No V2 feature work resumes until this passes.
