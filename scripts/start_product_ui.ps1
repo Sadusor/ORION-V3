@@ -92,5 +92,5 @@ Write-Host ("PID> " + $proc.Id)
 Write-Host "PHASE_A> live UI + pairing + truthful read surfaces; actions not yet connected are refused." -ForegroundColor Yellow
 
 if (!$NoBrowser) {
-    Start-Process ("http://127.0.0.1:" + $Port + "/v3/")
+    Write-Host "PC_PRESENTATION> native ORION.exe owns the desktop UI; no external browser launched." -ForegroundColor DarkGray
 }
