@@ -15,7 +15,8 @@
   <Grid Background="#05070B">
     <wv2:WebView2 x:Name="OrionView"
                   HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"/>
+                  VerticalAlignment="Stretch"
+                  Visibility="Hidden"/>
 
     <Border x:Name="StartupOverlay"
             Background="#05070B"
