@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Web.WebView2.Core;
@@ -11,6 +12,12 @@ public partial class MainWindow : Window
 {
     private static readonly Uri OrionUri = new("http://127.0.0.1:8890/v3/");
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(2) };
+    private readonly string _stateRoot = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+        "ORION-V3"
+    );
+    private string ReadyFile => Path.Combine(_stateRoot, "desktop-ready.json");
+    private string ErrorFile => Path.Combine(_stateRoot, "desktop-error.log");
     private bool _closing;
 
     public MainWindow()
@@ -22,6 +29,10 @@ public partial class MainWindow : Window
     {
         try
         {
+            Directory.CreateDirectory(_stateRoot);
+            TryDelete(ReadyFile);
+            TryDelete(ErrorFile);
+
             StartupText.Text = "Connecting to ORION runtime…";
             await WaitForRuntimeAsync();
 
@@ -53,11 +64,14 @@ public partial class MainWindow : Window
                     if (args.IsSuccess)
                     {
                         StartupOverlay.Visibility = Visibility.Collapsed;
+                        WriteReadyEvidence();
                     }
                     else
                     {
-                        StartupText.Text = "ORION UI failed to load · " + args.WebErrorStatus;
+                        var detail = "ORION UI failed to load · " + args.WebErrorStatus;
+                        StartupText.Text = detail;
                         StartupOverlay.Visibility = Visibility.Visible;
+                        File.WriteAllText(ErrorFile, detail);
                     }
                 });
             };
@@ -66,11 +80,45 @@ public partial class MainWindow : Window
         }
         catch (WebView2RuntimeNotFoundException)
         {
-            StartupText.Text = "Microsoft WebView2 Runtime is required by the ORION desktop app.";
+            const string detail = "Microsoft WebView2 Runtime is required by the ORION desktop app.";
+            StartupText.Text = detail;
+            File.WriteAllText(ErrorFile, detail);
         }
         catch (Exception ex)
         {
-            StartupText.Text = "ORION could not start · " + ex.Message;
+            var detail = "ORION could not start · " + ex.Message;
+            StartupText.Text = detail;
+            File.WriteAllText(ErrorFile, detail);
+        }
+    }
+
+    private void WriteReadyEvidence()
+    {
+        var evidence = new
+        {
+            schema = "orion-v3.desktop-ready/1",
+            pid = Environment.ProcessId,
+            url = OrionUri.ToString(),
+            ready_at = DateTimeOffset.Now.ToString("O")
+        };
+
+        File.WriteAllText(
+            ReadyFile,
+            JsonSerializer.Serialize(evidence, new JsonSerializerOptions { WriteIndented = true })
+        );
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
         }
     }
 
@@ -110,6 +158,7 @@ public partial class MainWindow : Window
         }
 
         _closing = true;
+        TryDelete(ReadyFile);
 
         try
         {
