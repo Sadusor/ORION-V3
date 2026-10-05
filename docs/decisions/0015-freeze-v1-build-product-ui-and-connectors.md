@@ -1,3 +1,5 @@
+> **PARTIALLY SUPERSEDED — 2026-10-05.** Decision 0016 changes only the engineering-Remote role: TheHands is now primary, while the older Remote remains frozen emergency fallback. The product-UI separation/freeze rules below remain valid.
+
 # Decision 0015 — Freeze V1 Remote; Build Connectors + Separate ORION Product UI
 
 Date: 2026-10-05  
