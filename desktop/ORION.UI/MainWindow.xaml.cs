@@ -23,6 +23,7 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
+        OrionView.DefaultBackgroundColor = System.Drawing.Color.FromArgb(5, 7, 11);
     }
 
     private async void Window_Loaded(object sender, RoutedEventArgs e)
