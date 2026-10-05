@@ -36,7 +36,7 @@ function planet(t,col){const [w,h]=fit(cv,cx0),c=cx0;c.clearRect(0,0,w,h);const 
  if(st==="acting"&&!RM){const a=-1.5708+t*1.4,ex=Math.cos(a)*RX,ey=Math.sin(a)*RY;c.fillStyle=`rgba(${col},1)`;c.beginPath();c.arc(cx+ex*Math.cos(RA)-ey*Math.sin(RA),cy+ex*Math.sin(RA)+ey*Math.cos(RA),3,0,6.283);c.fill()}}
 let last=0,raf=0;
 function loop(now){if(document.hidden){raf=0;return}raf=requestAnimationFrame(loop);
- const idle=(["idle","completed","pass","stopped","failed","error","blocked","verif_failed"].includes(S.state))&&S.voice==="off"&&!S.mem;const cap=S.orb?250:RM?400:S.low?66:idle?50:16;if(now-last<cap)return;const dt=Math.min((now-last)/1000,.1);last=now;
+ const idle=(["idle","completed","pass","stopped","failed","error","blocked","verif_failed"].includes(S.state))&&S.voice==="off"&&!S.mem;const cap=S.orb?250:RM?400:PHONE?(S.low?100:50):S.low?66:idle?50:16;if(now-last<cap)return;const dt=Math.min((now-last)/1000,.1);last=now;
  const a=hex(tgt);rgb=rgb.map((v,i)=>v+(a[i]-v)*.06);const col=rgb.map(v=>v|0).join(",");
  S.camZ+=((S.mem?3.2:1)-S.camZ)*.04;spread+=((DIM.includes(S.state)?1.05:1)-spread)*.04;
  if(!RM&&!(["acting","completed","pass"].includes(S.state)||HALT.includes(S.state)))rot+=dt*(S.state==="thinking"?.2:DIM.includes(S.state)?.01:.09);
