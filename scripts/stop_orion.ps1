@@ -9,6 +9,8 @@ $StateRoot = Join-Path $env:LOCALAPPDATA "ORION-V3"
 $PidFile = Join-Path $StateRoot "product-ui.pid"
 $PairCodeFile = Join-Path $StateRoot "pair-code.txt"
 $LauncherPidFile = Join-Path $StateRoot "launcher.pid"
+$ReadyFile = Join-Path $StateRoot "desktop-ready.json"
+$ErrorFile = Join-Path $StateRoot "desktop-error.log"
 $ZeroTierUiOwner = Join-Path $StateRoot "zerotier-ui-owner.json"
 $UiExe = Join-Path $Repo "dist\windows\ORION.exe"
 
@@ -79,6 +81,8 @@ foreach ($pidValue in $serverPids) {
 
 Remove-Item -LiteralPath $PidFile -Force -ErrorAction SilentlyContinue
 Remove-Item -LiteralPath $PairCodeFile -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $ReadyFile -Force -ErrorAction SilentlyContinue
+Remove-Item -LiteralPath $ErrorFile -Force -ErrorAction SilentlyContinue
 
 # Close ZeroTier desktop UI only if ORION opened that exact process.
 if (Test-Path -LiteralPath $ZeroTierUiOwner -PathType Leaf) {
