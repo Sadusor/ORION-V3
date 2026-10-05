@@ -6,14 +6,14 @@ All milestones are gated by physical evidence.
 
 Owner-locked sequence as of 2026-10-05:
 
-1. leave the proven V1 Remote completely frozen;
+1. leave the proven V1 Remote completely frozen and keep it as the dedicated engineering Remote;
 2. use V1 only as the existing remote command/approval/STOP path to drive development in other repos/folders;
 3. build the connector layer/seams;
 4. build the separate STRATA/Claude-inspired ORION UI for PC and phone;
 5. connect those product UIs to ORION/backend/connectors only after the surfaces are ready;
 6. physically qualify each connected capability without modifying V1.
 
-Do **not** build a V2/Chrome copy of Remote, do not recreate Check GitHub / Approve & Run / STOP parity as a product milestone, and do not treat the new phone UI as a Remote replacement.
+Do **not** build a V2/Chrome copy of Remote, do not recreate Check GitHub / Approve & Run / STOP parity as a product milestone, and do not treat the new phone UI as a Remote replacement. V1 and the new ORION app are separate products/surfaces that coexist.
 
 The Agent V0 / DeepSeek Harness benchmark work remains valid recorded evidence and may continue as a separate architecture benchmark lane; it is no longer the immediate product-build sequence.
 
@@ -145,7 +145,7 @@ Candidates: OpenJarvis desktop/channel infrastructure, whisper.cpp, EchoFetch, o
 The final PC and phone interfaces are ORION product surfaces, not Remote V2.
 
 ## V3.11 — V1 Remote protection
-V1 Remote remains frozen and outside the product-UI build lane. No parity migration or retirement milestone is active. Any future change to that rule requires a new explicit owner directive.
+V1 Remote remains frozen and outside the product-UI build lane. It continues as the dedicated engineering Remote even after the ORION product UI is launched. No parity migration or retirement milestone is active. Any future change to that rule requires a new explicit owner directive.
 
 ## V3.2B — Intelligence Architecture Tournament
 
