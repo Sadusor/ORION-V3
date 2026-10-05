@@ -1,8 +1,10 @@
 # ADR — Remote V1 Protected / V2 Shadow Migration
 
 Date: 2026-10-05
-Status: ACCEPTED
-Owner decision: build the new ORION UI and features while continuously proving compatibility with the existing working Remote workflow.
+Status: SUPERSEDED 2026-10-05 by Decision 0015
+Owner decision at time of this ADR: build a V2 shadow migration beside V1.
+
+> **SUPERSEDED:** The owner later locked a simpler direction: V1 Remote is frozen and used only as the existing development/control path. ORION will not build a V2 Remote/parity surface. New work is connectors plus separate STRATA/Claude-inspired PC and phone product UIs, then backend/connector wiring. See `docs/decisions/0015-freeze-v1-build-product-ui-and-connectors.md`. The remainder of this file is retained only as historical context.
 
 ## Decision
 
