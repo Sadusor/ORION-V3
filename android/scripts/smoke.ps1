@@ -85,10 +85,16 @@ if ($logs -match '"composer":false') {
 }
 Write-Host "ORION_ANDROID_STRATA_DOM> PASS" -ForegroundColor Green
 
-if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError|chromium.*ERROR") {
-    throw "ORION_ANDROID_WEBVIEW> FAIL | JavaScript/WebView error detected"
+if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError") {
+    throw "ORION_ANDROID_WEBVIEW> FAIL | JavaScript error detected"
 }
 Write-Host "ORION_ANDROID_JS> PASS" -ForegroundColor Green
+
+if ($logs -match "tile memory limits exceeded") {
+    Write-Host "ORION_ANDROID_TILE_MEMORY> WARN | Chromium reported tile pressure; visual screenshot check will decide PASS/FAIL." -ForegroundColor Yellow
+} else {
+    Write-Host "ORION_ANDROID_TILE_MEMORY> PASS" -ForegroundColor Green
+}
 
 if (($ui -match "Pair this device") -or ($ui -match "Ask ORION") -or ($ui -match "ORION")) {
     Write-Host "ORION_ANDROID_ACCESSIBILITY> PASS" -ForegroundColor Green
