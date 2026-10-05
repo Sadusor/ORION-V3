@@ -8,6 +8,7 @@ $Repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $StateRoot = Join-Path $env:LOCALAPPDATA "ORION-V3"
 $LauncherPidFile = Join-Path $StateRoot "launcher.pid"
 $ZeroTierUiOwner = Join-Path $StateRoot "zerotier-ui-owner.json"
+$OllamaOwner = Join-Path $StateRoot "ollama-owner.json"
 $UiExe = Join-Path $Repo "dist\windows\ORION.exe"
 $StartProduct = Join-Path $Repo "scripts\start_product_ui.ps1"
 $StopOrion = Join-Path $Repo "scripts\stop_orion.ps1"
@@ -96,6 +97,110 @@ function Get-ZeroTierStatus {
 
     return @{ Online = $false; Ip = $null }
 }
+function Test-OllamaApi {
+    try {
+        $response = Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/tags" -Method Get -TimeoutSec 2
+        return $null -ne $response
+    } catch {
+        return $false
+    }
+}
+
+function Resolve-OllamaExe {
+    $cmd = Get-Command ollama.exe -ErrorAction SilentlyContinue
+    if ($cmd -and (Test-Path -LiteralPath $cmd.Source -PathType Leaf)) {
+        return $cmd.Source
+    }
+
+    foreach ($candidate in @(
+        (Join-Path $env:LOCALAPPDATA "Programs\Ollama\ollama.exe"),
+        "C:\Program Files\Ollama\ollama.exe"
+    )) {
+        if ($candidate -and (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+            return $candidate
+        }
+    }
+
+    return $null
+}
+
+function Ensure-Ollama {
+    if (Test-OllamaApi) {
+        Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+        return @{ Online = $true; Owned = $false; Pid = $null; Reason = "pre-existing" }
+    }
+
+    $existing = @(
+        Get-CimInstance Win32_Process -Filter "Name='ollama.exe'" -ErrorAction SilentlyContinue
+    )
+
+    if ($existing.Count -gt 0) {
+        for ($i = 0; $i -lt 20; $i++) {
+            Start-Sleep -Milliseconds 250
+            if (Test-OllamaApi) {
+                Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+                return @{ Online = $true; Owned = $false; Pid = [int]$existing[0].ProcessId; Reason = "pre-existing" }
+            }
+        }
+
+        Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+        return @{ Online = $false; Owned = $false; Pid = [int]$existing[0].ProcessId; Reason = "existing-process-not-ready" }
+    }
+
+    $exe = Resolve-OllamaExe
+    if (!$exe) {
+        Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+        return @{ Online = $false; Owned = $false; Pid = $null; Reason = "ollama.exe-not-found" }
+    }
+
+    $ollamaLog = Join-Path $StateRoot "ollama-serve.log"
+    $ollamaErr = Join-Path $StateRoot "ollama-serve.err.log"
+    Remove-Item -LiteralPath $ollamaLog -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $ollamaErr -Force -ErrorAction SilentlyContinue
+
+    $startArgs = @{
+        FilePath = $exe
+        ArgumentList = @("serve")
+        WindowStyle = "Hidden"
+        RedirectStandardOutput = $ollamaLog
+        RedirectStandardError = $ollamaErr
+        PassThru = $true
+    }
+    $started = Start-Process @startArgs
+
+    $online = $false
+    for ($i = 0; $i -lt 40; $i++) {
+        Start-Sleep -Milliseconds 250
+
+        $started.Refresh()
+        if ($started.HasExited) {
+            break
+        }
+
+        if (Test-OllamaApi) {
+            $online = $true
+            break
+        }
+    }
+
+    if (!$online) {
+        if (!$started.HasExited) {
+            & taskkill.exe /PID $started.Id /T /F 2>$null | Out-Null
+        }
+        Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+        return @{ Online = $false; Owned = $false; Pid = $started.Id; Reason = "serve-failed" }
+    }
+
+    @{
+        pid = [int]$started.Id
+        executable = $exe
+        command = "serve"
+        opened_by = "ORION-V3"
+        opened_at = [DateTimeOffset]::Now.ToString("O")
+    } | ConvertTo-Json | Set-Content -LiteralPath $OllamaOwner -Encoding UTF8
+
+    return @{ Online = $true; Owned = $true; Pid = [int]$started.Id; Reason = "started-by-orion" }
+}
 
 try {
     if (!(Test-Path -LiteralPath $UiExe -PathType Leaf)) {
@@ -132,6 +237,18 @@ try {
         }
     } else {
         Log "ZEROTIER_UI> NOT FOUND"
+    }
+
+    $ollama = Ensure-Ollama
+    if ($ollama.Online) {
+        if ($ollama.Owned) {
+            Log ("OLLAMA> ONLINE OWNED_BY_ORION PID " + $ollama.Pid)
+        } else {
+            $ollamaPidText = if ($ollama.Pid) { " PID " + $ollama.Pid } else { "" }
+            Log ("OLLAMA> ONLINE PRE_EXISTING" + $ollamaPidText)
+        }
+    } else {
+        Log ("OLLAMA> WARN " + $ollama.Reason + " - ORION UI will continue; Local Brain is not ready.")
     }
 
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $StartProduct -Port $Port -NoBrowser
