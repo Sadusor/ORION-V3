@@ -403,3 +403,23 @@ V2-005 staged — AI Council visibility:
 - exactly one runnable task: orion-v2-council-visibility-005 / ORION V2 - Show AI Council Providers.
 - V2 AI page now reads V1 Provider Vault + reviewer catalog and renders up to five visible cloud-model slots.
 - visibility only: no cloud calls, no new execution authority, STOP untouched.
+
+
+## 2026-10-05 UI wiring handoff
+
+A read-only architecture/code audit was completed before the next integration phase. No ORION runtime/product/UI code was changed by the audit.
+
+Tomorrow's two source-of-truth documents:
+
+- `docs/FUNCTION_INVENTORY_UI_WIRING_2026-10-05.md` — exhaustive product-function inventory, current implementation status, authority class, current STRATA route allowlist and bounded wiring order.
+- `docs/DONOR_CODE_AUDIT_2026-10-05.md` — code-oriented audit of ORION's internal/proven mechanics and donor repositories, including what to borrow, what remains replaceable, and what must never become authority.
+
+Next bounded product task:
+
+1. preserve/requalify the accepted native PC + phone shell as needed;
+2. connect the Local Brain/Ollama path to **Ask ORION**;
+3. connect ORION verifier + deterministic preflight;
+4. migrate proven deterministic capabilities behind the existing STRATA seams;
+5. physically qualify each PC+phone slice and freeze it before widening scope.
+
+TheHands remains a separate frozen engineering Remote and is not to be recreated inside the ORION product UI.
