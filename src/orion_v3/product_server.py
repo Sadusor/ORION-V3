@@ -165,8 +165,13 @@ class Handler(BaseHTTPRequestHandler):
     def _token(self) -> str:
         return self.headers.get("X-Orion-Token", "").strip()
 
+    def _is_local_pc(self) -> bool:
+        host = str(self.client_address[0] if self.client_address else "")
+        return host in {"127.0.0.1", "::1"} or host.startswith("127.")
+
     def _require_auth(self) -> bool:
-        if AUTH.valid(self._token()):
+        # The PC-local ORION console is trusted locally. Remote/phone clients must pair.
+        if self._is_local_pc() or AUTH.valid(self._token()):
             return True
         self._json(401, {"ok": False, "error": "pairing required"})
         return False
@@ -193,6 +198,14 @@ class Handler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
         body = target.read_bytes()
+        if rel == "index.html" and self._is_local_pc():
+            marker = b"</head>"
+            injected = (
+                "<script>window.ORION_PC_PAIR_CODE="
+                + json.dumps(AUTH.pair_code)
+                + ";</script></head>"
+            ).encode("utf-8")
+            body = body.replace(marker, injected, 1)
         ctype = mimetypes.guess_type(str(target))[0] or "application/octet-stream"
         if target.suffix == ".js":
             ctype = "application/javascript; charset=utf-8"
