@@ -404,3 +404,11 @@ V2-002 phone test passed; V2-003 staged — 2026-10-05:
 - active ORION source SHA bae9badcff358c5607f918127f6b3f0b906c39be.
 - exactly one runnable task: orion-v2-approve-run-003 / ORION V2 - Enable Approve & Run.
 - V2-003 adds only a server-side proxy for V1 /api/run/start. V1 remains execution/evidence authority. STOP remains frozen and untouched.
+
+
+V2-003 installer PASS; Approve & Run proxy proof staged — 2026-10-05:
+- V2-003 source bae9badcff358c5607f918127f6b3f0b906c39be published PASS in session ca20b4fb97b7.
+- active ORION source SHA 0261ec4598cbab6abcfd694c8a74bf237c6fb7bc.
+- exactly one runnable task: orion-v2-approve-run-proxy-proof.
+- task is harmless and exits PASS after 2 seconds; purpose is only to prove V2 Approve & Run forwards into the existing V1 runner.
+- STOP remains frozen and untouched.
