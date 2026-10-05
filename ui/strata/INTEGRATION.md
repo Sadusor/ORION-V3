@@ -4,13 +4,14 @@ Status: **NOT ACTIVE YET**
 
 The current owner-approved sequence is:
 
-1. freeze V1 Remote;
-2. build connector contracts/seams;
-3. build the new PC + phone product UI;
-4. only then connect the UI to ORION/backend/connectors;
-5. physically qualify each capability.
+1. use TheHands for manual engineering Remote execution;
+2. keep the frozen fallback Remote untouched;
+3. build connector contracts/seams;
+4. build the new PC + phone product UI;
+5. connect the UI to ORION/backend/connectors;
+6. physically qualify each capability.
 
-Therefore this UI must **not** be mounted into, proxied through, or used to modify V1 Remote during the foundation phase.
+This product UI must not become or proxy the engineering Remote.
 
 ## What is ready now
 
@@ -37,4 +38,4 @@ Before a backend endpoint is exposed through the product UI:
 
 ## No Remote parity milestone
 
-Do not recreate `Check GitHub`, `Approve & Run`, Remote status counters, Remote navigation, or a browser copy of V1 as a product milestone. V1 remains separate and untouched unless a future explicit owner decision unfreezes it.
+Do not recreate TheHands engineering controls as a product milestone. Manual engineering Remote work belongs in TheHands; the frozen fallback remains untouched.
