@@ -9,7 +9,7 @@ The existing V1 Remote is frozen.
 
 ORION development must **not** modify, redesign, refactor, extend, replace, migrate, or recreate V1 Remote. There is no active "Remote V2" product lane.
 
-V1 is used only as the already-proven operator/development control path while work happens elsewhere. It may continue to provide the existing Check GitHub, Approve & Run, STOP, status/evidence, recovery, and other already-proven controls, but those controls are not to be rebuilt as another browser/app Remote.
+V1 is used only exactly as already deployed. Existing Check GitHub, Approve & Run, STOP, status/evidence, recovery, and other already-proven controls may continue to be used for the work they already support. V3 must not require new task definitions, payloads, adapters, launchers, or any other repo changes in V1.
 
 ## Product direction
 
@@ -31,7 +31,8 @@ Chrome may be used during development to inspect a web-rendered product UI when 
 - Do not add new Remote buttons, layouts, labels, WebView behavior, parity adapters, or migration features.
 - Do not create a second canonical Remote state.
 - Do not spend product work recreating Check GitHub, Approve & Run, STOP, or Remote parity.
-- Use V1 as-is to drive approved work against other authorized folders/repos.
+- Use V1 exactly as it already exists; do not commit or stage new V3 tasks, launchers, adapters, catalogs, payloads, or connector logic in `Sadusor/Orion`.
+- All new launch/control/connector/product logic belongs in `Sadusor/ORION-V3` (or another explicitly designated new-project repo), never in V1.
 - Any future change to V1 requires a new explicit owner directive that unfreezes it.
 
 ## Superseded plan
