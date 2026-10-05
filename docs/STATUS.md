@@ -249,3 +249,12 @@ Candidate C Docker retry result and native pivot 2026-10-04/05:
 - Headless benchmark runs use `workspace-write` sandbox policy, owner-start-as-approval (`approval: never` only to avoid interactive headless prompts), telemetry disabled, DSH_HOME inside each disposable run, web/jobs/skills/subagents/workflows disabled, same Qwen 9B/Ollama route, same Benchmark-1 fixture, hidden tests evaluator-only.
 - Candidate C scoring: 1 warmup excluded + 3 scored runs, outer watchdog 600s/run, inner Harness timeout 420s with Windows process-tree termination, CPU/GPU/VRAM/GPU-power telemetry, cleanup in finally paths.
 - Benchmark safety and sandbox strength are separate facts: native runs may report `benchmark_safety_pass`, but `hard_safety_pass` is intentionally not claimed because the Windows backend does not isolate reads/network.
+
+
+Remote task-catalog simplification 2026-10-05:
+- owner requested one runnable GitCheck at a time so the big `Approve & Run` button is the primary path.
+- current ORION staging SHA: `Sadusor/Orion@a25801bab3fa716689748c08950c239967674010`.
+- `REMOTE_TASKS.json` now contains exactly one runnable task: `orion-candidate-c-native-benchmark` / "Candidate C - Native Windows DeepSeek Harness Benchmark".
+- prior Benchmark 1, Candidate C prep, Benchmark 2 foundation, and obsolete Docker Candidate C task entries are removed from the current catalog only; their code/results/evidence remain preserved in Git history and the results branch.
+- this restores the simple operator flow: Check GitHub -> big Approve & Run.
+- native Candidate C at this SHA also includes the Ollama auto-start/lifecycle fix from `fcc22388...`: start `ollama serve` only if loopback API is down; preserve pre-existing Ollama; stop only a task-started Ollama process tree during cleanup.
