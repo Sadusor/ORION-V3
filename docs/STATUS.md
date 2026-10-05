@@ -338,3 +338,16 @@ Architecture decision 2026-10-05 — stop agent benchmarking; resume product bui
 - Proven coding loop is retained as a backup/recovery workflow. Frozen backup branch created at `Sadusor/Orion@backup/coding-loop-proven-2026-10-05` from `1100242e88cf6b9feb70135908fd539500b42242`.
 - Operator rule during active development: exactly one runnable GitCheck task at a time so the primary `Check GitHub -> Approve & Run` flow remains simple.
 - UI phase should frame the existing working backend rather than rewrite it: Home/status, Work/Tasks, AI Council, Memory, System/Remote; truthful backend-driven states; global STOP; exact SHA/evidence visibility; five cloud reviewer slots/provider health; low-consumption status; existing Remote V1 behavior preserved until replacements are proven.
+
+
+ORION V2 UI build started 2026-10-05 — V2-001 staged:
+- active ORION source SHA: `df23d4527350a0a54784167f841e8790da9c65d9`
+- exactly one runnable GitCheck task: `orion-v2-shadow-ui-001` / "ORION V2 - Start Shadow UI".
+- V1 code is untouched by V2-001.
+- V2 files live under `spikes/orion_v2_ui/`; runtime is copied to `%LOCALAPPDATA%\Orion\ui-v2\runtime`.
+- V2 runs as a separate Python process on port 8770 while V1 remains on 8766.
+- V2-001 has no execution authority. Check GitHub / Approve & Run / STOP are intentionally disabled in V2.
+- V2 uses its own phone pairing token. Server-side only, it reads the existing V1 control token file to query V1's authenticated status API; the V1 token is not exposed to V2 browser JavaScript.
+- Physical PASS requires: V1 reachable before launch, V1 PID unchanged, V1 still reachable after launch, V2 health endpoint live, and V2 shadow parity on pending_sha, run_state, last_result, and current_dispatch_session_id.
+- V2 UI shell includes Home, Work, AI Council, Memory, System/Remote. AI/Memory are placeholders only; no model or skill calls are enabled.
+- The V2 task prints a V2 URL, one-time pairing code, and pairing URL into the existing V1 runner output so the operator can open it remotely.
