@@ -31,6 +31,7 @@
       <button class="ib conn" id="conn" aria-label="Connection details"><span class="dot"></span><span id="connT">CONNECTING</span></button>
       <button class="ib" id="gear" title="Low-power mode">◐</button>
       <button class="ib" id="ccb">Connectors</button>
+      <button class="ib" id="closeOrion" hidden title="Close ORION and stop this ORION session">CLOSE</button>
     </div>
   </header>
 
@@ -99,6 +100,15 @@
   if(code&&el){
     el.textContent='PHONE PAIR · '+code;
     el.hidden=false;
+  }
+
+  var closeBtn=document.getElementById('closeOrion');
+  var nativeHost=window.chrome&&window.chrome.webview;
+  if(closeBtn&&nativeHost){
+    closeBtn.hidden=false;
+    closeBtn.addEventListener('click',function(){
+      nativeHost.postMessage('orion-close');
+    });
   }
 })();
 </script>
