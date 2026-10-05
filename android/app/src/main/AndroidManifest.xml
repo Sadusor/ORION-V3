@@ -8,7 +8,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="ORION V3"
+        android:label="ORION"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:usesCleartextTraffic="true"
         android:theme="@style/Theme.OrionV3">
         <activity
