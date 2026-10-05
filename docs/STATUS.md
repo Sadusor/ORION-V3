@@ -381,3 +381,10 @@ Primary STOP installation PASS and physical proof staged — 2026-10-05:
 - task is intentionally harmless and long-running: heartbeat every 5 seconds for up to 10 minutes.
 - operator action: start with big Approve & Run, then press the big STOP while heartbeats are visible.
 - valid gate result is STOPPED, not PASS. V2 work remains blocked until the result branch confirms STOPPED for this exact task/session.
+
+
+2026-10-05 — STOP frozen; V2 resumed:
+- operator physically confirmed the big STOP stopped the active proof run; STOP behavior is now frozen and must not be modified during V2 UI work.
+- the published proof session was classified FAIL despite the physical stop; treat this as evidence/result-state bookkeeping debt, not a reason to reopen STOP now.
+- V2 work resumed with exactly one runnable task at ORION SHA 8063f28dfac49414a00c3831fab41d916af2edeb: orion-v2-shadow-ui-001.
+- next gate: V2 task itself must exit cleanly while detached V2 remains reachable and V1 remains unchanged.
