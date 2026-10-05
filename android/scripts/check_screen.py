@@ -1,6 +1,7 @@
 from __future__ import annotations
 import sys
-from PIL import Image, ImageStat
+from PIL import Image
+import numpy as np
 
 if len(sys.argv) != 2:
     raise SystemExit("usage: check_screen.py <png>")
@@ -17,17 +18,22 @@ crop = im.crop((0, top, w, bottom))
 
 # Downsample for a cheap deterministic visual-health check.
 sample = crop.resize((max(1, w // 8), max(1, (bottom - top) // 8)))
-pixels = list(sample.getdata())
-n = max(1, len(pixels))
+pixels = np.asarray(sample, dtype=np.uint8).reshape(-1, 3).astype(np.float32)
 
-luma = [0.2126*r + 0.7152*g + 0.0722*b for r, g, b in pixels]
-mean = sum(luma) / n
-var = sum((x - mean) ** 2 for x in luma) / n
-std = var ** 0.5
-bright_ratio = sum(1 for x in luma if x >= 28.0) / n
-cyan_ratio = sum(1 for r, g, b in pixels if b >= 35 and g >= 28 and b > r * 1.15) / n
+r = pixels[:, 0]
+g = pixels[:, 1]
+b = pixels[:, 2]
+luma = 0.2126 * r + 0.7152 * g + 0.0722 * b
 
-print(f"ORION_SCREEN_METRICS> mean={mean:.2f} std={std:.2f} bright={bright_ratio:.5f} cyan={cyan_ratio:.5f}")
+mean = float(luma.mean())
+std = float(luma.std())
+bright_ratio = float((luma >= 28.0).mean())
+cyan_ratio = float(((b >= 35.0) & (g >= 28.0) & (b > r * 1.15)).mean())
+
+print(
+    f"ORION_SCREEN_METRICS> mean={mean:.2f} "
+    f"std={std:.2f} bright={bright_ratio:.5f} cyan={cyan_ratio:.5f}"
+)
 
 # A healthy STRATA surface is dark, but it contains stars, labels, the core,
 # pairing modal, or cyan UI chrome. A solid/near-solid black WebView will have
@@ -35,3 +41,5 @@ print(f"ORION_SCREEN_METRICS> mean={mean:.2f} std={std:.2f} bright={bright_ratio
 healthy = (std >= 4.0 and bright_ratio >= 0.0020) or cyan_ratio >= 0.0010
 if not healthy:
     raise SystemExit(2)
+
+raise SystemExit(0)
