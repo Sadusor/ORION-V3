@@ -9,6 +9,7 @@ This carries forward the original ORION donor research. Presence here is not ado
 | OpenJarvis | registries, engines, provider routing, channels, events, skills, UI/runtime | GATE-1 PRIMARY |
 | Jev Harness | proposal -> evidence -> code decides -> host authorizes | ADAPT CONCEPT |
 | WORKSHOP | provider discovery, role mappings, health, fallbacks, safe serialization | ADAPT / BENCHMARK |
+| Soup Wall | deterministic local agent firewall: taint, action classes, egress, MCP/subagent controls, approvals, replay/regression gates | HIGH-PRIORITY SECURITY DONOR / SHADOW SPIKE |
 
 ## Execution Hands
 
@@ -83,6 +84,12 @@ This carries forward the original ORION donor research. Presence here is not ado
 | Ai-Benchmark-v4 | model/router evaluation | BENCHMARK |
 | cua-bench | computer-use trajectories/effect verification | BENCHMARK |
 
+## Training / post-training
+
+| Donor | Role | V3 disposition |
+|---|---|---|
+| Soup | YAML-driven LoRA/QLoRA/post-training, low-VRAM layer streaming, GGUF/local deployment path | HIGH-PRIORITY TRAINING DONOR / BENCHMARK AT V3.9A |
+
 ## Audit / research-only
 
 | Donor | Role | V3 disposition |
@@ -109,3 +116,11 @@ Borrow capability, not ownership.
 - GhostTrack: no ORION runtime value found; no license reported; do not adopt.
 
 See `docs/decisions/0003-donor-contract-patterns.md`.
+
+## 2026-10-05 training + security donor review
+
+- Soup: promising for a future detachable ORION behavior adapter; keep canonical memory/retrieval outside model weights; benchmark only after enough curated traces exist.
+- Soup Wall: study deterministic shadow-first action gating, taint/egress controls, subagent authority monotonicity, MCP manifest pinning, approval grants, audit/replay and policy regression gates. It may narrow ORION-authorized actions but never create authority.
+- Neither donor is adopted or physically tested yet. Pin exact revisions before a falsification spike.
+
+Detailed review: `docs/reference/2026-10-05-soup-training-and-soup-wall-donor-review.md`.
