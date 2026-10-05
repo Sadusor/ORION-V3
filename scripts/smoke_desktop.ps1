@@ -78,6 +78,37 @@ if ($startProductSource -match 'Start-Process\s+\("?http://127\.0\.0\.1') {
 }
 Write-Host "ORION_NO_EXTERNAL_BROWSER> PASS" -ForegroundColor Green
 
+try {
+    $ollama = Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/tags" -Method Get -TimeoutSec 3
+    Write-Host "ORION_OLLAMA_RUNTIME> PASS" -ForegroundColor Green
+} catch {
+    throw "ORION_OLLAMA_RUNTIME> FAIL | Ollama API is not reachable on 127.0.0.1:11434"
+}
+
+$ollamaOwnerFile = Join-Path $StateRoot "ollama-owner.json"
+if (Test-Path -LiteralPath $ollamaOwnerFile -PathType Leaf) {
+    $owner = Get-Content -LiteralPath $ollamaOwnerFile -Raw | ConvertFrom-Json
+    $owned = Get-CimInstance Win32_Process -Filter ("ProcessId=" + [int]$owner.pid) -ErrorAction SilentlyContinue
+    if (
+        !$owned -or
+        $owned.Name -ine "ollama.exe" -or
+        [string]$owner.opened_by -ne "ORION-V3" -or
+        [string]$owner.command -ne "serve"
+    ) {
+        throw "ORION_OLLAMA_OWNERSHIP> FAIL | ownership record does not match a live ORION-started serve process"
+    }
+    Write-Host ("ORION_OLLAMA_OWNERSHIP> PASS | ORION-owned PID " + $owner.pid) -ForegroundColor Green
+} else {
+    Write-Host "ORION_OLLAMA_OWNERSHIP> PASS | pre-existing Ollama left unowned" -ForegroundColor Green
+}
+
+$indexSource = Get-Content -LiteralPath (Join-Path $Repo "ui\strata\index.html") -Raw
+$nativeSource = Get-Content -LiteralPath (Join-Path $Repo "desktop\ORION.UI\MainWindow.xaml.cs") -Raw
+if ($indexSource -notmatch 'id="closeOrion"' -or $nativeSource -notmatch 'orion-close') {
+    throw "ORION_CLOSE_CONTROL> FAIL | native CLOSE control contract missing"
+}
+Write-Host "ORION_CLOSE_CONTROL> PASS" -ForegroundColor Green
+
 foreach ($required in @("START ORION.bat", "STOP ORION.bat", "scripts\start_orion.ps1", "scripts\stop_orion.ps1")) {
     if (!(Test-Path -LiteralPath (Join-Path $Repo $required) -PathType Leaf)) {
         throw ("ORION_LAUNCH_PROTOCOL> FAIL | missing " + $required)
