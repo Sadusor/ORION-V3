@@ -43,17 +43,13 @@ Replaceable Hands
 
 OpenJarvis is a candidate substrate, not ORION's authority.
 
-## Safety / rollback
+## Engineering execution / rollback
 
-The existing ORION Remote fallback is not migrated into this repository.
+Manual engineering Remote work is routed through `Sadusor/TheHands-`.
 
-Proven fallback reference:
+The older Remote remains frozen emergency fallback only and is not modified or retired by V3 work.
 
-- repository: `Sadusor/Orion`
-- branch: `checkpoint/2026-10-01-orion-remote-project-link`
-- SHA: `327d32f714129ca633517a8f4158cd84820c1504`
-
-ORION V3 must prove parity before any old path is retired.
+The ORION product UI remains separate from the engineering Remote.
 
 ## Pinned OpenJarvis donor
 
