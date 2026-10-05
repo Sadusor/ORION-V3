@@ -105,13 +105,15 @@ Canonical Memory remains ORION-owned.
 Retrieval engines, vector stores, graphs and donor memory backends are derived/rebuildable.
 Retrieved information never grants authority.
 
-## UI
+## UI and engineering control
 
-The proven V1 Remote is frozen and is not a product-UI development target. It is used only as the existing operator/development control path (Check GitHub, approval/run, STOP, recovery) while work is performed in other ORION folders/repos.
+The ORION product surfaces are separate STRATA/Claude-inspired PC and phone UIs. They consume ORION projections/connectors and are not engineering Remote parity rebuilds.
 
-The new product surfaces are a separate STRATA/Claude-inspired ORION PC UI and ORION phone UI. They consume ORION projections/connectors and are not clones, successors, parity rebuilds, or browser replacements of V1 Remote.
+Manual engineering Remote execution is handled by `Sadusor/TheHands-`.
 
-Build order: connectors -> PC + phone UI -> connect UI to backend/connectors -> physical qualification. Replacing or closing either new UI must not destroy Task/Event truth.
+The older Remote stays frozen as emergency fallback only.
+
+Build order: connectors -> PC + phone UI -> connect UI to backend/connectors -> physical qualification. Replacing or closing either product UI must not destroy Task/Event truth.
 
 ## Default routine flow
 
