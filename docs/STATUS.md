@@ -351,3 +351,13 @@ ORION V2 UI build started 2026-10-05 — V2-001 staged:
 - Physical PASS requires: V1 reachable before launch, V1 PID unchanged, V1 still reachable after launch, V2 health endpoint live, and V2 shadow parity on pending_sha, run_state, last_result, and current_dispatch_session_id.
 - V2 UI shell includes Home, Work, AI Council, Memory, System/Remote. AI/Memory are placeholders only; no model or skill calls are enabled.
 - The V2 task prints a V2 URL, one-time pairing code, and pairing URL into the existing V1 runner output so the operator can open it remotely.
+
+
+V2-001 lifecycle regression found and fixed 2026-10-05:
+- physical V2-001 run on source `df23d4527350a0a54784167f841e8790da9c65d9` reached all functional PASS markers: V1 PID unchanged, V1 status after launch PASS, V2 shadow parity PASS, V2 listening on port 8770, execution authority NONE, V1 fallback preserved.
+- Operator observed the GitCheck session remained RUNNING even after `ORION_V2_001> PASS` / `STATUS> PASS`.
+- Root cause: the persistent V2 Python server was launched as a child of the GitCheck PowerShell task, so the dispatch session's process/pipe lifecycle remained coupled to the long-lived sidecar.
+- Fix staged at ORION source SHA `12f14dda250bbb7cf0e314aad625118fb296753c`.
+- Added `spikes/orion_v2_ui/launch_v2_detached.py`, which starts V2 with separate process-group/no-window flags, DEVNULL stdin, log-file stdout/stderr, and closed inherited handles.
+- `start_shadow_ui.ps1` now launches V2 through this short-lived helper, verifies the detached PID, then performs the same V1 parity checks and exits.
+- Next physical gate: old attached V2/task is stopped; run the same single V2-001 task at `12f14dda...`; PASS requires the GitCheck session itself to terminate/publish PASS while V2 remains reachable on 8770.
