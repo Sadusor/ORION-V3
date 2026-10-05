@@ -45,10 +45,13 @@ The PC-local console is trusted localhost. The phone must pair to the same runti
 3. inspect ZeroTier;
 4. if ZeroTier desktop UI is already open, leave it alone and record it as pre-existing;
 5. if ZeroTier desktop UI is not open, start it and write an exact ownership record;
-6. start the ORION backend on port 8890 without launching any browser;
-7. launch `ORION.exe`;
-8. wait for the native window to close;
-9. run ORION cleanup automatically.
+6. probe Ollama at `127.0.0.1:11434`;
+7. if Ollama is already healthy, leave it running and do not claim ownership;
+8. if Ollama is not running, start `ollama serve` hidden and record the exact ORION-owned PID/executable;
+9. start the ORION backend on port 8890 without launching any browser;
+10. launch `ORION.exe`;
+11. wait for the native window to close;
+12. run ORION cleanup automatically.
 
 `START ORION.bat` launches that lifecycle host hidden so no orphan command window remains on the desktop.
 
@@ -56,11 +59,15 @@ The PC-local console is trusted localhost. The phone must pair to the same runti
 
 Closing `ORION.exe` is the normal product close.
 
+The STRATA top bar exposes a native-only `CLOSE` control. It sends an `orion-close` message to the native host, which closes the same `ORION.exe` window. That enters the exact same lifecycle cleanup path as closing the window normally or running `STOP ORION.bat`.
+
 After the native window exits, the hidden lifecycle host automatically:
 - stops the ORION backend;
 - removes stale ORION runtime/pairing state;
 - closes ZeroTier desktop UI only if this ORION session opened that exact process;
 - leaves a pre-existing ZeroTier UI untouched;
+- stops Ollama only if this ORION session started the exact `ollama serve` process;
+- leaves a pre-existing Ollama runtime/model session untouched;
 - never stops the shared ZeroTier service;
 - removes stale ORION lifecycle hosts.
 
@@ -82,6 +89,9 @@ only after STRATA navigation completes successfully inside `ORION.exe`.
 - exact native `ORION.exe` process is running;
 - STRATA reached ready state inside the native app;
 - backend launcher contains no external-browser launch path;
+- Ollama API is reachable;
+- Ollama ownership is either a validated ORION-owned serve PID or explicitly pre-existing/unowned;
+- native CLOSE control is wired from STRATA to `ORION.exe`;
 - START/STOP lifecycle files exist.
 
 ## Separation from TheHands
