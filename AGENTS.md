@@ -46,14 +46,19 @@ Before substantial custom implementation:
 6. record the result;
 7. custom-build only when donors fail a real ORION contract.
 
-## Old ORION protection
+## Manual engineering Remote
 
-Fallback reference only:
-- repo: `Sadusor/Orion`
-- branch: `checkpoint/2026-10-01-orion-remote-project-link`
-- SHA: `327d32f714129ca633517a8f4158cd84820c1504`
+For owner-approved manual engineering execution, use `Sadusor/TheHands-`.
 
-Do not push V3 experiments into that repository.
+Default flow:
+
+`GIT CHECK -> APPROVE & START -> STOP`
+
+PowerShell 1 is MAIN; PowerShell 2-4 are independent additional slots.
+
+Do not create new routine engineering task-routing machinery in the frozen fallback Remote. The older Remote remains emergency fallback only and must stay untouched.
+
+Canonical decision: `docs/decisions/0016-thehands-primary-engineering-remote.md`.
 
 ## Cost / supply chain
 
