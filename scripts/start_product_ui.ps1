@@ -46,6 +46,8 @@ function Stop-OldProductUi {
 Stop-OldProductUi
 $python = Resolve-Python
 $pairCode = "{0:D6}" -f (Get-Random -Minimum 0 -Maximum 1000000)
+$pairCodeFile = Join-Path $State "pair-code.txt"
+Set-Content -LiteralPath $pairCodeFile -Encoding ASCII -Value $pairCode
 $server = Join-Path $Repo "src\orion_v3\product_server.py"
 if (!(Test-Path -LiteralPath $server)) { throw "Product server missing: $server" }
 
@@ -79,6 +81,7 @@ Write-Host ""
 Write-Host "ORION_V3_PRODUCT_UI> PASS" -ForegroundColor Green
 Write-Host ("RUNTIME_COMMIT> " + $health.running_commit) -ForegroundColor Green
 Write-Host ("PAIR_CODE> " + $pairCode) -ForegroundColor Cyan
+Write-Host ("PAIR_CODE_FILE> " + $pairCodeFile) -ForegroundColor DarkGray
 Write-Host ("PC_URL> http://127.0.0.1:" + $Port + "/v3/") -ForegroundColor Green
 if ($ztIp) {
     Write-Host ("PHONE_URL> http://" + $ztIp + ":" + $Port + "/v3/") -ForegroundColor Green
