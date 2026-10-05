@@ -58,6 +58,14 @@ public partial class MainWindow : Window
             OrionView.CoreWebView2.Settings.IsZoomControlEnabled = false;
             OrionView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
 
+            OrionView.CoreWebView2.WebMessageReceived += (_, args) =>
+            {
+                if (string.Equals(args.TryGetWebMessageAsString(), "orion-close", StringComparison.Ordinal))
+                {
+                    Dispatcher.Invoke(Close);
+                }
+            };
+
             OrionView.CoreWebView2.NavigationCompleted += (_, args) =>
             {
                 Dispatcher.Invoke(() =>
