@@ -27,6 +27,7 @@
       <input id="sch" placeholder="Search memory…" aria-label="Search memory (preview)">
       <button class="ib vpbtn" id="viewb" title="Live View">VIEW PC</button>
       <button class="ib" id="histb" title="Conversation history">History</button>
+      <span class="pillb pc-pair-code" id="pcPairCode" hidden title="Use this code to pair the ORION phone app"></span>
       <button class="ib conn" id="conn" aria-label="Connection details"><span class="dot"></span><span id="connT">CONNECTING</span></button>
       <button class="ib" id="gear" title="Low-power mode">◐</button>
       <button class="ib" id="ccb">Connectors</button>
@@ -91,5 +92,15 @@
 <script src="memory/memory.js"></script>
 <script src="product/workspace.js"></script>
 <script src="shell/shell.js"></script>
+<script>
+(function(){
+  var code=window.ORION_PC_PAIR_CODE;
+  var el=document.getElementById('pcPairCode');
+  if(code&&el){
+    el.textContent='PHONE PAIR · '+code;
+    el.hidden=false;
+  }
+})();
+</script>
 </body>
 </html>
