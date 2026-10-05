@@ -1,0 +1,41 @@
+<Window x:Class="ORION.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="ORION"
+        Width="1500"
+        Height="930"
+        MinWidth="1000"
+        MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        Background="#05070B"
+        Foreground="#C9EEF5"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing">
+  <Grid Background="#05070B">
+    <wv2:WebView2 x:Name="OrionView"
+                  HorizontalAlignment="Stretch"
+                  VerticalAlignment="Stretch"
+                  DefaultBackgroundColor="#05070B"/>
+
+    <Border x:Name="StartupOverlay"
+            Background="#05070B"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+      <StackPanel HorizontalAlignment="Center"
+                  VerticalAlignment="Center">
+        <TextBlock Text="ORION"
+                   FontSize="34"
+                   FontWeight="SemiBold"
+                   Foreground="#C9EEF5"
+                   HorizontalAlignment="Center"
+                   Margin="0,0,0,10"/>
+        <TextBlock x:Name="StartupText"
+                   Text="Starting personal AI control plane…"
+                   FontSize="13"
+                   Foreground="#728394"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+</Window>
