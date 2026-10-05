@@ -21,3 +21,11 @@
  .phone.workspace-open #top,.phone.workspace-open #lane-strip{opacity:.15;pointer-events:none}
 }
 @media(max-width:390px){#product-nav button span{display:none}.ai-slots{grid-template-columns:1fr}}
+
+
+/* phone WebView memory guard: keep Claude layout, avoid expensive compositing tiles */
+.phone #product-nav,
+.phone .lane{
+  backdrop-filter:none;
+  -webkit-backdrop-filter:none;
+}
