@@ -107,8 +107,11 @@ Retrieved information never grants authority.
 
 ## UI
 
-The final Jarvis-like UI consumes ORION projections, not donor-private state.
-Replacing or closing the UI must not destroy Task/Event truth.
+The proven V1 Remote is frozen and is not a product-UI development target. It is used only as the existing operator/development control path (Check GitHub, approval/run, STOP, recovery) while work is performed in other ORION folders/repos.
+
+The new product surfaces are a separate STRATA/Claude-inspired ORION PC UI and ORION phone UI. They consume ORION projections/connectors and are not clones, successors, parity rebuilds, or browser replacements of V1 Remote.
+
+Build order: connectors -> PC + phone UI -> connect UI to backend/connectors -> physical qualification. Replacing or closing either new UI must not destroy Task/Event truth.
 
 ## Default routine flow
 
