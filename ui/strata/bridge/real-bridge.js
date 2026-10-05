@@ -17,6 +17,7 @@ const RealBridge=(function(){
  const subs=new Set(),emit=e=>subs.forEach(f=>{try{f(e)}catch(x){console.error('[strata] subscriber error',x)}});
  const st={lastOk:0,fails:0,latency:null,link:'connecting',error:'',timer:0,running:false,model:null,burstUntil:0,lastPollAt:0,blockedCalls:0};
  const token=()=>LS('orionToken');
+ const localPc=()=>typeof location!=='undefined'&&['127.0.0.1','localhost','::1'].includes(location.hostname);
 
  /* ---- low-level request. Never throws for HTTP/network problems: returns a classified result. ---- */
  async function request(method,route,body,timeoutMs){
@@ -35,7 +36,7 @@ const RealBridge=(function(){
    return{ok:false,status:0,data:{},parsed:false,ms:Math.round(performance.now()-t0),route,method,cls:timeout?'timeout':'unreachable',message:timeout?'No answer within '+(+(timeoutMs/1000).toFixed(1))+'s':(e&&e.message)||'network error'};
   }finally{clearTimeout(to)}}
 
- function link(){return{status:st.link,lastOk:st.lastOk,latency:st.latency,fails:st.fails,error:st.error,base:C.base||'(same origin)',transport:C.transport,paired:!!token(),lastPollAt:st.lastPollAt}}
+ function link(){return{status:st.link,lastOk:st.lastOk,latency:st.latency,fails:st.fails,error:st.error,base:C.base||'(same origin)',transport:C.transport,paired:localPc()||!!token(),lastPollAt:st.lastPollAt}}
  function setLink(s,err){st.link=s;st.error=err||(s==='live'?'':st.error);emit({type:'link',link:link()})}
 
  /* Most POST routes return Controller.view(); absorb it as a fresh snapshot, but only if it passes the contract check. */
@@ -51,7 +52,7 @@ const RealBridge=(function(){
  async function poll(){
   clearTimeout(st.timer);st.lastPollAt=Date.now();
   try{
-   if(!token()){setLink('unpaired');return}
+   if(!token()&&!localPc()){setLink('unpaired');return}
    const r=await request('GET','/api/status',null,C.statusTimeoutMs);
    if(r.cls==='unauthorized')return;
    if(r.ok&&r.parsed&&looksLikeView(r.data)){st.fails=0;st.latency=r.ms;st.lastOk=Date.now();st.model=normalizeStatus(r.data);emit({type:'snapshot',model:st.model});setLink('live');return}
