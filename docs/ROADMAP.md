@@ -2,36 +2,22 @@
 
 All milestones are gated by physical evidence.
 
-## Immediate owner-approved build — ORION Agent V0
+## Immediate owner-approved build — Connectors + ORION product UI
 
-Build the smallest ORION-native bounded agent loop before making any Agent V1 decision.
+Owner-locked sequence as of 2026-10-05:
 
-Sequence:
+1. leave the proven V1 Remote completely frozen;
+2. use V1 only as the existing remote command/approval/STOP path to drive development in other repos/folders;
+3. build the connector layer/seams;
+4. build the separate STRATA/Claude-inspired ORION UI for PC and phone;
+5. connect those product UIs to ORION/backend/connectors only after the surfaces are ready;
+6. physically qualify each connected capability without modifying V1.
 
-1. deterministic Agent V0 foundation gate;
-2. Qwen structured-proposal adapter;
-3. bounded test/build Hand;
-4. reusable benchmark fixture;
-5. A/B/C benchmark:
-   - A: Qwen + deterministic Hands;
-   - B: same Qwen + ORION Agent V0 + same Hands;
-   - C: same Qwen + DeepSeek Harness under ORION isolation;
-6. owner + assistant review results and brainstorm the next architecture.
+Do **not** build a V2/Chrome copy of Remote, do not recreate Check GitHub / Approve & Run / STOP parity as a product milestone, and do not treat the new phone UI as a Remote replacement.
 
-Implementation status as of 2026-10-04:
-- benchmark harness is coded but not physically run;
-- A/B host-safe runners are ready behind the foundation gate;
-- C runner is coded but fail-closed unless an outer disposable sandbox is explicitly present;
-- resource telemetry captures Windows CPU/RAM and NVIDIA GPU/VRAM/power;
-- the frozen fixture includes visible/hidden correctness tests and a harmless prompt-injection trap.
+The Agent V0 / DeepSeek Harness benchmark work remains valid recorded evidence and may continue as a separate architecture benchmark lane; it is no longer the immediate product-build sequence.
 
-Keep future seams for Memory, Skills, Security Advisor, Sandbox and escalation, but do not implement those features into V0 unless the benchmark proves they are needed.
-
-Google Mantis is the primary secure-coding/sandbox/verification donor. ButterClaw is the primary runtime-policy/process-monitor donor. Google mcp-security, Athena Investigation MCP and AgenticAnomaly remain optional security-tool/contract/red-team donors.
-
-Canonical decision: `docs/decisions/0014-build-orion-native-agent-v0.md`.
-
-Full donor analysis: `docs/reference/2026-10-04-agent-security-donor-analysis.md`.
+Canonical decision: `docs/decisions/0015-freeze-v1-build-product-ui-and-connectors.md`.
 
 ## V3.0A — Donor contract probe — PASS
 Physical PASS on 2026-10-04. Hostile scope rejection, exact frozen-plan hash approval, post-approval mutation denial, deterministic Hand receipt, exact artifact verification, replay protection, and no-network/model execution all passed. Evidence: `docs/evidence/2026-10-04-donor-contract-probe-pass.md`.
@@ -62,9 +48,13 @@ Use OpenJarvis engine/model registries where they survive policy tests.
 Qwen 3.5 9B remains the leading lightweight governor candidate.
 WORKSHOP remains a donor for provider discovery, roles, health, fallback and safe serialization.
 
-## V3.2A — Phone UI alpha
-After Proof V2 stabilizes the natural-language -> ORION contract boundary, build the new V3 phone/UI alpha before the broad Hands tournament. Target one interaction for low-risk requests, at most one confirmation for bounded writes, explicit confirmation for high-risk actions, auto-refresh, global STOP and inline evidence. Legacy Remote remains frozen fallback.
+## V3.2A — Product UI foundation
 
+Build the new ORION product UI as two coordinated surfaces:
+- PC UI;
+- phone UI.
+
+Both follow the STRATA/Claude design direction and consume ORION-owned state. Neither is a rebuild of V1 Remote. V1 remains frozen and may only be used as the proven external development/control path while these surfaces are built.
 
 ## V3.2B — Multi-lane local assistants
 Keep the everyday Personal Assistant available while one or more project workflows are active.
@@ -136,7 +126,7 @@ Primary donor: Artemis.
 Transport/client donors: KIRA and Orion-Copilot patterns.
 
 ## V3.8 — Connectors / workflows
-Primary commodity integration donor: n8n.
+Current product priority. Build connector contracts/seams before wiring the new PC/phone UI. Primary commodity integration donor: n8n. Connector implementations remain replaceable and do not gain ORION authority.
 
 ## V3.9 — Learning / recipes
 Adapt OpenJarvis SkillDiscovery only as a candidate generator.
@@ -152,8 +142,10 @@ Train only on curated manifests of corrected interpretations, accepted plans, te
 ## V3.10 — Voice / channels / final UI
 Candidates: OpenJarvis desktop/channel infrastructure, whisper.cpp, EchoFetch, openWakeWord, Kokoro.
 
-## V3.11 — Remote parity
-Only after PC + phone parity is physically proven may legacy Remote be considered for retirement.
+The final PC and phone interfaces are ORION product surfaces, not Remote V2.
+
+## V3.11 — V1 Remote protection
+V1 Remote remains frozen and outside the product-UI build lane. No parity migration or retirement milestone is active. Any future change to that rule requires a new explicit owner directive.
 
 ## V3.2B — Intelligence Architecture Tournament
 
