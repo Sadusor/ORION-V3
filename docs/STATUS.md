@@ -282,3 +282,12 @@ Primary STOP live-server installation path staged 2026-10-05:
 - source-level STOP fix already present in this SHA: `/api/run/stop` routes to `stop_active_run`, which stops the authoritative active named dispatch session first and falls back to legacy verification only if no dispatch session is active; SessionSupervisor verifies the supervised root process actually dies.
 - native Candidate C script in the same SHA contains **no Docker calls or Docker references**. Docker is no longer part of the benchmark path.
 - Candidate C itself is intentionally NOT the current runnable task until the live server restart installs the STOP fix; after that physical update, the catalog should be advanced back to the single Candidate C task.
+
+
+Primary STOP installer physical result + Candidate C restored 2026-10-05:
+- installer task `orion-install-primary-stop-fix` at `Sadusor/Orion@9a64a52dc896363d886dd6c1ed69b722edbc642c` physically PASSed.
+- session: `ecb0b03da370`; exit code 0; published result PASS; evidence pack SHA256 `eda0fe31d9db4ac97dc2976647476aa11cb754c553c0a0880863f70e9f326121`.
+- physical output confirmed canonical checkout fast-forwarded to the exact approved SHA and Windows-owned server-only restart handoff scheduled on the preserved Remote endpoint.
+- current staged SHA: `Sadusor/Orion@1100242e88cf6b9feb70135908fd539500b42242`.
+- current `REMOTE_TASKS.json` again contains exactly one runnable task: `orion-candidate-c-native-benchmark`.
+- final exact-SHA sanity check: task_count=1; primary `/api/run/stop` routes to `stop_active_run`; native Candidate C contains no Docker reference; full-agent warmup count is 0; Qwen warmup is load-only.
