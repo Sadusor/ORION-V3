@@ -6,18 +6,19 @@ All milestones are gated by physical evidence.
 
 Owner-locked sequence as of 2026-10-05:
 
-1. leave the proven V1 Remote completely frozen and keep it as the dedicated engineering Remote;
-2. use V1 only as the existing remote command/approval/STOP path to drive development in other repos/folders;
+1. use `Sadusor/TheHands-` as the primary manual engineering Remote;
+2. keep the older Remote frozen as emergency fallback only;
 3. build the connector layer/seams;
 4. build the separate STRATA/Claude-inspired ORION UI for PC and phone;
 5. connect those product UIs to ORION/backend/connectors only after the surfaces are ready;
-6. physically qualify each connected capability without modifying V1.
+6. physically qualify each connected capability without modifying the frozen fallback.
 
-Do **not** build a V2/Chrome copy of Remote, do not recreate Check GitHub / Approve & Run / STOP parity as a product milestone, and do not treat the new phone UI as a Remote replacement. V1 and the new ORION app are separate products/surfaces that coexist.
+Do **not** rebuild engineering-Remote parity inside the ORION product UI. The product UI and TheHands have different jobs and may coexist.
 
 The Agent V0 / DeepSeek Harness benchmark work remains valid recorded evidence and may continue as a separate architecture benchmark lane; it is no longer the immediate product-build sequence.
 
-Canonical decision: `docs/decisions/0015-freeze-v1-build-product-ui-and-connectors.md`.
+Canonical current decision: `docs/decisions/0016-thehands-primary-engineering-remote.md`.
+Decision 0015 remains historical/current only for the product-UI separation and fallback freeze.
 
 ## V3.0A — Donor contract probe — PASS
 Physical PASS on 2026-10-04. Hostile scope rejection, exact frozen-plan hash approval, post-approval mutation denial, deterministic Hand receipt, exact artifact verification, replay protection, and no-network/model execution all passed. Evidence: `docs/evidence/2026-10-04-donor-contract-probe-pass.md`.
