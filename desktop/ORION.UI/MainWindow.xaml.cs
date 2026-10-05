@@ -64,6 +64,7 @@ public partial class MainWindow : Window
                 {
                     if (args.IsSuccess)
                     {
+                        OrionView.Visibility = Visibility.Visible;
                         StartupOverlay.Visibility = Visibility.Collapsed;
                         WriteReadyEvidence();
                     }
