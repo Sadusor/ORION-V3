@@ -412,3 +412,10 @@ V2-003 installer PASS; Approve & Run proxy proof staged — 2026-10-05:
 - exactly one runnable task: orion-v2-approve-run-proxy-proof.
 - task is harmless and exits PASS after 2 seconds; purpose is only to prove V2 Approve & Run forwards into the existing V1 runner.
 - STOP remains frozen and untouched.
+
+
+V2-004 staged — live runner/evidence UI:
+- active ORION source SHA 63a9e1547fa1bc94881608718667e116c643fa3b.
+- exactly one runnable task: orion-v2-live-runner-004 / ORION V2 - Enable Live Runner View.
+- V2 now projects the active V1 session output tail and evidence-pack state in the Work screen.
+- no V1 execution logic changed; STOP remains frozen and untouched.
