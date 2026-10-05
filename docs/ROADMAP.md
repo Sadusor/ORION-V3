@@ -138,7 +138,20 @@ After enough high-quality owner-approved traces exist, compare:
 - memory/retrieval only;
 - memory + detachable LoRA/QLoRA adapter.
 
+**Primary training/post-training donor candidate: Soup.** Evaluate it as a convenience/training substrate only; it never owns ORION memory, authority or runtime truth. Its low-VRAM layer-streaming path is promising but remains NOT TESTED by ORION and must be pinned/re-benchmarked before use.
+
+First adapter gate:
+- start with roughly 200-500 highly reviewed, provenance-backed behavior examples rather than a noisy bulk dump;
+- train behavior/routing patterns, not canonical ORION memory;
+- compare a small base model, the same model + adapter, and the current Qwen 3.5 9B governor baseline;
+- measure intent/tool accuracy, unsafe false negatives, unnecessary approvals, scope/STOP compliance, hallucinated-success rate, latency, CPU/GPU/VRAM/RAM and power where practical;
+- require held-out traces and full pre/post ORION regression gates before promotion.
+
 Train only on curated manifests of corrected interpretations, accepted plans, terminology, workflows and selected visual examples where supported. Keep the base model immutable, version adapters, preserve provenance, exclude secrets by default, and require pre/post ORION regression gates before promotion.
+
+Security note: Soup Wall is a separate donor for deterministic shadow-first action filtering, replay/policy regression and MCP/subagent/egress controls. Any such layer may only **narrow** ORION authorization; it may never grant authority or replace ORION approval/STOP/evidence semantics.
+
+Detailed review: `docs/reference/2026-10-05-soup-training-and-soup-wall-donor-review.md`.
 
 ## V3.10 — Voice / channels / final UI
 Candidates: OpenJarvis desktop/channel infrastructure, whisper.cpp, EchoFetch, openWakeWord, Kokoro.
