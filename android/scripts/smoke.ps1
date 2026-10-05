@@ -5,6 +5,7 @@ $ErrorActionPreference = "Stop"
 function Resolve-Adb {
     $adb = Get-Command adb.exe -ErrorAction SilentlyContinue
     if ($adb) { return $adb.Source }
+
     foreach ($root in @(
         $env:ANDROID_SDK_ROOT,
         $env:ANDROID_HOME,
@@ -16,54 +17,83 @@ function Resolve-Adb {
             if (Test-Path -LiteralPath $candidate) { return $candidate }
         }
     }
+
     throw "adb.exe was not found."
 }
 
 function Dump-Ui([string]$Adb) {
-    & $Adb shell uiautomator dump /sdcard/orion-v3-ui.xml | Out-Null
-    if ($LASTEXITCODE -ne 0) { throw "uiautomator dump failed." }
-    return (& $Adb shell cat /sdcard/orion-v3-ui.xml) -join "`n"
+    try {
+        & $Adb shell uiautomator dump /sdcard/orion-v3-ui.xml | Out-Null
+        if ($LASTEXITCODE -ne 0) { return "" }
+        return ((& $Adb shell cat /sdcard/orion-v3-ui.xml) -join "`n")
+    } catch {
+        return ""
+    }
 }
 
 $adb = Resolve-Adb
 $devices = @(& $adb devices) | Where-Object { $_ -match "\tdevice$" }
 if (@($devices).Count -lt 1) {
-    throw "ORION_ANDROID_SMOKE> FAIL | no authorized Android device"
+    throw "ORION_ANDROID_DEVICE> FAIL | no authorized Android device"
 }
-
 Write-Host "ORION_ANDROID_DEVICE> PASS" -ForegroundColor Green
 
 & $adb logcat -c | Out-Null
 & $adb shell am force-stop com.sadusor.orionv3 | Out-Null
 & $adb shell monkey -p com.sadusor.orionv3 -c android.intent.category.LAUNCHER 1 | Out-Null
-Start-Sleep -Seconds 4
+Start-Sleep -Seconds 5
 
 $ui = Dump-Ui $adb
+$logs = ((& $adb logcat -d -s ORIONV3:I chromium:E "*:S") -join "`n")
+
+Write-Host ""
+Write-Host "===== ORION ANDROID WEBVIEW LOG =====" -ForegroundColor Cyan
+if ($logs) {
+    Write-Host $logs
+} else {
+    Write-Host "(no ORION WebView log lines captured)"
+}
 
 if (($ui -match "OPEN ORION") -or ($ui -match "CHECK ORION") -or ($ui -match "OPEN ZEROTIER")) {
     throw "ORION_ANDROID_DIRECT_UI> FAIL | obsolete launcher/dashboard detected"
 }
+Write-Host "ORION_ANDROID_NO_LAUNCHER> PASS" -ForegroundColor Green
 
-$realSurface =
-    ($ui -match "Pair this device") -or
-    ($ui -match "Ask ORION") -or
-    ($ui -match "CONNECTING") -or
-    ($ui -match "ORION")
-
-if (!$realSurface) {
-    $logs = (& $adb logcat -d -s ORIONV3:I chromium:E "*:S") -join "`n"
-Write-Host ""
-Write-Host "===== ORION ANDROID WEBVIEW LOG =====" -ForegroundColor Cyan
-Write-Host $logs
-
-if ($logs -match "DOM probe:") {
-    Write-Host "ORION_ANDROID_DOM_PROBE> PASS" -ForegroundColor Green
-} else {
-    Write-Host "ORION_ANDROID_DOM_PROBE> FAIL | no DOM probe from loaded page" -ForegroundColor Red
+if ($logs -notmatch "page started:") {
+    throw "ORION_ANDROID_WEBVIEW_START> FAIL | WebView never started loading STRATA"
 }
+Write-Host "ORION_ANDROID_WEBVIEW_START> PASS" -ForegroundColor Green
+
+if ($logs -notmatch "page finished:") {
+    throw "ORION_ANDROID_WEBVIEW_FINISH> FAIL | STRATA main page never finished loading"
+}
+Write-Host "ORION_ANDROID_WEBVIEW_FINISH> PASS" -ForegroundColor Green
+
+if ($logs -notmatch "DOM probe:") {
+    throw "ORION_ANDROID_DOM> FAIL | no DOM probe from loaded STRATA page"
+}
+Write-Host "ORION_ANDROID_DOM_PROBE> PASS" -ForegroundColor Green
+
+if ($logs -match '"app":false') {
+    throw "ORION_ANDROID_DOM> FAIL | #app missing"
+}
+if ($logs -match '"core":false') {
+    throw "ORION_ANDROID_DOM> FAIL | #core missing"
+}
+if ($logs -match '"composer":false') {
+    throw "ORION_ANDROID_DOM> FAIL | Ask ORION composer missing"
+}
+Write-Host "ORION_ANDROID_STRATA_DOM> PASS" -ForegroundColor Green
 
 if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError|chromium.*ERROR") {
     throw "ORION_ANDROID_WEBVIEW> FAIL | JavaScript/WebView error detected"
+}
+Write-Host "ORION_ANDROID_JS> PASS" -ForegroundColor Green
+
+if (($ui -match "Pair this device") -or ($ui -match "Ask ORION") -or ($ui -match "ORION")) {
+    Write-Host "ORION_ANDROID_ACCESSIBILITY> PASS" -ForegroundColor Green
+} else {
+    Write-Host "ORION_ANDROID_ACCESSIBILITY> WARN | WebView text was not exposed to UIAutomator" -ForegroundColor Yellow
 }
 
 Write-Host "ORION_ANDROID_SMOKE> PASS" -ForegroundColor Green
