@@ -324,3 +324,17 @@ Candidate C native Windows DeepSeek Harness scored benchmark — FINAL result 20
 - Evidence pack: `docs/coding-mode/evidence-packs/00fccdf14870-evidence-pack.zip`, SHA256 `fa365458ebe96fd4e178efc1a97d5429801ada7497920220b7befb8fcba50763`.
 - Decision for this task class: **DeepSeek Harness Candidate C is not justified as the default execution path.** Benchmark 1 direct Qwen 9B -> deterministic Hands remains qualified winner: 3/3 PASS vs Candidate C 0/3; direct path median ~12.06 s vs Candidate C median ~250.72 s (~20.8x slower); Candidate C also consumed comparable GPU utilization for far longer.
 - Do not rerun Candidate C simply to seek a different score. Any future Harness work should be diagnostic/feature-specific, not qualification for default routing, unless the architecture changes materially.
+
+
+Architecture decision 2026-10-05 — stop agent benchmarking; resume product build:
+- Owner decision: Benchmark 2 / further agent qualification is not needed now.
+- Evidence basis: cloud-reviewer workflow was already proven separately; direct Qwen 9B -> deterministic Hands won the local execution comparison; DeepSeek Harness Candidate C scored 0/3 and is not justified as default routing.
+- Active product direction:
+  1. Build the ORION UI shell first.
+  2. Wire a five-cloud-AI reasoning/review loop into that UI.
+  3. Keep ORION as deterministic authority/orchestrator; cloud AIs propose/review, ORION routes, owner approves when required, Hands execute, evidence verifies.
+  4. Qwen 9B remains the cheap local manager/interpreter/offline fallback, not a mandatory hop for every cloud-generated task.
+  5. Full coding agents remain optional/specialized only; they are not the default execution architecture.
+- Proven coding loop is retained as a backup/recovery workflow. Frozen backup branch created at `Sadusor/Orion@backup/coding-loop-proven-2026-10-05` from `1100242e88cf6b9feb70135908fd539500b42242`.
+- Operator rule during active development: exactly one runnable GitCheck task at a time so the primary `Check GitHub -> Approve & Run` flow remains simple.
+- UI phase should frame the existing working backend rather than rewrite it: Home/status, Work/Tasks, AI Council, Memory, System/Remote; truthful backend-driven states; global STOP; exact SHA/evidence visibility; five cloud reviewer slots/provider health; low-consumption status; existing Remote V1 behavior preserved until replacements are proven.
