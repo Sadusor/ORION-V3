@@ -60,6 +60,8 @@ Do not create new routine engineering task-routing machinery in the frozen fallb
 
 Canonical decision: `docs/decisions/0016-thehands-primary-engineering-remote.md`.
 
+If/when the real runtime is connected to TheHands lifecycle controls, follow `docs/contracts/THEHANDS_LIFECYCLE_BRIDGE.md`. Do not use demo/mock servers as lifecycle proof.
+
 ## Cost / supply chain
 
 - Prefer local tests.
