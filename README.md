@@ -65,6 +65,8 @@ Do not float to a newer revision during a gate. Upgrade only through a dedicated
 
 See `docs/STATUS.md`.
 
+Manual engineering execution uses TheHands. The future real-runtime lifecycle seam is defined in `docs/contracts/THEHANDS_LIFECYCLE_BRIDGE.md`; it must remain unconfigured until stable production lifecycle entrypoints exist.
+
 ## Read order
 
 1. `AGENTS.md`
