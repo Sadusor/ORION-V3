@@ -4,7 +4,7 @@ Status: **UI FOUNDATION / NOT YET CONNECTED**
 
 This is the new ORION product interface for **PC and phone**. It is based on Claude's STRATA V3 package and keeps its strongest ideas: the sky/planet shell, canonical UI state, explicit evidence, honest stale/offline states, targeted STOP semantics, and strict separation between presentation and authority.
 
-It is **not Remote V2**. The proven V1 Remote is frozen and separate. This UI contains no migration plan, no Classic Remote links, and no requirement to reproduce V1's engineering controls.
+It is **not an engineering Remote**. Manual engineering execution is handled separately by TheHands. The frozen fallback Remote is not modified by this UI.
 
 ## Product surfaces
 
