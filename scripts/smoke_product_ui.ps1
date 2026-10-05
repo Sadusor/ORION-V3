@@ -31,4 +31,12 @@ if ($html -notmatch "ORION_PC_PAIR_CODE") {
 Write-Host "ORION_PC_STRATA> PASS" -ForegroundColor Green
 Write-Host "ORION_PC_PAIRING_SURFACE> PASS" -ForegroundColor Green
 
+foreach ($asset in @("icons/favicon.ico", "icons/apple-touch-icon.png")) {
+    $r = Invoke-WebRequest -UseBasicParsing -Uri ("http://127.0.0.1:" + $Port + "/v3/" + $asset) -TimeoutSec 3
+    if ($r.StatusCode -ne 200 -or $r.RawContentLength -lt 100) {
+        throw ("ORION_PC_ICON_ASSET> FAIL | " + $asset)
+    }
+}
+Write-Host "ORION_PC_ICON_ASSET> PASS" -ForegroundColor Green
+
 Write-Host "ORION_PC_SMOKE> PASS" -ForegroundColor Green
