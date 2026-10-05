@@ -1,10 +1,10 @@
 # ORION V3 Status
 
-Updated: 2026-10-04
+Updated: 2026-10-05
 
 ## Stage
 
-ORION Agent V0 bounded-loop foundation build.
+Connectors + separate ORION PC/phone product-UI foundation.
 
 ORION-V3 is a completely separate repository from the proven ORION implementation.
 
@@ -18,7 +18,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
-- old ORION Remote: frozen external fallback; untouched
+- V1 Remote: FROZEN / USE ONLY — no redesign, refactor, feature work, V2 parity rebuild, or product migration
 - Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN RESTAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `9a6a5fc216b6`)
 
 ## Pinned OpenJarvis donor
@@ -27,46 +27,17 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 ## Current bounded task
 
-**Physically qualify the first ORION Agent V0 foundation before adding Qwen to the loop.**
+**Build connectors and the separate ORION product UI without touching V1 Remote.**
 
-Owner approved building a small ORION-native agent with explicit future seams, then benchmarking it before deciding the next architecture.
+Owner-locked direction on 2026-10-05:
+- V1 Remote is finished/frozen for this development lane and is used only as the proven command/approval/STOP/recovery path.
+- Do not build another Remote in Chrome and do not reproduce V1 parity as a milestone.
+- Build connector seams first.
+- Build the STRATA/Claude-inspired ORION UI for both PC and phone as separate product surfaces.
+- After those surfaces exist, wire them to ORION/backend/connectors and physically qualify each capability.
+- Agent/Hands/Harness benchmark results remain architectural evidence but are not the immediate product-UI sequence.
 
-Current implementation in `Sadusor/Orion` is GITHUB-CODED / UNVERIFIED and contains:
-
-- strict structured proposals;
-- one-action-at-a-time loop;
-- frozen task-scoped Hand registry;
-- task-state binding;
-- idempotency guard;
-- hash-chained Journal;
-- bounded observations;
-- model/tool/time/rejection budgets;
-- external Stop hook;
-- reserved interfaces for later Memory, Skills, Security Advisor, Sandbox and escalation.
-
-The first target-machine gate is deterministic and intentionally excludes Qwen/cloud/network. After it passes, run the now-coded local Qwen JSON adapter and bounded coding/test capability, then execute the frozen benchmark.
-
-Benchmark implementation now includes:
-- A: one-shot same-Qwen deterministic control with a bounded patch manifest;
-- B: same Qwen through ORION Agent V0 with bounded list/read/write/test Hands;
-- C: same Qwen through DeepSeek Harness headless JSON using its OpenAI-compatible self-hosted route; C refuses normal-host execution and requires the outer disposable sandbox;
-- frozen multi-file persistence/configuration fixture with visible and hidden tests;
-- harmless repository prompt-injection trap;
-- Windows CPU/RAM plus NVIDIA GPU/VRAM/power sampling;
-- one warm-up plus three scored A/B repetitions with rotated order.
-
-
-A/B/C:
-
-- A: Qwen + deterministic Hands;
-- B: same Qwen + ORION Agent V0 + same Hands;
-- C: same Qwen + DeepSeek Harness under ORION isolation.
-
-Google Mantis is now the primary secure-coding/sandbox/verification donor; ButterClaw is the primary runtime-policy/process-monitor donor.
-
-Canonical decision: `docs/decisions/0014-build-orion-native-agent-v0.md`.
-
-Detailed donor record: `docs/reference/2026-10-04-agent-security-donor-analysis.md`.
+Canonical decision: `docs/decisions/0015-freeze-v1-build-product-ui-and-connectors.md`.
 
 ## Newly documented owner direction
 
