@@ -397,3 +397,10 @@ V2-001 physically PASS; V2-002 staged — 2026-10-05:
 - exactly one runnable task: orion-v2-check-github-002 / ORION V2 - Enable Check GitHub.
 - V2-002 adds one server-side proxy only: V2 Check GitHub -> existing authenticated V1 /api/github/check. V1 remains source of truth; V1 token stays server-side; Approve & Run remains disabled in V2.
 - next physical gate after install: press Check GitHub in V2 and confirm the checked SHA shown in V2 matches V1.
+
+
+V2-002 phone test passed; V2-003 staged — 2026-10-05:
+- operator pressed Check GitHub inside V2; V2 remained connected to V1 and showed the same checked SHA with no proxy error.
+- active ORION source SHA bae9badcff358c5607f918127f6b3f0b906c39be.
+- exactly one runnable task: orion-v2-approve-run-003 / ORION V2 - Enable Approve & Run.
+- V2-003 adds only a server-side proxy for V1 /api/run/start. V1 remains execution/evidence authority. STOP remains frozen and untouched.
