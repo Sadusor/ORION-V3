@@ -10,6 +10,8 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.WebChromeClient
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -72,6 +74,7 @@ private val Muted = Color(0xFF728394)
 private val Green = Color(0xFF49D99A)
 private val Amber = Color(0xFFF5B942)
 private val Red = Color(0xFFD98276)
+private const val TAG = "ORIONV3"
 
 private enum class PcState { Offline, Connecting, Online }
 
@@ -88,6 +91,7 @@ private fun OrionApp() {
     var state by rememberSaveable { mutableStateOf(PcState.Offline) }
     var showOrion by rememberSaveable { mutableStateOf(false) }
     var message by rememberSaveable { mutableStateOf("Connect ZeroTier when you want ORION away from the PC.") }
+    var webMessage by rememberSaveable { mutableStateOf("Loading ORION V3…") }
 
     MaterialTheme(
         colorScheme = darkColorScheme(
@@ -100,14 +104,28 @@ private fun OrionApp() {
     ) {
         Surface(modifier = Modifier.fillMaxSize(), color = Bg) {
             if (showOrion) {
-                OrionWebSurface(
-                    onClose = { showOrion = false },
-                    onError = {
-                        message = it
-                        showOrion = false
-                        state = PcState.Offline
+                Box(modifier = Modifier.fillMaxSize().background(Bg)) {
+                    OrionWebSurface(
+                        onClose = { showOrion = false },
+                        onStatus = { webMessage = it },
+                        onError = {
+                            message = it
+                            showOrion = false
+                            state = PcState.Offline
+                        }
+                    )
+                    if (webMessage.isNotBlank()) {
+                        Text(
+                            webMessage,
+                            color = Muted,
+                            fontSize = 11.sp,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .statusBarsPadding()
+                                .padding(top = 6.dp)
+                        )
                     }
-                )
+                }
             } else {
                 Dashboard(
                     state = state,
@@ -312,6 +330,7 @@ private fun StatusChip(state: PcState) {
 @Composable
 private fun OrionWebSurface(
     onClose: () -> Unit,
+    onStatus: (String) -> Unit,
     onError: (String) -> Unit,
 ) {
     BackHandler(onBack = onClose)
@@ -330,8 +349,26 @@ private fun OrionWebSurface(
                 settings.allowFileAccess = false
                 settings.allowContentAccess = false
                 settings.setSupportZoom(false)
+                settings.mediaPlaybackRequiresUserGesture = true
+
+                WebView.setWebContentsDebuggingEnabled(true)
+                webChromeClient = object : WebChromeClient() {
+                    override fun onConsoleMessage(consoleMessage: android.webkit.ConsoleMessage): Boolean {
+                        Log.e(TAG, "JS " + consoleMessage.message() + " @" + consoleMessage.lineNumber())
+                        return true
+                    }
+                }
 
                 webViewClient = object : WebViewClient() {
+                    override fun onPageStarted(view: WebView, url: String, favicon: android.graphics.Bitmap?) {
+                        onStatus("Loading ORION V3…")
+                        Log.i(TAG, "page started: $url")
+                    }
+
+                    override fun onPageFinished(view: WebView, url: String) {
+                        onStatus("")
+                        Log.i(TAG, "page finished: $url")
+                    }
                     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
                         val url = request.url.toString()
                         return if (url.startsWith(ORION_BASE_URL)) {
@@ -349,7 +386,8 @@ private fun OrionWebSurface(
                         request: WebResourceRequest,
                         error: WebResourceError,
                     ) {
-                        if (request.isForMainFrame) onError("ORION V3 page could not be reached.")
+                        Log.e(TAG, "web error: " + error.description)
+                        if (request.isForMainFrame) onError("ORION V3 page could not be reached: " + error.description)
                     }
                 }
 
