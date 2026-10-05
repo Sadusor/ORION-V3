@@ -2,7 +2,7 @@
 
 Status: FOUNDATION / CONNECTOR-READY / NOT YET BACKEND-QUALIFIED
 
-This is the separate ORION product UI. It is **not Remote V2** and it does not replace or modify the frozen V1 Remote.
+This is the separate ORION product UI. It is not the manual engineering Remote and it does not modify the frozen fallback Remote.
 
 ## Information architecture
 
@@ -19,7 +19,7 @@ Four concurrent logical lanes are first class: Personal, Project, Specialists, B
 
 ## Locked boundary
 
-V1 Remote is frozen and separate. The product UI contains no Check GitHub / Approve & Run parity project, no Classic Remote links and no Remote migration controls. The existing bridge/state/evidence code is retained as a tested donor seam for later ORION backend integration.
+TheHands is the separate manual engineering Remote. This product UI contains no engineering-Remote parity project or migration controls. The frozen fallback Remote remains untouched.
 
 ## Truth rules
 
