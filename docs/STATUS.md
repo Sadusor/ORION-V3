@@ -371,3 +371,13 @@ Primary STOP blocked V2 progression — 2026-10-05:
 - exactly one runnable task: orion-install-primary-stop-fix / ORION Remote - Install Primary STOP Fix.
 - task uses the existing bounded install_primary_stop_fix.ps1: verifies exact approved SHA, clean canonical branch, fast-forward only, preserves bind address/port, schedules a Windows-owned server-only restart, leaves ZeroTier online, and restarts V1 on the same endpoint.
 - after installation/restart, next gate is a small disposable named task used only to physically prove the primary big STOP routes to the active dispatch session and kills its process tree. No V2 feature work resumes until this passes.
+
+
+Primary STOP installation PASS and physical proof staged — 2026-10-05:
+- install task source SHA fc0434a7cfdf0f3661f2cf973dee597a61e697b4 physically PASS.
+- published session cd20080372a0, exit 0, canonical checkout fast-forwarded to fc0434a7..., same endpoint preserved, server-only restart handoff scheduled.
+- next and only runnable task staged at ORION SHA 0231af8b3fdbe07a7cd8c015f844e85d0ddd8288.
+- task: orion-primary-stop-physical-proof / ORION Remote - Prove Big STOP.
+- task is intentionally harmless and long-running: heartbeat every 5 seconds for up to 10 minutes.
+- operator action: start with big Approve & Run, then press the big STOP while heartbeats are visible.
+- valid gate result is STOPPED, not PASS. V2 work remains blocked until the result branch confirms STOPPED for this exact task/session.
