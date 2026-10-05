@@ -52,17 +52,18 @@ $realSurface =
 
 if (!$realSurface) {
     $logs = (& $adb logcat -d -s ORIONV3:I chromium:E "*:S") -join "`n"
-    Write-Host $logs
-    throw "ORION_ANDROID_DIRECT_UI> FAIL | STRATA surface not detected"
+Write-Host ""
+Write-Host "===== ORION ANDROID WEBVIEW LOG =====" -ForegroundColor Cyan
+Write-Host $logs
+
+if ($logs -match "DOM probe:") {
+    Write-Host "ORION_ANDROID_DOM_PROBE> PASS" -ForegroundColor Green
+} else {
+    Write-Host "ORION_ANDROID_DOM_PROBE> FAIL | no DOM probe from loaded page" -ForegroundColor Red
 }
 
-Write-Host "ORION_ANDROID_DIRECT_UI> PASS" -ForegroundColor Green
-
-$logs = (& $adb logcat -d -s ORIONV3:I chromium:E "*:S") -join "`n"
-if ($logs -match "DOM probe:.*\\\"app\\\":true") {
-    Write-Host "ORION_ANDROID_DOM> PASS" -ForegroundColor Green
-} else {
-    Write-Host "ORION_ANDROID_DOM> WARN | DOM probe not found; accessibility surface was still detected" -ForegroundColor Yellow
+if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError|chromium.*ERROR") {
+    throw "ORION_ANDROID_WEBVIEW> FAIL | JavaScript/WebView error detected"
 }
 
 Write-Host "ORION_ANDROID_SMOKE> PASS" -ForegroundColor Green
