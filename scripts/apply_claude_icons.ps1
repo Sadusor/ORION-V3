@@ -29,16 +29,34 @@ if (!(Test-Path -LiteralPath $Py -PathType Leaf)) {
     if ($LASTEXITCODE -ne 0) { throw "Could not create ORION icon renderer venv." }
 }
 
-& $Py -c "import PIL, numpy" 2>$null
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Installing Pillow + NumPy for Claude icon renderer..." -ForegroundColor Cyan
-    & $Py -m pip install --disable-pip-version-check --quiet pillow numpy
-    if ($LASTEXITCODE -ne 0) { throw "Could not install icon renderer dependencies." }
+Write-Host "Ensuring Pillow + NumPy for Claude icon renderer..." -ForegroundColor Cyan
+$previousErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& $Py -m pip install --disable-pip-version-check --quiet pillow numpy 2>&1 | Out-Host
+$pipExit = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorPreference
+if ($pipExit -ne 0) {
+    throw "Could not install icon renderer dependencies."
+}
+
+$previousErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& $Py -c "import PIL, numpy; print('ORION_ICON_DEPS> PASS')" 2>&1 | Out-Host
+$verifyExit = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorPreference
+if ($verifyExit -ne 0) {
+    throw "ORION icon renderer dependency verification failed."
 }
 
 Write-Host "Rendering Claude ORION icon pack..." -ForegroundColor Cyan
-& $Py $Renderer $IconRoot
-if ($LASTEXITCODE -ne 0) { throw "Claude ORION icon rendering failed." }
+$previousErrorPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& $Py $Renderer $IconRoot 2>&1 | Out-Host
+$renderExit = $LASTEXITCODE
+$ErrorActionPreference = $previousErrorPreference
+if ($renderExit -ne 0) {
+    throw "Claude ORION icon rendering failed."
+}
 
 $required = @(
     (Join-Path $IconRoot "orion-icon-1024.png"),
