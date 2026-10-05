@@ -96,4 +96,55 @@ if (($ui -match "Pair this device") -or ($ui -match "Ask ORION") -or ($ui -match
     Write-Host "ORION_ANDROID_ACCESSIBILITY> WARN | WebView text was not exposed to UIAutomator" -ForegroundColor Yellow
 }
 
+$screenDir = Join-Path $env:LOCALAPPDATA "ORION-V3\android"
+$screenPath = Join-Path $screenDir "orion-screen.png"
+New-Item -ItemType Directory -Force -Path $screenDir | Out-Null
+Remove-Item -LiteralPath $screenPath -Force -ErrorAction SilentlyContinue
+
+& $adb shell screencap -p /sdcard/orion-screen.png | Out-Null
+if ($LASTEXITCODE -ne 0) {
+    throw "ORION_ANDROID_SCREENSHOT> FAIL | screencap failed"
+}
+& $adb pull /sdcard/orion-screen.png $screenPath | Out-Null
+if ($LASTEXITCODE -ne 0 -or !(Test-Path -LiteralPath $screenPath -PathType Leaf)) {
+    throw "ORION_ANDROID_SCREENSHOT> FAIL | pull failed"
+}
+Write-Host ("ORION_ANDROID_SCREENSHOT> PASS | " + $screenPath) -ForegroundColor Green
+
+$checker = Join-Path $PSScriptRoot "check_screen.py"
+$pythonCandidates = @(
+    (Join-Path $env:LOCALAPPDATA "ORION-V3\icon-renderer\venv\Scripts\python.exe"),
+    "python.exe",
+    "py.exe"
+)
+$python = $null
+foreach ($candidate in $pythonCandidates) {
+    if ([System.IO.Path]::IsPathRooted($candidate)) {
+        if (Test-Path -LiteralPath $candidate -PathType Leaf) {
+            $python = $candidate
+            break
+        }
+    } else {
+        $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
+        if ($cmd) {
+            $python = $cmd.Source
+            break
+        }
+    }
+}
+if (!$python) {
+    throw "ORION_ANDROID_VISUAL> FAIL | Python not found"
+}
+
+$oldPreference = $ErrorActionPreference
+$ErrorActionPreference = "Continue"
+& $python $checker $screenPath 2>&1 | Out-Host
+$visualExit = $LASTEXITCODE
+$ErrorActionPreference = $oldPreference
+
+if ($visualExit -ne 0) {
+    throw "ORION_ANDROID_VISUAL> FAIL | screen is effectively black"
+}
+Write-Host "ORION_ANDROID_VISUAL> PASS" -ForegroundColor Green
+
 Write-Host "ORION_ANDROID_SMOKE> PASS" -ForegroundColor Green
