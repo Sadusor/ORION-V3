@@ -271,3 +271,14 @@ Candidate C benchmark control fixes 2026-10-05:
 - the suite shares one temporary DSH_HOME/cache lifecycle, while prior session/storages are cleared between scored runs to avoid answer/session leakage.
 - suite-scoped DSH_HOME and all disposable workspaces are removed in cleanup.
 - current runnable catalog remains exactly one task: `orion-candidate-c-native-benchmark`.
+
+
+Primary STOP live-server installation path staged 2026-10-05:
+- user reported big STOP still ineffective after source-level fix; root cause: the long-running ORION Remote server process was still executing older `server.py`, so checking/running a newer exact-SHA task did not hot-reload the HTTP/UI routing code.
+- immediate stuck Candidate-C processes were manually cleaned by the owner with the bounded process-pattern PowerShell cleanup.
+- current one-time installer SHA: `Sadusor/Orion@9a64a52dc896363d886dd6c1ed69b722edbc642c`.
+- current `REMOTE_TASKS.json` contains exactly one task: `orion-install-primary-stop-fix` / "Install Remote STOP Fix and Restart".
+- installer runs from the approved detached worktree, resolves the canonical ORION checkout via Git common-dir, verifies clean/expected branch, fetches and requires FETCH_HEAD == the exact approved task SHA, fast-forwards canonical checkout, recovers the live Remote server PID/config/bind/port, then schedules a delayed (~30s) Windows-owned restart handoff using the existing ORION restart launcher so the dispatch result has time to finish/publish before the old server exits.
+- source-level STOP fix already present in this SHA: `/api/run/stop` routes to `stop_active_run`, which stops the authoritative active named dispatch session first and falls back to legacy verification only if no dispatch session is active; SessionSupervisor verifies the supervised root process actually dies.
+- native Candidate C script in the same SHA contains **no Docker calls or Docker references**. Docker is no longer part of the benchmark path.
+- Candidate C itself is intentionally NOT the current runnable task until the live server restart installs the STOP fix; after that physical update, the catalog should be advanced back to the single Candidate C task.
