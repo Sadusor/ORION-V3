@@ -18,7 +18,8 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
-- V1 Remote: FROZEN / PERMANENT ENGINEERING REMOTE — use exactly as-is; it continues alongside the new ORION app and is not scheduled for replacement
+- TheHands: PRIMARY MANUAL ENGINEERING REMOTE — `Sadusor/TheHands-`; exact Git Hand check, owner Approve & Start, live terminal, targeted STOP, evidence, guarded self-update
+- older Remote: FROZEN / EMERGENCY FALLBACK ONLY — do not route normal new engineering work there
 - Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN RESTAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `9a6a5fc216b6`)
 
 ## Pinned OpenJarvis donor
@@ -30,14 +31,16 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 **Build connectors and the separate ORION product UI without touching V1 Remote.**
 
 Owner-locked direction on 2026-10-05:
-- V1 Remote is finished/frozen for this development lane and must remain byte-for-byte outside V3 work; do not stage V3 tasks or launch/control logic in the V1 repo.
-- Do not build another Remote in Chrome and do not reproduce V1 parity as a milestone. The new PC/phone ORION UI is a separate app that coexists with V1.
+- TheHands is the primary manual engineering Remote for new owner-approved engineering execution.
+- The older Remote remains frozen emergency fallback only; do not stage new V3 tasks or launch/control logic there.
+- Do not build engineering-Remote parity inside the ORION product UI.
 - Build connector seams first.
 - Build the STRATA/Claude-inspired ORION UI for both PC and phone as separate product surfaces.
 - After those surfaces exist, wire them to ORION/backend/connectors and physically qualify each capability.
 - Agent/Hands/Harness benchmark results remain architectural evidence but are not the immediate product-UI sequence.
 
-Canonical decision: `docs/decisions/0015-freeze-v1-build-product-ui-and-connectors.md`.
+Canonical current engineering-Remote decision: `docs/decisions/0016-thehands-primary-engineering-remote.md`.
+Decision 0015 remains valid for product-UI separation and fallback freeze.
 
 ## Newly documented owner direction
 
