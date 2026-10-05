@@ -1,6 +1,6 @@
-# Backend Wiring — Future Gate
+# Backend Wiring — Live Gate
 
-Status: **NOT ACTIVE YET**
+Status: **PHASE A CONNECTED / PHYSICAL PC+PHONE VIEW PENDING**
 
 The current owner-approved sequence is:
 
@@ -12,6 +12,20 @@ The current owner-approved sequence is:
 6. physically qualify each capability.
 
 This product UI must not become or proxy the engineering Remote.
+
+## Phase A live connection
+
+The live product server is now `src/orion_v3/product_server.py`.
+
+It serves Claude's STRATA UI at `/v3/`, provides pairing, and exposes truthful read-only backend facts. Unsupported action routes return explicit refusal rather than synthetic success.
+
+Launcher:
+
+`scripts/start_product_ui.ps1`
+
+Default port: `8890`.
+
+See `docs/contracts/PRODUCT_UI_BACKEND.md`.
 
 ## What is ready now
 
