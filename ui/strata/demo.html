@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#05070b">
+<title>[DEMO / MOCK] ORION</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%2712%27 fill=%27%2308111d%27 stroke=%27%2376cfe4%27 stroke-width=%272%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles/tokens.css">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/strata.css">
+<link rel="stylesheet" href="styles/product.css">
+</head>
+<body>
+<div id="app" class="desk">
+  <canvas id="sky"></canvas>
+  <div id="cam"><canvas id="core" aria-label="ORION core"></canvas></div>
+  <div id="demo" hidden>DEMO / MOCK BACKEND · synthetic data · not ORION</div>
+
+  <header id="top">
+    <div class="tl"><span class="brand">ORION</span><span class="pillb" id="proj" hidden></span></div>
+    <div id="clock"><b id="clk">--:--</b><span class="cap" id="dt"></span></div>
+    <div class="tl">
+      <input id="sch" placeholder="Search memory…" aria-label="Search memory (preview)">
+      <button class="ib vpbtn" id="viewb" title="Live View">VIEW PC</button>
+      <button class="ib" id="histb" title="Conversation history">History</button>
+      <button class="ib conn" id="conn" aria-label="Connection details"><span class="dot"></span><span id="connT">CONNECTING</span></button>
+      <button class="ib" id="gear" title="Low-power mode">◐</button>
+      <button class="ib" id="ccb">Connectors</button>
+    </div>
+  </header>
+
+  <section id="hud" aria-live="polite">
+    <div id="stl">Idle</div>
+    <div id="act"></div>
+    <div id="tl" hidden></div>
+    <div id="chips"><span id="auth"></span><span class="gchip" id="ghchip" hidden></span><button class="gchip" id="lvchip" hidden></button></div>
+    <button class="ib stop" id="stopb" disabled>Stop</button>
+    <div id="notice" class="notice" hidden></div>
+  </section>
+
+  <div id="rz"></div>
+  <div id="rvz"></div>
+  <div id="chat" aria-label="Conversation"></div>
+
+  <div id="actrow">
+    <button class="htt" id="htt" disabled aria-disabled="true" title="Voice is planned: phone audio → PC speech-to-text → the same Local Brain">
+      <span class="hm">🎙</span><span>Hold to talk<small>planned · not available yet</small></span></button>
+    <button class="ib vpbtn" id="viewb2" title="Live View">VIEW PC</button>
+  </div>
+
+  <form id="bar" autocomplete="off">
+    <input id="inp" placeholder="Ask ORION…" aria-label="Ask ORION">
+    <button type="button" class="rb" id="mic" disabled aria-disabled="true" title="Voice planned">🎙</button>
+    <button type="submit" class="rb pri" id="send" aria-label="Send">↑</button>
+  </form>
+
+  <aside id="evd" class="sheet" aria-label="Evidence"></aside>
+  <aside id="vp" class="sheet" aria-label="Live View"></aside>
+
+  <section id="cc" class="layer" aria-label="Connectors and system">
+    <div class="ch"><h2>CONNECTORS &amp; SYSTEM</h2>
+      <div class="tl"><span id="legacy" class="tl" hidden></span><button class="ib" id="ccm">Memory</button><button class="ib" id="ccx">Close</button></div></div>
+    <div class="grid" id="ccg"></div>
+  </section>
+
+  <section id="mu" class="layer" aria-label="Memory Universe (preview)">
+    <canvas id="muc"></canvas>
+    <div id="mut"><button class="ib" id="mux">← Back to ORION</button><input id="mq" placeholder="Filter…"><button class="tg" id="tgOld">Show superseded</button>
+      <span class="pillb warn">PREVIEW · only Memory candidates are exposed, not promoted Memory</span><span class="cap" id="mcount"></span></div>
+    <div id="msrc"></div>
+    <div id="mud"></div>
+  </section>
+
+  <div id="pair"></div>
+  <div id="toast" role="status"></div>
+</div>
+
+<script src="config.js"></script>
+<script src="bridge/routes.js"></script>
+<script src="bridge/normalize.js"></script>
+<script src="bridge/mock-bridge.js"></script>
+<script src="state/store.js"></script>
+<script src="connectors/descriptors.js"></script>
+<script src="connectors/render.js"></script>
+<script src="components/sky-planet.js"></script>
+<script src="memory/adapter.js"></script>
+<script src="memory/memory.js"></script>
+<script src="product/workspace.js"></script>
+<script src="shell/shell.js"></script>
+</body>
+</html>

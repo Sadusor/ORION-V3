@@ -1,0 +1,11 @@
+/* STRATA shared design tokens (PC + phone). */
+:root{
+  --void:#05070b;--navy:#08111d;--panel:#0d1724;--lift:#132131;
+  --ion:#76cfe4;--ice:#c9eef5;--silver:#e7ebef;--mem:#9d90e8;--ok:#76cea3;--warn:#e0b867;--bad:#d98276;--mut:#6f8092;--tx2:#9fb0bf;
+  --accent:var(--ion);
+  --r1:8px;--r2:14px;--r3:22px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;
+  --fast:160ms;--base:260ms;--slow:420ms;--ease:cubic-bezier(.3,0,0,1);
+  --sans:Inter,"Segoe UI",system-ui,sans-serif;--disp:"Space Grotesk",Sora,var(--sans);--mono:"JetBrains Mono","IBM Plex Mono",ui-monospace,Consolas,monospace;
+  --surf:rgba(13,23,36,.78);--hl:inset 0 1px 0 rgba(255,255,255,.06);
+  color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}

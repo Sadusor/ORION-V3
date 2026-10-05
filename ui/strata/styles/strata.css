@@ -1,0 +1,179 @@
+/* STRATA V3 — refinements over the V2 base: result-first desktop, genuinely phone-native layout, sheets, Command Center. */
+#app{--py:44%;--ps:min(64vh,60vw)}
+#app.chat{--py:31%;--ps:min(40vh,38vw)}
+#app.result{--py:26%;--ps:min(30vh,28vw)}
+#app.viewing{--ps:56px}
+#demo{position:absolute;z-index:8;top:0;left:50%;transform:translateX(-50%);padding:2px 14px;border-radius:0 0 10px 10px;background:rgba(217,130,118,.18);color:#f1b8af;font:500 10.5px var(--mono);letter-spacing:.12em}
+#top{z-index:3}
+.brand{text-shadow:0 0 18px rgba(118,207,228,.35)}
+.pillb.warn{background:rgba(224,184,103,.14);color:var(--warn)}
+.conn{font:500 10.5px var(--mono);letter-spacing:.1em}
+.conn[data-s=live] .dot{background:var(--ok)}.conn[data-s=stale] .dot{background:var(--mut)}.conn[data-s=reconnecting] .dot,.conn[data-s=connecting] .dot{background:var(--warn);animation:blink 1.4s infinite}
+.conn[data-s=offline] .dot,.conn[data-s=unpaired] .dot{background:var(--bad)}
+@keyframes blink{50%{opacity:.25}}
+.vpbtn{font:500 10.5px var(--mono);letter-spacing:.12em}
+
+/* HUD: state, ONE activity line, chips, stop */
+#hud{z-index:3;display:flex;flex-direction:column;align-items:center;gap:4px}
+#stl{font:500 12px var(--mono);letter-spacing:.2em}
+#act{font-size:14.5px;color:var(--tx2);min-height:22px;max-width:100%;text-overflow:ellipsis;overflow:hidden;white-space:nowrap}
+#act.live::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:middle;animation:blink 1.6s infinite}
+#chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:0}
+#auth{display:none}#auth.on{display:inline-block}
+.gchip{padding:3px 12px;border-radius:99px;font-size:12px;color:var(--warn);background:rgba(224,184,103,.1);cursor:pointer}
+.stop{color:var(--warn)}
+
+/* result zone (desktop) */
+#rz{position:absolute;z-index:3;left:50%;transform:translateX(-50%);top:calc(var(--py) + var(--ps)/2 + 96px);width:min(740px,92vw);max-height:calc(100% - var(--py) - var(--ps)/2 - 200px);overflow:auto;padding-bottom:6px}
+.chat #rz{display:none}
+.card.main{padding:24px 26px;border-radius:24px;background:rgba(13,23,36,.92)}
+.card.main::before{content:"";position:absolute;left:26px;right:26px;top:0;height:1px;background:linear-gradient(90deg,transparent,var(--accent),transparent);opacity:.7}
+.card.main h3{font-size:28px}
+.card.main.dim{opacity:.55}
+.card .note{font-size:12.5px;color:var(--warn);margin-top:8px}
+.card pre,.sheet pre{margin:8px 0;padding:10px 12px;border-radius:var(--r1);background:#05080d;color:#a9c4d0;font:12px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word;max-height:220px;overflow:auto}
+.evchip{margin-top:14px;padding:6px 14px;border-radius:99px;background:rgba(118,207,228,.1);color:var(--ice);font:500 11px var(--mono);letter-spacing:.08em}
+.evchip b{color:var(--accent)}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+.rows span{color:var(--tx2)}.rows b{font-weight:500;max-width:70%;text-align:right;overflow-wrap:anywhere}
+
+/* conversation */
+.m.sys{color:var(--mut);font-size:13px;font-style:italic}
+.m.err{color:var(--bad)}
+.m .card{max-width:none}
+
+/* sheets: evidence + live view (right drawer on desktop, bottom sheet on phone) */
+.sheet{position:absolute;z-index:7;right:0;top:0;bottom:0;width:min(460px,100%);background:rgba(10,17,27,.97);padding:20px;overflow:auto;transform:translateX(104%);transition:transform var(--slow) var(--ease);box-shadow:-12px 0 40px rgba(0,0,0,.45)}
+.sheet.on{transform:none}
+.sheet h3{font:400 18px var(--disp);margin:2px 0 12px}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ev{padding:10px 0;border-top:1px solid rgba(255,255,255,.07)}.ev .k{font:500 10px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.ev .v{font-size:13.5px;color:var(--silver);overflow-wrap:anywhere}
+.ladder{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.ladder span{padding:4px 10px;border-radius:99px;font:500 10.5px var(--mono);letter-spacing:.1em;background:var(--lift);color:var(--mut)}
+.ladder span.on{color:var(--ice);box-shadow:inset 0 0 0 1px var(--accent)}
+#vstage{aspect-ratio:16/9;border-radius:var(--r2);background:#05080d;display:grid;place-items:center;text-align:center;color:var(--mut);font-size:13px;padding:16px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.06)}
+#vstage b{display:block;color:var(--tx2);font:300 20px var(--disp);margin-bottom:6px}
+
+/* Command Center */
+#cc .grid{align-items:start}
+.classic{color:var(--ice);box-shadow:inset 0 0 0 1px rgba(118,207,228,.5)}
+.pn small{display:block;color:var(--mut);font-size:12px;overflow-wrap:anywhere}
+.pn .sd{font-size:13px;color:var(--tx2);margin-bottom:8px;overflow-wrap:anywhere}
+.cn .st{margin-left:8px;padding:1px 8px;border-radius:99px;font:500 9.5px var(--mono);letter-spacing:.1em;background:var(--lift);color:var(--tx2)}
+.cn[data-s=ready] .st{color:var(--ok)}.cn[data-s=busy] .st{color:var(--accent)}.cn[data-s=degraded] .st{color:var(--warn)}.cn[data-s=unavailable] .st{color:var(--bad)}.cn[data-s=preview] .st{color:var(--mem)}.cn[data-s=planned] .st{color:var(--mut)}
+.chps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}.chp{padding:3px 10px;border-radius:99px;background:var(--lift);font-size:12px;color:var(--ice)}
+.kv{align-items:flex-start;gap:10px}.kv .ia{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;color:inherit}.kv span:first-child{color:var(--silver)}
+#ccg .eng{margin-top:10px}
+.pn.wide{grid-column:1/-1}.pn input,.pn select{width:100%;background:var(--lift);border:0;border-radius:var(--r1);padding:8px 10px;color:var(--silver);font:inherit;font-size:13px;margin:4px 0}
+#rawpre{max-height:240px}
+
+/* pairing + toast */
+#pair{position:absolute;inset:0;z-index:10;background:rgba(5,7,11,.78);display:none;align-items:center;justify-content:center;padding:16px}#pair.on{display:flex}
+#pair .gb h3{color:var(--ice)}#pair input{width:100%;padding:12px 14px;border-radius:var(--r1);border:0;background:var(--lift);color:var(--silver);font:500 20px var(--mono);letter-spacing:.3em;text-align:center;margin:8px 0}
+#pair p{font-size:13px;color:var(--tx2);margin-bottom:6px}.perr{color:var(--bad)!important}
+#toast{position:absolute;z-index:11;left:50%;bottom:92px;transform:translate(-50%,16px);max-width:min(560px,92vw);padding:10px 16px;border-radius:var(--r2);background:rgba(28,40,56,.96);font-size:13px;opacity:0;pointer-events:none;transition:opacity var(--base),transform var(--base)}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* voice: visibly unavailable, never simulated */
+#actrow{display:none}
+.htt{display:flex;align-items:center;gap:12px;flex:1;padding:12px 18px;border-radius:99px;background:rgba(19,33,49,.7);color:var(--mut);text-align:left;border:1px dashed rgba(111,128,146,.45);cursor:not-allowed}
+.htt small{display:block;font-size:10.5px;letter-spacing:.06em}.htt .hm{filter:grayscale(1);opacity:.6;font-size:18px}
+#mic[disabled]{opacity:.35;cursor:not-allowed}
+
+/* ============ PHONE: a vertical remote, not a shrunk desktop ============ */
+#app.phone{display:flex;flex-direction:column;--py:0;--ps:min(58vw,29vh)}
+#app.phone.result{--ps:min(30vw,15vh)}
+#app.phone.viewing{--ps:48px}
+.phone #top,.phone #hud,.phone #chat,.phone #bar,.phone #cam,.phone #actrow{position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none}
+.phone #top{order:0;padding:10px 14px 0;z-index:3}
+.phone #cam{order:1;margin:0 auto;flex:none;width:var(--ps)}
+.phone.mem #cam{transform:scale(3.2)}
+.phone #hud{order:2;flex:none;width:auto;padding:0 18px;top:auto}
+.phone #rz{display:none}
+.phone #chat{order:3;flex:1;min-height:0;width:auto;max-height:none;opacity:1;background:none;padding:6px 14px;overflow:auto;border-radius:0}
+.phone #actrow{order:4;display:flex;gap:8px;padding:6px 12px 0;align-items:stretch;z-index:3}
+.phone #actrow .ib{align-self:center}
+.phone #bar{order:5;width:auto;margin:8px 12px 12px;z-index:3}
+.phone #clock,.phone #sch,.phone #histb,.phone #gear,.phone #viewb{display:none}
+.phone #conn{margin-left:auto}
+.phone .tl:first-child{flex:1}
+.phone .tl:last-child{gap:6px}
+.phone #stl{font-size:11px}.phone #act{font-size:15px;white-space:normal;text-align:center}
+.phone .card.main h3{font-size:23px}.phone .card.main{padding:18px;border-radius:20px}
+.phone .sheet{top:auto;left:0;right:0;bottom:0;width:auto;height:76%;border-radius:22px 22px 0 0;transform:translateY(104%);box-shadow:0 -12px 40px rgba(0,0,0,.5)}
+.phone .sheet.on{transform:none}
+.phone #toast{bottom:150px}
+.phone #cc{padding:14px 14px 28px}
+#app.phone.viewing #chat,#app.phone.viewing #hud #chips{display:none}
+@media (orientation:landscape) and (max-height:520px){#app.phone{--ps:min(22vw,24vh)}.phone #vp.on{height:100%;border-radius:0}}
+@media (prefers-reduced-motion:reduce){#act.live::before,.conn .dot{animation:none!important}}
+
+/* review fixes */
+#cc{background:#070b11}
+.cinfo{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 28px}.phone .cinfo{grid-template-columns:1fr}
+a.btn,a.ib{text-decoration:none;color:inherit;display:inline-block}
+#clock b{font-size:24px}
+@media (max-width:1500px){.desk #sch{display:none}}
+#demo{top:auto;bottom:8px;left:12px;transform:none;border-radius:10px;white-space:nowrap;padding:4px 12px}
+.phone #demo{top:0;bottom:auto;left:50%;transform:translateX(-50%);border-radius:0 0 10px 10px;font-size:9.5px;padding:2px 12px}
+.isdemo.phone #top{padding-top:26px}
+
+/* ===== V3 additions: approval UX, verdict chips, ladder, timeline, notices, reviewers, stop, demo marking ===== */
+#demo{background:#7a1f1f;color:#ffd9d4;font-weight:700;letter-spacing:.14em;box-shadow:0 0 0 1px #d98276}
+#app.demomode{box-shadow:inset 0 0 0 2px #d98276}
+#demo select{margin-left:10px;background:#132131;color:#e7ebef;border:0;border-radius:8px;padding:2px 6px;font:inherit}
+#stopb{margin-top:6px;opacity:.55}
+#stopb.armed{opacity:1;color:#1a0f08;background:var(--warn);font-weight:600;padding:8px 18px}
+#stopb:disabled{cursor:not-allowed}
+#tl{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:2px 0 4px}
+.tls{display:flex;align-items:center;gap:5px;font:500 10px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.tls i{width:8px;height:8px;border-radius:50%;border:1px solid var(--mut);background:transparent}
+.tls.done{color:var(--tx2)}.tls.done i{background:var(--ok);border-color:var(--ok)}
+.tls.active{color:var(--silver)}.tls.active i{border-color:var(--accent);box-shadow:0 0 8px var(--accent);animation:blink 1.6s infinite}
+.tls.failed{color:var(--bad)}.tls.failed i{background:var(--bad);border-color:var(--bad)}
+.notice{margin-top:8px;padding:8px 14px;border-radius:var(--r2);font-size:13px;max-width:min(640px,92vw);position:relative;padding-right:34px;text-align:left}
+.notice.error{background:rgba(217,130,118,.14);color:#f1b8af}.notice.warn{background:rgba(224,184,103,.12);color:var(--warn)}
+.notice .nx{position:absolute;right:8px;top:6px;color:inherit;opacity:.7}
+.chipv{display:inline-block;padding:2px 10px;border-radius:99px;font:600 10.5px var(--mono);letter-spacing:.1em;background:var(--lift);color:var(--tx2)}
+.chipv.pass{color:var(--ok);background:rgba(118,206,163,.12)}.chipv.fail{color:var(--bad);background:rgba(217,130,118,.12)}.chipv.warn{color:var(--warn);background:rgba(224,184,103,.12)}.chipv.exec{color:var(--ice)}
+.vrow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.card .cap{margin-bottom:6px;color:var(--warn)}.card.result .cap,.card.rvs .cap{color:var(--mut)}
+.card.blocked .cap,.card.error .cap{color:var(--bad)}
+.facts{display:grid;grid-template-columns:104px 1fr;gap:6px 14px;margin:10px 0;font-size:13.5px}.facts dt{color:var(--mut)}.facts dd{margin:0;color:var(--silver);overflow-wrap:anywhere}
+.acts.big .btn{padding:12px 20px;font-size:15px}.btn.pri[data-approve]{min-width:150px}
+.card details summary{cursor:pointer;color:var(--tx2);font-size:13px;margin:8px 0}
+.ladder2{list-style:none;padding:0;margin:6px 0}.ladder2 li{display:flex;gap:10px;padding:5px 0;font-size:13px;border-top:1px solid rgba(255,255,255,.05)}
+.ladder2 b{width:16px;text-align:center}.ladder2 small{display:block;color:var(--mut);font-size:11.5px;overflow-wrap:anywhere}
+.ladder2 .established b{color:var(--ok)}.ladder2 .failed b{color:var(--bad)}.ladder2 .not_established{opacity:.75}.ladder2 .not_reported{opacity:.6}.ladder2 .pending{opacity:.5}
+#rvz{position:absolute;z-index:3;right:22px;top:80px;width:min(340px,28vw);max-height:calc(100% - 200px);overflow:auto}.phone #rvz{display:none}
+.card.rvs{padding:14px;margin-bottom:12px}.rvi{padding:8px 0;border-top:1px solid rgba(255,255,255,.07)}.rvh{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rvi .ex{font-size:13px;color:var(--tx2);margin:4px 0;overflow-wrap:anywhere}.note2{font-size:11.5px;color:var(--mut);margin-top:6px}
+.vnote{font-size:13px;color:var(--tx2);margin:12px 0}
+#msrc{position:absolute;z-index:3;left:22px;bottom:18px;display:flex;gap:6px;flex-wrap:wrap;max-width:calc(100% - 400px)}.phone #msrc{max-width:100%;bottom:70px}
+.srcchip{padding:3px 10px;border-radius:99px;background:var(--lift);color:var(--mut);font-size:11.5px}.srcchip.on{color:var(--ice)}
+.stopbtn{width:100%;color:var(--warn);padding:14px}
+.pn .btn.approve{box-shadow:inset 0 0 0 1px var(--warn);color:var(--warn)}
+.phone #stopb.armed{padding:12px 28px;font-size:15px}
+.phone #tl{margin-top:0}
+
+/* ===== layout fix (found by browser test): the result zone must never cover or intercept the HUD (Stop, chips, notices) ===== */
+#hud{z-index:4}
+#app.result{--py:21%;--ps:min(24vh,24vw)}
+#rz{pointer-events:none;top:calc(var(--py) + var(--ps)/2 + 158px);max-height:calc(100% - var(--py) - var(--ps)/2 - 158px - 96px)}
+#rz>*{pointer-events:auto}
+#rvz{pointer-events:none}#rvz>*{pointer-events:auto}
+.phone #rz{display:none}
+
+/* approval actions sit directly under the facts so expanding technical details can never push them off-screen */
+.card.approval .acts.big{margin:12px 0 4px}
+#clock{top:6px}
+
+/* ===== containment fixes (found by browser test) ===== */
+html,body{overflow:hidden}
+#app{overflow:hidden;overflow:clip}                      /* clip: cannot be scrolled by focus / scrollIntoView, so the layout can never shift */
+.sheet{visibility:hidden;transition:transform var(--slow) var(--ease),visibility 0s linear var(--slow)}
+.sheet.on{visibility:visible;transition-delay:0s}        /* closed sheets are not focusable, not clickable and add no scroll height */
+.phone #demo{white-space:normal;text-align:center;width:calc(100% - 24px);max-width:420px;line-height:1.5;font-size:9.5px}
+.phone .card,.phone .card pre{max-width:100%;min-width:0}.phone #chat{min-width:0}
