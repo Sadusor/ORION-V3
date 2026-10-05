@@ -45,13 +45,19 @@ Start-Sleep -Seconds 5
 
 $ui = Dump-Ui $adb
 $logs = ((& $adb logcat -d -s ORIONV3:I chromium:E "*:S") -join "`n")
+$logLines = @($logs -split "`r?`n")
+$tileWarnings = @($logLines | Where-Object { $_ -match "tile memory limits exceeded" })
+$displayLines = @($logLines | Where-Object { $_ -notmatch "tile memory limits exceeded" })
 
 Write-Host ""
 Write-Host "===== ORION ANDROID WEBVIEW LOG =====" -ForegroundColor Cyan
-if ($logs) {
-    Write-Host $logs
+if ($displayLines.Count -gt 0) {
+    $displayLines | ForEach-Object { Write-Host $_ }
 } else {
-    Write-Host "(no ORION WebView log lines captured)"
+    Write-Host "(no non-tile ORION WebView log lines captured)"
+}
+if ($tileWarnings.Count -gt 0) {
+    Write-Host ("ORION_ANDROID_TILE_MEMORY_COUNT> " + $tileWarnings.Count) -ForegroundColor Yellow
 }
 
 if (($ui -match "OPEN ORION") -or ($ui -match "CHECK ORION") -or ($ui -match "OPEN ZEROTIER")) {
@@ -90,8 +96,8 @@ if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError") {
 }
 Write-Host "ORION_ANDROID_JS> PASS" -ForegroundColor Green
 
-if ($logs -match "tile memory limits exceeded") {
-    Write-Host "ORION_ANDROID_TILE_MEMORY> WARN | Chromium reported tile pressure; visual screenshot check will decide PASS/FAIL." -ForegroundColor Yellow
+if ($tileWarnings.Count -gt 0) {
+    Write-Host ("ORION_ANDROID_TILE_MEMORY> WARN | " + $tileWarnings.Count + " renderer-pressure messages; visual screenshot check decides PASS/FAIL.") -ForegroundColor Yellow
 } else {
     Write-Host "ORION_ANDROID_TILE_MEMORY> PASS" -ForegroundColor Green
 }
