@@ -258,3 +258,16 @@ Remote task-catalog simplification 2026-10-05:
 - prior Benchmark 1, Candidate C prep, Benchmark 2 foundation, and obsolete Docker Candidate C task entries are removed from the current catalog only; their code/results/evidence remain preserved in Git history and the results branch.
 - this restores the simple operator flow: Check GitHub -> big Approve & Run.
 - native Candidate C at this SHA also includes the Ollama auto-start/lifecycle fix from `fcc22388...`: start `ollama serve` only if loopback API is down; preserve pre-existing Ollama; stop only a task-started Ollama process tree during cleanup.
+
+
+Candidate C benchmark control fixes 2026-10-05:
+- owner manually stopped ORION Remote and ran the bounded PowerShell cleanup for Candidate-C/ORION benchmark processes and temp residue.
+- root cause of broken big STOP: primary APPROVE & RUN correctly routed to the named dispatch runtime, but the big STOP button still called the legacy GitHub-run stop endpoint. This mismatch is fixed in `Sadusor/Orion@dc996be3893aff838d1059c4edcccfd7cd0ed282`: `/api/run/stop` now routes to the authoritative active named-dispatch session first, falling back to the legacy verifier only when no dispatch session is active. SessionSupervisor STOP now verifies the supervised root process is dead and fails loudly if it survives.
+- warm-up redesign finalized in `Sadusor/Orion@25faadd0ab4bf91a9bd6940af359085c0d92d575`.
+- full coding-agent warm-up count is now **0**.
+- benchmark performs one tiny Ollama/Qwen load-only preheat (`READY`, max 8 generated tokens, keep-alive 15m), excluded from all scores.
+- C1/C2/C3 are the only full scored Harness coding runs.
+- each scored run gets a fresh disposable project workspace.
+- the suite shares one temporary DSH_HOME/cache lifecycle, while prior session/storages are cleared between scored runs to avoid answer/session leakage.
+- suite-scoped DSH_HOME and all disposable workspaces are removed in cleanup.
+- current runnable catalog remains exactly one task: `orion-candidate-c-native-benchmark`.
