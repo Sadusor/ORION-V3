@@ -4,7 +4,7 @@ Updated: 2026-10-05
 
 ## Stage
 
-Connectors + separate ORION PC/phone product-UI foundation.
+Native ORION PC + Android phone product surfaces are physically working. Next product wiring target: Local Brain / connectors.
 
 ORION-V3 is a completely separate repository from the proven ORION implementation.
 
@@ -18,6 +18,8 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
+- Native ORION PC + Android phone STRATA product shell: PHYSICAL PASS — shared PC runtime, phone pairing, visible phone render, native PC app, no external browser; evidence: `docs/evidence/2026-10-05-pc-phone-product-milestone.md`
+- ORION lifecycle: START/STOP owns backend; ZeroTier and Ollama are only cleaned up when ORION started them; native CLOSE enters the same cleanup path
 - TheHands: PRIMARY MANUAL ENGINEERING REMOTE — `Sadusor/TheHands-`; exact Git Hand check, owner Approve & Start, live terminal, targeted STOP, evidence, guarded self-update
 - older Remote: FROZEN / EMERGENCY FALLBACK ONLY — do not route normal new engineering work there
 - Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN RESTAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `9a6a5fc216b6`)
