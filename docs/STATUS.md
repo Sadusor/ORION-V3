@@ -388,3 +388,12 @@ Primary STOP installation PASS and physical proof staged — 2026-10-05:
 - the published proof session was classified FAIL despite the physical stop; treat this as evidence/result-state bookkeeping debt, not a reason to reopen STOP now.
 - V2 work resumed with exactly one runnable task at ORION SHA 8063f28dfac49414a00c3831fab41d916af2edeb: orion-v2-shadow-ui-001.
 - next gate: V2 task itself must exit cleanly while detached V2 remains reachable and V1 remains unchanged.
+
+
+V2-001 physically PASS; V2-002 staged — 2026-10-05:
+- V2-001 source 8063f28dfac49414a00c3831fab41d916af2edeb published PASS in session d32f5b341329.
+- detached V2 lifecycle is proven: GitCheck finished while V2 remained separate and V1 stayed authoritative.
+- active ORION source SHA 493f372db3c55a6ee6dd16215439758597e9dab8.
+- exactly one runnable task: orion-v2-check-github-002 / ORION V2 - Enable Check GitHub.
+- V2-002 adds one server-side proxy only: V2 Check GitHub -> existing authenticated V1 /api/github/check. V1 remains source of truth; V1 token stays server-side; Approve & Run remains disabled in V2.
+- next physical gate after install: press Check GitHub in V2 and confirm the checked SHA shown in V2 matches V1.
