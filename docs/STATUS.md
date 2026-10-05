@@ -18,7 +18,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 - OpenJarvis substrate: CANDIDATE, not adopted
 - Authority Boundary V0: DRAFT
 - Gate-1 runtime: NOT TESTED
-- V1 Remote: FROZEN / USE EXACTLY AS-IS — no code, task-catalog, launcher, payload, adapter, refactor, feature, parity, or migration changes for V3
+- V1 Remote: FROZEN / PERMANENT ENGINEERING REMOTE — use exactly as-is; it continues alongside the new ORION app and is not scheduled for replacement
 - Agent V0 benchmark harness: GITHUB-CODED / PHYSICAL RUN RESTAGED (`Sadusor/Orion@agent/coding-mode-github-loop-v0`, staged SHA `9a6a5fc216b6`)
 
 ## Pinned OpenJarvis donor
@@ -31,7 +31,7 @@ ORION-V3 is a completely separate repository from the proven ORION implementatio
 
 Owner-locked direction on 2026-10-05:
 - V1 Remote is finished/frozen for this development lane and must remain byte-for-byte outside V3 work; do not stage V3 tasks or launch/control logic in the V1 repo.
-- Do not build another Remote in Chrome and do not reproduce V1 parity as a milestone.
+- Do not build another Remote in Chrome and do not reproduce V1 parity as a milestone. The new PC/phone ORION UI is a separate app that coexists with V1.
 - Build connector seams first.
 - Build the STRATA/Claude-inspired ORION UI for both PC and phone as separate product surfaces.
 - After those surfaces exist, wire them to ORION/backend/connectors and physically qualify each capability.
