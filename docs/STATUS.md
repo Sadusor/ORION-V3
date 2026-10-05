@@ -419,3 +419,11 @@ V2-004 staged — live runner/evidence UI:
 - exactly one runnable task: orion-v2-live-runner-004 / ORION V2 - Enable Live Runner View.
 - V2 now projects the active V1 session output tail and evidence-pack state in the Work screen.
 - no V1 execution logic changed; STOP remains frozen and untouched.
+
+
+V2-005 staged — AI Council visibility:
+- V2-004 source 63a9e1547fa1bc94881608718667e116c643fa3b published PASS in session aa4e38ece5d0.
+- active ORION source SHA a200546fd3ea27eccf03ade43f237441cb0d9d77.
+- exactly one runnable task: orion-v2-council-visibility-005 / ORION V2 - Show AI Council Providers.
+- V2 AI page now reads V1 Provider Vault + reviewer catalog and renders up to five visible cloud-model slots.
+- visibility only: no cloud calls, no new execution authority, STOP untouched.
