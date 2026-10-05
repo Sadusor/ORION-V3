@@ -19,3 +19,8 @@ external/
 *.pem
 secrets/
 private/
+
+# Native Windows build intermediates / generated icon
+desktop/**/bin/
+desktop/**/obj/
+desktop/ORION.UI/Assets/orion.ico
