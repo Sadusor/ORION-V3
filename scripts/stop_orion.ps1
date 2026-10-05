@@ -12,6 +12,7 @@ $LauncherPidFile = Join-Path $StateRoot "launcher.pid"
 $ReadyFile = Join-Path $StateRoot "desktop-ready.json"
 $ErrorFile = Join-Path $StateRoot "desktop-error.log"
 $ZeroTierUiOwner = Join-Path $StateRoot "zerotier-ui-owner.json"
+$OllamaOwner = Join-Path $StateRoot "ollama-owner.json"
 $UiExe = Join-Path $Repo "dist\windows\ORION.exe"
 
 function Stop-ProcessTree {
@@ -110,6 +111,34 @@ if (Test-Path -LiteralPath $ZeroTierUiOwner -PathType Leaf) {
     }
 } else {
     Write-Host "ZEROTIER_UI> LEFT OPEN (not owned by ORION)" -ForegroundColor DarkGray
+}
+
+# Stop Ollama only when this ORION session started the exact serve process.
+if (Test-Path -LiteralPath $OllamaOwner -PathType Leaf) {
+    try {
+        $owner = Get-Content -LiteralPath $OllamaOwner -Raw | ConvertFrom-Json
+        $owned = Get-CimInstance Win32_Process -Filter ("ProcessId=" + [int]$owner.pid) -ErrorAction SilentlyContinue
+
+        if (
+            $owned -and
+            $owned.Name -ieq "ollama.exe" -and
+            $owned.ExecutablePath -and
+            $owned.ExecutablePath -ieq [string]$owner.executable -and
+            [string]$owner.opened_by -eq "ORION-V3" -and
+            [string]$owner.command -eq "serve"
+        ) {
+            Stop-ProcessTree -ProcessId ([int]$owned.ProcessId) -Label "ORION-owned Ollama"
+            Write-Host "OLLAMA> CLOSED (ORION-owned runtime only)" -ForegroundColor Green
+        } else {
+            Write-Host "OLLAMA> ownership record stale; no unrelated Ollama process killed." -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host ("OLLAMA> ownership record unreadable: " + $_.Exception.Message) -ForegroundColor Yellow
+    } finally {
+        Remove-Item -LiteralPath $OllamaOwner -Force -ErrorAction SilentlyContinue
+    }
+} else {
+    Write-Host "OLLAMA> LEFT RUNNING/UNCHANGED (not owned by ORION)" -ForegroundColor DarkGray
 }
 
 # Kill stale hidden lifecycle host(s), except the one currently performing cleanup.
