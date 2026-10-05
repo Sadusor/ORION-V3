@@ -291,3 +291,36 @@ Primary STOP installer physical result + Candidate C restored 2026-10-05:
 - current staged SHA: `Sadusor/Orion@1100242e88cf6b9feb70135908fd539500b42242`.
 - current `REMOTE_TASKS.json` again contains exactly one runnable task: `orion-candidate-c-native-benchmark`.
 - final exact-SHA sanity check: task_count=1; primary `/api/run/stop` routes to `stop_active_run`; native Candidate C contains no Docker reference; full-agent warmup count is 0; Qwen warmup is load-only.
+
+
+Candidate C native Windows DeepSeek Harness scored benchmark — FINAL result 2026-10-05:
+- source SHA: `1100242e88cf6b9feb70135908fd539500b42242`
+- task: `orion-candidate-c-native-benchmark`
+- session: `00fccdf14870`
+- result: **FAIL**
+- This is the first valid scored Candidate C result; prior Candidate C failures were setup/orchestration failures and must not be counted as agent scores.
+- Runtime path: native Windows only; Docker not used.
+- Full agent warmups: **0**.
+- Qwen preheat: **PASS 4.580 s**, load-only, no coding task.
+- Windows ACL restricted-token qualification: **PASS**; inside-workspace write succeeded, outside-workspace write was denied, outside file not created.
+- Sandbox boundary remains honestly classified `WINDOWS_ACL_WRITE_RESTRICTED_PARTIAL`; read isolation=false; network isolation=false; no hard-safety claim.
+- Scored runs:
+  - C1 FAIL, 254.018 s
+  - C2 FAIL, 130.984 s
+  - C3 FAIL, 250.717 s
+  - pass rate: **0/3 (0%)**
+  - timeouts: **0**
+  - benchmark safety passes: **3/3**
+- scored elapsed: mean **211.906 s**, median **250.717 s**, max **254.018 s**
+- CPU mean aggregate mean **8.284%**
+- CPU max aggregate mean **14.580%**
+- GPU mean aggregate mean **67.938%**
+- GPU max aggregate mean **98.333%**
+- VRAM mean aggregate mean **8076.315 MB**
+- VRAM max aggregate mean **8168 MB**
+- GPU power mean aggregate mean **162.107 W**
+- GPU power max aggregate mean **258.313 W**
+- task-started Ollama process tree was stopped after the run; transient benchmark residue cleanup reported PASS.
+- Evidence pack: `docs/coding-mode/evidence-packs/00fccdf14870-evidence-pack.zip`, SHA256 `fa365458ebe96fd4e178efc1a97d5429801ada7497920220b7befb8fcba50763`.
+- Decision for this task class: **DeepSeek Harness Candidate C is not justified as the default execution path.** Benchmark 1 direct Qwen 9B -> deterministic Hands remains qualified winner: 3/3 PASS vs Candidate C 0/3; direct path median ~12.06 s vs Candidate C median ~250.72 s (~20.8x slower); Candidate C also consumed comparable GPU utilization for far longer.
+- Do not rerun Candidate C simply to seek a different score. Any future Harness work should be diagnostic/feature-specific, not qualification for default routing, unless the architecture changes materially.
