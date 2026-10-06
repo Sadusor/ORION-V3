@@ -15,6 +15,7 @@ from urllib.parse import unquote, urlparse
 
 from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
+from modules.chat_history import ChatHistoryStore
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UI_ROOT = ROOT / "ui" / "strata"
@@ -23,6 +24,7 @@ STATE_ROOT.mkdir(parents=True, exist_ok=True)
 PID_FILE = STATE_ROOT / "product-ui.pid"
 
 LOCAL_BRAIN = StreamingBrainPipeline()
+CHAT_HISTORY = ChatHistoryStore(STATE_ROOT / "chat_history.sqlite3")
 
 DENIED_TOP = {"demo.html", "README.md", "ARCHITECTURE.md", "INTEGRATION.md", "PRODUCT_UI.md", "STATE_CONTRACT.md", "TESTING.md"}
 DENIED_DIRS = {"tests", "tools"}
@@ -238,6 +240,8 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/status":
             return self._json(200, STATE.view())
+        if path == "/api/chat-history":
+            return self._json(200, CHAT_HISTORY.snapshot())
         if path == "/api/project-links":
             v = STATE.view()
             return self._json(200, {"project_links": v["project_links"], "active_project_link_id": v["active_project_link_id"]})
@@ -261,6 +265,11 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"ok": False, "error": str(exc)})
         if not self._require_auth():
             return
+        if path == "/api/chat-history/sync":
+            try:
+                return self._json(200, CHAT_HISTORY.sync(self._read_json()))
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/local-hand/draft":
             try:
                 body = self._read_json()
