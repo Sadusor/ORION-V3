@@ -78,6 +78,18 @@ Canonical Memory remains ORION-owned.
 Primary internal donor: KnowledgeOS.
 Challengers: agentmemory, TencentDB-Agent-Memory, OpenViking, memanto.
 
+Current memory sequence after adversarial review:
+1. Conversation Recall V1 — frozen PASS.
+2. Memory Candidate Queue V1 — frozen PASS.
+3. Canonical Memory Review + Promotion V1 — frozen physical PASS.
+4. Canonical Memory Retrieval Foundation V1 — exact scope, retrieval-time admission,
+   append-only supersession representation, explicit budget/fusion contract.
+5. Canonical Memory Retrieval integration — owner-approved durable context and
+   Conversation Recall remain separate labeled blocks; conflicts never silently resolve.
+6. Automatic Candidate Detection — candidates only, never automatic promotion.
+7. Consolidation / L0-L1-L2 / duplicate handling.
+8. Hybrid/vector/graph evaluation only if a retrieval benchmark proves BM25 insufficient.
+
 Personal-file learning begins here as retrieval, not weight training:
 - approved project/file/browser/assistant exports;
 - text + image/PDF/screenshot ingestion;
