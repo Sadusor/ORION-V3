@@ -10,13 +10,14 @@
      command   existing Remote V1 control (backend validates and may refuse with 409)
      high      high-impact; the UI asks for a browser confirm() as a courtesy. The backend remains the authority.
    Deliberately NOT registered (still available only in the legacy UI): /api/manual/run, /api/reviewers/run,
-   /api/project-links/clone|create, /api/providers/save|delete, /api/generate, /api/tags, /api/memory/candidate (write),
+   /api/project-links/clone|create, /api/providers/save|delete, /api/generate, /api/tags,
    /api/session/* beyond start/stop. Add a route here only when a V3 screen genuinely needs it.
    ====================================================================== */
 const ROUTES={
  'GET /api/status':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
  'GET /api/memory/candidates':{kind:'read'},'GET /api/memory/search':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
  'POST /api/pair':{kind:'auth'},
+ 'POST /api/memory/candidate':{kind:'approval',note:'Owner-selected exact chat message enters candidate queue only; never canonical Memory.'},
  'POST /api/chat-history/sync':{kind:'storage'},
  'POST /api/local-hand/draft':{kind:'request',note:'Local Brain proposes. ORION preflight, semantic verifier and original-request authorization decide whether a registered capability starts.'},
  'POST /api/local-hand/revise':{kind:'request'},
