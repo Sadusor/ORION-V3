@@ -17,18 +17,29 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import com.sadusor.orionv3.history.ChatHistoryBridge
+import com.sadusor.orionv3.history.ChatHistoryStore
+import com.sadusor.orionv3.offline.OfflineChatBridge
 
 private const val ORION_BASE_URL = "http://10.109.233.27:8890/"
 private const val ORION_UI_URL = ORION_BASE_URL + "v3/?view=phone"
+private const val OFFLINE_BASE_URL = "https://orion.local/offline/"
 private const val TAG = "ORIONV3"
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
     private lateinit var statusView: TextView
+    private lateinit var historyStore: ChatHistoryStore
+    private lateinit var historyBridge: ChatHistoryBridge
+    private var offlineChatBridge: OfflineChatBridge? = null
+    private var showingOffline = false
 
-    @SuppressLint("SetJavaScriptEnabled")
+    @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        historyStore = ChatHistoryStore(this)
+        historyBridge = ChatHistoryBridge(historyStore)
 
         val root = FrameLayout(this).apply {
             setBackgroundColor(Color.rgb(5, 7, 11))
@@ -53,6 +64,7 @@ class MainActivity : Activity() {
             settings.cacheMode = WebSettings.LOAD_NO_CACHE
             settings.mediaPlaybackRequiresUserGesture = true
 
+            addJavascriptInterface(historyBridge, "ORION_NATIVE_HISTORY")
             WebView.setWebContentsDebuggingEnabled(true)
 
             webChromeClient = object : WebChromeClient() {
@@ -61,7 +73,7 @@ class MainActivity : Activity() {
                         TAG,
                         "JS " + message.message() +
                             " @" + message.sourceId() +
-                            ":" + message.lineNumber()
+                            ":" + message.lineNumber(),
                     )
                     return true
                 }
@@ -72,7 +84,8 @@ class MainActivity : Activity() {
                     view: WebView,
                     request: WebResourceRequest,
                 ): Boolean {
-                    return !request.url.toString().startsWith(ORION_BASE_URL)
+                    val url = request.url.toString()
+                    return !url.startsWith(ORION_BASE_URL) && !url.startsWith(OFFLINE_BASE_URL)
                 }
 
                 override fun onPageStarted(
@@ -81,7 +94,7 @@ class MainActivity : Activity() {
                     favicon: Bitmap?,
                 ) {
                     Log.i(TAG, "page started: $url")
-                    statusView.text = "Loading ORION…"
+                    statusView.text = if (showingOffline) "Loading ORION Offline…" else "Loading ORION…"
                     statusView.visibility = View.VISIBLE
                 }
 
@@ -90,15 +103,20 @@ class MainActivity : Activity() {
                     url: String,
                 ) {
                     Log.i(TAG, "page finished: $url")
+                    if (showingOffline) {
+                        statusView.visibility = View.GONE
+                        Log.i(TAG, "offline shell ready")
+                        return
+                    }
 
                     view.evaluateJavascript(
-                        "(function(){return JSON.stringify({title:document.title,ready:document.readyState,app:!!document.getElementById('app'),core:!!document.getElementById('core'),composer:!!document.getElementById('inp'),scripts:document.scripts.length,styles:document.styleSheets.length,ua:navigator.userAgent,body:document.body&&document.body.innerText.slice(0,220)});})()"
+                        "(function(){return JSON.stringify({title:document.title,ready:document.readyState,app:!!document.getElementById('app'),core:!!document.getElementById('core'),composer:!!document.getElementById('inp'),scripts:document.scripts.length,styles:document.styleSheets.length,ua:navigator.userAgent,body:document.body&&document.body.innerText.slice(0,220)});})()",
                     ) { result ->
                         Log.i(TAG, "DOM probe: $result")
                     }
 
                     view.evaluateJavascript(
-                        "Boolean(document.getElementById('app')&&document.getElementById('core')&&document.getElementById('inp'))"
+                        "Boolean(document.getElementById('app')&&document.getElementById('core')&&document.getElementById('inp'))",
                     ) { ok ->
                         if (ok == "true") {
                             statusView.visibility = View.GONE
@@ -117,9 +135,9 @@ class MainActivity : Activity() {
                     error: WebResourceError,
                 ) {
                     Log.e(TAG, "web error: " + error.description)
-                    if (request.isForMainFrame) {
-                        statusView.text = "ORION unavailable · " + error.description
-                        statusView.visibility = View.VISIBLE
+                    if (request.isForMainFrame && !showingOffline) {
+                        Log.w(TAG, "PC ORION unavailable; falling back to bundled offline chat")
+                        loadOffline()
                     }
                 }
             }
@@ -149,7 +167,43 @@ class MainActivity : Activity() {
         )
 
         setContentView(root)
-        webView.loadUrl(ORION_UI_URL)
+        loadOnline()
+    }
+
+    private fun loadOnline() {
+        showingOffline = false
+        offlineChatBridge?.close()
+        offlineChatBridge = null
+        if (::webView.isInitialized) {
+            webView.removeJavascriptInterface("ORION_NATIVE_CHAT")
+            statusView.text = "Connecting to ORION…"
+            statusView.visibility = View.VISIBLE
+            webView.loadUrl(ORION_UI_URL)
+        }
+    }
+
+    @SuppressLint("JavascriptInterface")
+    private fun loadOffline() {
+        if (showingOffline || !::webView.isInitialized) return
+        showingOffline = true
+        offlineChatBridge?.close()
+        val bridge = OfflineChatBridge(
+            activity = this,
+            webView = webView,
+            historyStore = historyStore,
+            onReconnect = { loadOnline() },
+        )
+        offlineChatBridge = bridge
+        webView.addJavascriptInterface(bridge, "ORION_NATIVE_CHAT")
+
+        val html = assets.open("offline/index.html").bufferedReader(Charsets.UTF_8).use { it.readText() }
+        webView.loadDataWithBaseURL(
+            OFFLINE_BASE_URL,
+            html,
+            "text/html",
+            "utf-8",
+            null,
+        )
     }
 
     override fun onBackPressed() {
@@ -161,6 +215,11 @@ class MainActivity : Activity() {
     }
 
     override fun onDestroy() {
+        offlineChatBridge?.close()
+        offlineChatBridge = null
+        if (::historyStore.isInitialized) {
+            historyStore.close()
+        }
         if (::webView.isInitialized) {
             webView.stopLoading()
             webView.webChromeClient = null
