@@ -1,0 +1,16 @@
+ORION bundled offline model
+
+Model: Qwen3-0.6B
+Quantization: Q4_0 GGUF
+Source: ggml-org/Qwen3-0.6B-GGUF
+File: Qwen3-0.6B-Q4_0.gguf
+Expected SHA-256: da2572f16c06133561ce56accaa822216f2391ef4d37fba427801cd6736417d4
+License: Apache License 2.0
+
+Inference runtime:
+dev.ffmpegkit-maintained:llama-android:0.1.1
+License: MIT
+Purpose: on-device GGUF inference through llama.cpp.
+
+The model binary is fetched by android/scripts/build.ps1, hash-verified, and bundled
+into the locally produced APK. It is intentionally not committed to this public repo.
