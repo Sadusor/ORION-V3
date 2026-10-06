@@ -13,6 +13,8 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
+from orion_v3.thehands_learning import TheHandsLearningInbox
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UI_ROOT = ROOT / "ui" / "strata"
 STATE_ROOT = pathlib.Path(os.environ.get("LOCALAPPDATA", str(ROOT / ".local"))) / "ORION-V3"
@@ -139,6 +141,7 @@ class ProductState:
 
 AUTH: Auth
 STATE = ProductState()
+THEHANDS_LEARNING = TheHandsLearningInbox(STATE_ROOT)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -249,7 +252,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/work-exchange/latest":
             return self._json(200, {"items": [], "status": "not_connected"})
         if path == "/api/memory/candidates":
-            return self._json(200, {"candidates": []})
+            return self._json(200, {"candidates": THEHANDS_LEARNING.list_candidates()})
         if path == "/api/reviewers/latest":
             return self._json(200, STATE.view()["reviewer"])
         if path == "/api/providers":
@@ -266,6 +269,14 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"ok": False, "error": str(exc)})
         if not self._require_auth():
             return
+        if path == "/api/learning/thehands/import":
+            try:
+                evidence = self._read_json()
+                return self._json(200, THEHANDS_LEARNING.import_evidence(evidence))
+            except RuntimeError as exc:
+                return self._json(409, {"ok": False, "error": str(exc)})
+            except Exception as exc:
+                return self._json(400, {"ok": False, "error": str(exc)})
         # Registered frontend routes that are not yet real backend capabilities fail truthfully.
         known = {
             "/api/local-hand/draft", "/api/local-hand/revise", "/api/local-hand/run", "/api/local-hand/stop",
