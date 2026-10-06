@@ -24,3 +24,8 @@ private/
 desktop/**/bin/
 desktop/**/obj/
 desktop/ORION.UI/Assets/orion.ico
+
+# Large verified offline model is fetched by android/scripts/build.ps1 and bundled locally.
+android/app/src/main/assets/models/*.gguf
+android/app/src/main/assets/models/*.partial
+
