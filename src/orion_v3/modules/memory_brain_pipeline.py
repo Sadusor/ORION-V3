@@ -37,7 +37,10 @@ class MemoryAwareBrainPipeline:
             "state": state,
             "authority": "context_only",
             "query": "",
+            "query_fingerprint": "",
+            "scope": {},
             "count": 0,
+            "context_count": 0,
             "items": [],
             "trace": {},
             "error": error,
@@ -68,12 +71,25 @@ class MemoryAwareBrainPipeline:
                 project_id=project_id,
             )
             composed = self.memory.compose_owner_request(owner_goal, retrieval)
+            trace = copy.deepcopy(retrieval.get("trace", {}))
+            context_count = int(trace.get("context_item_count") or 0)
+            selected_count = len(retrieval.get("items", []))
+            brief_state = (
+                "pass"
+                if context_count > 0
+                else "filtered"
+                if selected_count > 0
+                else "empty"
+            )
             brief = {
                 "schema": "orion.memory-brief/1",
-                "state": "pass" if retrieval.get("items") else "empty",
+                "state": brief_state,
                 "authority": "context_only",
                 "query": retrieval.get("query", ""),
-                "count": len(retrieval.get("items", [])),
+                "count": selected_count,
+                "context_count": context_count,
+                "query_fingerprint": retrieval.get("query_fingerprint", ""),
+                "scope": copy.deepcopy(retrieval.get("scope", {})),
                 "items": [
                     {
                         "id": item.get("id", ""),
@@ -85,7 +101,7 @@ class MemoryAwareBrainPipeline:
                     }
                     for item in retrieval.get("items", [])
                 ],
-                "trace": copy.deepcopy(retrieval.get("trace", {})),
+                "trace": trace,
                 "error": "",
             }
         except Exception as exc:
