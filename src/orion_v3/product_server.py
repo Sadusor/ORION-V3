@@ -225,6 +225,18 @@ class Handler(BaseHTTPRequestHandler):
         self._json(401, {"ok": False, "error": "pairing required"})
         return False
 
+    def _require_owner_token(self) -> bool:
+        # Durable canonical-memory decisions are stricter than ordinary local UI
+        # reads/commands: even loopback must present a paired owner token.
+        if AUTH.valid(self._token()):
+            return True
+        self._json(401, {"ok": False, "error": "paired owner token required"})
+        return False
+
+    def _owner_actor_fingerprint(self) -> str:
+        token = self._token()
+        return "paired:" + AUTH.digest(token)[:16] if token else ""
+
     def _serve_ui(self, path: str):
         if path in ("/v3", "/v3/"):
             rel = "index.html"
@@ -366,7 +378,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, {"ok": True, "token": token})
             except Exception as exc:
                 return self._json(400, {"ok": False, "error": str(exc)})
-        if not self._require_auth():
+
+        # Canonical-memory review is a durable write boundary. Unlike ordinary
+        # V3 routes, loopback is not implicitly trusted here.
+        if path in {"/api/memory/review-ticket", "/api/memory/decision"}:
+            if not self._require_owner_token():
+                return
+        elif not self._require_auth():
             return
         if path == "/api/chat-history/sync":
             try:
@@ -391,6 +409,21 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/review-ticket":
+            try:
+                body = self._read_json()
+                result = MEMORY_REVIEW.prepare_review(
+                    candidate_id=str(body.get("candidate_id", "")),
+                    decision=str(body.get("decision", "")),
+                    expected_content_sha256=str(body.get("expected_content_sha256", "")),
+                    owner_scope=str(body.get("owner_scope", "owner:primary")),
+                    actor_fingerprint=self._owner_actor_fingerprint(),
+                )
+                return self._json(200, result)
+            except MemoryReviewError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/memory/decision":
             try:
                 body = self._read_json()
@@ -398,7 +431,9 @@ class Handler(BaseHTTPRequestHandler):
                     candidate_id=str(body.get("candidate_id", "")),
                     decision=str(body.get("decision", "")),
                     expected_content_sha256=str(body.get("expected_content_sha256", "")),
+                    review_token=str(body.get("review_token", "")),
                     owner_scope=str(body.get("owner_scope", "owner:primary")),
+                    actor_fingerprint=self._owner_actor_fingerprint(),
                 )
                 return self._json(201 if result.get("created") else 200, result)
             except MemoryReviewError as exc:
