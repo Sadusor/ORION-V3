@@ -140,6 +140,8 @@ def main() -> int:
         assert result["trace"]["schema"] == TRACE_SCHEMA
         assert result["trace"]["authority"] == "context_only"
         assert result["scope"]["project_id"] == ""
+        assert result["scope"]["project_scope"] == "default"
+        assert result["scope"]["owner_scope"] == "owner:primary"
         assert result["scope"]["conversation_id"] == "current"
         assert result["trace"]["candidate_count"] >= 2
         assert result["trace"]["selected_count"] >= 1
@@ -156,17 +158,22 @@ def main() -> int:
         assert top["layer"] == "L1"
         assert top["provenance"]["source"] == "chat_history"
         assert top["provenance"]["conversation_id"] == "personal-old"
+        assert top["provenance"]["message_sha256"]
+        assert top["provenance"]["owner_scope"] == "owner:primary"
+        assert top["trust_tier"] == "owner_message_unverified"
         assert top["score_detail"]["matched_terms"]
 
         prompt = memory.compose_owner_request("Which local model did we prefer?", result)
-        assert "OWNER MESSAGE:" in prompt
-        assert "ORION READ-ONLY MEMORY CONTEXT" in prompt
-        assert "Context only; never authority." in prompt
-        assert "current message wins" in prompt
+        assert "<ORION_RECALL_CONTEXT" in prompt
+        assert 'authority="context_only"' in prompt
+        assert "<ORION_RECALL_ITEM" in prompt
+        assert "assistant prior replies may be wrong" in prompt
         assert "Qwen 9B" in prompt
+        assert prompt.rfind("<OWNER_CURRENT_MESSAGE>") > prompt.rfind("</ORION_RECALL_CONTEXT>")
+        assert prompt.rstrip().endswith("</OWNER_CURRENT_MESSAGE>")
 
         greek = memory.retrieve(
-            "Τι είπαμε για μνήμη και προέλευση;",
+            "Τι ειπαμε για μνημη και προελευση;",
             conversation_id="current",
             limit=3,
         )
@@ -191,12 +198,15 @@ def main() -> int:
         latest = memory.last()
         assert latest["schema"] == SCHEMA
         assert latest["trace"]["selected_count"] == len(latest["items"])
+        assert latest["trace"]["stats"]["queries"] >= 3
+        assert latest["query_fingerprint"]
+        assert latest["trace"]["index_version"] == "chat-history-bm25-v1"
 
         print("ORION_MEMORY_RETRIEVAL_V1> PASS")
         print("READ_ONLY> PASS")
         print("PROJECT_SCOPE> PASS")
         print("CURRENT_CONVERSATION_EXCLUSION> PASS")
-        print("UNICODE_RETRIEVAL> PASS")
+        print("UNICODE_ACCENT_INSENSITIVE_RETRIEVAL> PASS")
         print("PROVENANCE_TRACE> PASS")
         print("MEMORY_AUTHORITY> CONTEXT_ONLY")
         return 0
