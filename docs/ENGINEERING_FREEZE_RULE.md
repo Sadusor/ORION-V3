@@ -59,6 +59,25 @@ Latest owner-confirmed TheHands baseline at the time this rule was adopted:
 
 ORION integrations with TheHands must prefer external/read-only adapters and narrow module seams. Do not modify unrelated TheHands product code.
 
+## Small-fix exception
+
+Module-first remains the default.
+
+If a fix is genuinely tiny and making a new module would add pointless complexity, direct editing of a proven existing file is allowed **only after explicit owner approval**.
+
+Required sequence:
+
+1. stop before editing;
+2. name the exact existing file(s) that would change;
+3. explain the exact tiny change;
+4. explain why a separate module would be over-engineering;
+5. ask the owner for approval;
+6. after approval, change only that stated file/scope;
+7. run the smallest relevant qualification;
+8. freeze the new physical PASS when appropriate.
+
+This exception never authorizes unrelated cleanup, refactoring, redesign, scope expansion, or silent edits to proven code.
+
 ## Owner shorthand
 
 When the owner says:

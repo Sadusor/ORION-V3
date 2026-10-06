@@ -56,7 +56,8 @@ It means:
 - identify the latest frozen PASS before substantial work;
 - branch from that proven state;
 - implement new capability as an isolated, replaceable module/adapter first;
-- touch existing core files only for the smallest necessary hook;
+- if a fix is genuinely tiny and a module would add pointless complexity, STOP first, name the exact existing file/change, explain why a module is overkill, and obtain explicit owner approval before editing that proven file directly;
+- touch existing core files only for the smallest necessary hook or the explicitly approved tiny fix;
 - make no unrelated refactor, cleanup or redesign;
 - bound the allowed diff before editing;
 - test the module independently before merge;
