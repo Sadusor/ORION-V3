@@ -9,6 +9,8 @@ for(const page of ['index.html','demo.html']){
  ok(!/https?:\/\//.test(html.replace(/xmlns=%27[^%]*%27/g,'')),page+': no external URLs (self-contained)');}
 const live=scriptsOf('index.html'),demo=scriptsOf('demo.html');
 ok(live.includes('bridge/real-bridge.js')&&!live.includes('bridge/mock-bridge.js'),'index.html (live) loads the REAL bridge and never the mock');
+ok(live.includes('modules/chat-history.js'),'index.html loads the bounded chat-history module');
+ok(live.indexOf('shell/shell.js')<live.indexOf('modules/chat-history.js'),'chat history loads after shell so it observes the proven chat DOM instead of replacing it');
 ok(demo.includes('bridge/mock-bridge.js')&&!demo.includes('bridge/real-bridge.js'),'demo.html loads ONLY the mock bridge');
 ok(!/mock/i.test(read('index.html').replace(/<!--.*?-->/gs,'').replace('DEMO / MOCK BACKEND','')),'index.html contains no mock wiring (only the hidden banner text)');
 const all=[];(function walk(d){for(const f of fs.readdirSync(d)){const p=path.join(d,f);fs.statSync(p).isDirectory()?(f==='tests'?0:walk(p)):all.push(p)}})(ROOT);
