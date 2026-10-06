@@ -1,5 +1,6 @@
 param(
     [switch]$Install,
+    [switch]$BundleOfflineModel,
     [switch]$SkipOfflineModel,
     [string]$GradleVersion = "8.10.2"
 )
@@ -49,49 +50,63 @@ function Resolve-Adb([string]$SdkRoot) {
     throw "adb.exe was not found."
 }
 
-function Ensure-OfflineModel([string]$AndroidRoot) {
+function Test-ModelHash([string]$Path, [string]$ExpectedSha256) {
+    if (!(Test-Path -LiteralPath $Path -PathType Leaf)) { return $false }
+    return (Get-FileHash -Algorithm SHA256 -LiteralPath $Path).Hash.ToUpperInvariant() -eq $ExpectedSha256
+}
+
+function Prepare-OfflineModelAsset([string]$AndroidRoot, [bool]$Bundle) {
     $modelName = "Qwen3-0.6B-Q4_0.gguf"
     $modelUrl = "https://huggingface.co/ggml-org/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_0.gguf"
     $expectedSha256 = "DA2572F16C06133561CE56ACCAA822216F2391EF4D37FBA427801CD6736417D4"
-    $modelDir = Join-Path $AndroidRoot "app\src\main\assets\models"
-    $modelPath = Join-Path $modelDir $modelName
-    $partial = "$modelPath.partial"
+    $assetDir = Join-Path $AndroidRoot "app\src\main\assets\models"
+    $assetPath = Join-Path $assetDir $modelName
+    $cacheDir = Join-Path $env:LOCALAPPDATA "ORION-V3\models"
+    $cachePath = Join-Path $cacheDir $modelName
+    $partial = "$cachePath.partial"
 
-    New-Item -ItemType Directory -Force -Path $modelDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $assetDir, $cacheDir | Out-Null
 
-    if (Test-Path $modelPath) {
-        $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $modelPath).Hash.ToUpperInvariant()
-        if ($actual -eq $expectedSha256) {
-            Write-Host "ORION_OFFLINE_MODEL> READY ($modelName)" -ForegroundColor Green
-            return
-        }
-        Write-Warning "Existing offline model hash is wrong; replacing it."
-        Remove-Item -LiteralPath $modelPath -Force
+    # Preserve a previously downloaded build copy before externalizing it.
+    if (!(Test-ModelHash $cachePath $expectedSha256) -and
+        (Test-ModelHash $assetPath $expectedSha256)) {
+        Copy-Item -LiteralPath $assetPath -Destination $cachePath -Force
     }
 
-    Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
-    Write-Host "Downloading bundled offline model ($modelName, about 429 MB)..." -ForegroundColor Cyan
-    Invoke-WebRequest -Uri $modelUrl -OutFile $partial
+    if (!$Bundle) {
+        Remove-Item -LiteralPath $assetPath -Force -ErrorAction SilentlyContinue
+        Write-Host "ORION_OFFLINE_MODEL> EXTERNALIZED (normal APK does not bundle GGUF)" -ForegroundColor Green
+        return
+    }
 
-    $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $partial).Hash.ToUpperInvariant()
-    if ($actual -ne $expectedSha256) {
+    if (!(Test-ModelHash $cachePath $expectedSha256)) {
+        Remove-Item -LiteralPath $cachePath -Force -ErrorAction SilentlyContinue
         Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
-        throw "Offline model SHA256 mismatch. Expected $expectedSha256 but got $actual."
+        Write-Host "Downloading one-time bundled offline model ($modelName, about 429 MB)..." -ForegroundColor Cyan
+        Invoke-WebRequest -Uri $modelUrl -OutFile $partial
+        if (!(Test-ModelHash $partial $expectedSha256)) {
+            Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
+            throw "Offline model SHA256 verification failed."
+        }
+        Move-Item -LiteralPath $partial -Destination $cachePath -Force
     }
 
-    Move-Item -LiteralPath $partial -Destination $modelPath -Force
-    Write-Host "ORION_OFFLINE_MODEL> PASS ($modelName)" -ForegroundColor Green
+    Copy-Item -LiteralPath $cachePath -Destination $assetPath -Force
+    if (!(Test-ModelHash $assetPath $expectedSha256)) {
+        throw "Bundled offline model asset SHA256 verification failed."
+    }
+    Write-Host "ORION_OFFLINE_MODEL> BUNDLED ($modelName)" -ForegroundColor Green
 }
 
 $env:JAVA_HOME = Resolve-Java
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 $sdkRoot = Resolve-AndroidSdkRoot
 
-if (!$SkipOfflineModel) {
-    Ensure-OfflineModel $AndroidRoot
-} else {
-    Write-Host "ORION_OFFLINE_MODEL> SKIPPED (offline chatbot will not be usable in this APK)" -ForegroundColor Yellow
+if ($BundleOfflineModel -and $SkipOfflineModel) {
+    throw "Use either -BundleOfflineModel or -SkipOfflineModel, not both."
 }
+$bundleModel = $BundleOfflineModel -and !$SkipOfflineModel
+Prepare-OfflineModelAsset $AndroidRoot $bundleModel
 
 $localProperties = Join-Path $AndroidRoot "local.properties"
 $sdkForGradle = $sdkRoot.Replace("\", "\\")
@@ -153,12 +168,29 @@ if (!(Test-Path $apk)) {
     throw "APK was not created at expected path: $apk"
 }
 
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$zip = [System.IO.Compression.ZipFile]::OpenRead($apk)
+try {
+    $ggufEntries = @($zip.Entries | Where-Object { $_.FullName -like "*.gguf" })
+} finally {
+    $zip.Dispose()
+}
+if ($bundleModel -and $ggufEntries.Count -lt 1) {
+    throw "Bundled-model build is missing the GGUF asset."
+}
+if (!$bundleModel -and $ggufEntries.Count -gt 0) {
+    throw "Normal update APK unexpectedly contains a GGUF model."
+}
+Write-Host ("ORION_APK_MODEL_POLICY> " + $(if ($bundleModel) { "BUNDLED" } else { "EXTERNALIZED" })) -ForegroundColor Green
+
 $dist = Join-Path $RepoRoot "dist"
 New-Item -ItemType Directory -Force -Path $dist | Out-Null
 $distApk = Join-Path $dist "ORION-V3-debug.apk"
 Copy-Item -LiteralPath $apk -Destination $distApk -Force
 
 Write-Host ""
+$apkMb = [Math]::Round((Get-Item -LiteralPath $distApk).Length / 1MB, 1)
+Write-Host ("ORION_APK_MB> " + $apkMb)
 Write-Host "ORION_V3_APK> PASS" -ForegroundColor Green
 Write-Host ("APK> " + $distApk)
 Write-Host "PACKAGE> com.sadusor.orionv3"
