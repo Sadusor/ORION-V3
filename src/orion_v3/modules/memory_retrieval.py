@@ -377,26 +377,25 @@ class MemoryRetrievalModule:
                 continue
             lexical_prefilter_count += 1
 
-            tier = _trust_tier(role)
-            rows.append(
-                _Candidate(
-                    message_id=_clean(m.get("id"), 160),
-                    conversation_id=cid,
-                    project_id=project_id,
-                    title=_clean(c.get("title"), 160),
-                    role=role,
-                    text=text,
-                    source=_clean(m.get("source"), 80),
-                    created_at_ms=int(m.get("created_at_ms") or 0),
-                    pinned=bool(c.get("pinned")),
-                    tokens=doc_tokens,
-                    trust_tier=tier,
-                    trust_weight=TRUST_WEIGHTS[tier],
-                    risk_flags=tuple(_risk_flags(text)),
+            if len(rows) < MAX_CANDIDATES:
+                tier = _trust_tier(role)
+                rows.append(
+                    _Candidate(
+                        message_id=_clean(m.get("id"), 160),
+                        conversation_id=cid,
+                        project_id=project_id,
+                        title=_clean(c.get("title"), 160),
+                        role=role,
+                        text=text,
+                        source=_clean(m.get("source"), 80),
+                        created_at_ms=int(m.get("created_at_ms") or 0),
+                        pinned=bool(c.get("pinned")),
+                        tokens=doc_tokens,
+                        trust_tier=tier,
+                        trust_weight=TRUST_WEIGHTS[tier],
+                        risk_flags=tuple(_risk_flags(text)),
+                    )
                 )
-            )
-            if len(rows) >= MAX_CANDIDATES:
-                break
 
         return rows, {
             "source_message_count": source_message_count,
