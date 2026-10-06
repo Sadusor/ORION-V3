@@ -198,6 +198,13 @@ class CanonicalMemoryCandidateQueue:
                 (candidate_id,),
             ).fetchone()
             if existing is None:
+                count = int(
+                    con.execute("SELECT COUNT(*) FROM candidates").fetchone()[0]
+                )
+                if count >= MAX_CANDIDATES:
+                    raise MemoryCandidateError(
+                        "Memory candidate queue is full; review it before adding more."
+                    )
                 con.execute(
                     """
                     INSERT INTO candidates(
@@ -213,7 +220,6 @@ class CanonicalMemoryCandidateQueue:
             else:
                 row = dict(existing)
                 created = False
-            self._prune(con)
 
         return {
             "ok": True,
@@ -221,13 +227,6 @@ class CanonicalMemoryCandidateQueue:
             "candidate": self._public(row),
             "canonical_memory_written": False,
         }
-
-    def _prune(self, con: sqlite3.Connection) -> None:
-        rows = con.execute(
-            "SELECT candidate_id FROM candidates ORDER BY submitted_at_ms DESC, candidate_id DESC"
-        ).fetchall()
-        for row in rows[MAX_CANDIDATES:]:
-            con.execute("DELETE FROM candidates WHERE candidate_id=?", (row["candidate_id"],))
 
     def list(self) -> dict[str, Any]:
         with self._lock, closing(self._connect()) as con:
