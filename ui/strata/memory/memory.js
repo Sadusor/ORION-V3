@@ -32,7 +32,7 @@ muc.onclick=e=>{const n=hit(e);MU.sel=n||null;const d=$("mud");d.classList.toggl
  const canPropose=n.source==="orion-history"&&n.meta&&n.meta.messageId;
  d.innerHTML=`<span class="cap">${escH(n.kind)} · ${escH(cap)}</span><h3>${escH(n.t)}</h3><p>${escH(n.project)} · ${escH(n.date)}${n.src?" · source: "+escH(n.src):""}</p>${meta}${by?`<p>Replaced by: ${escH(by.t)}</p>`:""}${ft?`<p>Supersedes: ${escH(ft.t)}</p>`:""}${canPropose?`<button id="muPropose" type="button">Propose as memory candidate</button><p class="cap">Queues exact source only · does not promote canonical Memory</p>`:""}`;
  if(canPropose){const b=$("muPropose");b.onclick=async ev=>{b.disabled=true;const r=await B.proposeMemoryCandidate(n,ev);if(r.ok){b.textContent=r.data&&r.data.created===false?"Already queued":"Queued as candidate";const mem=await MemoryAdapters.load(B,MU.q);MU.nodes=mem.nodes;MU.sources=mem.sources;muLayout();muDraw()}else{b.disabled=false;b.textContent="Could not queue · "+escH(r.message||"rejected")}}}
- muDraw()};
+ muDraw()}};
 $("mq").oninput=e=>{MU.q=e.target.value;muDraw()};
 $("mq").onkeydown=async e=>{if(e.key!=="Enter")return;MU.q=e.target.value;const mem=await MemoryAdapters.load(B,MU.q);MU.nodes=mem.nodes;MU.sources=mem.sources;MU.sel=null;$("mud").classList.remove("on");muLayout();muDraw()};
 $("tgOld").onclick=e=>{MU.old=!MU.old;e.target.classList.toggle("on",MU.old);muDraw()};
