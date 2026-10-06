@@ -65,6 +65,9 @@ const ORION_PRODUCT=(function(){
 
   const quick=document.createElement('section');quick.id='mobile-quick-menu';quick.setAttribute('aria-label','ORION tools');
   quick.innerHTML=
+   '<button type="button" disabled title="Camera capture is planned"><i>📷</i><span>Camera</span></button>'+
+   '<button type="button" disabled title="Photo upload is planned"><i>▧</i><span>Photo</span></button>'+
+   '<button type="button" disabled title="Document upload is planned"><i>📎</i><span>Document</span></button>'+
    '<button type="button" data-quick-view="work"><i>◇</i><span>Work</span></button>'+
    '<button type="button" data-quick-view="ai"><i>✦</i><span>AI</span></button>'+
    '<button type="button" data-quick-view="memory"><i>◌</i><span>Memory</span></button>'+
