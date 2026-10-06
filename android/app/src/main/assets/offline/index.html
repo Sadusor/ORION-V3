@@ -275,12 +275,19 @@ button{touch-action:manipulation}
  function renderMemoryReview(){
    const cq=pc.memory_candidates||{},items=Array.isArray(cq.candidates)?cq.candidates:[];
    const list=document.getElementById('reviewList'),summary=document.getElementById('reviewSummary');
-   const pending=Number(cq.pending_count||0),deferred=Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0);
-   summary.textContent=(pending+deferred)+' awaiting review · '+promoted+' promoted · '+rejected+' rejected. PROMOTE is durable context only.';
+   const pending=Number(cq.pending_count||0),deferred=Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0),revoked=Number(cq.revoked_count||0);
+   summary.textContent=(pending+deferred)+' awaiting review · '+promoted+' active promoted · '+rejected+' rejected · '+revoked+' revoked. Canonical Memory is context only.';
    list.innerHTML=items.map(c=>{
-     const d=String(c.decision||'pending'),reviewable=d==='pending'||d==='defer';
-     const who=String(c.source_role||'')==='assistant'?'assistant prior · unverified':'owner message · unverified';
-     return '<div class="candidateCard" data-candidate="'+esc(c.candidate_id)+'"><div class="candidateState">'+esc(d.toUpperCase())+' · '+esc(who)+' · '+esc(c.project_id||'personal')+'</div><p>'+esc(c.content||'')+'</p><small>source '+esc(c.source_ref||'')+'</small>'+(reviewable?'<div class="candidateActions"><button data-memory-decision="promote">PROMOTE</button><button data-memory-decision="reject">REJECT</button><button data-memory-decision="defer">DEFER</button></div>':'')+'</div>';
+     const d=String(c.decision||'pending'),reviewable=d==='pending'||d==='defer',assistant=String(c.source_role||'')==='assistant',revokable=d==='promote';
+     const who=assistant?'assistant prior · unverified':'owner message · unverified';
+     let actions='';
+     if(reviewable){
+       actions='<div class="candidateActions">'+(assistant?'':'<button data-memory-decision="promote">PROMOTE</button>')+'<button data-memory-decision="reject">REJECT</button><button data-memory-decision="defer">DEFER</button></div>';
+       if(assistant)actions+='<small>Assistant priors cannot be promoted in V1. Restate a verified fact as an owner message first.</small>';
+     }else if(revokable){
+       actions='<button data-memory-decision="revoke">REVOKE canonical memory</button><small>Revocation is append-only; promotion evidence remains.</small>';
+     }
+     return '<div class="candidateCard" data-candidate="'+esc(c.candidate_id)+'"><div class="candidateState">'+esc(d.toUpperCase())+' · '+esc(who)+' · '+esc(c.project_id||'personal')+'</div><p>'+esc(c.content||'')+'</p><small>source '+esc(c.source_ref||'')+'</small>'+actions+'</div>';
    }).join('')||'<p style="color:#8e949d;padding:8px">No memory candidates yet.</p>';
  }
  function renderConnection(){
@@ -301,11 +308,11 @@ button{touch-action:manipulation}
     mstate==='filtered'?'Last recall · matching history was filtered from model context for safety':
     mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):
     'Ready · read-only · context only · canonical promotion is still locked.';
-   const cq=pc.memory_candidates||{},cc=Number(cq.count||0),reviewable=Number(cq.pending_count==null?cc:cq.pending_count)+Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0);
-   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?(reviewable+' awaiting review · '+promoted+' promoted · '+rejected+' rejected'):'No candidates yet · owner-selected intake only.');
+   const cq=pc.memory_candidates||{},cc=Number(cq.count||0),reviewable=Number(cq.pending_count==null?cc:cq.pending_count)+Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0),revoked=Number(cq.revoked_count||0);
+   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?(reviewable+' awaiting review · '+promoted+' active promoted · '+rejected+' rejected · '+revoked+' revoked'):'No candidates yet · owner-selected intake only.');
    document.getElementById('reviewCandidatesBtn').disabled=!pc.connected||cc===0;
-   const cm=pc.memory_canonical||{},cmc=Number(cm.count||0);
-   document.getElementById('canonicalMemoryText').textContent=!pc.connected?'Connect to ORION PC to view promoted canonical context.':(cmc?cmc+' canonical memor'+(cmc===1?'y':'ies')+' · context only · never execution authority':'No canonical memories yet.');
+   const cm=pc.memory_canonical||{},cmc=Number(cm.count||0),cmr=Number(cm.revoked_count||0);
+   document.getElementById('canonicalMemoryText').textContent=!pc.connected?'Connect to ORION PC to view promoted canonical context.':(cmc||cmr?(cmc+' active canonical memor'+(cmc===1?'y':'ies')+' · '+cmr+' revoked · context only'):'No canonical memories yet.');
    renderModels();
  }
  function refreshPc(){
@@ -352,7 +359,8 @@ button{touch-action:manipulation}
    const card=b.closest('[data-candidate]'),candidate=(pc.memory_candidates&&Array.isArray(pc.memory_candidates.candidates)?pc.memory_candidates.candidates:[]).find(x=>x.candidate_id===(card&&card.dataset.candidate));
    if(!candidate)return toast('Candidate no longer available');
    const decision=b.dataset.memoryDecision;
-   if(decision==='promote'&&!confirm('Promote this exact candidate to canonical Memory? It remains context only and cannot authorize actions.'))return;
+   if(decision==='promote'&&!confirm('Promote this exact owner message to canonical Memory? It remains context only and cannot authorize actions.'))return;
+   if(decision==='revoke'&&!confirm('Revoke this canonical memory? The original promotion evidence remains append-only, but the memory becomes inactive.'))return;
    const id=uid('memory-'+decision);pendingActions[id]='memory-'+decision;
    nativePc.reviewMemoryCandidate(JSON.stringify({candidate_id:candidate.candidate_id,decision,expected_content_sha256:candidate.content_sha256||''}),id);
    document.querySelectorAll('#reviewSheet [data-memory-decision]').forEach(x=>x.disabled=true);
