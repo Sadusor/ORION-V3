@@ -265,27 +265,92 @@ class ChatHistoryStore(context: Context) :
     }
 
     @Synchronized
-    fun contextFor(conversationId: String, maxMessages: Int = 12, maxChars: Int = 6_000): String {
+    fun contextFor(
+        conversationId: String,
+        query: String,
+        maxCurrentMessages: Int = 10,
+        maxRelatedMessages: Int = 4,
+        maxChars: Int = 6_000,
+    ): String {
         if (conversationId.isBlank()) return ""
-        val rows = mutableListOf<Pair<String, String>>()
-        readableDatabase.rawQuery(
+        val db = readableDatabase
+        val scope = db.rawQuery(
+            "SELECT project_id FROM conversations WHERE id=?",
+            arrayOf(conversationId),
+        ).use { cursor -> if (cursor.moveToFirst()) cursor.getString(0) else "" }
+
+        val current = mutableListOf<Pair<String, String>>()
+        db.rawQuery(
             """
             SELECT role,text FROM messages
             WHERE conversation_id=? AND role IN ('user','assistant')
             ORDER BY created_at_ms DESC
             LIMIT ?
             """.trimIndent(),
-            arrayOf(conversationId, maxMessages.toString()),
+            arrayOf(conversationId, maxCurrentMessages.toString()),
         ).use { cursor ->
-            while (cursor.moveToNext()) rows += cursor.getString(0) to cursor.getString(1)
+            while (cursor.moveToNext()) current += cursor.getString(0) to cursor.getString(1)
         }
-        val ordered = rows.asReversed()
-        val builder = StringBuilder()
-        for ((role, text) in ordered) {
+
+        val builder = StringBuilder("Current conversation:\n")
+        for ((role, text) in current.asReversed()) {
             val label = if (role == "user") "User" else "Assistant"
             val line = "$label: $text\n"
             if (builder.length + line.length > maxChars) break
             builder.append(line)
+        }
+
+        val terms = query
+            .lowercase()
+            .split(Regex("[^\\p{L}\\p{N}]+"))
+            .filter { it.length >= 3 }
+            .distinct()
+            .take(8)
+        if (terms.isEmpty() || builder.length >= maxChars) return builder.toString().trim()
+
+        data class Candidate(val role: String, val text: String, val score: Int, val createdAt: Long)
+        val candidates = mutableListOf<Candidate>()
+        db.rawQuery(
+            """
+            SELECT m.role,m.text,m.created_at_ms
+            FROM messages m
+            JOIN conversations c ON c.id=m.conversation_id
+            WHERE m.conversation_id<>?
+              AND c.project_id=?
+              AND c.deleted=0
+              AND c.archived=0
+              AND m.role IN ('user','assistant')
+            ORDER BY c.pinned DESC, m.created_at_ms DESC
+            LIMIT 240
+            """.trimIndent(),
+            arrayOf(conversationId, scope),
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val text = cursor.getString(1)
+                val lower = text.lowercase()
+                val score = terms.count { lower.contains(it) }
+                if (score > 0) {
+                    candidates += Candidate(
+                        role = cursor.getString(0),
+                        text = text,
+                        score = score,
+                        createdAt = cursor.getLong(2),
+                    )
+                }
+            }
+        }
+
+        val related = candidates
+            .sortedWith(compareByDescending<Candidate> { it.score }.thenByDescending { it.createdAt })
+            .take(maxRelatedMessages)
+        if (related.isNotEmpty()) {
+            builder.append("\nRelevant prior chat context (same scope):\n")
+            for (item in related.asReversed()) {
+                val label = if (item.role == "user") "User" else "Assistant"
+                val line = "[Prior chat] $label: ${item.text}\n"
+                if (builder.length + line.length > maxChars) break
+                builder.append(line)
+            }
         }
         return builder.toString().trim()
     }
