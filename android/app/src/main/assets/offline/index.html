@@ -139,12 +139,16 @@ button{touch-action:manipulation}
       <p id="pcMemoryText">Connect to ORION PC for provenance-backed cross-chat recall.</p>
     </div>
     <div class="settingRow">
+      <b>Canonical memory candidates</b>
+      <p id="candidateQueueText">Connect to ORION PC to review candidate intake.</p>
+    </div>
+    <div class="settingRow">
       <b>Local memory</b>
       <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.3.0 · Memory Retrieval V1</p>
+      <p>ORION 0.4.0 · Memory Candidate Queue V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -165,15 +169,22 @@ button{touch-action:manipulation}
     </div>
   </section>
 
+  <section class="sheet" id="messageSheet">
+    <h2>Message</h2>
+    <p style="color:#8e949d">Queue this exact message for later canonical-memory review. This does not promote it.</p>
+    <button id="proposeCandidateBtn">Propose as memory candidate</button>
+    <button data-close-sheet>Close</button>
+  </section>
+
   <div class="toast" id="toast"></div>
 </div>
 <script>
 (function(){
  const app=document.getElementById('app'),chat=document.getElementById('chat'),inp=document.getElementById('inp');
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
- let data={conversations:[],messages:[]},current='',menuTarget='',toastTimer=0;
+ let data={conversations:[],messages:[]},current='',menuTarget='',messageTarget='',toastTimer=0;
  let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
- let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null};
+ let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null};
  let wasConnected=false, pendingLocal={}, pendingPc={}, pendingActions={};
 
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -206,7 +217,7 @@ button{touch-action:manipulation}
  function renderChat(){
    ensureConversation();
    const ms=data.messages.filter(m=>m.conversation_id===current).sort((a,b)=>Number(a.created_at_ms)-Number(b.created_at_ms));
-   chat.innerHTML=ms.filter(m=>m.role==='user'||m.role==='assistant').map(m=>'<div class="m '+(m.role==='user'?'user':'assistant')+'">'+esc(m.text)+'</div>').join('');
+   chat.innerHTML=ms.filter(m=>m.role==='user'||m.role==='assistant').map(m=>'<div class="m '+(m.role==='user'?'user':'assistant')+'" data-mid="'+esc(m.id)+'" data-cid="'+esc(m.conversation_id)+'">'+esc(m.text)+'</div>').join('');
    app.classList.toggle('has-chat',ms.length>0);chat.scrollTop=chat.scrollHeight;
  }
  function groupLabel(ts){const d=(now()-Number(ts||0))/86400000;return d<=7?'7 Days':d<=30?'30 Days':'Older'}
@@ -266,6 +277,8 @@ button{touch-action:manipulation}
     mstate==='filtered'?'Last recall · matching history was filtered from model context for safety':
     mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):
     'Ready · read-only · context only · canonical promotion is still locked.';
+   const cq=pc.memory_candidates||{},cc=Number(cq.count||0);
+   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?cc+' pending candidate'+(cc===1?'':'s')+' · not canonical Memory':'No candidates yet · owner-selected intake only · no auto-promotion.');
    renderModels();
  }
  function refreshPc(){
@@ -280,6 +293,12 @@ button{touch-action:manipulation}
  document.getElementById('menu').onclick=openDrawer;document.getElementById('shade').onclick=closeDrawer;document.getElementById('closeMenu').onclick=closeDrawer;
  document.getElementById('newChat').onclick=()=>newChat(true);document.getElementById('historySearch').oninput=renderHistory;
  document.getElementById('history').onclick=e=>{const o=e.target.closest('[data-open]'),m=e.target.closest('[data-more]');if(o)return openConversation(o.dataset.open);if(m){menuTarget=m.dataset.more;showSheet('actionSheet')}};
+ let msgHold=0;
+ const openMessageMenu=e=>{const m=e.target.closest('.m[data-mid]');if(!m)return;messageTarget=m.dataset.mid||'';showSheet('messageSheet')};
+ chat.addEventListener('contextmenu',e=>{if(e.target.closest('.m[data-mid]')){e.preventDefault();openMessageMenu(e)}});
+ chat.addEventListener('touchstart',e=>{const m=e.target.closest('.m[data-mid]');if(!m)return;clearTimeout(msgHold);msgHold=setTimeout(()=>openMessageMenu(e),520)},{passive:true});
+ chat.addEventListener('touchend',()=>clearTimeout(msgHold),{passive:true});
+ chat.addEventListener('touchmove',()=>clearTimeout(msgHold),{passive:true});
  document.getElementById('model').onclick=()=>{renderModels();showSheet('modelSheet')};
  document.getElementById('modelList').onclick=e=>{const b=e.target.closest('[data-model]');if(!b)return;selected=b.dataset.model;localStorage.setItem('orion.selectedModel',selected);renderModels();closeSheets()};
  document.getElementById('plus').onclick=()=>showSheet('toolsSheet');document.getElementById('settingsBtn').onclick=()=>showSheet('settingsSheet');document.getElementById('toolSettings').onclick=()=>showSheet('settingsSheet');
@@ -292,6 +311,14 @@ button{touch-action:manipulation}
  document.getElementById('forgetBtn').onclick=()=>{const id=uid('forget');pendingActions[id]='forget';nativePc.forgetPairing(id)};
  document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const id=uid('update');pendingActions[id]='update';document.getElementById('updateBtn').disabled=true;document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
  document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
+ document.getElementById('proposeCandidateBtn').onclick=()=>{
+   if(!pc.connected)return toast('Connect ORION PC first');
+   const m=data.messages.find(x=>x.id===messageTarget),c=m&&conv(m.conversation_id);
+   if(!m||!c)return toast('Message not available');
+   const id=uid('candidate');pendingActions[id]='candidate';
+   nativePc.proposeMemoryCandidate(JSON.stringify({conversation_id:m.conversation_id,message_id:m.id,project_id:c.project_id||''}),id);
+   closeSheets();
+ };
  document.getElementById('actionSheet').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const c=conv(menuTarget);if(!c)return;const a=b.dataset.act;if(a==='share')shareConversation(c.id);if(a==='pin')patchConversation(c.id,{pinned:asBool(c.pinned)?0:1});if(a==='archive')patchConversation(c.id,{archived:1});if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}if(a==='find'){openConversation(c.id);setTimeout(()=>{const q=prompt('Find in this chat');if(q&&window.find)toast(window.find(q)?'Found':'Not found')},80)}closeSheets()};
  inp.addEventListener('input',autoGrow);
  inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('form').requestSubmit()}});
@@ -322,7 +349,7 @@ button{touch-action:manipulation}
    chat.scrollTop=chat.scrollHeight;
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
-   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;renderConnection();
+   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;renderConnection();
    if(pc.connected&&!prior)syncHistory();wasConnected=pc.connected;
  };
  window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
@@ -332,6 +359,7 @@ button{touch-action:manipulation}
    else if(kind==='forget'){toast('Pairing removed');refreshPc()}
    else if(kind==='update'){document.getElementById('updateBtn').disabled=false;if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
    else if(kind==='install'){toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
+   else if(kind==='candidate'){toast(payload.ok?(payload.created===false?'Already queued as memory candidate':'Queued as memory candidate'):'Candidate rejected: '+(payload.error||'unknown'));refreshPc()}
  };
  window.ORION_PHONE_BACK=function(){if(document.querySelector('.sheet.on')){closeSheets();return true}if(app.classList.contains('menu-open')){closeDrawer();return true}return false};
  loadSnapshot();renderModels();renderConnection();refreshPc();setInterval(()=>{if(!document.hidden)refreshPc()},10000);
