@@ -2,6 +2,7 @@ package com.sadusor.orionv3.offline
 
 import android.app.Activity
 import android.content.Context
+import android.content.res.AssetManager
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import com.sadusor.orionv3.history.ChatHistoryStore
@@ -131,7 +132,7 @@ class OfflineChatBridge(
 
         val tmp = File(dir, "$MODEL_FILE.partial")
         if (tmp.exists()) tmp.delete()
-        context.assets.open(MODEL_ASSET, Context.MODE_PRIVATE).use { input ->
+        context.assets.open(MODEL_ASSET, AssetManager.ACCESS_STREAMING).use { input ->
             FileOutputStream(tmp).use { output ->
                 input.copyTo(output, bufferSize = 1024 * 1024)
                 output.fd.sync()
