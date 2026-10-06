@@ -43,6 +43,19 @@ _CANONICAL_INJECTION_PATTERNS = (
     re.compile(r"\balways\s+approve\b", re.I),
 )
 
+# Canonical Memory V1 is deliberately facts/preferences/decisions only.
+# Imperative owner instructions must be restated declaratively before promotion.
+_CANONICAL_IMPERATIVE_PATTERNS = (
+    re.compile(
+        r"(?:^|[.!?]\s+|,\s*)(?:please\s+)?"
+        r"(?:invent|pretend|fabricate|make\s+up|run|execute|open|close|delete|"
+        r"install|search|send|write|create|change|modify|ignore|follow|bypass|"
+        r"approve|use|do\s+not\s+use|don't\s+use|remember\s+to)\b",
+        re.I,
+    ),
+    re.compile(r"\b(?:you|orion|the\s+assistant|the\s+model)\s+(?:must|should|shall)\b", re.I),
+)
+
 
 class MemoryReviewError(RuntimeError):
     pass
@@ -66,10 +79,13 @@ def _canonical_json(value: Any) -> str:
 
 def _canonical_risks(text: str) -> list[str]:
     flags: list[str] = []
-    if any(pattern.search(str(text or "")) for pattern in _SECRET_PATTERNS):
+    raw = str(text or "")
+    if any(pattern.search(raw) for pattern in _SECRET_PATTERNS):
         flags.append("possible_secret")
-    if any(pattern.search(str(text or "")) for pattern in _CANONICAL_INJECTION_PATTERNS):
+    if any(pattern.search(raw) for pattern in _CANONICAL_INJECTION_PATTERNS):
         flags.append("instruction_like")
+    if any(pattern.search(raw) for pattern in _CANONICAL_IMPERATIVE_PATTERNS):
+        flags.append("imperative_instruction")
     return flags
 
 
@@ -223,23 +239,35 @@ class CanonicalMemoryReviewPromotion:
             return
         raise MemoryReviewError("Unsupported prior decision state.")
 
-    def _promotion_checks(self, candidate: dict[str, Any]) -> None:
+    def _promotion_block_reason(self, candidate: dict[str, Any]) -> str:
         # V1 refuses assistant-origin durable promotion entirely. The owner can
         # restate a verified fact in their own message and promote that instead.
         if str(candidate.get("source_role") or "") != "user":
+            return "assistant_origin"
+        if str(candidate.get("trust_tier") or "") != "owner_message_unverified":
+            return "unsupported_trust_tier"
+        risks = _canonical_risks(str(candidate.get("content") or ""))
+        if "possible_secret" in risks:
+            return "possible_secret"
+        if "instruction_like" in risks or "imperative_instruction" in risks:
+            return "instruction_like"
+        return ""
+
+    def _promotion_checks(self, candidate: dict[str, Any]) -> None:
+        reason = self._promotion_block_reason(candidate)
+        if reason == "assistant_origin":
             raise MemoryReviewError(
                 "Promotion blocked: assistant-origin candidates cannot become canonical Memory in V1; owner must restate the verified fact."
             )
-        if str(candidate.get("trust_tier") or "") != "owner_message_unverified":
+        if reason == "unsupported_trust_tier":
             raise MemoryReviewError("Promotion blocked: unsupported candidate trust tier.")
-        risks = _canonical_risks(str(candidate.get("content") or ""))
-        if "possible_secret" in risks:
+        if reason == "possible_secret":
             raise MemoryReviewError(
                 "Promotion blocked: candidate appears to contain secret material."
             )
-        if "instruction_like" in risks:
+        if reason == "instruction_like":
             raise MemoryReviewError(
-                "Promotion blocked: candidate contains instruction-like content unsuitable for canonical Memory."
+                "Promotion blocked: candidate contains instruction-like content unsuitable for canonical Memory; restate it as a declarative fact, preference, or decision."
             )
 
     def prepare_review(
@@ -376,6 +404,12 @@ class CanonicalMemoryReviewPromotion:
                 c["status"] = "pending"
                 c["canonical"] = False
                 c["authority"] = "candidate_only"
+
+            promotion_block_reason = self._promotion_block_reason(c)
+            c["promotion_eligible"] = (
+                c["decision"] in {"pending", "defer"} and not promotion_block_reason
+            )
+            c["promotion_block_reason"] = promotion_block_reason
             counts[c["decision"]] = counts.get(c["decision"], 0) + 1
             out.append(c)
 
