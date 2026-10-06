@@ -73,7 +73,7 @@ const RealBridge=(function(){
   if(info.kind==='approval'&&!trusted(opts&&opts.gesture)){st.blockedCalls++;const r={ok:false,status:0,data:{},cls:'no_gesture',message:'UI refused: approval routes require a real user click',route,method,label:(opts&&opts.label)||route};log(r,opts);return r}
   const r=await request(method,route,body,method==='GET'?C.statusTimeoutMs:C.commandTimeoutMs);
   if(method!=='GET'){st.burstUntil=Date.now()+4000;absorb(r.data);setTimeout(poll,350)}
-  r.label=(opts&&opts.label)||route;if(method!=='GET'||!r.ok)log(r,opts);return r}
+  r.label=(opts&&opts.label)||route;if((method!=='GET'||!r.ok)&&!(opts&&opts.silent))log(r,opts);return r}
  function log(r,opts){emit({type:'command',entry:{at:Date.now(),label:(opts&&opts.label)||r.route,route:r.route,method:r.method,status:r.status,cls:r.cls,message:r.message,ms:r.ms}})}
 
  return{
