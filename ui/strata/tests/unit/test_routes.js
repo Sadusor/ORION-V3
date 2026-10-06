@@ -32,5 +32,7 @@ const B=run(ctx,'window.ORION_BRIDGE');
  const descriptorIds=mk(view()).active.map(x=>x.id);ok(descriptorIds.includes('project')&&descriptorIds.includes('providers')&&descriptorIds.includes('memory')&&descriptorIds.includes('safety'),'product connector catalog exposes truthful status surfaces');
  ok(!mk(view()).active.some(x=>(x.actions||[]).some(a=>a.href)),'product connector catalog has no legacy/Remote navigation actions');
  const memRoute=run(c,"routeInfo('GET','/api/memory/search?q=test')");ok(memRoute&&memRoute.kind==='read','Memory Retrieval V1 search is allowlisted READ-only even with query string');
+ const memCandidate=run(c,"routeInfo('POST','/api/memory/candidate')");ok(memCandidate&&memCandidate.kind==='approval','Memory candidate intake requires approval/trusted gesture');
+
  const kinds=run(c,'Object.values(STRATA_ROUTES).map(r=>r.kind)');ok(kinds.every(k=>['read','auth','request','approval','stop','storage','command','high'].includes(k)),'every registered route has a known kind');
  done('routes & safety')})();
