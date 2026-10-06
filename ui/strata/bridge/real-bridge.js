@@ -115,7 +115,11 @@ const RealBridge=(function(){
   async reviewMemoryCandidate(node,decision,gesture){
    const m=node&&node.meta||{};
    const body={candidate_id:String(node&&node.id||''),decision:String(decision||''),expected_content_sha256:String(m.contentSha256||''),owner_scope:String(m.ownerScope||'owner:primary')};
-   return call('POST','/api/memory/decision',body,{label:'Review memory candidate',gesture})
+   const prepared=await call('POST','/api/memory/review-ticket',body,{label:'Prepare memory decision',gesture});
+   if(!prepared.ok)return prepared;
+   body.review_token=String(prepared.data&&prepared.data.review_token||'');
+   if(!body.review_token)return{ok:false,status:0,data:{},cls:'review_token_missing',message:'Owner review token was not issued'};
+   return call('POST','/api/memory/decision',body,{label:'Commit memory decision',gesture})
   }
  };
  function pickModel(){const m=st.model;if(!m)return'';const saved=LS('orion.phone.localbrain.model'),loc=m.reviewer.ollama;
