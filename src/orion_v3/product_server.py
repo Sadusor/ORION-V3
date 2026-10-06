@@ -16,15 +16,19 @@ from urllib.parse import unquote, urlparse
 from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
+from modules.update_manager import UpdateError, UpdateManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UI_ROOT = ROOT / "ui" / "strata"
 STATE_ROOT = pathlib.Path(os.environ.get("LOCALAPPDATA", str(ROOT / ".local"))) / "ORION-V3"
 STATE_ROOT.mkdir(parents=True, exist_ok=True)
 PID_FILE = STATE_ROOT / "product-ui.pid"
+DEVICES_FILE = STATE_ROOT / "devices.json"
+APK_FILE = ROOT / "dist" / "ORION-V3-debug.apk"
 
 LOCAL_BRAIN = StreamingBrainPipeline()
 CHAT_HISTORY = ChatHistoryStore(STATE_ROOT / "chat_history.sqlite3")
+UPDATE_MANAGER = UpdateManager(ROOT, STATE_ROOT)
 
 DENIED_TOP = {"demo.html", "README.md", "ARCHITECTURE.md", "INTEGRATION.md", "PRODUCT_UI.md", "STATE_CONTRACT.md", "TESTING.md"}
 DENIED_DIRS = {"tests", "tools"}
@@ -46,15 +50,45 @@ def _now() -> str:
 
 
 class Auth:
-    def __init__(self, pair_code: str):
+    def __init__(self, pair_code: str, devices_path: pathlib.Path):
         self.pair_code = pair_code
         self.pair_expires = time.time() + 3600
+        self.devices_path = pathlib.Path(devices_path)
         self._digests: set[str] = set()
         self._lock = threading.Lock()
+        self._load_devices()
 
     @staticmethod
     def digest(token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()
+
+    def _load_devices(self) -> None:
+        try:
+            doc = json.loads(self.devices_path.read_text(encoding="utf-8-sig"))
+            if doc.get("schema") == "orion-v3.devices/1":
+                self._digests = {
+                    str(x.get("token_sha256") or "")
+                    for x in doc.get("devices", [])
+                    if str(x.get("token_sha256") or "")
+                }
+        except Exception:
+            self._digests = set()
+
+    def _save_devices(self) -> None:
+        self.devices_path.parent.mkdir(parents=True, exist_ok=True)
+        payload = {
+            "schema": "orion-v3.devices/1",
+            "devices": [
+                {"token_sha256": digest}
+                for digest in sorted(self._digests)
+            ],
+        }
+        temp = self.devices_path.with_suffix(".json.tmp")
+        temp.write_text(
+            json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
+        temp.replace(self.devices_path)
 
     def pair(self, code: str) -> str:
         if time.time() > self.pair_expires:
@@ -64,6 +98,7 @@ class Auth:
         token = secrets.token_urlsafe(32)
         with self._lock:
             self._digests.add(self.digest(token))
+            self._save_devices()
         return token
 
     def valid(self, token: str) -> bool:
@@ -236,10 +271,37 @@ class Handler(BaseHTTPRequestHandler):
                 "running_commit": STATE.started_commit,
                 "branch": STATE.started_branch,
             })
+        if path == "/apk":
+            if not self._require_auth():
+                return
+            if not APK_FILE.is_file():
+                return self._json(404, {"ok": False, "error": "ORION Android APK has not been built yet."})
+            body = APK_FILE.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/vnd.android.package-archive")
+            self.send_header("Content-Disposition", 'attachment; filename="ORION-V3-debug.apk"')
+            self.send_header("Cache-Control", "no-store")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if not self._require_auth():
             return
         if path == "/api/status":
             return self._json(200, STATE.view())
+        if path == "/api/models":
+            try:
+                models = LOCAL_BRAIN.local_brain._available_models()
+            except Exception:
+                models = LOCAL_BRAIN.cached_models()
+            return self._json(200, {
+                "models": models,
+                "default_model": LOCAL_BRAIN.default_model(),
+            })
+        if path == "/api/update/status":
+            return self._json(200, UPDATE_MANAGER.status())
+        if path == "/api/update/check":
+            return self._json(200, UPDATE_MANAGER.check())
         if path == "/api/chat-history":
             return self._json(200, CHAT_HISTORY.snapshot())
         if path == "/api/project-links":
@@ -268,6 +330,14 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/chat-history/sync":
             try:
                 return self._json(200, CHAT_HISTORY.sync(self._read_json()))
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/update/main":
+            try:
+                result = UPDATE_MANAGER.apply(STATE.started_commit)
+                return self._json(202 if result.get("restart_scheduled") else 200, {"ok": True, "update": result})
+            except UpdateError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/local-hand/draft":
@@ -310,7 +380,7 @@ def main() -> int:
     code = args.pair_code.strip() or f"{secrets.randbelow(1_000_000):06d}"
     if len(code) != 6 or not code.isdigit():
         raise SystemExit("--pair-code must be exactly 6 digits")
-    AUTH = Auth(code)
+    AUTH = Auth(code, DEVICES_FILE)
     PID_FILE.write_text(str(os.getpid()), encoding="ascii")
     print("ORION_V3_PRODUCT> ONLINE", flush=True)
     print(f"ORION_V3_PAIR_CODE> {code}", flush=True)
