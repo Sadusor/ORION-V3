@@ -4,7 +4,8 @@ const sk=$("sky"),skx=sk.getContext("2d"),cv=$("core"),cx0=cv.getContext("2d");
 let tgt="#76cfe4",rgb=[118,207,228],rot=0,ring=0,spread=1,VERTS=[],EDGES=[],stars=[];
 const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 const fit=(c,x)=>{const d=Math.min(devicePixelRatio||1,PHONE?1:S.low?1.25:2),w=c.clientWidth,h=c.clientHeight;if(c.width!==Math.round(w*d)||c.height!==Math.round(h*d)){c.width=Math.round(w*d);c.height=Math.round(h*d)}x.setTransform(d,0,0,d,0,0);return[w,h]};
-function build(){const N=PHONE?96:S.low?150:260;VERTS=[];EDGES=[];for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),th=i*2.39996;VERTS.push([Math.cos(th)*r,y,Math.sin(th)*r])}
+const staticPhone=()=>PHONE&&app.classList.contains("static-core");
+function build(){if(staticPhone()){VERTS=[];EDGES=[];stars=[];return}const N=PHONE?96:S.low?150:260;VERTS=[];EDGES=[];for(let i=0;i<N;i++){const y=1-2*(i+.5)/N,r=Math.sqrt(1-y*y),th=i*2.39996;VERTS.push([Math.cos(th)*r,y,Math.sin(th)*r])}
  const th=PHONE||S.low?.93:.945;for(let i=0;i<N;i++)for(let j=i+1;j<N;j++)if(VERTS[i][0]*VERTS[j][0]+VERTS[i][1]*VERTS[j][1]+VERTS[i][2]*VERTS[j][2]>th)EDGES.push([i,j]);
  const n=PHONE?88:S.low?160:320;stars=[];
  for(let g=0;g<7;g++){const gx=.08+Math.random()*.84,gy=.08+Math.random()*.84;for(let k=0;k<5;k++)stars.push({x:gx+(Math.random()-.5)*.1,y:gy+(Math.random()-.5)*.12,r:1+Math.random()*.9,ph:Math.random()*6,sp:.5+Math.random(),v:0,g})}
@@ -35,12 +36,12 @@ function planet(t,col){const [w,h]=fit(cv,cx0),c=cx0;c.clearRect(0,0,w,h);const 
  arc(true);
  if(st==="acting"&&!RM){const a=-1.5708+t*1.4,ex=Math.cos(a)*RX,ey=Math.sin(a)*RY;c.fillStyle=`rgba(${col},1)`;c.beginPath();c.arc(cx+ex*Math.cos(RA)-ey*Math.sin(RA),cy+ex*Math.sin(RA)+ey*Math.cos(RA),3,0,6.283);c.fill()}}
 let last=0,raf=0;
-function loop(now){if(document.hidden){raf=0;return}raf=requestAnimationFrame(loop);
+function loop(now){if(document.hidden||staticPhone()){raf=0;return}raf=requestAnimationFrame(loop);
  const idle=(["idle","completed","pass","stopped","failed","error","blocked","verif_failed"].includes(S.state))&&S.voice==="off"&&!S.mem;const cap=S.orb?250:RM?400:PHONE?(S.low?100:50):S.low?66:idle?50:16;if(now-last<cap)return;const dt=Math.min((now-last)/1000,.1);last=now;
  const a=hex(tgt);rgb=rgb.map((v,i)=>v+(a[i]-v)*.06);const col=rgb.map(v=>v|0).join(",");
  S.camZ+=((S.mem?3.2:1)-S.camZ)*.04;spread+=((DIM.includes(S.state)?1.05:1)-spread)*.04;
  if(!RM&&!(["acting","completed","pass"].includes(S.state)||HALT.includes(S.state)))rot+=dt*(S.state==="thinking"?.2:DIM.includes(S.state)?.01:.09);
  const t=now/1000;sky(t,col);planet(t,col)}
-function wake(){last=0;if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
+function wake(){last=0;if(staticPhone()){if(raf)cancelAnimationFrame(raf);raf=0;return}if(!raf&&!document.hidden)raf=requestAnimationFrame(loop)}
 document.addEventListener("visibilitychange",wake);
 
