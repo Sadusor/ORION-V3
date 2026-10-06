@@ -19,6 +19,7 @@ from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.memory_brain_pipeline import MemoryAwareBrainPipeline
 from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
+from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -34,6 +35,10 @@ MEMORY_RETRIEVAL = MemoryRetrievalModule(CHAT_HISTORY)
 MEMORY_CANDIDATES = CanonicalMemoryCandidateQueue(
     STATE_ROOT / "memory_candidates.sqlite3",
     CHAT_HISTORY,
+)
+MEMORY_REVIEW = CanonicalMemoryReviewPromotion(
+    STATE_ROOT / "canonical_memory.sqlite3",
+    MEMORY_CANDIDATES,
 )
 LOCAL_BRAIN = MemoryAwareBrainPipeline(
     brain=StreamingBrainPipeline(),
@@ -324,7 +329,11 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/work-exchange/latest":
             return self._json(200, {"items": [], "status": "not_connected"})
         if path == "/api/memory/candidates":
-            return self._json(200, MEMORY_CANDIDATES.list())
+            return self._json(200, MEMORY_REVIEW.candidates_view())
+        if path == "/api/memory/canonical":
+            return self._json(200, MEMORY_REVIEW.list_canonical())
+        if path == "/api/memory/decisions":
+            return self._json(200, MEMORY_REVIEW.decisions())
         if path == "/api/memory/search":
             try:
                 raw_limit = str((query.get("limit") or ["6"])[0] or "6")
@@ -379,6 +388,20 @@ class Handler(BaseHTTPRequestHandler):
                 )
                 return self._json(201 if result.get("created") else 200, result)
             except MemoryCandidateError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/decision":
+            try:
+                body = self._read_json()
+                result = MEMORY_REVIEW.decide(
+                    candidate_id=str(body.get("candidate_id", "")),
+                    decision=str(body.get("decision", "")),
+                    expected_content_sha256=str(body.get("expected_content_sha256", "")),
+                    owner_scope=str(body.get("owner_scope", "owner:primary")),
+                )
+                return self._json(201 if result.get("created") else 200, result)
+            except MemoryReviewError as exc:
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
