@@ -418,6 +418,18 @@ def main() -> int:
                 "promoted_event_hash": "d" * 64,
             }
         )
+        tampered_text = "Tampered provenance marker should never be admitted."
+        tampered_legacy = dict(risky_memory)
+        tampered_legacy.update(
+            {
+                "memory_id": "legacy-tampered",
+                "candidate_id": "legacy-candidate-tampered",
+                "content": tampered_text,
+                "content_sha256": "0" * 64,
+                "promoted_decision_id": "legacy-promotion-3",
+                "promoted_event_hash": "e" * 64,
+            }
+        )
         fake_candidates = FakeCandidates(
             [
                 {
@@ -434,10 +446,17 @@ def main() -> int:
                     "content": assistant_text,
                     "content_sha256": assistant_legacy["content_sha256"],
                 },
+                {
+                    "candidate_id": "legacy-candidate-tampered",
+                    "source_conversation_id": "legacy",
+                    "source_message_id": "legacy-tampered-message",
+                    "content": tampered_text,
+                    "content_sha256": tampered_legacy["content_sha256"],
+                },
             ]
         )
         risky_foundation = CanonicalMemoryRetrievalFoundation(
-            FakeReview([risky_memory, assistant_legacy]),
+            FakeReview([risky_memory, assistant_legacy, tampered_legacy]),
             root / "legacy-supersession.sqlite3",
             fake_candidates,
         )
@@ -448,6 +467,10 @@ def main() -> int:
         blocked_assistant = risky_foundation.retrieve("legacy assistant model preference", project_id="")
         assert not blocked_assistant["items"]
         assert blocked_assistant["trace"]["filtered"]["unsupported_trust_tier"] == 1
+
+        blocked_tamper = risky_foundation.retrieve("tampered provenance marker", project_id="")
+        assert not blocked_tamper["items"]
+        assert blocked_tamper["trace"]["filtered"]["provenance_integrity"] == 1
 
         # Read-only retrieval did not mutate canonical/review state.
         snapshot_before = json.dumps(
@@ -471,6 +494,7 @@ def main() -> int:
         print("HISTORICAL_LABELING> PASS")
         print("CURRENT_CONVERSATION_EXCLUSION> PASS")
         print("RETRIEVAL_TIME_ADMISSION> PASS")
+        print("PROVENANCE_INTEGRITY_RECHECK> PASS")
         print("OWNER_TRUST_TIER_ONLY> PASS")
         print("EPISTEMIC_STATUS_LABEL> PASS")
         print("SEPARATE_FUSION_CONTRACT> PASS")
