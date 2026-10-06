@@ -293,6 +293,53 @@ class OrionPcBridge(
     }
 
     @JavascriptInterface
+    fun reviewMemoryCandidate(requestJson: String, requestId: String): String {
+        val id = requestId.ifBlank { UUID.randomUUID().toString() }
+        val requestBody = try {
+            JSONObject(requestJson)
+        } catch (_: Throwable) {
+            JSONObject()
+        }
+        scope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                try {
+                    val response = request(
+                        "POST",
+                        "/api/memory/decision",
+                        JSONObject()
+                            .put("candidate_id", requestBody.optString("candidate_id").trim())
+                            .put("decision", requestBody.optString("decision").trim())
+                            .put(
+                                "expected_content_sha256",
+                                requestBody.optString("expected_content_sha256").trim(),
+                            )
+                            .put("owner_scope", "owner:primary"),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!response.ok) {
+                        JSONObject().put("ok", false).put("error", response.error)
+                    } else {
+                        JSONObject()
+                            .put("ok", true)
+                            .put("created", response.body.optBoolean("created"))
+                            .put("decision", response.body.optJSONObject("decision"))
+                            .put("memory", response.body.optJSONObject("memory"))
+                            .put(
+                                "canonical_memory_written",
+                                response.body.optBoolean("canonical_memory_written"),
+                            )
+                    }
+                } catch (t: Throwable) {
+                    JSONObject().put("ok", false).put("error", t.message ?: "Memory review failed.")
+                }
+            }
+            emit("ORION_PC_ACTION_RESULT", id, payload)
+        }
+        return id
+    }
+
+    @JavascriptInterface
     fun updateOrion(requestId: String): String {
         val id = requestId.ifBlank { UUID.randomUUID().toString() }
         scope.launch {
@@ -462,6 +509,13 @@ class OrionPcBridge(
                 authenticated = true,
                 timeoutMs = 3500,
             )
+            val canonicalMemory = request(
+                "GET",
+                "/api/memory/canonical",
+                null,
+                authenticated = true,
+                timeoutMs = 3500,
+            )
 
             JSONObject()
                 .put("ok", true)
@@ -481,6 +535,10 @@ class OrionPcBridge(
                 .put(
                     "memory_candidates",
                     if (memoryCandidates.ok) memoryCandidates.body else JSONObject.NULL,
+                )
+                .put(
+                    "memory_canonical",
+                    if (canonicalMemory.ok) canonicalMemory.body else JSONObject.NULL,
                 )
                 .put(
                     "memory_retrieval",
