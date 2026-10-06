@@ -215,11 +215,19 @@ B.subscribe(ev=>{
  if(ev.type==='snapshot'){
   dispatch({type:'snapshot',model:ev.model});
   const L=ev.model&&ev.model.local;
-  const replyKey=L&&L.brainStartedUtc||'';
-  if(L&&L.brainState==='ready'&&L.conclusion&&replyKey&&replyKey!==shownBrainReply){
-   shownBrainReply=replyKey;
-   msg('or',L.conclusion);
-   if(!PHONE)app.classList.add('chat');
+  const live=window.ORION_LIVE_BRAIN_CHAT;
+  if(live&&L){
+   live.update(L,$('chat'));
+   if((L.brainState==='running'&&L.preview)||L.brainState==='ready'){
+    if(!PHONE)app.classList.add('chat');
+   }
+  }else{
+   const replyKey=L&&L.brainStartedUtc||'';
+   if(L&&L.brainState==='ready'&&L.conclusion&&replyKey&&replyKey!==shownBrainReply){
+    shownBrainReply=replyKey;
+    msg('or',L.conclusion);
+    if(!PHONE)app.classList.add('chat');
+   }
   }
  }else if(ev.type==='link')dispatch({type:'link',link:ev.link});
  else if(ev.type==='lists')dispatch({type:'lists',lists:ev.lists});
