@@ -190,7 +190,7 @@
    try{nativeChat.ask(JSON.stringify({id:req,conversation_id:current,text}))}catch(err){window.ORION_OFFLINE_RESULT(req,null,String(err))}
  };
  window.ORION_OFFLINE_RESULT=function(req,answer,error){
-   const wait=chat.querySelector('[data-req="'+CSS.escape(req)+'"]');if(wait)wait.remove();delete pending[req];
+   const wait=[...chat.querySelectorAll('[data-req]')].find(x=>x.dataset.req===req);if(wait)wait.remove();delete pending[req];
    if(error){const e=document.createElement('div');e.className='m assistant';e.textContent='Offline model error: '+error;chat.appendChild(e);toast('Offline model could not answer')}
    else if(answer){const e=document.createElement('div');e.className='m assistant';e.textContent=answer;chat.appendChild(e)}
    loadSnapshot();chat.scrollTop=chat.scrollHeight;
