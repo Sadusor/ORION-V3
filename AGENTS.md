@@ -46,6 +46,28 @@ Before substantial custom implementation:
 6. record the result;
 7. custom-build only when donors fail a real ORION contract.
 
+
+## FREEZE RULE — mandatory engineering method
+
+**FREEZE RULE** is standing owner shorthand and an ORION engineering invariant.
+
+It means:
+- proven code is read-only by default;
+- identify the latest frozen PASS before substantial work;
+- branch from that proven state;
+- implement new capability as an isolated, replaceable module/adapter first;
+- touch existing core files only for the smallest necessary hook;
+- make no unrelated refactor, cleanup or redesign;
+- bound the allowed diff before editing;
+- test the module independently before merge;
+- owner-confirmed physical PASS creates the next frozen baseline.
+
+A failed experiment is disposable. Drop/revert the experimental module rather than spreading compensating edits through proven core.
+
+This applies to ORION and to engineering integrations with TheHands.
+
+Canonical rule: `docs/ENGINEERING_FREEZE_RULE.md`.
+
 ## Manual engineering Remote
 
 For owner-approved manual engineering execution, use `Sadusor/TheHands-`.
