@@ -29,6 +29,7 @@ function normLane(l){l=l&&typeof l==='object'?l:{};const run=str(l.run_state)||'
  execKind:str(l.execution_kind),execAction:str(l.execution_action),execLink:str(l.execution_target_project_link),
  execRepo:str(l.execution_target_repo),execBranch:str(l.execution_target_branch),execScope:str(l.execution_target_scope),
  publishState:str(l.publish_state),publishError:str(l.publish_error),
+ memory:l.brain_memory&&typeof l.brain_memory==='object'?l.brain_memory:{state:'idle',authority:'context_only',count:0,items:[],trace:{}},
  capOutput:str(l.execution_kind)==='capability'?parseCapOutput(l.output):{}}}
 
 /* reviewer = raw.reviewer. Shape verified from Remote V1's own rendering code; reviewer_connector.py was not available. */
