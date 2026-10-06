@@ -106,6 +106,16 @@ const RealBridge=(function(){
    const m=node&&node.meta||{};
    const body={conversation_id:String(m.conversationId||''),message_id:String(m.messageId||''),project_id:String(m.projectId||''),owner_scope:String(m.ownerScope||'owner:primary')};
    return call('POST','/api/memory/candidate',body,{label:'Propose memory candidate',gesture})
+  },
+  async getCanonicalMemory(){
+   const r=await call('GET','/api/memory/canonical',null,{silent:true});
+   if(!r.ok)throw new Error(r.message||'Canonical memory unavailable');
+   return normalizeCanonicalMemory(r.data)
+  },
+  async reviewMemoryCandidate(node,decision,gesture){
+   const m=node&&node.meta||{};
+   const body={candidate_id:String(node&&node.id||''),decision:String(decision||''),expected_content_sha256:String(m.contentSha256||''),owner_scope:String(m.ownerScope||'owner:primary')};
+   return call('POST','/api/memory/decision',body,{label:'Review memory candidate',gesture})
   }
  };
  function pickModel(){const m=st.model;if(!m)return'';const saved=LS('orion.phone.localbrain.model'),loc=m.reviewer.ollama;
