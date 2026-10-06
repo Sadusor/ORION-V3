@@ -74,10 +74,11 @@ function normalizeStatus(raw){const v=validateStatus(raw);if(!v.ok)throw new Err
    dirty:null /* not exposed by /api/status: reported as "not reported", never guessed */,cwd:str(raw.runner_cwd)}}}
 
 /* GET /api/memory/candidates -> {candidates:[...]}. Memory CANDIDATES (decision defaults to "defer"), never promoted Memory. */
-function normalizeCandidates(d){return arr(d&&d.candidates).map((c,i)=>({
+function normalizeCandidates(d){return arr(d&&d.candidates).map((c,i)=>{const ts=num(c&&c.submitted_at);return{
  id:str(c.candidate_id)||'c'+i,t:str(c.content)||'(empty candidate)',kind:'candidate',status:'candidate',source:'orion-candidates',
- project:str(c.classification)||'UNCLASSIFIED',date:str(c.submitted_at),src:[str(c.source_actor),str(c.source_ref)].filter(Boolean).join(' · '),
- meta:{trust:str(c.trust_origin),confidence:c.confidence,decision:str(c.decision)||'defer',decisionReason:str(c.decision_reason),reason:str(c.reason_for_candidate),task:str(c.task_id)}}))}
+ project:str(c.project_id)||'personal',date:ts?new Date(ts).toISOString():str(c.submitted_at),src:[str(c.source_actor),str(c.source_ref)].filter(Boolean).join(' · '),
+ meta:{authority:str(c.authority)||'candidate_only',trust:str(c.trust_tier)||str(c.trust_origin),confidence:c.confidence,decision:str(c.decision)||'pending',decisionReason:str(c.decision_reason),reason:str(c.reason_for_candidate),task:str(c.task_id),sourceRole:str(c.source_role),sourceMessageId:str(c.source_message_id),contentSha256:str(c.content_sha256)}
+ }})}
 
 /* GET /api/memory/search -> read-only retrieval results. Conversation recall is CONTEXT, never canonical authority. */
 function normalizeMemoryRecall(d){return arr(d&&d.items).map((m,i)=>{
