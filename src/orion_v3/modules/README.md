@@ -128,3 +128,28 @@ promotion module is built and qualified.
 Donor patterns were reviewed from KnowledgeOS, OpenViking, agentmemory,
 TencentDB Agent Memory and Memanto. Implementation code is not copied from
 those donors; the V1 module stays replaceable and stdlib/local.
+
+
+## Canonical Memory Candidate Queue V1
+
+`memory_candidate_queue.py` creates a separate owner-reviewed intake boundary
+between Conversation Recall and future canonical Memory.
+
+Boundary:
+- owner selects an exact existing chat message;
+- server resolves the exact message from `ChatHistoryStore`;
+- arbitrary client-supplied candidate text is ignored;
+- the queue snapshots provenance + SHA-256 and stores a pending candidate;
+- repeated selection is idempotent;
+- archived/deleted sources and project-scope mismatches are refused;
+- user vs assistant trust tiers are preserved;
+- queue persistence is append-oriented and refuses overflow rather than silently pruning.
+
+The module has **no promotion authority**. It cannot produce canonical Memory,
+PROMOTE/REJECT decisions, supersession, permissions, capabilities, Hands actions
+or execution. Every intake result reports `canonical_memory_written=false`.
+
+STRATA exposes intake only through an approval-kind route requiring a real user
+gesture. The Android shell exposes the same owner action by long-pressing an exact
+chat message. Phone Settings may show the pending count, but a candidate remains
+`candidate_only` until a separate future Review + Promotion module is qualified.
