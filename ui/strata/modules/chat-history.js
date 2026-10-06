@@ -4,7 +4,7 @@ window.ORION_CHAT_HISTORY=(function(){
  const SCHEMA='orion.chat-history/1';
  const native=window.ORION_NATIVE_HISTORY||null;
  let state={schema:SCHEMA,conversations:[],messages:[]},ready=false,syncTimer=0,actionTarget='';
- const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+ const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
  const asBool=v=>v===true||v===1||v==='1';
  const chat=()=>document.getElementById('chat');
@@ -136,18 +136,18 @@ window.ORION_CHAT_HISTORY=(function(){
  }
  function group(ts){const d=(now()-Number(ts||0))/86400000;return d<=7?'7 Days':d<=30?'30 Days':'Older'}
  function renderHistory(){
-  const host=document.getElementById('orionHistoryList');if(!host)return;
-  const q=(document.getElementById('orionHistorySearch')?.value||'').trim().toLowerCase();
+  const host=document.getElementById('orionHistoryList'),deskHost=document.getElementById('orionHistoryDesktopList');if(!host&&!deskHost)return;
+  const q=((document.activeElement&&document.activeElement.id==='orionHistoryDesktopSearch'?document.getElementById('orionHistoryDesktopSearch')?.value:document.getElementById('orionHistorySearch')?.value)||'').trim().toLowerCase();
   const items=activeConversations().filter(c=>{
    if(!q)return true;if(String(c.title||'').toLowerCase().includes(q))return true;
    return state.messages.some(m=>m.conversation_id===c.id&&String(m.text||'').toLowerCase().includes(q))
-  }).sort((a,b)=>(Number(b.pinned)-Number(a.pinned))+(Number(b.updated_at_ms)-Number(a.updated_at_ms)));
+  }).sort((a,b)=>{const p=Number(b.pinned)-Number(a.pinned);return p||Number(b.updated_at_ms)-Number(a.updated_at_ms)});
   const groups={};items.forEach(c=>(groups[group(c.updated_at_ms)]??=[]).push(c));
-  host.innerHTML=['7 Days','30 Days','Older'].filter(k=>groups[k]).map(k=>
+  const html=['7 Days','30 Days','Older'].filter(k=>groups[k]).map(k=>
    '<section class="oh-group"><h4>'+k+'</h4>'+groups[k].map(c=>
     '<div class="oh-row '+(c.id===currentId()?'on':'')+'"><button data-oh-open="'+escH(c.id)+'">'+(asBool(c.pinned)?'📌 ':'')+escH(c.title||'New chat')+'</button><button class="oh-more" data-oh-more="'+escH(c.id)+'" aria-label="Chat actions">•••</button></div>'
    ).join('')+'</section>'
-  ).join('')||'<p class="oh-empty">No chats yet.</p>'
+  ).join('')||'<p class="oh-empty">No chats yet.</p>';if(host)host.innerHTML=html;if(deskHost)deskHost.innerHTML=html
  }
  function openDrawer(){
   if(typeof app!=='undefined'&&app.classList.contains('phone')){app.classList.add('mobile-menu-open');app.classList.remove('mobile-quick-open')}
@@ -171,7 +171,7 @@ window.ORION_CHAT_HISTORY=(function(){
    '<div id="orionHistoryList"></div>';
   head.insertAdjacentElement('afterend',section);
 
-  const desk=document.createElement('aside');desk.id='orionHistoryDesktop';desk.innerHTML='<header><b>Chat history</b><button data-oh-close>×</button></header><div class="oh-deskbody"></div>';document.body.appendChild(desk);
+  const desk=document.createElement('aside');desk.id='orionHistoryDesktop';desk.innerHTML='<header><b>Chat history</b><button data-oh-close>×</button></header><div class="oh-deskbody"><button id="orionDesktopNewChat" type="button">＋ New chat</button><div class="oh-searchrow"><input id="orionHistoryDesktopSearch" placeholder="Search chat content…" aria-label="Search chats"><button id="orionHistoryDesktopRefresh" title="Refresh history">↻</button></div><div id="orionHistoryDesktopList"></div></div>';document.body.appendChild(desk);
   const actions=document.createElement('section');actions.id='orionHistoryActions';actions.innerHTML=
    '<button data-oh-act="share">Share</button><button data-oh-act="pin">Pin</button><button data-oh-act="project">Add to project</button>'+
    '<button disabled>Uploaded files<small>planned</small></button><button data-oh-act="find">Find in chat</button><button disabled>Add to home<small>planned</small></button>'+
@@ -182,13 +182,17 @@ window.ORION_CHAT_HISTORY=(function(){
    '#orionHistoryBlock{display:none}.phone #orionHistoryBlock{display:block;padding:8px 10px 4px;border-bottom:1px solid rgba(255,255,255,.07)}'+
    '#orionNewChat{width:100%;height:44px;border:0;border-radius:12px;background:#24272b;color:#eef1f4;font-weight:600}.oh-searchrow{display:grid;grid-template-columns:1fr 38px;gap:6px;margin-top:8px}.oh-searchrow input{min-width:0;height:40px;border:1px solid rgba(255,255,255,.08);border-radius:20px;background:#202328;color:#eef1f4;padding:0 13px;outline:0}.oh-searchrow button{border:0;border-radius:50%;background:transparent;color:#9aa3ad;font-size:18px}#orionHistoryList{max-height:42vh;overflow:auto;padding:5px 0}.oh-group h4{margin:10px 8px 3px;color:#89939f;font-size:11px}.oh-row{display:grid;grid-template-columns:1fr 34px;align-items:center;border-radius:10px}.oh-row.on{background:#25292e}.oh-row>button:first-child{min-width:0;border:0;background:transparent;color:#edf0f3;text-align:left;padding:9px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.oh-more{border:0;background:transparent;color:#8c96a2;height:34px}.oh-empty{color:#7f8995;padding:10px;font-size:12px}'+
    '#orionHistoryActions{display:none;position:fixed;z-index:50;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));grid-template-columns:repeat(3,1fr);gap:7px;padding:10px;border-radius:20px;background:#292d32;border:1px solid rgba(255,255,255,.1);box-shadow:0 16px 50px #000b}#orionHistoryActions.on{display:grid}#orionHistoryActions button{min-height:58px;border:0;border-radius:13px;background:#34383d;color:#edf0f3}#orionHistoryActions button:disabled{opacity:.35}#orionHistoryActions small{display:block;font-size:9px}#orionHistoryActions .danger{color:#ff8585}'+
-   '#orionHistoryDesktop{display:none;position:fixed;z-index:45;left:50%;top:50%;width:min(620px,90vw);height:min(700px,82vh);transform:translate(-50%,-50%);background:#11151a;border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 24px 80px #000c;padding:12px}#orionHistoryDesktop.on{display:block}#orionHistoryDesktop header{display:flex;justify-content:space-between;align-items:center;padding:8px}#orionHistoryDesktop header button{border:0;background:transparent;color:#eee;font-size:24px}.desk #orionHistoryDesktop .oh-deskbody{height:calc(100% - 48px);overflow:auto}.desk #orionHistoryDesktop .oh-deskbody #orionHistoryBlock{display:block}';
+   '#orionHistoryDesktop{display:none;position:fixed;z-index:45;left:50%;top:50%;width:min(620px,90vw);height:min(700px,82vh);transform:translate(-50%,-50%);background:#11151a;border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 24px 80px #000c;padding:12px}#orionHistoryDesktop.on{display:block}#orionHistoryDesktop header{display:flex;justify-content:space-between;align-items:center;padding:8px}#orionHistoryDesktop header button{border:0;background:transparent;color:#eee;font-size:24px}.desk #orionHistoryDesktop .oh-deskbody{height:calc(100% - 48px);overflow:auto;padding:4px 8px}.desk #orionDesktopNewChat{width:100%;height:44px;border:0;border-radius:12px;background:#24272b;color:#eef1f4;font-weight:600}.desk #orionHistoryDesktopList{padding-top:6px}';
   document.head.appendChild(style);
 
   document.getElementById('orionNewChat').onclick=newConversation;
   document.getElementById('orionHistorySearch').oninput=renderHistory;
   document.getElementById('orionHistoryRefresh').onclick=syncNow;
-  section.addEventListener('click',e=>{const a=e.target.closest('[data-oh-open]'),m=e.target.closest('[data-oh-more]');if(a)loadConversation(a.dataset.ohOpen);else if(m)openAction(m.dataset.ohMore)});
+  document.getElementById('orionDesktopNewChat').onclick=newConversation;
+  document.getElementById('orionHistoryDesktopSearch').oninput=renderHistory;
+  document.getElementById('orionHistoryDesktopRefresh').onclick=syncNow;
+  const historyClick=e=>{const a=e.target.closest('[data-oh-open]'),m=e.target.closest('[data-oh-more]');if(a)loadConversation(a.dataset.ohOpen);else if(m)openAction(m.dataset.ohMore)};
+  section.addEventListener('click',historyClick);document.getElementById('orionHistoryDesktopList').addEventListener('click',historyClick);
   actions.addEventListener('click',e=>{const b=e.target.closest('[data-oh-act]');if(!b)return;const a=b.dataset.ohAct,c=getConversation(actionTarget);if(a==='close')return closeAction();if(!c)return;
    if(a==='share')share(c.id);
    if(a==='pin')patchConversation(c.id,{pinned:asBool(c.pinned)?0:1});
