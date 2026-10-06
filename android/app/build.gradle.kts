@@ -18,6 +18,9 @@ android {
 
     buildFeatures { compose = true }
 
+    // The offline GGUF is already quantized; do not recompress it in the APK.
+    androidResources { noCompress += "gguf" }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -38,5 +41,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.foundation:foundation")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("dev.ffmpegkit-maintained:llama-android:0.1.1")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
