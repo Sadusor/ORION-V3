@@ -5,7 +5,7 @@
    ====================================================================== */
 const ORION_PRODUCT=(function(){
  let current='home',lastUi=null,built=false;
- const escP=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+ const escP=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const nav=[['home','Chat','⌂'],['work','Work','◇'],['ai','AI','✦'],['memory','Memory','◌'],['connectors','Connectors','⛓'],['system','System','◎']];
  const phoneClient=new URLSearchParams(location.search).get('view')==='phone'||innerWidth<=760;
  const prefKey='orion.phone.ui.v1';
