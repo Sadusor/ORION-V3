@@ -4,16 +4,35 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#080a0d">
-<title>ORION Offline</title>
+<title>ORION</title>
 <style>
-:root{color-scheme:dark;--bg:#080a0d;--panel:#1d2024;--panel2:#24282d;--text:#f3f5f7;--mut:#8e949d;--ion:#79d7ee;--ok:#72d7ad;--danger:#ff7777}
-*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input{font:inherit}
-#app{height:100%;display:flex;flex-direction:column;overflow:hidden}.top{height:62px;display:grid;grid-template-columns:54px 1fr 54px;align-items:center;padding:env(safe-area-inset-top) 8px 0;border-bottom:1px solid #ffffff0a}
-.iconbtn{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--text);font-size:25px}.brand{text-align:center;letter-spacing:.28em;font-size:15px;margin-left:.28em}.offline{justify-self:end;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#eabf69;font-size:10px;border:1px solid #ffffff12}
-#main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}.empty{margin:auto;text-align:center;padding:30px 20px 80px}.orb{width:84px;height:84px;margin:0 auto 22px;filter:drop-shadow(0 0 18px #79d7ee33)}.empty h1{font-size:29px;font-weight:400;margin:0 0 8px}.empty p{color:var(--mut);margin:0}.chat{display:none;flex:1;overflow:auto;padding:18px 18px 130px}.has-chat .empty{display:none}.has-chat .chat{display:block}.m{max-width:88%;margin:10px 0;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word}.m.user{margin-left:auto;background:#2b3036}.m.assistant{margin-right:auto;background:transparent;padding-left:0}.m.thinking{color:var(--mut);font-size:13px}
-.composer{position:absolute;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));background:var(--panel);border:1px solid #ffffff14;border-radius:25px;padding:10px;box-shadow:0 16px 40px #0008}.composer input{width:100%;height:42px;background:transparent;border:0;outline:0;color:var(--text);font-size:17px;padding:0 8px}.row{display:flex;align-items:center;gap:8px}.chip{border:1px solid #ffffff18;background:transparent;color:var(--text);border-radius:18px;height:38px;padding:0 14px}.chip.offlinechip{color:var(--ion);border-color:#79d7ee44}.round{width:42px;height:42px;border:0;border-radius:50%;background:#2b2f34;color:var(--text);font-size:24px}.send{background:var(--ion);color:#071014;margin-left:auto}
-.drawerShade{position:fixed;inset:0;background:#0008;z-index:20;opacity:0;pointer-events:none;transition:.16s}.drawer{position:fixed;z-index:21;top:0;bottom:0;left:0;width:min(87vw,370px);background:#111315;transform:translateX(-103%);transition:.18s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}.menu-open .drawerShade{opacity:1;pointer-events:auto}.menu-open .drawer{transform:none}.drawerHead{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}.drawerHead svg{width:34px;height:34px}.drawerHead b{letter-spacing:.18em}.drawerHead button{margin-left:auto}.newchat{margin:6px 14px 8px;height:45px;border:0;border-radius:13px;background:#25292e;color:var(--text);font-weight:600}.search{margin:0 14px 8px;height:44px;border-radius:22px;border:1px solid #ffffff10;background:#202327;color:var(--text);padding:0 16px;outline:0}.history{overflow:auto;padding:4px 8px 16px;flex:1}.group h3{margin:14px 10px 5px;color:var(--mut);font-size:12px;font-weight:600}.historyRow{display:grid;grid-template-columns:1fr 38px;align-items:center;gap:5px;border-radius:11px}.historyRow.active{background:#25282c}.historyRow>button:first-child{border:0;background:transparent;color:var(--text);text-align:left;padding:11px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dots{border:0;background:transparent;color:var(--mut);height:36px;border-radius:50%}.drawerFoot{border-top:1px solid #ffffff10;padding:10px 14px calc(12px + env(safe-area-inset-bottom));color:var(--mut);font-size:12px}.drawerFoot b{color:var(--text);display:block;margin-bottom:3px}
-.sheet{position:fixed;z-index:30;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));background:#292d32;border:1px solid #ffffff14;border-radius:22px;padding:10px;display:none;box-shadow:0 18px 50px #000b}.sheet.on{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sheet button{min-height:72px;border:0;border-radius:16px;background:#34383d;color:var(--text)}.sheet button:disabled{opacity:.38}.sheet .wide{grid-column:1/-1;min-height:46px}.danger{color:var(--danger)!important}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:126px;z-index:40;background:#30343a;border:1px solid #ffffff14;border-radius:15px;padding:9px 13px;opacity:0;pointer-events:none;transition:.15s;max-width:82%;text-align:center}.toast.on{opacity:1}
+:root{color-scheme:dark;--bg:#080a0d;--panel:#1d2024;--panel2:#262a2f;--text:#f3f5f7;--mut:#8e949d;--ion:#79d7ee;--ok:#72d7ad;--warn:#e6bd68;--danger:#ff7777}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input,textarea{font:inherit}
+button{touch-action:manipulation}
+#app{height:100dvh;max-height:100dvh;display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.top{flex:0 0 auto;height:64px;display:grid;grid-template-columns:54px 1fr 54px;align-items:center;padding:env(safe-area-inset-top) 8px 0;border-bottom:1px solid #ffffff0a;background:var(--bg)}
+.iconbtn{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--text);font-size:25px}
+.brand{text-align:center;letter-spacing:.28em;font-size:15px;margin-left:.28em}
+.conn{justify-self:end;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:9px;border:1px solid #ffffff12;background:transparent;color:var(--warn)}
+.conn.pc{color:var(--ok);border-color:#72d7ad35}.conn.pair{color:var(--warn)}.conn.local{color:var(--ion);border-color:#79d7ee30}
+#main{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.stage{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow:hidden}
+.empty{margin:auto;text-align:center;padding:24px 20px}.orb{width:82px;height:82px;margin:0 auto 20px;filter:drop-shadow(0 0 18px #79d7ee2b)}
+.empty h1{font-size:30px;font-weight:400;margin:0 0 8px}.empty p{color:var(--mut);margin:0;font-size:14px}
+.chat{display:none;flex:1;min-height:0;overflow:auto;padding:14px 18px 24px;overscroll-behavior:contain}.has-chat .empty{display:none}.has-chat .chat{display:block}
+.m{max-width:88%;margin:10px 0;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word}.m.user{margin-left:auto;background:#2b3036}.m.assistant{margin-right:auto;background:transparent;padding-left:0}.m.thinking{color:var(--mut);font-size:13px}.m.error{color:#ffb0b0}
+.composer{flex:0 0 auto;margin:8px 14px calc(10px + env(safe-area-inset-bottom));background:var(--panel);border:1px solid #ffffff14;border-radius:24px;padding:8px 9px 9px;box-shadow:0 12px 34px #0007;min-height:104px}
+.composer textarea{display:block;width:100%;min-height:42px;max-height:120px;resize:none;overflow:auto;background:transparent;border:0;outline:0;color:var(--text);font-size:17px;line-height:23px;padding:8px 8px 6px}
+.row{display:flex;align-items:center;gap:7px;min-height:42px}.chip{border:1px solid #ffffff18;background:transparent;color:var(--text);border-radius:19px;height:38px;padding:0 13px;white-space:nowrap;max-width:50vw;overflow:hidden;text-overflow:ellipsis}.chip.model{color:var(--ion);border-color:#79d7ee44}.chip:disabled{opacity:.38}.round{flex:0 0 42px;width:42px;height:42px;border:0;border-radius:50%;background:#2b2f34;color:var(--text);font-size:23px}.send{background:var(--ion);color:#071014;margin-left:auto}
+.drawerShade{position:fixed;inset:0;background:#0008;z-index:20;opacity:0;pointer-events:none;transition:.16s}.drawer{position:fixed;z-index:21;top:0;bottom:0;left:0;width:min(87vw,370px);background:#111315;transform:translateX(-103%);transition:.18s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.menu-open .drawerShade{opacity:1;pointer-events:auto}.menu-open .drawer{transform:none}.drawerHead{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}.drawerHead svg{width:34px;height:34px}.drawerHead b{letter-spacing:.18em}.drawerHead button{margin-left:auto}
+.newchat{margin:6px 14px 8px;height:45px;border:0;border-radius:13px;background:#25292e;color:var(--text);font-weight:600}.search{margin:0 14px 8px;height:44px;border-radius:22px;border:1px solid #ffffff10;background:#202327;color:var(--text);padding:0 16px;outline:0}.history{overflow:auto;padding:4px 8px 12px;flex:1}.group h3{margin:14px 10px 5px;color:var(--mut);font-size:12px;font-weight:600}.historyRow{display:grid;grid-template-columns:1fr 38px;align-items:center;gap:5px;border-radius:11px}.historyRow.active{background:#25282c}.historyRow>button:first-child{border:0;background:transparent;color:var(--text);text-align:left;padding:11px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dots{border:0;background:transparent;color:var(--mut);height:36px;border-radius:50%}
+.drawerFoot{border-top:1px solid #ffffff10;padding:8px 14px calc(12px + env(safe-area-inset-bottom));display:grid;gap:7px}.drawerFoot button{height:42px;border:0;border-radius:12px;background:#202327;color:var(--text);text-align:left;padding:0 13px}.drawerFoot small{color:var(--mut)}
+.sheetShade{position:fixed;inset:0;background:#0009;z-index:29;display:none}.sheetShade.on{display:block}.sheet{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-height:78dvh;overflow:auto;background:#292d32;border:1px solid #ffffff14;border-radius:22px;padding:10px;display:none;box-shadow:0 18px 50px #000b}.sheet.on{display:block}
+.sheet h2{font-size:17px;margin:6px 8px 12px}.sheet button,.sheet input{width:100%;min-height:46px;border:0;border-radius:14px;background:#34383d;color:var(--text);padding:0 13px;margin:4px 0}.sheet input{outline:0;border:1px solid #ffffff0f}.sheet button:disabled{opacity:.38}.sheet small{display:block;color:var(--mut);font-size:11px}.modelItem{display:flex!important;align-items:center;justify-content:space-between;text-align:left}.modelItem.on{border:1px solid #79d7ee66;color:var(--ion)}.settingRow{padding:10px 8px;border-bottom:1px solid #ffffff0c}.settingRow:last-child{border-bottom:0}.settingRow b{display:block;margin-bottom:3px}.settingRow p{margin:0;color:var(--mut);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.danger{color:var(--danger)!important}
+.actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.actionGrid button{min-height:68px;margin:0}.actionGrid .wide{grid-column:1/-1;min-height:46px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:126px;z-index:50;background:#30343a;border:1px solid #ffffff14;border-radius:15px;padding:9px 13px;opacity:0;pointer-events:none;transition:.15s;max-width:84%;text-align:center}.toast.on{opacity:1}
+@media(max-height:560px){.empty{padding:12px}.orb{width:62px;height:62px;margin-bottom:10px}.empty h1{font-size:24px}.composer{margin-top:4px}}
 </style>
 </head>
 <body>
@@ -21,26 +40,30 @@
   <header class="top">
     <button class="iconbtn" id="menu" aria-label="Open history">☰</button>
     <div class="brand">ORION</div>
-    <div class="offline">OFF</div>
+    <button class="conn local" id="conn" aria-label="Connection status">LOCAL</button>
   </header>
+
   <main id="main">
-    <section class="empty">
-      <svg class="orb" viewBox="0 0 100 100" aria-label="ORION">
-        <circle cx="50" cy="50" r="37" fill="none" stroke="#79d7ee" stroke-opacity=".7" stroke-width="2"/>
-        <circle cx="50" cy="50" r="28" fill="#79d7ee" fill-opacity=".08"/>
-        <path d="M20 62L36 34L61 27L78 50L59 73L31 70Z" fill="none" stroke="#79d7ee" stroke-opacity=".55"/>
-        <g fill="#bceefa"><circle cx="20" cy="62" r="2"/><circle cx="36" cy="34" r="2.4"/><circle cx="61" cy="27" r="1.8"/><circle cx="78" cy="50" r="2.6"/><circle cx="59" cy="73" r="2"/><circle cx="31" cy="70" r="1.8"/></g>
-      </svg>
-      <h1>How can I help?</h1>
-      <p>Offline · Qwen3-0.6B · local chat memory</p>
-    </section>
-    <section class="chat" id="chat"></section>
+    <div class="stage">
+      <section class="empty">
+        <svg class="orb" viewBox="0 0 100 100" aria-label="ORION">
+          <circle cx="50" cy="50" r="37" fill="none" stroke="#79d7ee" stroke-opacity=".72" stroke-width="2"/>
+          <circle cx="50" cy="50" r="28" fill="#79d7ee" fill-opacity=".07"/>
+          <path d="M20 62L36 34L61 27L78 50L59 73L31 70Z" fill="none" stroke="#79d7ee" stroke-opacity=".55"/>
+          <g fill="#bceefa"><circle cx="20" cy="62" r="2"/><circle cx="36" cy="34" r="2.4"/><circle cx="61" cy="27" r="1.8"/><circle cx="78" cy="50" r="2.6"/><circle cx="59" cy="73" r="2"/><circle cx="31" cy="70" r="1.8"/></g>
+        </svg>
+        <h1>How can I help?</h1>
+        <p id="welcomeStatus">Local · Qwen3-0.6B · chat memory ready</p>
+      </section>
+      <section class="chat" id="chat"></section>
+    </div>
+
     <form class="composer" id="form">
-      <input id="inp" autocomplete="off" placeholder="Message ORION offline…">
+      <textarea id="inp" rows="1" autocomplete="off" placeholder="Message ORION…"></textarea>
       <div class="row">
-        <button type="button" class="chip offlinechip" id="model">Offline</button>
-        <button type="button" class="round" id="plus" aria-label="Attachments">＋</button>
-        <button type="button" class="round" disabled title="Voice is not connected offline">🎙</button>
+        <button type="button" class="chip model" id="model">Local · Qwen3-0.6B ▾</button>
+        <button type="button" class="chip" id="searchBtn" disabled title="Web search is not connected yet">Search</button>
+        <button type="button" class="round" id="plus" aria-label="Tools">＋</button>
         <button class="round send" type="submit" aria-label="Send">↑</button>
       </div>
     </form>
@@ -50,152 +73,248 @@
   <aside class="drawer">
     <div class="drawerHead">
       <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="none" stroke="#79d7ee" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#79d7ee"/></svg>
-      <div><b>ORION</b><small style="display:block;color:#8e949d">Offline history</small></div>
+      <div><b>ORION</b><small style="display:block;color:#8e949d">Personal AI</small></div>
       <button class="iconbtn" id="closeMenu">×</button>
     </div>
     <button class="newchat" id="newChat">＋ New chat</button>
-    <input class="search" id="search" placeholder="Search chat content…">
+    <input class="search" id="historySearch" placeholder="Search chats…">
     <div class="history" id="history"></div>
     <div class="drawerFoot">
-      <b>Local settings</b>
-      History is stored on this phone and syncs with ORION when you reconnect.
-      <button class="newchat" id="reconnect" style="margin:10px 0 0;width:100%">Reconnect to ORION PC</button>
+      <button id="settingsBtn">⚙ Settings <small id="drawerConn">Local mode</small></button>
     </div>
   </aside>
 
-  <section class="sheet" id="attachSheet">
-    <button disabled>📷<br>Camera<br><small>planned</small></button>
-    <button disabled>🖼<br>Photo<br><small>planned</small></button>
-    <button disabled>📎<br>Document<br><small>planned</small></button>
-    <button class="wide" id="closeAttach">Close</button>
+  <div class="sheetShade" id="sheetShade"></div>
+
+  <section class="sheet" id="modelSheet">
+    <h2>Choose model</h2>
+    <div id="modelList"></div>
+    <button data-close-sheet>Close</button>
+  </section>
+
+  <section class="sheet" id="toolsSheet">
+    <h2>Tools</h2>
+    <div class="actionGrid">
+      <button disabled>📷<br>Camera<small>planned</small></button>
+      <button disabled>🖼<br>Photo<small>planned</small></button>
+      <button disabled>📎<br>Document<small>planned</small></button>
+      <button id="toolSettings">⚙<br>Settings</button>
+      <button id="toolSync">↻<br>Sync history</button>
+      <button disabled>◎<br>View PC<small>planned</small></button>
+      <button class="wide" data-close-sheet>Close</button>
+    </div>
+  </section>
+
+  <section class="sheet" id="settingsSheet">
+    <h2>Settings</h2>
+    <div class="settingRow">
+      <b>ORION PC</b>
+      <p id="pcStatusText">Offline. The local bot works without ZeroTier.</p>
+      <div class="grid2" style="margin-top:8px">
+        <button id="openZeroTier">Open ZeroTier</button>
+        <button id="refreshPc">Refresh connection</button>
+      </div>
+    </div>
+    <div class="settingRow">
+      <b>Pair phone with ORION</b>
+      <p>The pairing token is stored on this phone and survives ORION restarts.</p>
+      <input id="pairCode" inputmode="numeric" maxlength="6" placeholder="6-digit PC pairing code">
+      <div class="grid2">
+        <button id="pairBtn">Pair</button>
+        <button id="forgetBtn">Forget pairing</button>
+      </div>
+    </div>
+    <div class="settingRow">
+      <b>Update ORION</b>
+      <p id="updateText">Connect to the PC to check/update ORION.</p>
+      <button id="updateBtn" disabled>Update ORION PC</button>
+      <button id="installBtn" disabled>Install latest ORION APK</button>
+    </div>
+    <div class="settingRow">
+      <b>Local memory</b>
+      <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
+    </div>
+    <div class="settingRow">
+      <b>Power</b>
+      <p>ORION core is static while idle. No continuous animation.</p>
+    </div>
+    <button data-close-sheet>Close</button>
   </section>
 
   <section class="sheet" id="actionSheet">
-    <button data-act="share">Share</button>
-    <button data-act="pin">Pin</button>
-    <button data-act="project" disabled>Add to project<br><small>when PC connected</small></button>
-    <button data-act="files" disabled>Uploaded files<br><small>planned</small></button>
-    <button data-act="find">Find in chat</button>
-    <button data-act="home" disabled>Add to home<br><small>planned</small></button>
-    <button data-act="archive">Archive</button>
-    <button data-act="delete" class="danger">Delete</button>
-    <button data-act="close">Close</button>
+    <h2>Chat</h2>
+    <div class="actionGrid">
+      <button data-act="share">Share</button>
+      <button data-act="pin">Pin</button>
+      <button data-act="find">Find</button>
+      <button data-act="archive">Archive</button>
+      <button data-act="delete" class="danger">Delete</button>
+      <button data-close-sheet>Close</button>
+    </div>
   </section>
+
   <div class="toast" id="toast"></div>
 </div>
 <script>
 (function(){
  const app=document.getElementById('app'),chat=document.getElementById('chat'),inp=document.getElementById('inp');
- let data={conversations:[],messages:[]},current='',menuTarget='',pending={},toastTimer=0;
- const nativeHistory=window.ORION_NATIVE_HISTORY,nativeChat=window.ORION_NATIVE_CHAT;
- const now=()=>Date.now(),id=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+ const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
+ let data={conversations:[],messages:[]},current='',menuTarget='',toastTimer=0;
+ let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
+ let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null};
+ let wasConnected=false, pendingLocal={}, pendingPc={}, pendingActions={};
+
+ const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const asBool=v=>v===true||v===1||v==='1';
  function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove('on'),2600)}
  function snap(){try{return JSON.parse(nativeHistory.snapshot())}catch(_){return{conversations:[],messages:[]}}}
- function merge(delta){try{data=JSON.parse(nativeHistory.merge(JSON.stringify(delta)));return data}catch(e){toast('Local history unavailable');return data}}
+ function merge(delta){try{data=JSON.parse(nativeHistory.merge(JSON.stringify(delta)));return data}catch(_){toast('Local history unavailable');return data}}
  function conv(cid){return data.conversations.find(c=>c.id===cid)}
- function visibleConvs(){return data.conversations.filter(c=>!c.deleted&&!c.archived)}
+ function visibleConvs(){return data.conversations.filter(c=>!asBool(c.deleted)&&!asBool(c.archived))}
  function ensureConversation(){
-   if(current&&conv(current)&&!conv(current).deleted)return current;
-   const c=visibleConvs().sort((a,b)=>b.updated_at_ms-a.updated_at_ms)[0];
+   if(current&&conv(current)&&!asBool(conv(current).deleted))return current;
+   const c=visibleConvs().sort((a,b)=>Number(b.updated_at_ms)-Number(a.updated_at_ms))[0];
    if(c){current=c.id;return current}
    newChat(false);return current
  }
- function newChat(openComposer=true){
-   current=id('c');
-   const t=now();
+ function newChat(focus=true){
+   current=uid('c');const t=now();
    merge({conversations:[{id:current,title:'New chat',project_id:'',pinned:0,archived:0,deleted:0,created_at_ms:t,updated_at_ms:t}]});
-   renderChat();renderHistory();closeDrawer();if(openComposer)inp.focus()
+   renderChat();renderHistory();closeDrawer();if(focus)inp.focus()
  }
- function addMessage(role,text,source){
-   const c=conv(current),t=now();
-   const title=(c&&c.title&&c.title!=='New chat')?c.title:(role==='user'?text.slice(0,58):'New chat');
+ function addMessage(role,text,source,cid=current){
+   const c=conv(cid),t=now();if(!c)return;
+   const title=(c.title&&c.title!=='New chat')?c.title:(role==='user'?text.slice(0,58):'New chat');
    merge({
-     conversations:[{id:current,title,project_id:c?c.project_id:'',pinned:c?c.pinned:0,archived:c?c.archived:0,deleted:0,created_at_ms:c?c.created_at_ms:t,updated_at_ms:t}],
-     messages:[{id:id('m'),conversation_id:current,role,text,source,created_at_ms:t}]
+     conversations:[Object.assign({},c,{title,updated_at_ms:t})],
+     messages:[{id:uid('m'),conversation_id:cid,role,text,source:source||'',created_at_ms:t}]
    });
  }
  function renderChat(){
    ensureConversation();
-   const ms=data.messages.filter(m=>m.conversation_id===current).sort((a,b)=>a.created_at_ms-b.created_at_ms);
-   chat.innerHTML=ms.map(m=>'<div class="m '+(m.role==='user'?'user':'assistant')+'">'+esc(m.text)+'</div>').join('');
+   const ms=data.messages.filter(m=>m.conversation_id===current).sort((a,b)=>Number(a.created_at_ms)-Number(b.created_at_ms));
+   chat.innerHTML=ms.filter(m=>m.role==='user'||m.role==='assistant').map(m=>'<div class="m '+(m.role==='user'?'user':'assistant')+'">'+esc(m.text)+'</div>').join('');
    app.classList.toggle('has-chat',ms.length>0);chat.scrollTop=chat.scrollHeight;
  }
- function groupLabel(ts){
-   const d=(now()-ts)/86400000;
-   return d<=7?'7 Days':d<=30?'30 Days':'Older';
- }
+ function groupLabel(ts){const d=(now()-Number(ts||0))/86400000;return d<=7?'7 Days':d<=30?'30 Days':'Older'}
  function renderHistory(){
-   const q=document.getElementById('search').value.trim().toLowerCase();
+   const q=document.getElementById('historySearch').value.trim().toLowerCase();
    const filtered=visibleConvs().filter(c=>{
      if(!q)return true;
-     if((c.title||'').toLowerCase().includes(q))return true;
-     return data.messages.some(m=>m.conversation_id===c.id&&(m.text||'').toLowerCase().includes(q));
-   }).sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at_ms-a.updated_at_ms));
-   const groups={};
-   filtered.forEach(c=>(groups[groupLabel(c.updated_at_ms)]??=[]).push(c));
-   const order=['7 Days','30 Days','Older'];
-   document.getElementById('history').innerHTML=order.filter(k=>groups[k]).map(k=>
+     if(String(c.title||'').toLowerCase().includes(q))return true;
+     return data.messages.some(m=>m.conversation_id===c.id&&String(m.text||'').toLowerCase().includes(q));
+   }).sort((a,b)=>{const p=Number(b.pinned)-Number(a.pinned);return p||Number(b.updated_at_ms)-Number(a.updated_at_ms)});
+   const groups={};filtered.forEach(c=>(groups[groupLabel(c.updated_at_ms)]??=[]).push(c));
+   document.getElementById('history').innerHTML=['7 Days','30 Days','Older'].filter(k=>groups[k]).map(k=>
      '<section class="group"><h3>'+k+'</h3>'+groups[k].map(c=>
-       '<div class="historyRow '+(c.id===current?'active':'')+'"><button data-open="'+esc(c.id)+'">'+(c.pinned?'📌 ':'')+esc(c.title||'New chat')+'</button><button class="dots" data-more="'+esc(c.id)+'">•••</button></div>'
+       '<div class="historyRow '+(c.id===current?'active':'')+'"><button data-open="'+esc(c.id)+'">'+(asBool(c.pinned)?'📌 ':'')+esc(c.title||'New chat')+'</button><button class="dots" data-more="'+esc(c.id)+'">•••</button></div>'
      ).join('')+'</section>'
-   ).join('')||'<p style="color:#8e949d;padding:16px">No matching chats.</p>';
+   ).join('')||'<p style="color:#8e949d;padding:16px">No chats yet.</p>';
  }
- function openDrawer(){app.classList.add('menu-open');renderHistory()}
- function closeDrawer(){app.classList.remove('menu-open')}
- function showSheet(id,on){document.getElementById(id).classList.toggle('on',!!on)}
  function loadSnapshot(){data=snap();ensureConversation();renderHistory();renderChat()}
- function patchConversation(cid,patch){
-   const c=conv(cid);if(!c)return;
-   merge({conversations:[Object.assign({},c,patch,{updated_at_ms:now()})]});renderHistory()
- }
+ function patchConversation(cid,patch){const c=conv(cid);if(!c)return;merge({conversations:[Object.assign({},c,patch,{updated_at_ms:now()})]});renderHistory()}
  function openConversation(cid){current=cid;renderChat();renderHistory();closeDrawer()}
+ function openDrawer(){closeSheets();app.classList.add('menu-open');renderHistory()}
+ function closeDrawer(){app.classList.remove('menu-open')}
+ function showSheet(id){closeDrawer();document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('on'));document.getElementById(id).classList.add('on');document.getElementById('sheetShade').classList.add('on')}
+ function closeSheets(){document.querySelectorAll('.sheet').forEach(x=>x.classList.remove('on'));document.getElementById('sheetShade').classList.remove('on')}
  function shareConversation(cid){
-   const c=conv(cid);if(!c)return;
-   const body=data.messages.filter(m=>m.conversation_id===cid).map(m=>(m.role==='user'?'You: ':'ORION: ')+m.text).join('\n\n');
-   if(navigator.share){navigator.share({title:c.title||'ORION chat',text:body}).catch(()=>{})}
-   else if(navigator.clipboard){navigator.clipboard.writeText(body).then(()=>toast('Chat copied'))}
-   else toast('Share is not available on this device')
+   const c=conv(cid);if(!c)return;const body=data.messages.filter(m=>m.conversation_id===cid).map(m=>(m.role==='user'?'You: ':'ORION: ')+m.text).join('\n\n');
+   if(navigator.share)navigator.share({title:c.title||'ORION chat',text:body}).catch(()=>{});
+   else if(navigator.clipboard)navigator.clipboard.writeText(body).then(()=>toast('Chat copied'));
  }
- document.getElementById('menu').onclick=openDrawer;
- document.getElementById('shade').onclick=closeDrawer;
- document.getElementById('closeMenu').onclick=closeDrawer;
- document.getElementById('newChat').onclick=()=>newChat(true);
- document.getElementById('search').oninput=renderHistory;
- document.getElementById('history').onclick=e=>{
-   const o=e.target.closest('[data-open]'),m=e.target.closest('[data-more]');
-   if(o)return openConversation(o.dataset.open);
-   if(m){menuTarget=m.dataset.more;showSheet('actionSheet',1)}
- };
- document.getElementById('plus').onclick=()=>showSheet('attachSheet',1);
- document.getElementById('closeAttach').onclick=()=>showSheet('attachSheet',0);
- document.getElementById('reconnect').onclick=()=>{try{nativeChat.reconnect()}catch(_){toast('Reconnect unavailable')}};
- document.getElementById('model').onclick=()=>{try{const m=JSON.parse(nativeChat.modelInfo());toast(m.name+' '+m.quant+(m.loaded?' · loaded':' · loads on first message'))}catch(_){toast('Offline model')}};
- document.getElementById('actionSheet').onclick=e=>{
-   const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,c=conv(menuTarget);
-   if(a==='close')return showSheet('actionSheet',0);
-   if(!c)return;
-   if(a==='share')shareConversation(c.id);
-   if(a==='pin')patchConversation(c.id,{pinned:c.pinned?0:1});
-   if(a==='archive')patchConversation(c.id,{archived:1});
-   if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}
-   if(a==='find'){openConversation(c.id);setTimeout(()=>inp.focus(),80);toast('Use history search to find text in this chat')}
-   showSheet('actionSheet',0);renderHistory();
- };
+ function selectedLabel(){
+   if(selected.startsWith('pc:'))return 'PC · '+selected.slice(3);
+   return 'Local · Qwen3-0.6B';
+ }
+ function renderModels(){
+   const list=document.getElementById('modelList');const items=[{id:'local:qwen3-0.6b',label:'Local · Qwen3-0.6B',sub:'Always available · on this phone'}];
+   if(pc.connected&&Array.isArray(pc.models))pc.models.forEach(m=>items.push({id:'pc:'+m,label:'PC · '+m,sub:'ORION Local Brain · streamed + verified'}));
+   if(selected.startsWith('pc:')&&!items.some(x=>x.id===selected))selected='local:qwen3-0.6b';
+   localStorage.setItem('orion.selectedModel',selected);
+   document.getElementById('model').textContent=selectedLabel()+' ▾';
+   list.innerHTML=items.map(x=>'<button class="modelItem '+(x.id===selected?'on':'')+'" data-model="'+esc(x.id)+'"><span>'+esc(x.label)+'<small>'+esc(x.sub)+'</small></span><span>'+(x.id===selected?'✓':'')+'</span></button>').join('');
+ }
+ function renderConnection(){
+   const badge=document.getElementById('conn'),drawer=document.getElementById('drawerConn'),status=document.getElementById('pcStatusText');
+   badge.className='conn '+(pc.connected?'pc':pc.reachable&&!pc.paired?'pair':'local');
+   badge.textContent=pc.connected?'PC':pc.reachable&&!pc.paired?'PAIR':'LOCAL';
+   drawer.textContent=pc.connected?'PC connected':pc.reachable&&!pc.paired?'PC found · pairing needed':'Local mode';
+   status.textContent=pc.connected?'Connected to ORION PC. PC models and history sync are available.':pc.reachable&&!pc.paired?'ORION PC is reachable. Enter the 6-digit pairing code.':'Local bot is ready. ZeroTier is optional until you want the PC.';
+   document.getElementById('welcomeStatus').textContent=pc.connected?'PC connected · choose Local or ORION model':'Local · Qwen3-0.6B · chat memory ready';
+   document.getElementById('updateBtn').disabled=!pc.connected;
+   document.getElementById('installBtn').disabled=!pc.connected;
+   const u=pc.update||{};document.getElementById('updateText').textContent=u.state?('Update '+String(u.state).toUpperCase()+(u.message?' · '+u.message:'')):'Connect to the PC to check/update ORION.';
+   renderModels();
+ }
+ function refreshPc(){
+   try{nativePc.refresh(uid('status'))}catch(_){pc.connected=false;pc.reachable=false;renderConnection()}
+ }
+ function syncHistory(){if(pc.connected)try{nativePc.syncHistory(uid('sync'))}catch(_){}}
+ function autoGrow(){inp.style.height='auto';inp.style.height=Math.min(inp.scrollHeight,120)+'px'}
+ function createLiveBubble(req,kind,cid){
+   const e=document.createElement('div');e.className='m assistant thinking';e.dataset.req=req;e.textContent=kind==='pc'?'ORION PC is thinking…':'Loading local model…';chat.appendChild(e);app.classList.add('has-chat');chat.scrollTop=chat.scrollHeight;
+   return{bubble:e,cid}
+ }
+ document.getElementById('menu').onclick=openDrawer;document.getElementById('shade').onclick=closeDrawer;document.getElementById('closeMenu').onclick=closeDrawer;
+ document.getElementById('newChat').onclick=()=>newChat(true);document.getElementById('historySearch').oninput=renderHistory;
+ document.getElementById('history').onclick=e=>{const o=e.target.closest('[data-open]'),m=e.target.closest('[data-more]');if(o)return openConversation(o.dataset.open);if(m){menuTarget=m.dataset.more;showSheet('actionSheet')}};
+ document.getElementById('model').onclick=()=>{renderModels();showSheet('modelSheet')};
+ document.getElementById('modelList').onclick=e=>{const b=e.target.closest('[data-model]');if(!b)return;selected=b.dataset.model;localStorage.setItem('orion.selectedModel',selected);renderModels();closeSheets()};
+ document.getElementById('plus').onclick=()=>showSheet('toolsSheet');document.getElementById('settingsBtn').onclick=()=>showSheet('settingsSheet');document.getElementById('toolSettings').onclick=()=>showSheet('settingsSheet');
+ document.getElementById('toolSync').onclick=()=>{syncHistory();toast(pc.connected?'Sync requested':'PC not connected');closeSheets()};
+ document.getElementById('sheetShade').onclick=closeSheets;document.querySelectorAll('[data-close-sheet]').forEach(b=>b.onclick=closeSheets);
+ document.getElementById('conn').onclick=()=>showSheet('settingsSheet');
+ document.getElementById('openZeroTier').onclick=()=>{try{toast(nativePc.openZeroTier()?'ZeroTier opened':'ZeroTier not installed')}catch(_){toast('Could not open ZeroTier')}};
+ document.getElementById('refreshPc').onclick=()=>{refreshPc();toast('Checking ORION PC…')};
+ document.getElementById('pairBtn').onclick=()=>{const code=document.getElementById('pairCode').value.trim();if(!/^\d{6}$/.test(code))return toast('Enter the 6-digit pairing code');const id=uid('pair');pendingActions[id]='pair';nativePc.pair(code,id)};
+ document.getElementById('forgetBtn').onclick=()=>{const id=uid('forget');pendingActions[id]='forget';nativePc.forgetPairing(id)};
+ document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const id=uid('update');pendingActions[id]='update';document.getElementById('updateBtn').disabled=true;document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
+ document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
+ document.getElementById('actionSheet').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const c=conv(menuTarget);if(!c)return;const a=b.dataset.act;if(a==='share')shareConversation(c.id);if(a==='pin')patchConversation(c.id,{pinned:asBool(c.pinned)?0:1});if(a==='archive')patchConversation(c.id,{archived:1});if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}if(a==='find'){openConversation(c.id);setTimeout(()=>{const q=prompt('Find in this chat');if(q&&window.find)toast(window.find(q)?'Found':'Not found')},80)}closeSheets()};
+ inp.addEventListener('input',autoGrow);
+ inp.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();document.getElementById('form').requestSubmit()}});
  document.getElementById('form').onsubmit=e=>{
-   e.preventDefault();const text=inp.value.trim();if(!text)return;ensureConversation();inp.value='';
-   addMessage('user',text,'phone-offline');renderChat();
-   const req=id('req');pending[req]=true;
-   const wait=document.createElement('div');wait.className='m assistant thinking';wait.dataset.req=req;wait.textContent='Thinking locally…';chat.appendChild(wait);app.classList.add('has-chat');chat.scrollTop=chat.scrollHeight;
-   try{nativeChat.ask(JSON.stringify({id:req,conversation_id:current,text}))}catch(err){window.ORION_OFFLINE_RESULT(req,null,String(err))}
+   e.preventDefault();const text=inp.value.trim();if(!text)return;ensureConversation();const cid=current;inp.value='';autoGrow();addMessage('user',text,selected.startsWith('pc:')?'phone-pc':'phone-local',cid);renderChat();
+   const req=uid('req');
+   if(selected.startsWith('pc:')){
+     if(!pc.connected){toast('PC model unavailable. Choose Local or connect ORION PC.');return}
+     pendingPc[req]=createLiveBubble(req,'pc',cid);
+     nativePc.ask(JSON.stringify({id:req,conversation_id:cid,text,model:selected.slice(3)}));
+   }else{
+     pendingLocal[req]=createLiveBubble(req,'local',cid);
+     nativeLocal.ask(JSON.stringify({id:req,conversation_id:cid,text}));
+   }
  };
  window.ORION_OFFLINE_RESULT=function(req,answer,error){
-   const wait=[...chat.querySelectorAll('[data-req]')].find(x=>x.dataset.req===req);if(wait)wait.remove();delete pending[req];
-   if(error){const e=document.createElement('div');e.className='m assistant';e.textContent='Offline model error: '+error;chat.appendChild(e);toast('Offline model could not answer')}
-   else if(answer){const e=document.createElement('div');e.className='m assistant';e.textContent=answer;chat.appendChild(e)}
-   loadSnapshot();chat.scrollTop=chat.scrollHeight;
+   const p=pendingLocal[req];if(p&&p.bubble)p.bubble.remove();delete pendingLocal[req];
+   loadSnapshot();
+   if(error){const e=document.createElement('div');e.className='m assistant error';e.textContent='Local model error: '+error;chat.appendChild(e);toast('Local model could not answer')}chat.scrollTop=chat.scrollHeight;
+   if(pc.connected)syncHistory();
  };
- loadSnapshot();
+ window.ORION_PC_CHAT_EVENT=function(req,text,done,error){
+   const p=pendingPc[req];if(!p)return;if(text){p.bubble.classList.remove('thinking');p.bubble.textContent=text}
+   if(!done)return;
+   p.bubble.remove();delete pendingPc[req];
+   if(error){const e=document.createElement('div');e.className='m assistant error';e.textContent=(text?text+'\n\n':'')+'PC model error: '+error;chat.appendChild(e);toast('ORION PC could not answer')}
+   else if(text){addMessage('assistant',text,'orion-pc',p.cid);renderChat();syncHistory()}
+   chat.scrollTop=chat.scrollHeight;
+ };
+ window.ORION_PC_STATUS_RESULT=function(_,payload){
+   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;renderConnection();
+   if(pc.connected&&!prior)syncHistory();wasConnected=pc.connected;
+ };
+ window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
+ window.ORION_PC_ACTION_RESULT=function(id,payload){
+   const kind=pendingActions[id]||'';delete pendingActions[id];payload=payload||{};
+   if(kind==='pair'){toast(payload.ok?'Phone paired with ORION':'Pairing failed: '+(payload.error||'unknown'));if(payload.ok)document.getElementById('pairCode').value='';refreshPc()}
+   else if(kind==='forget'){toast('Pairing removed');refreshPc()}
+   else if(kind==='update'){document.getElementById('updateBtn').disabled=false;if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
+   else if(kind==='install'){toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
+ };
+ window.ORION_PHONE_BACK=function(){if(document.querySelector('.sheet.on')){closeSheets();return true}if(app.classList.contains('menu-open')){closeDrawer();return true}return false};
+ loadSnapshot();renderModels();renderConnection();refreshPc();setInterval(()=>{if(!document.hidden)refreshPc()},10000);
 })();
 </script>
 </body>
