@@ -1,5 +1,6 @@
 param(
     [switch]$Install,
+    [switch]$SkipOfflineModel,
     [string]$GradleVersion = "8.10.2"
 )
 
@@ -48,9 +49,49 @@ function Resolve-Adb([string]$SdkRoot) {
     throw "adb.exe was not found."
 }
 
+function Ensure-OfflineModel([string]$AndroidRoot) {
+    $modelName = "Qwen3-0.6B-Q4_0.gguf"
+    $modelUrl = "https://huggingface.co/ggml-org/Qwen3-0.6B-GGUF/resolve/main/Qwen3-0.6B-Q4_0.gguf"
+    $expectedSha256 = "DA2572F16C06133561CE56ACCAA822216F2391EF4D37FBA427801CD6736417D4"
+    $modelDir = Join-Path $AndroidRoot "app\src\main\assets\models"
+    $modelPath = Join-Path $modelDir $modelName
+    $partial = "$modelPath.partial"
+
+    New-Item -ItemType Directory -Force -Path $modelDir | Out-Null
+
+    if (Test-Path $modelPath) {
+        $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $modelPath).Hash.ToUpperInvariant()
+        if ($actual -eq $expectedSha256) {
+            Write-Host "ORION_OFFLINE_MODEL> READY ($modelName)" -ForegroundColor Green
+            return
+        }
+        Write-Warning "Existing offline model hash is wrong; replacing it."
+        Remove-Item -LiteralPath $modelPath -Force
+    }
+
+    Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
+    Write-Host "Downloading bundled offline model ($modelName, about 429 MB)..." -ForegroundColor Cyan
+    Invoke-WebRequest -Uri $modelUrl -OutFile $partial
+
+    $actual = (Get-FileHash -Algorithm SHA256 -LiteralPath $partial).Hash.ToUpperInvariant()
+    if ($actual -ne $expectedSha256) {
+        Remove-Item -LiteralPath $partial -Force -ErrorAction SilentlyContinue
+        throw "Offline model SHA256 mismatch. Expected $expectedSha256 but got $actual."
+    }
+
+    Move-Item -LiteralPath $partial -Destination $modelPath -Force
+    Write-Host "ORION_OFFLINE_MODEL> PASS ($modelName)" -ForegroundColor Green
+}
+
 $env:JAVA_HOME = Resolve-Java
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 $sdkRoot = Resolve-AndroidSdkRoot
+
+if (!$SkipOfflineModel) {
+    Ensure-OfflineModel $AndroidRoot
+} else {
+    Write-Host "ORION_OFFLINE_MODEL> SKIPPED (offline chatbot will not be usable in this APK)" -ForegroundColor Yellow
+}
 
 $localProperties = Join-Path $AndroidRoot "local.properties"
 $sdkForGradle = $sdkRoot.Replace("\", "\\")
