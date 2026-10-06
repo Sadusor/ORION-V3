@@ -29,3 +29,88 @@
   backdrop-filter:none;
   -webkit-backdrop-filter:none;
 }
+
+
+/* ===== Phone chat-first shell — 2026-10-06 =====
+   Keep the PC STRATA surface unchanged. Phone defaults to a static ORION mark
+   and moves product tools into a drawer / + menu instead of permanent chrome. */
+.mobile-only,.mobile-nav-head,.mobile-nav-foot,#mobile-nav-shade,#mobile-quick-menu,#phoneMark,#phoneWelcome{display:none}
+
+@media(max-width:760px){
+ #app.phone{padding-bottom:0;background:#07090d;--ps:92px}
+
+ .phone #top{order:0;min-height:58px;padding:8px 14px;gap:8px;background:rgba(7,9,13,.96);border-bottom:1px solid rgba(255,255,255,.035)}
+ .phone #mobileMenu{display:grid;place-items:center;width:42px;height:42px;padding:0;border-radius:50%;font-size:24px;line-height:1;color:var(--silver);background:transparent}
+ .phone #top>.tl:first-of-type{position:absolute;left:50%;transform:translateX(-50%);display:block;flex:none}
+ .phone #top>.tl:first-of-type .brand{font-size:15px;letter-spacing:.28em;margin-left:.28em}
+ .phone #top>.tl:last-of-type{margin-left:auto;display:flex}
+ .phone #proj,.phone #clock,.phone #sch,.phone #histb,.phone #gear,.phone #viewb,.phone #ccb,.phone #pcPairCode,.phone #closeOrion{display:none!important}
+ .phone #conn{display:grid;place-items:center;width:42px;height:42px;padding:0;border-radius:50%;background:transparent}
+ .phone #connT{display:none}.phone #conn .dot{width:9px;height:9px;margin:0}
+
+ .phone #lane-strip{display:none!important}
+ .phone.show-lanes #lane-strip{display:flex!important;order:1;position:relative;left:auto;top:auto;width:auto;gap:7px;overflow:auto;padding:8px 14px 2px;pointer-events:auto;flex:none}
+ .phone.show-lanes #lane-strip::-webkit-scrollbar{display:none}
+ .phone.show-lanes .lane{min-width:150px;padding:8px 10px;background:#11161d;border:1px solid rgba(255,255,255,.045);box-shadow:none}
+
+ .phone #cam{order:2;width:var(--ps);height:var(--ps);margin:clamp(66px,14vh,124px) auto 8px;flex:none}
+ .phone #phoneMark{width:100%;height:100%;object-fit:contain}
+ .phone.static-core #sky,.phone.static-core #core{display:none!important}
+ .phone.static-core #phoneMark{display:block;filter:drop-shadow(0 0 18px rgba(118,207,228,.16))}
+ .phone #phoneWelcome{display:block;order:3;flex:none;text-align:center;color:#f2f4f7;font:400 31px/1.2 var(--disp);letter-spacing:-.02em;margin:6px 20px 24px}
+ .phone.has-chat #cam,.phone.has-chat #phoneWelcome{display:none!important}
+
+ .phone #hud{order:4;flex:none;width:auto;padding:4px 16px 2px;min-height:36px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+ .phone #stl{font:600 9px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+ .phone #act{font-size:12px;line-height:1.35;white-space:normal;text-align:center;max-width:70%}
+ .phone #chips{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+ .phone #hud #stopb{margin-left:auto;min-width:58px;height:32px;padding:0 11px;border-radius:16px;font-size:11px}
+ .phone #hud #stopb:disabled{opacity:.28}
+ .phone #notice{flex-basis:100%;margin:2px 0 4px}
+
+ .phone #chat{order:5;flex:1;min-height:0;width:auto;max-height:none;opacity:1;background:none;padding:8px 18px 10px;overflow:auto;border-radius:0}
+ .phone #chat .m{font-size:16px;line-height:1.55}
+ .phone #actrow{display:none!important}
+
+ .phone #bar{order:6;position:relative;left:auto;right:auto;top:auto;bottom:auto;transform:none;width:auto;margin:8px 14px calc(12px + env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr auto auto auto;gap:7px;padding:10px 10px 9px;border-radius:25px;background:#1d2024;border:1px solid rgba(255,255,255,.09);box-shadow:0 8px 26px rgba(0,0,0,.32);z-index:9}
+ .phone #inp{grid-column:1/-1;width:100%;min-width:0;height:38px;padding:1px 8px 4px;background:transparent;border:0;outline:0;color:#f2f4f7;font-size:17px}
+ .phone #inp::placeholder{color:#878b93}
+ .phone #quickb{display:grid;place-items:center;width:42px;height:42px;border-radius:50%;font-size:26px;color:#f2f4f7;background:#2a2d32}
+ .phone #mic,.phone #send{width:42px;height:42px}
+ .phone #mic{margin-left:auto;background:transparent}
+ .phone #send{background:var(--ion);color:#071015}
+
+ .phone #product-nav{position:absolute;z-index:24;left:0;right:auto;top:0;bottom:0;width:min(86vw,360px);height:auto;transform:translateX(-105%);display:flex;flex-direction:column;gap:0;padding:0;border-radius:0;background:#111214;box-shadow:18px 0 48px rgba(0,0,0,.5);transition:transform var(--base) var(--ease);overflow:auto}
+ .phone.mobile-menu-open #product-nav{transform:none}
+ .phone #product-nav .mobile-nav-head{display:flex;align-items:center;gap:11px;padding:calc(17px + env(safe-area-inset-top)) 18px 16px;border-bottom:1px solid rgba(255,255,255,.07)}
+ .phone .mobile-nav-head img{width:38px;height:38px;object-fit:contain}
+ .phone .mobile-nav-head div{display:flex;flex-direction:column;min-width:0}.phone .mobile-nav-head b{font-size:17px;letter-spacing:.18em}.phone .mobile-nav-head small{color:var(--mut);font-size:11px;margin-top:2px}
+ .phone .mobile-nav-head button{margin-left:auto;width:38px!important;min-height:38px!important;border-radius:50%!important;padding:0!important;font-size:17px!important}
+ .phone .mobile-nav-items{display:flex;flex-direction:column;padding:10px}
+ .phone #product-nav .mobile-nav-items>button,.phone #product-nav .mobile-settings-toggle{width:100%;min-height:52px;border-radius:12px;display:flex;grid-template-columns:none;place-items:initial;align-items:center;justify-content:flex-start;gap:13px;padding:0 14px;color:#e9ebee;text-align:left;transform:none}
+ .phone #product-nav .mobile-nav-items>button i,.phone #product-nav .mobile-settings-toggle i{width:25px;font-size:19px;text-align:center}
+ .phone #product-nav .mobile-nav-items>button span,.phone #product-nav .mobile-settings-toggle span{font:500 15px var(--disp);letter-spacing:0;text-transform:none}
+ .phone #product-nav .mobile-nav-items>button.on{background:#242629;color:#fff}
+ .phone .mobile-nav-foot{display:block;margin-top:auto;padding:8px 10px calc(12px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.07)}
+ .phone .mobile-settings{display:none;padding:2px 6px 8px}.phone #product-nav.settings-open .mobile-settings{display:block}
+ .phone .mobile-settings label{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 8px;border-top:1px solid rgba(255,255,255,.055);font-size:13px}
+ .phone .mobile-settings label span{display:block;color:#e7e9ec}.phone .mobile-settings label small{display:block;color:var(--mut);font-size:10.5px;margin-top:3px;line-height:1.35}
+ .phone .mobile-settings input{width:20px;height:20px;accent-color:var(--ion);flex:none}
+ .phone .mobile-connection{width:100%;min-height:42px;margin-top:5px;border-radius:10px;background:#232529;color:#e7e9ec;font-size:12px}
+
+ .phone #mobile-nav-shade{display:block;position:absolute;z-index:23;inset:0;border:0;background:rgba(0,0,0,.56);opacity:0;pointer-events:none;transition:opacity var(--base)}
+ .phone.mobile-menu-open #mobile-nav-shade{opacity:1;pointer-events:auto}
+
+ .phone #mobile-quick-menu{display:grid;position:absolute;z-index:18;left:14px;right:14px;bottom:104px;grid-template-columns:repeat(5,1fr);gap:7px;padding:10px;border-radius:20px;background:#242629;border:1px solid rgba(255,255,255,.09);box-shadow:0 14px 38px rgba(0,0,0,.46);transform:translateY(12px);opacity:0;pointer-events:none;transition:opacity var(--fast),transform var(--fast)}
+ .phone.mobile-quick-open #mobile-quick-menu{opacity:1;transform:none;pointer-events:auto}
+ .phone #mobile-quick-menu button{min-width:0;padding:9px 3px;border-radius:13px;color:#e9ebee;background:#1b1d20;display:grid;place-items:center;gap:5px}
+ .phone #mobile-quick-menu i{font-style:normal;font-size:18px}.phone #mobile-quick-menu span{font-size:9.5px;white-space:nowrap}
+
+ .phone .product-workspace{z-index:16;padding:16px 14px calc(18px + env(safe-area-inset-bottom));background:#0b0d10}
+ .phone.workspace-open #top,.phone.workspace-open #lane-strip{opacity:.18;pointer-events:none}
+}
+
+@media(max-width:390px){
+ .phone #mobile-quick-menu{grid-template-columns:repeat(3,1fr)}
+ .phone #mobile-quick-menu button:nth-child(n+4){min-height:48px}
+}
