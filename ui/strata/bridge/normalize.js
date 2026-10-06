@@ -78,5 +78,20 @@ function normalizeCandidates(d){return arr(d&&d.candidates).map((c,i)=>({
  project:str(c.classification)||'UNCLASSIFIED',date:str(c.submitted_at),src:[str(c.source_actor),str(c.source_ref)].filter(Boolean).join(' · '),
  meta:{trust:str(c.trust_origin),confidence:c.confidence,decision:str(c.decision)||'defer',decisionReason:str(c.decision_reason),reason:str(c.reason_for_candidate),task:str(c.task_id)}}))}
 
+/* GET /api/memory/search -> read-only retrieval results. Conversation recall is CONTEXT, never canonical authority. */
+function normalizeMemoryRecall(d){return arr(d&&d.items).map((m,i)=>{
+ const p=m&&m.provenance&&typeof m.provenance==='object'?m.provenance:{},ts=num(p.created_at_ms);
+ return{
+  id:str(m&&m.id)||'memory-recall-'+i,
+  t:str(m&&m.preview)||str(m&&m.content)||'(empty recall)',
+  kind:'evidence',
+  status:'current',
+  source:'orion-history',
+  project:str(p.project_id)||'personal',
+  date:ts?new Date(ts).toISOString():'',
+  src:[str(p.message_source),str(p.conversation_id),str(p.message_id)].filter(Boolean).join(' · '),
+  meta:{authority:'context_only',trust:'chat_history',score:num(m&&m.score),layer:str(m&&m.layer)||'L1',role:str(p.role),title:str(m&&m.title)}
+ }})}
+
 /* open_web_url etc. write JSON into lane.output. Returns {} when it is not JSON. */
 function parseCapOutput(text){try{const v=JSON.parse(text);return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}catch(e){return{}}}
