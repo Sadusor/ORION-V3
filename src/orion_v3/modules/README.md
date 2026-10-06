@@ -33,3 +33,24 @@ The transport mechanics follow the proven legacy ORION Local Brain contract:
 - bounded token generation.
 
 OpenJarvis remains the preferred future replaceable engine substrate, but importing its larger runtime for this first single-model seam would widen the dependency and regression surface without adding authority or functionality needed by this gate.
+
+
+## Verifier + Preflight
+
+`verifier_preflight.py` adds the second bounded gate after Local Brain.
+
+It performs:
+- deterministic preflight for executable mechanics or false claims that actions already happened;
+- a second structured local-model verification pass for unsupported claims and missing evidence;
+- fail-closed blocking when the verifier cannot complete.
+
+`brain_pipeline.py` composes the already-proven Local Brain with this verifier without modifying `local_brain.py`.
+
+Authority boundary:
+- verifier may PASS/BLOCK advisory text only;
+- it cannot execute;
+- it cannot grant approval;
+- it cannot call Hands;
+- it cannot browse, inspect files, write memory, or contact cloud models.
+
+The product-server hook remains the same `LOCAL_BRAIN.start()/view()` interface.
