@@ -29,7 +29,20 @@ function Stop-ProcessTree {
     if (!$proc) { return }
 
     Write-Host ("Stopping " + $Label + " PID " + $ProcessId + "...")
-    & taskkill.exe /PID $ProcessId /T /F 2>$null | Out-Null
+    # taskkill can report a child-process race even when the target tree is already gone.
+    # Treat taskkill as best-effort here; the authoritative stop check is performed below.
+    try {
+        $kill = Start-Process -FilePath "taskkill.exe" -ArgumentList @(
+            "/PID", [string]$ProcessId,
+            "/T",
+            "/F"
+        ) -WindowStyle Hidden -Wait -PassThru -ErrorAction SilentlyContinue
+        if ($kill -and $kill.ExitCode -ne 0) {
+            Write-Host ("TASKKILL> non-zero exit " + $kill.ExitCode + " for " + $Label + "; verifying final process state.") -ForegroundColor DarkGray
+        }
+    } catch {
+        Write-Host ("TASKKILL> warning for " + $Label + "; verifying final process state.") -ForegroundColor DarkGray
+    }
 }
 
 Write-Host ""
@@ -99,8 +112,13 @@ if (Test-Path -LiteralPath $ZeroTierUiOwner -PathType Leaf) {
             [string]$owner.opened_by -eq "ORION-V3"
         ) {
             Write-Host ("Closing ORION-opened ZeroTier desktop UI PID " + $owned.ProcessId + "...")
-            & taskkill.exe /PID ([int]$owned.ProcessId) /F 2>$null | Out-Null
-            Write-Host "ZEROTIER_UI> CLOSED (ORION-owned UI only)" -ForegroundColor Green
+            try {
+                $ztKill = Start-Process -FilePath "taskkill.exe" -ArgumentList @(
+                    "/PID", [string]([int]$owned.ProcessId),
+                    "/F"
+                ) -WindowStyle Hidden -Wait -PassThru -ErrorAction SilentlyContinue
+            } catch {}
+            Write-Host "ZEROTIER_UI> CLOSED/REQUESTED (ORION-owned UI only)" -ForegroundColor Green
         } else {
             Write-Host "ZEROTIER_UI> ownership record stale; no unrelated process killed." -ForegroundColor DarkGray
         }
