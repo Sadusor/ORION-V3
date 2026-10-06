@@ -13,11 +13,15 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
+from modules.local_brain import LocalBrainError, LocalBrainModule
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UI_ROOT = ROOT / "ui" / "strata"
 STATE_ROOT = pathlib.Path(os.environ.get("LOCALAPPDATA", str(ROOT / ".local"))) / "ORION-V3"
 STATE_ROOT.mkdir(parents=True, exist_ok=True)
 PID_FILE = STATE_ROOT / "product-ui.pid"
+
+LOCAL_BRAIN = LocalBrainModule()
 
 DENIED_TOP = {"demo.html", "README.md", "ARCHITECTURE.md", "INTEGRATION.md", "PRODUCT_UI.md", "STATE_CONTRACT.md", "TESTING.md"}
 DENIED_DIRS = {"tests", "tools"}
@@ -106,17 +110,7 @@ class ProductState:
                 "scope": str(ROOT),
                 "state": "active",
             }],
-            "local_hand_lane": {
-                "run_state": "idle",
-                "result": "",
-                "activity": "Local Brain not connected to product server yet",
-                "brain_state": "idle",
-                "brain_phase": "idle",
-                "brain_quality_state": "not-run",
-                "brain_preflight": "not-run",
-                "execution_kind": "",
-                "execution_action": "",
-            },
+            "local_hand_lane": LOCAL_BRAIN.view(),
             "manual_lane": {
                 "run_state": "idle",
                 "result": "",
@@ -132,7 +126,7 @@ class ProductState:
                 "reviewers": {},
             },
             "provider_vault": {"providers": []},
-            "local_brain_default_model": "",
+            "local_brain_default_model": LOCAL_BRAIN.default_model(),
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
         }
 
@@ -266,6 +260,18 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(400, {"ok": False, "error": str(exc)})
         if not self._require_auth():
             return
+        if path == "/api/local-hand/draft":
+            try:
+                body = self._read_json()
+                LOCAL_BRAIN.start(
+                    str(body.get("goal", "")),
+                    str(body.get("model", "")),
+                )
+                return self._json(202, STATE.view())
+            except LocalBrainError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
         # Registered frontend routes that are not yet real backend capabilities fail truthfully.
         known = {
             "/api/local-hand/draft", "/api/local-hand/revise", "/api/local-hand/run", "/api/local-hand/stop",

@@ -210,9 +210,18 @@ function tick(){const d=new Date();$('clk').textContent=d.toLocaleTimeString([],
 /* demo-only state picker (mock bridge only) */
 if(B.mode==='mock'){const sel=el('select');sel.setAttribute('aria-label','Demo state');sel.id='demosel';sel.innerHTML=B.demoStates.map(s=>`<option>${s}</option>`).join('');sel.onchange=()=>B.demoState(sel.value);$('demo').appendChild(sel)}
 
+let shownBrainReply='';
 B.subscribe(ev=>{
- if(ev.type==='snapshot')dispatch({type:'snapshot',model:ev.model});
- else if(ev.type==='link')dispatch({type:'link',link:ev.link});
+ if(ev.type==='snapshot'){
+  dispatch({type:'snapshot',model:ev.model});
+  const L=ev.model&&ev.model.local;
+  const replyKey=L&&L.brainStartedUtc||'';
+  if(L&&L.brainState==='ready'&&L.conclusion&&replyKey&&replyKey!==shownBrainReply){
+   shownBrainReply=replyKey;
+   msg('or',L.conclusion);
+   if(!PHONE)app.classList.add('chat');
+  }
+ }else if(ev.type==='link')dispatch({type:'link',link:ev.link});
  else if(ev.type==='lists')dispatch({type:'lists',lists:ev.lists});
  else if(ev.type==='command'){dispatch({type:'command',entry:ev.entry});if(ev.entry.cls!=='sent'||ev.entry.label!=='Ask ORION')toast(commandMessage(ev.entry))}
  paint()});
