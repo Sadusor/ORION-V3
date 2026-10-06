@@ -163,22 +163,27 @@ It consumes the frozen Candidate Queue contract and stores review evidence in a
 separate append-only database. The candidate queue itself is not rewritten.
 
 Owner decisions:
-- `PROMOTE` -> terminal; creates one immutable canonical-memory record;
+- `PROMOTE` -> creates one immutable canonical-memory record;
 - `REJECT` -> terminal; creates no canonical memory;
-- `DEFER` -> non-terminal; may later become PROMOTE or REJECT.
+- `DEFER` -> non-terminal; may later become PROMOTE or REJECT;
+- `REVOKE` -> terminal append-only deactivation of an already-promoted memory.
 
 Safety boundary:
-- every decision is bound to the exact candidate ID + content SHA-256;
+- durable decisions require a paired owner token even on loopback;
+- an explicit owner gesture first obtains a 90-second one-time server review ticket;
+- the ticket is bound to exact candidate ID/hash/decision/owner scope/device fingerprint and is consumed once;
 - client-supplied replacement content is ignored by design;
-- decision events form a previous-hash/event-hash chain;
+- assistant-origin candidates cannot be promoted in V1;
+- promotion re-runs secret + instruction-like risk filtering;
+- canonical content preserves exact source content/hash/provenance/trust tier;
+- decision events include monotonic event index, actor fingerprint and previous/event hashes;
 - SQLite triggers deny UPDATE/DELETE of decision events;
 - promoted canonical records are immutable in V1;
-- obvious secret-like material is refused from normal Memory promotion;
-- terminal decisions cannot be reversed in V1;
-- repeated identical decisions are idempotent;
+- REVOKE never deletes evidence; it makes the canonical record inactive in reads;
+- the local hash chain is explicitly not claimed to detect wholesale DB replacement;
 - canonical Memory remains `authority=context_only`;
 - no model, Hand or background process can auto-promote.
 
-The phone and STRATA expose explicit owner `PROMOTE / REJECT / DEFER` controls.
-Canonical Memory retrieval into model prompts is deliberately a later module so
-this durable-write boundary can be qualified and frozen independently.
+The phone and STRATA expose explicit owner `PROMOTE / REJECT / DEFER / REVOKE`
+controls. Canonical Memory retrieval into model prompts is deliberately a later
+module so this durable-write boundary can be qualified and frozen independently.
