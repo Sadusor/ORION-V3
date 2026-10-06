@@ -170,6 +170,16 @@ try {
     & python.exe (Join-Path $Repo "src\orion_v3\modules\chat_history_test.py") *>> $LogPath
     if ($LASTEXITCODE -ne 0) { throw "Chat-history regression failed." }
 
+    Log "Running Memory Retrieval V1 regressions."
+    foreach ($memoryTest in @(
+        "memory_retrieval_test.py",
+        "memory_brain_pipeline_test.py",
+        "memory_product_server_test.py"
+    )) {
+        & python.exe (Join-Path $Repo ("src\orion_v3\modules\" + $memoryTest)) *>> $LogPath
+        if ($LASTEXITCODE -ne 0) { throw ("Memory Retrieval regression failed: " + $memoryTest) }
+    }
+
     Log "Running STRATA regression suite."
     Push-Location (Join-Path $Repo "ui\strata")
     try {
