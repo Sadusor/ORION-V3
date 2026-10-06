@@ -258,8 +258,14 @@ button{touch-action:manipulation}
    document.getElementById('updateBtn').disabled=!pc.connected;
    document.getElementById('installBtn').disabled=!pc.connected;
    const u=pc.update||{};document.getElementById('updateText').textContent=u.state?('Update '+String(u.state).toUpperCase()+(u.message?' · '+u.message:'')):'Connect to the PC to check/update ORION.';
-   const mr=pc.memory_retrieval||{},mt=mr.trace||{},mc=Array.isArray(mr.items)?mr.items.length:0;
-   document.getElementById('pcMemoryText').textContent=!pc.connected?'Connect to ORION PC for provenance-backed cross-chat recall.':(mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):'Ready · read-only · context only · canonical promotion is still locked.');
+   const mr=pc.memory_retrieval||{},mt=mr.trace||{},mc=Array.isArray(mr.items)?mr.items.length:0,mstate=String(mr.state||mt.outcome||'idle');
+   const memoryText=document.getElementById('pcMemoryText');
+   memoryText.textContent=!pc.connected?'Connect to ORION PC for provenance-backed cross-chat recall.':
+    mstate==='error'?('Recall unavailable for last turn · '+String(mr.error||'retrieval error')):
+    mstate==='empty'||mstate==='miss'?'Last recall · no relevant prior chat found · normal':
+    mstate==='filtered'?'Last recall · matching history was filtered from model context for safety':
+    mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):
+    'Ready · read-only · context only · canonical promotion is still locked.';
    renderModels();
  }
  function refreshPc(){
