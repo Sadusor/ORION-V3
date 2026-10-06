@@ -6,14 +6,16 @@ const calls=[];const fetchStub=async(url,init)=>{calls.push({url,method:init&&in
 const ctx=H.makeContext({fetch:fetchStub,storage:{orionToken:'tok'}});H.loadScripts(ctx,['config.js','bridge/routes.js','bridge/normalize.js','bridge/real-bridge.js']);
 const B=run(ctx,'window.ORION_BRIDGE');
 (async()=>{
- for(const [m,r] of [['POST','/api/manual/run'],['POST','/api/reviewers/run'],['POST','/api/project-links/clone'],['POST','/api/project-links/create'],['POST','/api/generate'],['POST','/api/providers/save'],['POST','/api/providers/delete'],['POST','/api/memory/candidate'],['POST','/api/made-up-capability'],['DELETE','/api/status'],['POST','/etc/passwd'],['GET','/api/../secret']]){
+ for(const [m,r] of [['POST','/api/manual/run'],['POST','/api/reviewers/run'],['POST','/api/project-links/clone'],['POST','/api/project-links/create'],['POST','/api/generate'],['POST','/api/providers/save'],['POST','/api/providers/delete'],['POST','/api/made-up-capability'],['DELETE','/api/status'],['POST','/etc/passwd'],['GET','/api/../secret']]){
   const before=calls.length,res=await B.call(m,r,{});ok(res.ok===false&&res.cls==='unregistered'&&calls.length===before,m+' '+r+' => refused by the allowlist, NO network request made')}
  /* approval boundaries need a trusted gesture */
  for(const [label,g] of [['no gesture',undefined],['synthetic (untrusted) event',{isTrusted:false}],['plain object',{}]]){
-  for(const r of ['/api/local-hand/run','/api/run/start']){const before=calls.length,res=await B.call('POST',r,{script:'x'},{gesture:g});ok(res.cls==='no_gesture'&&calls.length===before,r+' with '+label+' => refused, NO request')}}
+  for(const r of ['/api/local-hand/run','/api/run/start','/api/memory/candidate']){const before=calls.length,res=await B.call('POST',r,{script:'x'},{gesture:g});ok(res.cls==='no_gesture'&&calls.length===before,r+' with '+label+' => refused, NO request')}}
  let before=calls.length;let res=await B.call('POST','/api/local-hand/run',{script:'Get-Date',publish_github:false},{gesture:{isTrusted:true}});
  ok(res.ok&&calls.length===before+1&&JSON.parse(calls.at(-1).body).script==='Get-Date','a real click (isTrusted) is the only thing that lets the approval route through; exact script forwarded');
  before=calls.length;await B.approveScript('Get-Date');ok(calls.length===before,'approveScript() without a click is refused');
+ before=calls.length;res=await B.call('POST','/api/memory/candidate',{conversation_id:'c',message_id:'m',project_id:''},{gesture:{isTrusted:true}});
+ ok(res.ok&&calls.length===before+1,'trusted owner click lets candidate-only intake route through');
  /* conversation never executes */
  calls.length=0;await B.sendGoal('Open Chrome and search Google for x');
  ok(calls.length===1&&calls[0].url.endsWith('/api/local-hand/draft')&&JSON.parse(calls[0].body).goal==='Open Chrome and search Google for x','sendGoal => exactly ONE request, to /api/local-hand/draft');
