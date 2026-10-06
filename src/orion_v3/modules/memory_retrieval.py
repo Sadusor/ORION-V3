@@ -539,7 +539,7 @@ class MemoryRetrievalModule:
             "kind": "conversation_recall",
             "status": "context",
             "authority": "context_only",
-            "layer": "L1",
+            "layer": "message",
             "owner_scope": OWNER_SCOPE,
             "trust_tier": c.trust_tier,
             "trust_weight": c.trust_weight,
