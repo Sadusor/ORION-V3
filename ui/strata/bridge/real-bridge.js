@@ -99,7 +99,8 @@ const RealBridge=(function(){
   async getMemoryRecall(query,conversationId){
    const qs='?q='+encodeURIComponent(String(query||''))+(conversationId?'&conversation_id='+encodeURIComponent(String(conversationId)):'');
    const r=await call('GET','/api/memory/search'+qs,null,{silent:true});
-   return r.ok?normalizeMemoryRecall(r.data):[]
+   if(!r.ok)throw new Error(r.message||'Conversation recall unavailable');
+   return normalizeMemoryRecall(r.data)
   }
  };
  function pickModel(){const m=st.model;if(!m)return'';const saved=LS('orion.phone.localbrain.model'),loc=m.reviewer.ollama;
