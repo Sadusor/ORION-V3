@@ -72,3 +72,24 @@ It changes transport only:
 STRATA uses the separate `ui/strata/modules/live-brain-chat.js` renderer to update one existing chat bubble while output grows. During generation it is visibly marked `LIVE · UNVERIFIED`; after verifier PASS the same bubble becomes `VERIFIED`.
 
 The streaming prompt also grounds model identity to the exact selected Ollama model name, preventing the Local Brain from inventing a different provider/model identity.
+
+
+## Chat history + offline phone bot
+
+`chat_history.py` is a bounded storage/sync module. It is deliberately outside ORION authority:
+- SQLite stores chat metadata and immutable message rows only;
+- conversation metadata uses deterministic last-write-wins by `updated_at_ms`;
+- message ids deduplicate phone/PC refreshes;
+- history is bounded and pruned;
+- sync can move chat context PC -> phone and phone -> PC;
+- chat history cannot approve, execute, grant capability, alter STOP, or promote canonical ORION Memory.
+
+The Android app mirrors the same history schema in app-private SQLite through
+`android/.../history/ChatHistoryStore.kt`. When the PC is unavailable, the APK can
+fall back to the separate `OfflineChatBridge`, which reads only bounded local chat
+context and runs a bundled Qwen3-0.6B Q4_0 GGUF through the pinned llama-android
+runtime. The offline bot has no ORION execution authority and no network tools.
+
+The large GGUF is never committed to this public repository. `android/scripts/build.ps1`
+downloads the pinned file, verifies its SHA-256, and places it in the APK assets at
+build time.
