@@ -12,8 +12,8 @@ PARENT = HERE.parent
 if str(PARENT) not in sys.path:
     sys.path.insert(0, str(PARENT))
 
-from brain_pipeline import BrainPipeline
-from verifier_preflight import VerifierPreflightModule
+from modules.brain_pipeline import BrainPipeline
+from modules.verifier_preflight import VerifierPreflightModule
 
 
 class FakeVerifierHandler(BaseHTTPRequestHandler):
