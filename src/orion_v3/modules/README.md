@@ -93,3 +93,33 @@ runtime. The offline bot has no ORION execution authority and no network tools.
 The large GGUF is never committed to this public repository. `android/scripts/build.ps1`
 downloads the pinned file, verifies its SHA-256, and places it in the APK assets at
 build time.
+
+
+## Memory Retrieval V1
+
+`memory_retrieval.py` is a read-only, bounded retrieval module over ORION's
+already-synced chat-history journal.
+
+Boundary:
+- retrieves context only; never authority;
+- same project/person scope only;
+- excludes the current conversation from cross-chat recall;
+- excludes archived/deleted chats;
+- deterministic Unicode lexical BM25-style ranking;
+- every result includes provenance and a passive retrieval trace;
+- no embeddings, cloud calls, file scraping, promotion, consolidation, deletion,
+  training, Hands, capabilities, approvals, or execution.
+
+`memory_brain_pipeline.py` composes retrieval in front of the already-proven
+streaming/verifier pipeline without modifying the frozen Local Brain module.
+It restores the original owner goal in the public state and exposes a bounded
+`brain_memory` brief showing whether recall was used.
+
+V1 deliberately treats chat history as **conversation memory**, not canonical
+promoted Memory. The Memory Explorer labels this source `context only · not
+authority`. Accepted/promoted Memory remains disconnected until its separate
+promotion module is built and qualified.
+
+Donor patterns were reviewed from KnowledgeOS, OpenViking, agentmemory,
+TencentDB Agent Memory and Memanto. Implementation code is not copied from
+those donors; the V1 module stays replaceable and stdlib/local.
