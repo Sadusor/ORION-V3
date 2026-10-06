@@ -138,6 +138,7 @@ class OrionPcBridge(
         }
         val id = request.optString("id").ifBlank { UUID.randomUUID().toString() }
         val conversationId = request.optString("conversation_id").trim()
+        val projectId = request.optString("project_id").trim()
         val text = request.optString("text").trim()
         val model = request.optString("model").trim()
 
@@ -168,7 +169,8 @@ class OrionPcBridge(
                             .put("goal", goal)
                             .put("model", model)
                             .put("memory_query", text)
-                            .put("conversation_id", conversationId),
+                            .put("conversation_id", conversationId)
+                            .put("project_id", projectId),
                         authenticated = true,
                         timeoutMs = 10000,
                     )
