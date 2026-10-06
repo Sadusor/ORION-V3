@@ -98,6 +98,18 @@ def main() -> int:
             assert before["pending_count"] == 1
             assert before["promoted_count"] == 0
 
+            status, unauth = http_json(
+                "POST",
+                base + "/api/memory/decision",
+                {
+                    "candidate_id": candidate["candidate_id"],
+                    "decision": "promote",
+                    "expected_content_sha256": candidate["content_sha256"],
+                },
+            )
+            assert status == 401
+            assert unauth["ok"] is False
+
             status, promoted = http_json(
                 "POST",
                 base + "/api/memory/decision",
@@ -200,6 +212,7 @@ def main() -> int:
             assert rejected["canonical_memory_written"] is False
 
             print("ORION_CANONICAL_MEMORY_REVIEW_HTTP> PASS")
+            print("UNAUTHENTICATED_DECISION_DENIED> PASS")
             print("AUTHENTICATED_OWNER_DECISION> PASS")
             print("SERVER_SOURCE_BINDING> PASS")
             print("CANONICAL_READ_ROUTE> PASS")
