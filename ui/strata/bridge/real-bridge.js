@@ -95,7 +95,12 @@ const RealBridge=(function(){
   revise:(gesture)=>call('POST','/api/local-hand/revise',{model:pickModel()},{label:'Revise draft',gesture}),
   /* Approve & Run for generated PowerShell. Requires a trusted click. Sends exactly the script ORION proposed. */
   approveScript:(script,gesture)=>call('POST','/api/local-hand/run',{script,publish_github:false},{label:'Approve & Run',gesture}),
-  async getMemoryCandidates(){const r=await call('GET','/api/memory/candidates');return r.ok?normalizeCandidates(r.data):[]}
+  async getMemoryCandidates(){const r=await call('GET','/api/memory/candidates');return r.ok?normalizeCandidates(r.data):[]},
+  async getMemoryRecall(query,conversationId){
+   const qs='?q='+encodeURIComponent(String(query||''))+(conversationId?'&conversation_id='+encodeURIComponent(String(conversationId)):'');
+   const r=await call('GET','/api/memory/search'+qs,null,{silent:true});
+   return r.ok?normalizeMemoryRecall(r.data):[]
+  }
  };
  function pickModel(){const m=st.model;if(!m)return'';const saved=LS('orion.phone.localbrain.model'),loc=m.reviewer.ollama;
   return saved&&loc.includes(saved)?saved:loc.includes(m.defaultModel)?m.defaultModel:(loc[0]||'')}
