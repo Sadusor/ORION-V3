@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 import threading
 import time
 from pathlib import Path
@@ -48,7 +49,7 @@ class ChatHistoryStore:
         return con
 
     def _init_db(self) -> None:
-        with self._lock, self._connect() as con:
+        with self._lock, closing(self._connect()) as con, con:
             con.executescript(
                 """
                 CREATE TABLE IF NOT EXISTS conversations (
@@ -114,7 +115,7 @@ class ChatHistoryStore:
         payload = payload if isinstance(payload, dict) else {}
         conversations = payload.get("conversations") if isinstance(payload.get("conversations"), list) else []
         messages = payload.get("messages") if isinstance(payload.get("messages"), list) else []
-        with self._lock, self._connect() as con:
+        with self._lock, closing(self._connect()) as con, con:
             for raw in conversations[:MAX_CONVERSATIONS * 2]:
                 if not isinstance(raw, dict):
                     continue
@@ -174,7 +175,7 @@ class ChatHistoryStore:
                 con.executemany("DELETE FROM messages WHERE id=?", [(x["id"],) for x in ids])
 
     def snapshot(self) -> dict[str, Any]:
-        with self._lock, self._connect() as con:
+        with self._lock, closing(self._connect()) as con, con:
             conversations = [dict(row) for row in con.execute(
                 "SELECT id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms FROM conversations ORDER BY pinned DESC, updated_at_ms DESC LIMIT ?",
                 (MAX_CONVERSATIONS,),
