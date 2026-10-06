@@ -187,9 +187,13 @@ window.ORION_CHAT_HISTORY=(function(){
   document.head.appendChild(style);
 
   const settings=document.getElementById('mobileSettings');
-  if(settings&&nativeApp&&typeof nativeApp.openOffline==='function'){
-   const offline=document.createElement('button');offline.type='button';offline.className='mobile-connection';offline.id='orionUseOffline';
-   offline.textContent='Use offline bot · Qwen3-0.6B';offline.onclick=()=>nativeApp.openOffline();settings.appendChild(offline)
+  if(settings){
+   const memory=document.createElement('button');memory.type='button';memory.className='mobile-connection';memory.id='orionMemoryInfo';
+   memory.textContent='Local chat memory · 50 chats max';memory.onclick=openDrawer;settings.appendChild(memory);
+   if(nativeApp&&typeof nativeApp.openOffline==='function'){
+    const offline=document.createElement('button');offline.type='button';offline.className='mobile-connection';offline.id='orionUseOffline';
+    offline.textContent='Use offline bot · Qwen3-0.6B';offline.onclick=()=>nativeApp.openOffline();settings.appendChild(offline)
+   }
   }
 
   document.getElementById('orionNewChat').onclick=newConversation;
