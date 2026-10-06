@@ -80,6 +80,11 @@ def main() -> int:
             assert status == 200
             token = paired["token"]
 
+            # The product server intentionally trusts loopback PC-local requests.
+            # For the phone-auth boundary below, make this test client behave like
+            # a remote phone so unauthenticated requests must be refused.
+            product.Handler._is_local_pc = lambda self: False
+
             status, queued = http_json(
                 "POST",
                 base + "/api/memory/candidate",
