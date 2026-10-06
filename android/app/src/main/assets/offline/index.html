@@ -31,6 +31,7 @@ button{touch-action:manipulation}
 .sheetShade{position:fixed;inset:0;background:#0009;z-index:29;display:none}.sheetShade.on{display:block}.sheet{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-height:78dvh;overflow:auto;background:#292d32;border:1px solid #ffffff14;border-radius:22px;padding:10px;display:none;box-shadow:0 18px 50px #000b}.sheet.on{display:block}
 .sheet h2{font-size:17px;margin:6px 8px 12px}.sheet button,.sheet input{width:100%;min-height:46px;border:0;border-radius:14px;background:#34383d;color:var(--text);padding:0 13px;margin:4px 0}.sheet input{outline:0;border:1px solid #ffffff0f}.sheet button:disabled{opacity:.38}.sheet small{display:block;color:var(--mut);font-size:11px}.modelItem{display:flex!important;align-items:center;justify-content:space-between;text-align:left}.modelItem.on{border:1px solid #79d7ee66;color:var(--ion)}.settingRow{padding:10px 8px;border-bottom:1px solid #ffffff0c}.settingRow:last-child{border-bottom:0}.settingRow b{display:block;margin-bottom:3px}.settingRow p{margin:0;color:var(--mut);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.danger{color:var(--danger)!important}
 .actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.actionGrid button{min-height:68px;margin:0}.actionGrid .wide{grid-column:1/-1;min-height:46px}
+.candidateCard{margin:8px 0;padding:11px;border:1px solid #ffffff12;border-radius:14px;background:#22262b}.candidateCard p{margin:0 0 8px;white-space:pre-wrap;word-break:break-word}.candidateCard small{margin-bottom:8px}.candidateActions{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.candidateActions button{min-height:42px;padding:0 8px;margin:0}.candidateState{color:var(--mut);font-size:11px;margin-bottom:7px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:126px;z-index:50;background:#30343a;border:1px solid #ffffff14;border-radius:15px;padding:9px 13px;opacity:0;pointer-events:none;transition:.15s;max-width:84%;text-align:center}.toast.on{opacity:1}
 @media(max-height:560px){.empty{padding:12px}.orb{width:62px;height:62px;margin-bottom:10px}.empty h1{font-size:24px}.composer{margin-top:4px}}
 </style>
@@ -141,6 +142,11 @@ button{touch-action:manipulation}
     <div class="settingRow">
       <b>Canonical memory candidates</b>
       <p id="candidateQueueText">Connect to ORION PC to review candidate intake.</p>
+      <button id="reviewCandidatesBtn" disabled>Review memory candidates</button>
+    </div>
+    <div class="settingRow">
+      <b>Canonical memory</b>
+      <p id="canonicalMemoryText">Connect to ORION PC to view promoted canonical context.</p>
     </div>
     <div class="settingRow">
       <b>Local memory</b>
@@ -148,7 +154,7 @@ button{touch-action:manipulation}
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.4.0 · Memory Candidate Queue V1</p>
+      <p>ORION 0.5.0 · Memory Review + Promotion V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -176,6 +182,13 @@ button{touch-action:manipulation}
     <button data-close-sheet>Close</button>
   </section>
 
+  <section class="sheet" id="reviewSheet">
+    <h2>Review memory candidates</h2>
+    <p id="reviewSummary" style="color:#8e949d">Owner decisions only. PROMOTE writes durable context, never execution authority.</p>
+    <div id="reviewList"></div>
+    <button data-close-sheet>Close</button>
+  </section>
+
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -184,7 +197,7 @@ button{touch-action:manipulation}
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
  let data={conversations:[],messages:[]},current='',menuTarget='',messageTarget='',toastTimer=0;
  let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
- let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null};
+ let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null,memory_canonical:null};
  let wasConnected=false, pendingLocal={}, pendingPc={}, pendingActions={};
 
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -259,6 +272,17 @@ button{touch-action:manipulation}
    document.getElementById('model').textContent=selectedLabel()+' ▾';
    list.innerHTML=items.map(x=>'<button class="modelItem '+(x.id===selected?'on':'')+'" data-model="'+esc(x.id)+'"><span>'+esc(x.label)+'<small>'+esc(x.sub)+'</small></span><span>'+(x.id===selected?'✓':'')+'</span></button>').join('');
  }
+ function renderMemoryReview(){
+   const cq=pc.memory_candidates||{},items=Array.isArray(cq.candidates)?cq.candidates:[];
+   const list=document.getElementById('reviewList'),summary=document.getElementById('reviewSummary');
+   const pending=Number(cq.pending_count||0),deferred=Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0);
+   summary.textContent=(pending+deferred)+' awaiting review · '+promoted+' promoted · '+rejected+' rejected. PROMOTE is durable context only.';
+   list.innerHTML=items.map(c=>{
+     const d=String(c.decision||'pending'),reviewable=d==='pending'||d==='defer';
+     const who=String(c.source_role||'')==='assistant'?'assistant prior · unverified':'owner message · unverified';
+     return '<div class="candidateCard" data-candidate="'+esc(c.candidate_id)+'"><div class="candidateState">'+esc(d.toUpperCase())+' · '+esc(who)+' · '+esc(c.project_id||'personal')+'</div><p>'+esc(c.content||'')+'</p><small>source '+esc(c.source_ref||'')+'</small>'+(reviewable?'<div class="candidateActions"><button data-memory-decision="promote">PROMOTE</button><button data-memory-decision="reject">REJECT</button><button data-memory-decision="defer">DEFER</button></div>':'')+'</div>';
+   }).join('')||'<p style="color:#8e949d;padding:8px">No memory candidates yet.</p>';
+ }
  function renderConnection(){
    const badge=document.getElementById('conn'),drawer=document.getElementById('drawerConn'),status=document.getElementById('pcStatusText');
    badge.className='conn '+(pc.connected?'pc':pc.reachable&&!pc.paired?'pair':'local');
@@ -277,8 +301,11 @@ button{touch-action:manipulation}
     mstate==='filtered'?'Last recall · matching history was filtered from model context for safety':
     mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):
     'Ready · read-only · context only · canonical promotion is still locked.';
-   const cq=pc.memory_candidates||{},cc=Number(cq.count||0);
-   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?cc+' pending candidate'+(cc===1?'':'s')+' · not canonical Memory':'No candidates yet · owner-selected intake only · no auto-promotion.');
+   const cq=pc.memory_candidates||{},cc=Number(cq.count||0),reviewable=Number(cq.pending_count==null?cc:cq.pending_count)+Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0);
+   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?(reviewable+' awaiting review · '+promoted+' promoted · '+rejected+' rejected'):'No candidates yet · owner-selected intake only.');
+   document.getElementById('reviewCandidatesBtn').disabled=!pc.connected||cc===0;
+   const cm=pc.memory_canonical||{},cmc=Number(cm.count||0);
+   document.getElementById('canonicalMemoryText').textContent=!pc.connected?'Connect to ORION PC to view promoted canonical context.':(cmc?cmc+' canonical memor'+(cmc===1?'y':'ies')+' · context only · never execution authority':'No canonical memories yet.');
    renderModels();
  }
  function refreshPc(){
@@ -311,6 +338,7 @@ button{touch-action:manipulation}
  document.getElementById('forgetBtn').onclick=()=>{const id=uid('forget');pendingActions[id]='forget';nativePc.forgetPairing(id)};
  document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const id=uid('update');pendingActions[id]='update';document.getElementById('updateBtn').disabled=true;document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
  document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
+ document.getElementById('reviewCandidatesBtn').onclick=()=>{renderMemoryReview();showSheet('reviewSheet')};
  document.getElementById('proposeCandidateBtn').onclick=()=>{
    if(!pc.connected)return toast('Connect ORION PC first');
    const m=data.messages.find(x=>x.id===messageTarget),c=m&&conv(m.conversation_id);
@@ -318,6 +346,16 @@ button{touch-action:manipulation}
    const id=uid('candidate');pendingActions[id]='candidate';
    nativePc.proposeMemoryCandidate(JSON.stringify({conversation_id:m.conversation_id,message_id:m.id,project_id:c.project_id||''}),id);
    closeSheets();
+ };
+ document.getElementById('reviewSheet').onclick=e=>{
+   const b=e.target.closest('[data-memory-decision]');if(!b)return;
+   const card=b.closest('[data-candidate]'),candidate=(pc.memory_candidates&&Array.isArray(pc.memory_candidates.candidates)?pc.memory_candidates.candidates:[]).find(x=>x.candidate_id===(card&&card.dataset.candidate));
+   if(!candidate)return toast('Candidate no longer available');
+   const decision=b.dataset.memoryDecision;
+   if(decision==='promote'&&!confirm('Promote this exact candidate to canonical Memory? It remains context only and cannot authorize actions.'))return;
+   const id=uid('memory-'+decision);pendingActions[id]='memory-'+decision;
+   nativePc.reviewMemoryCandidate(JSON.stringify({candidate_id:candidate.candidate_id,decision,expected_content_sha256:candidate.content_sha256||''}),id);
+   document.querySelectorAll('#reviewSheet [data-memory-decision]').forEach(x=>x.disabled=true);
  };
  document.getElementById('actionSheet').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const c=conv(menuTarget);if(!c)return;const a=b.dataset.act;if(a==='share')shareConversation(c.id);if(a==='pin')patchConversation(c.id,{pinned:asBool(c.pinned)?0:1});if(a==='archive')patchConversation(c.id,{archived:1});if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}if(a==='find'){openConversation(c.id);setTimeout(()=>{const q=prompt('Find in this chat');if(q&&window.find)toast(window.find(q)?'Found':'Not found')},80)}closeSheets()};
  inp.addEventListener('input',autoGrow);
@@ -349,7 +387,7 @@ button{touch-action:manipulation}
    chat.scrollTop=chat.scrollHeight;
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
-   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;renderConnection();
+   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;pc.memory_canonical=payload.memory_canonical&&typeof payload.memory_canonical==='object'?payload.memory_canonical:null;renderConnection();
    if(pc.connected&&!prior)syncHistory();wasConnected=pc.connected;
  };
  window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
@@ -360,6 +398,7 @@ button{touch-action:manipulation}
    else if(kind==='update'){document.getElementById('updateBtn').disabled=false;if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
    else if(kind==='install'){toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
    else if(kind==='candidate'){toast(payload.ok?(payload.created===false?'Already queued as memory candidate':'Queued as memory candidate'):'Candidate rejected: '+(payload.error||'unknown'));refreshPc()}
+   else if(kind.startsWith('memory-')){const d=kind.slice(7).toUpperCase();toast(payload.ok?(d+(payload.created===false?' already recorded':' recorded')):('Memory decision refused: '+(payload.error||'unknown')));refreshPc();setTimeout(()=>{if(document.getElementById('reviewSheet').classList.contains('on'))renderMemoryReview()},900)}
  };
  window.ORION_PHONE_BACK=function(){if(document.querySelector('.sheet.on')){closeSheets();return true}if(app.classList.contains('menu-open')){closeDrawer();return true}return false};
  loadSnapshot();renderModels();renderConnection();refreshPc();setInterval(()=>{if(!document.hidden)refreshPc()},10000);
