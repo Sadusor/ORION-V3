@@ -433,7 +433,11 @@ class OrionPcBridge(
                 .put("update", if (update.ok) update.body else JSONObject.NULL)
                 .put(
                     "memory_retrieval",
-                    status.body.optJSONObject("memory_retrieval") ?: JSONObject.NULL,
+                    status.body
+                        .optJSONObject("local_hand_lane")
+                        ?.optJSONObject("brain_memory")
+                        ?: status.body.optJSONObject("memory_retrieval")
+                        ?: JSONObject.NULL,
                 )
         } catch (_: Throwable) {
             JSONObject()
