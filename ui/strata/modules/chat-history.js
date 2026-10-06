@@ -3,6 +3,7 @@
 window.ORION_CHAT_HISTORY=(function(){
  const SCHEMA='orion.chat-history/1';
  const native=window.ORION_NATIVE_HISTORY||null;
+ const nativeApp=window.ORION_NATIVE_APP||null;
  let state={schema:SCHEMA,conversations:[],messages:[]},ready=false,syncTimer=0,actionTarget='';
  const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
@@ -185,6 +186,12 @@ window.ORION_CHAT_HISTORY=(function(){
    '#orionHistoryDesktop{display:none;position:fixed;z-index:45;left:50%;top:50%;width:min(620px,90vw);height:min(700px,82vh);transform:translate(-50%,-50%);background:#11151a;border:1px solid rgba(255,255,255,.1);border-radius:22px;box-shadow:0 24px 80px #000c;padding:12px}#orionHistoryDesktop.on{display:block}#orionHistoryDesktop header{display:flex;justify-content:space-between;align-items:center;padding:8px}#orionHistoryDesktop header button{border:0;background:transparent;color:#eee;font-size:24px}.desk #orionHistoryDesktop .oh-deskbody{height:calc(100% - 48px);overflow:auto;padding:4px 8px}.desk #orionDesktopNewChat{width:100%;height:44px;border:0;border-radius:12px;background:#24272b;color:#eef1f4;font-weight:600}.desk #orionHistoryDesktopList{padding-top:6px}';
   document.head.appendChild(style);
 
+  const settings=document.getElementById('mobileSettings');
+  if(settings&&nativeApp&&typeof nativeApp.openOffline==='function'){
+   const offline=document.createElement('button');offline.type='button';offline.className='mobile-connection';offline.id='orionUseOffline';
+   offline.textContent='Use offline bot · Qwen3-0.6B';offline.onclick=()=>nativeApp.openOffline();settings.appendChild(offline)
+  }
+
   document.getElementById('orionNewChat').onclick=newConversation;
   document.getElementById('orionHistorySearch').oninput=renderHistory;
   document.getElementById('orionHistoryRefresh').onclick=syncNow;
@@ -212,6 +219,7 @@ window.ORION_CHAT_HISTORY=(function(){
   observeChat();
   let tries=0;const t=setInterval(()=>{if(installUi()||++tries>40)clearInterval(t)},125);
   syncNow();setInterval(()=>{if(!document.hidden)syncNow()},15000);
+  setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
  return{init,sync:syncNow,newChat:newConversation,open:openDrawer,get snapshot(){return state}};
