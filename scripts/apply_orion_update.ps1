@@ -40,6 +40,23 @@ function Log([string]$Message) {
     )
 }
 
+function Start-OrionDetached {
+    $startScript = Join-Path $Repo "scripts\start_orion.ps1"
+    if (!(Test-Path -LiteralPath $startScript -PathType Leaf)) {
+        throw "ORION start script is missing: $startScript"
+    }
+
+    $started = Start-Process -FilePath "powershell.exe" -ArgumentList @(
+        "-NoProfile",
+        "-ExecutionPolicy","Bypass",
+        "-WindowStyle","Hidden",
+        "-File",$startScript
+    ) -WindowStyle Hidden -PassThru
+
+    Log ("ORION detached launcher started PID " + $started.Id)
+    return $started.Id
+}
+
 function Remove-OwnTask {
     if (!$TaskName) { return }
     try {
@@ -134,7 +151,7 @@ function Restore-Previous {
     }
 
     try {
-        & cmd.exe /d /c ('"' + (Join-Path $Repo "START ORION.bat") + '"') *>> $LogPath
+        [void](Start-OrionDetached)
     } catch {
         Log ("Recovery start warning: " + $_.Exception.Message)
     }
@@ -196,8 +213,7 @@ try {
     Remove-Item -LiteralPath $StageRoot -Recurse -Force -ErrorAction SilentlyContinue
 
     Write-Status -State "starting" -Message "Starting updated ORION" -Commit $ExpectedCommit
-    & cmd.exe /d /c ('"' + (Join-Path $Repo "START ORION.bat") + '"') *>> $LogPath
-    if ($LASTEXITCODE -ne 0) { throw "ORION restart launcher failed." }
+    [void](Start-OrionDetached)
 
     Write-Status -State "verifying" -Message "Waiting for updated ORION runtime" -Commit $ExpectedCommit
     $running = ""
