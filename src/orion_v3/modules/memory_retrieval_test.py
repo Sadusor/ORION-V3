@@ -155,7 +155,7 @@ def main() -> int:
 
         top = result["items"][0]
         assert top["authority"] == "context_only"
-        assert top["layer"] == "L1"
+        assert top["layer"] == "message"
         assert top["provenance"]["source"] == "chat_history"
         assert top["provenance"]["conversation_id"] == "personal-old"
         assert top["provenance"]["message_sha256"]
