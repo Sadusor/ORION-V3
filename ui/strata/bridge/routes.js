@@ -6,6 +6,7 @@
      request   asks ORION to PROPOSE something (backend preflight + verifier + authorization decide what happens)
      approval  a human approval boundary (generated PowerShell / exact-SHA run). Requires a real, trusted user gesture.
      stop      targeted stop
+     storage   bounded chat-history data sync; never authorizes execution
      command   existing Remote V1 control (backend validates and may refuse with 409)
      high      high-impact; the UI asks for a browser confirm() as a courtesy. The backend remains the authority.
    Deliberately NOT registered (still available only in the legacy UI): /api/manual/run, /api/reviewers/run,
@@ -14,8 +15,9 @@
    ====================================================================== */
 const ROUTES={
  'GET /api/status':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
- 'GET /api/memory/candidates':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},
+ 'GET /api/memory/candidates':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
  'POST /api/pair':{kind:'auth'},
+ 'POST /api/chat-history/sync':{kind:'storage'},
  'POST /api/local-hand/draft':{kind:'request',note:'Local Brain proposes. ORION preflight, semantic verifier and original-request authorization decide whether a registered capability starts.'},
  'POST /api/local-hand/revise':{kind:'request'},
  'POST /api/local-hand/run':{kind:'approval',note:'Approve & Run for generated PowerShell. The server re-checks the approved script hash.'},
