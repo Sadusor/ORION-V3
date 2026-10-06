@@ -13,7 +13,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
-from orion_v3.thehands_learning import TheHandsLearningInbox
+from thehands_learning import TheHandsLearningInbox
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 UI_ROOT = ROOT / "ui" / "strata"
