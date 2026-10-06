@@ -9,9 +9,9 @@ import org.json.JSONObject
 
 private const val DB_NAME = "orion_chat_history.db"
 private const val DB_VERSION = 1
-private const val MAX_CONVERSATIONS = 200
-private const val MAX_MESSAGES_PER_CONVERSATION = 240
-private const val MAX_TEXT_CHARS = 100_000
+private const val MAX_CONVERSATIONS = 50
+private const val MAX_MESSAGES_PER_CONVERSATION = 100
+private const val MAX_TEXT_CHARS = 8_000
 private const val MAX_TITLE_CHARS = 160
 
 class ChatHistoryStore(context: Context) :
