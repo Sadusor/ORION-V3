@@ -187,3 +187,51 @@ Safety boundary:
 The phone and STRATA expose explicit owner `PROMOTE / REJECT / DEFER / REVOKE`
 controls. Canonical Memory retrieval into model prompts is deliberately a later
 module so this durable-write boundary can be qualified and frozen independently.
+
+
+## Canonical Memory Retrieval Foundation V1
+
+`canonical_memory_retrieval_foundation.py` establishes the read-side trust
+boundary required before owner-approved durable Memory can be injected into any
+model prompt. It deliberately does **not** connect this source to Local Brain yet.
+
+DeepSeek's adversarial review correctly moved several concerns forward from
+"maintenance" into retrieval correctness. This foundation therefore freezes the
+contract before integration:
+
+- exact owner + project scope; the empty/default project scope is never a wildcard;
+- only active owner-promoted durable memories are eligible;
+- revoked memories are excluded from every retrieval path;
+- source candidate provenance is required;
+- memories promoted from the current conversation are excluded from that same
+  conversation to prevent recursive reinjection;
+- promotion-time checks are repeated as a distinct retrieval-time admission gate;
+- only `owner_message_unverified` durable memories are accepted in V1;
+- output carries `epistemic_status = owner-approved durable context, not verified truth`;
+- model-facing structural labels use `OWNER_APPROVED_DURABLE_CONTEXT` rather than
+  treating the word "canonical" as truth or authority;
+- deterministic local BM25 remains the retrieval mechanism;
+- default fusion budget policy is explicit: 40% durable context / 60% ordinary
+  Conversation Recall;
+- durable context and Conversation Recall must remain separate labeled blocks and
+  must never be flattened into a single ranked list;
+- storage class never silently resolves conflicts.
+
+Supersession is represented without mutating the frozen canonical rows. A separate
+append-only `supersession_events` ledger records `old -> replacement` relations,
+with one-time bound owner review tickets, exact content hashes, same-scope checks,
+monotonic event indexes, an in-database hash chain, and UPDATE/DELETE denial
+triggers. Current retrieval excludes superseded memories; an explicit historical
+mode may return them only as `status=historical` with `superseded_by`.
+
+This module intentionally leaves automatic contradiction detection to the later
+fusion/integration module. Its contract is fail-honest:
+`contradiction_flag=null` / `conflict_status=not_evaluated_until_fusion`.
+The later integration must surface potentially conflicting durable + conversation
+evidence rather than inventing deterministic semantic certainty.
+
+There is no product/HTTP/model mutation route for supersession in this foundation.
+The storage representation and retrieval filter are qualified first; any future
+owner UI/API must preserve the same paired-owner authority pattern.
+
+---
