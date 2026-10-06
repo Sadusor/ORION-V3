@@ -429,6 +429,10 @@ class OrionPcBridge(
                     if (models.ok) models.body.optString("default_model") else "",
                 )
                 .put("update", if (update.ok) update.body else JSONObject.NULL)
+                .put(
+                    "memory_retrieval",
+                    status.body.optJSONObject("memory_retrieval") ?: JSONObject.NULL,
+                )
         } catch (_: Throwable) {
             JSONObject()
                 .put("ok", true)
