@@ -660,6 +660,7 @@ class CanonicalMemoryRetrievalFoundation:
             "project_scope": 0,
             "owner_scope": 0,
             "missing_provenance": 0,
+            "provenance_integrity": 0,
             "current_conversation": 0,
             "unsupported_trust_tier": 0,
             "retrieval_risk": 0,
@@ -705,11 +706,25 @@ class CanonicalMemoryRetrievalFoundation:
             if not source_conversation_id or not source_message_id:
                 filtered["missing_provenance"] += 1
                 continue
+
+            text = _clean(memory.get("content"), 8_000)
+            content_hash = _clean(memory.get("content_sha256"), 64).lower()
+            source_hash = _clean(source.get("content_sha256"), 64).lower()
+            if (
+                not content_hash
+                or _sha256_text(text) != content_hash
+                or source_hash != content_hash
+                or str(source.get("content") or "") != str(memory.get("content") or "")
+                or not _clean(memory.get("promoted_decision_id"), 160)
+                or not _clean(memory.get("promoted_event_hash"), 128)
+            ):
+                filtered["provenance_integrity"] += 1
+                continue
+
             if current_conversation and source_conversation_id == current_conversation:
                 filtered["current_conversation"] += 1
                 continue
 
-            text = _clean(memory.get("content"), 8_000)
             risks = _retrieval_risks(text)
             if risks:
                 filtered["retrieval_risk"] += 1
