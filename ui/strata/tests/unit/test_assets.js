@@ -17,7 +17,7 @@ const all=[];(function walk(d){for(const f of fs.readdirSync(d)){const p=path.jo
 for(const f of all.filter(f=>f.endsWith('.js'))){const t=fs.readFileSync(f,'utf8');ok(!/^\s*(import\s.+from|export\s)/m.test(t),path.relative(ROOT,f)+': classic script (no ES import/export to resolve)')}
 const ids=new Set([...read('index.html').matchAll(/id="([^"]+)"/g)].map(m=>m[1]));
 const used=new Set();for(const f of ['shell/shell.js','memory/memory.js','components/sky-planet.js','state/store.js'])for(const m of read(f).matchAll(/\$\(['"]([A-Za-z0-9_-]+)['"]\)/g))used.add(m[1]);
-const dyn=new Set(['cinfo','rawpre','rawsel','epin','epsave','forget','refreshnow','pcode','pgo','perr','vstage','demosel']);   // created at runtime by the shell
+const dyn=new Set(['cinfo','rawpre','rawsel','epin','epsave','forget','refreshnow','pcode','pgo','perr','vstage','demosel','muPropose']);   // created at runtime by the shell
 for(const u of used)if(!dyn.has(u))ok(ids.has(u),'DOM id #'+u+' used by code exists in index.html');
 for(const d of ['README.md','ARCHITECTURE.md','INTEGRATION.md','STATE_CONTRACT.md','TESTING.md'])ok(fs.existsSync(path.join(ROOT,d)),d+' present');
 ok(all.some(f=>f.endsWith('styles'+path.sep+'tokens.css'))&&all.some(f=>f.endsWith('styles'+path.sep+'base.css'))&&all.some(f=>f.endsWith('styles'+path.sep+'strata.css')),'all three stylesheets present');
