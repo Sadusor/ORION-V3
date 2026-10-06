@@ -173,6 +173,7 @@ try {
     Log "Running Memory Retrieval V1 regressions."
     foreach ($memoryTest in @(
         "memory_retrieval_test.py",
+        "memory_retrieval_adversarial_test.py",
         "memory_brain_pipeline_test.py",
         "memory_product_server_test.py"
     )) {
