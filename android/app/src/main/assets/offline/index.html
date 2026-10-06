@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080a0d">
+<title>ORION Offline</title>
+<style>
+:root{color-scheme:dark;--bg:#080a0d;--panel:#1d2024;--panel2:#24282d;--text:#f3f5f7;--mut:#8e949d;--ion:#79d7ee;--ok:#72d7ad;--danger:#ff7777}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}button,input{font:inherit}
+#app{height:100%;display:flex;flex-direction:column;overflow:hidden}.top{height:62px;display:grid;grid-template-columns:54px 1fr 54px;align-items:center;padding:env(safe-area-inset-top) 8px 0;border-bottom:1px solid #ffffff0a}
+.iconbtn{width:44px;height:44px;border:0;border-radius:50%;background:transparent;color:var(--text);font-size:25px}.brand{text-align:center;letter-spacing:.28em;font-size:15px;margin-left:.28em}.offline{justify-self:end;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:#eabf69;font-size:10px;border:1px solid #ffffff12}
+#main{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}.empty{margin:auto;text-align:center;padding:30px 20px 80px}.orb{width:84px;height:84px;margin:0 auto 22px;filter:drop-shadow(0 0 18px #79d7ee33)}.empty h1{font-size:29px;font-weight:400;margin:0 0 8px}.empty p{color:var(--mut);margin:0}.chat{display:none;flex:1;overflow:auto;padding:18px 18px 130px}.has-chat .empty{display:none}.has-chat .chat{display:block}.m{max-width:88%;margin:10px 0;padding:12px 14px;border-radius:18px;white-space:pre-wrap;word-break:break-word}.m.user{margin-left:auto;background:#2b3036}.m.assistant{margin-right:auto;background:transparent;padding-left:0}.m.thinking{color:var(--mut);font-size:13px}
+.composer{position:absolute;left:14px;right:14px;bottom:calc(12px + env(safe-area-inset-bottom));background:var(--panel);border:1px solid #ffffff14;border-radius:25px;padding:10px;box-shadow:0 16px 40px #0008}.composer input{width:100%;height:42px;background:transparent;border:0;outline:0;color:var(--text);font-size:17px;padding:0 8px}.row{display:flex;align-items:center;gap:8px}.chip{border:1px solid #ffffff18;background:transparent;color:var(--text);border-radius:18px;height:38px;padding:0 14px}.chip.offlinechip{color:var(--ion);border-color:#79d7ee44}.round{width:42px;height:42px;border:0;border-radius:50%;background:#2b2f34;color:var(--text);font-size:24px}.send{background:var(--ion);color:#071014;margin-left:auto}
+.drawerShade{position:fixed;inset:0;background:#0008;z-index:20;opacity:0;pointer-events:none;transition:.16s}.drawer{position:fixed;z-index:21;top:0;bottom:0;left:0;width:min(87vw,370px);background:#111315;transform:translateX(-103%);transition:.18s;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}.menu-open .drawerShade{opacity:1;pointer-events:auto}.menu-open .drawer{transform:none}.drawerHead{display:flex;align-items:center;gap:10px;padding:14px 14px 10px}.drawerHead svg{width:34px;height:34px}.drawerHead b{letter-spacing:.18em}.drawerHead button{margin-left:auto}.newchat{margin:6px 14px 8px;height:45px;border:0;border-radius:13px;background:#25292e;color:var(--text);font-weight:600}.search{margin:0 14px 8px;height:44px;border-radius:22px;border:1px solid #ffffff10;background:#202327;color:var(--text);padding:0 16px;outline:0}.history{overflow:auto;padding:4px 8px 16px;flex:1}.group h3{margin:14px 10px 5px;color:var(--mut);font-size:12px;font-weight:600}.historyRow{display:grid;grid-template-columns:1fr 38px;align-items:center;gap:5px;border-radius:11px}.historyRow.active{background:#25282c}.historyRow>button:first-child{border:0;background:transparent;color:var(--text);text-align:left;padding:11px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dots{border:0;background:transparent;color:var(--mut);height:36px;border-radius:50%}.drawerFoot{border-top:1px solid #ffffff10;padding:10px 14px calc(12px + env(safe-area-inset-bottom));color:var(--mut);font-size:12px}.drawerFoot b{color:var(--text);display:block;margin-bottom:3px}
+.sheet{position:fixed;z-index:30;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));background:#292d32;border:1px solid #ffffff14;border-radius:22px;padding:10px;display:none;box-shadow:0 18px 50px #000b}.sheet.on{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sheet button{min-height:72px;border:0;border-radius:16px;background:#34383d;color:var(--text)}.sheet button:disabled{opacity:.38}.sheet .wide{grid-column:1/-1;min-height:46px}.danger{color:var(--danger)!important}.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:126px;z-index:40;background:#30343a;border:1px solid #ffffff14;border-radius:15px;padding:9px 13px;opacity:0;pointer-events:none;transition:.15s;max-width:82%;text-align:center}.toast.on{opacity:1}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <button class="iconbtn" id="menu" aria-label="Open history">☰</button>
+    <div class="brand">ORION</div>
+    <div class="offline">OFF</div>
+  </header>
+  <main id="main">
+    <section class="empty">
+      <svg class="orb" viewBox="0 0 100 100" aria-label="ORION">
+        <circle cx="50" cy="50" r="37" fill="none" stroke="#79d7ee" stroke-opacity=".7" stroke-width="2"/>
+        <circle cx="50" cy="50" r="28" fill="#79d7ee" fill-opacity=".08"/>
+        <path d="M20 62L36 34L61 27L78 50L59 73L31 70Z" fill="none" stroke="#79d7ee" stroke-opacity=".55"/>
+        <g fill="#bceefa"><circle cx="20" cy="62" r="2"/><circle cx="36" cy="34" r="2.4"/><circle cx="61" cy="27" r="1.8"/><circle cx="78" cy="50" r="2.6"/><circle cx="59" cy="73" r="2"/><circle cx="31" cy="70" r="1.8"/></g>
+      </svg>
+      <h1>How can I help?</h1>
+      <p>Offline · Qwen3-0.6B · local chat memory</p>
+    </section>
+    <section class="chat" id="chat"></section>
+    <form class="composer" id="form">
+      <input id="inp" autocomplete="off" placeholder="Message ORION offline…">
+      <div class="row">
+        <button type="button" class="chip offlinechip" id="model">Offline</button>
+        <button type="button" class="round" id="plus" aria-label="Attachments">＋</button>
+        <button type="button" class="round" disabled title="Voice is not connected offline">🎙</button>
+        <button class="round send" type="submit" aria-label="Send">↑</button>
+      </div>
+    </form>
+  </main>
+
+  <div class="drawerShade" id="shade"></div>
+  <aside class="drawer">
+    <div class="drawerHead">
+      <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="34" fill="none" stroke="#79d7ee" stroke-width="3"/><circle cx="50" cy="50" r="5" fill="#79d7ee"/></svg>
+      <div><b>ORION</b><small style="display:block;color:#8e949d">Offline history</small></div>
+      <button class="iconbtn" id="closeMenu">×</button>
+    </div>
+    <button class="newchat" id="newChat">＋ New chat</button>
+    <input class="search" id="search" placeholder="Search chat content…">
+    <div class="history" id="history"></div>
+    <div class="drawerFoot">
+      <b>Local settings</b>
+      History is stored on this phone and syncs with ORION when you reconnect.
+      <button class="newchat" id="reconnect" style="margin:10px 0 0;width:100%">Reconnect to ORION PC</button>
+    </div>
+  </aside>
+
+  <section class="sheet" id="attachSheet">
+    <button disabled>📷<br>Camera<br><small>planned</small></button>
+    <button disabled>🖼<br>Photo<br><small>planned</small></button>
+    <button disabled>📎<br>Document<br><small>planned</small></button>
+    <button class="wide" id="closeAttach">Close</button>
+  </section>
+
+  <section class="sheet" id="actionSheet">
+    <button data-act="share">Share</button>
+    <button data-act="pin">Pin</button>
+    <button data-act="project" disabled>Add to project<br><small>when PC connected</small></button>
+    <button data-act="files" disabled>Uploaded files<br><small>planned</small></button>
+    <button data-act="find">Find in chat</button>
+    <button data-act="home" disabled>Add to home<br><small>planned</small></button>
+    <button data-act="archive">Archive</button>
+    <button data-act="delete" class="danger">Delete</button>
+    <button data-act="close">Close</button>
+  </section>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+(function(){
+ const app=document.getElementById('app'),chat=document.getElementById('chat'),inp=document.getElementById('inp');
+ let data={conversations:[],messages:[]},current='',menuTarget='',pending={},toastTimer=0;
+ const nativeHistory=window.ORION_NATIVE_HISTORY,nativeChat=window.ORION_NATIVE_CHAT;
+ const now=()=>Date.now(),id=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+ const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toastTimer);toastTimer=setTimeout(()=>e.classList.remove('on'),2600)}
+ function snap(){try{return JSON.parse(nativeHistory.snapshot())}catch(_){return{conversations:[],messages:[]}}}
+ function merge(delta){try{data=JSON.parse(nativeHistory.merge(JSON.stringify(delta)));return data}catch(e){toast('Local history unavailable');return data}}
+ function conv(cid){return data.conversations.find(c=>c.id===cid)}
+ function visibleConvs(){return data.conversations.filter(c=>!c.deleted&&!c.archived)}
+ function ensureConversation(){
+   if(current&&conv(current)&&!conv(current).deleted)return current;
+   const c=visibleConvs().sort((a,b)=>b.updated_at_ms-a.updated_at_ms)[0];
+   if(c){current=c.id;return current}
+   newChat(false);return current
+ }
+ function newChat(openComposer=true){
+   current=id('c');
+   const t=now();
+   merge({conversations:[{id:current,title:'New chat',project_id:'',pinned:0,archived:0,deleted:0,created_at_ms:t,updated_at_ms:t}]});
+   renderChat();renderHistory();closeDrawer();if(openComposer)inp.focus()
+ }
+ function addMessage(role,text,source){
+   const c=conv(current),t=now();
+   const title=(c&&c.title&&c.title!=='New chat')?c.title:(role==='user'?text.slice(0,58):'New chat');
+   merge({
+     conversations:[{id:current,title,project_id:c?c.project_id:'',pinned:c?c.pinned:0,archived:c?c.archived:0,deleted:0,created_at_ms:c?c.created_at_ms:t,updated_at_ms:t}],
+     messages:[{id:id('m'),conversation_id:current,role,text,source,created_at_ms:t}]
+   });
+ }
+ function renderChat(){
+   ensureConversation();
+   const ms=data.messages.filter(m=>m.conversation_id===current).sort((a,b)=>a.created_at_ms-b.created_at_ms);
+   chat.innerHTML=ms.map(m=>'<div class="m '+(m.role==='user'?'user':'assistant')+'">'+esc(m.text)+'</div>').join('');
+   app.classList.toggle('has-chat',ms.length>0);chat.scrollTop=chat.scrollHeight;
+ }
+ function groupLabel(ts){
+   const d=(now()-ts)/86400000;
+   return d<=7?'7 Days':d<=30?'30 Days':'Older';
+ }
+ function renderHistory(){
+   const q=document.getElementById('search').value.trim().toLowerCase();
+   const filtered=visibleConvs().filter(c=>{
+     if(!q)return true;
+     if((c.title||'').toLowerCase().includes(q))return true;
+     return data.messages.some(m=>m.conversation_id===c.id&&(m.text||'').toLowerCase().includes(q));
+   }).sort((a,b)=>(b.pinned-a.pinned)||(b.updated_at_ms-a.updated_at_ms));
+   const groups={};
+   filtered.forEach(c=>(groups[groupLabel(c.updated_at_ms)]??=[]).push(c));
+   const order=['7 Days','30 Days','Older'];
+   document.getElementById('history').innerHTML=order.filter(k=>groups[k]).map(k=>
+     '<section class="group"><h3>'+k+'</h3>'+groups[k].map(c=>
+       '<div class="historyRow '+(c.id===current?'active':'')+'"><button data-open="'+esc(c.id)+'">'+(c.pinned?'📌 ':'')+esc(c.title||'New chat')+'</button><button class="dots" data-more="'+esc(c.id)+'">•••</button></div>'
+     ).join('')+'</section>'
+   ).join('')||'<p style="color:#8e949d;padding:16px">No matching chats.</p>';
+ }
+ function openDrawer(){app.classList.add('menu-open');renderHistory()}
+ function closeDrawer(){app.classList.remove('menu-open')}
+ function showSheet(id,on){document.getElementById(id).classList.toggle('on',!!on)}
+ function loadSnapshot(){data=snap();ensureConversation();renderHistory();renderChat()}
+ function patchConversation(cid,patch){
+   const c=conv(cid);if(!c)return;
+   merge({conversations:[Object.assign({},c,patch,{updated_at_ms:now()})]});renderHistory()
+ }
+ function openConversation(cid){current=cid;renderChat();renderHistory();closeDrawer()}
+ function shareConversation(cid){
+   const c=conv(cid);if(!c)return;
+   const body=data.messages.filter(m=>m.conversation_id===cid).map(m=>(m.role==='user'?'You: ':'ORION: ')+m.text).join('\n\n');
+   if(navigator.share){navigator.share({title:c.title||'ORION chat',text:body}).catch(()=>{})}
+   else if(navigator.clipboard){navigator.clipboard.writeText(body).then(()=>toast('Chat copied'))}
+   else toast('Share is not available on this device')
+ }
+ document.getElementById('menu').onclick=openDrawer;
+ document.getElementById('shade').onclick=closeDrawer;
+ document.getElementById('closeMenu').onclick=closeDrawer;
+ document.getElementById('newChat').onclick=()=>newChat(true);
+ document.getElementById('search').oninput=renderHistory;
+ document.getElementById('history').onclick=e=>{
+   const o=e.target.closest('[data-open]'),m=e.target.closest('[data-more]');
+   if(o)return openConversation(o.dataset.open);
+   if(m){menuTarget=m.dataset.more;showSheet('actionSheet',1)}
+ };
+ document.getElementById('plus').onclick=()=>showSheet('attachSheet',1);
+ document.getElementById('closeAttach').onclick=()=>showSheet('attachSheet',0);
+ document.getElementById('reconnect').onclick=()=>{try{nativeChat.reconnect()}catch(_){toast('Reconnect unavailable')}};
+ document.getElementById('model').onclick=()=>{try{const m=JSON.parse(nativeChat.modelInfo());toast(m.name+' '+m.quant+(m.loaded?' · loaded':' · loads on first message'))}catch(_){toast('Offline model')}};
+ document.getElementById('actionSheet').onclick=e=>{
+   const b=e.target.closest('[data-act]');if(!b||b.disabled)return;const a=b.dataset.act,c=conv(menuTarget);
+   if(a==='close')return showSheet('actionSheet',0);
+   if(!c)return;
+   if(a==='share')shareConversation(c.id);
+   if(a==='pin')patchConversation(c.id,{pinned:c.pinned?0:1});
+   if(a==='archive')patchConversation(c.id,{archived:1});
+   if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}
+   if(a==='find'){openConversation(c.id);setTimeout(()=>inp.focus(),80);toast('Use history search to find text in this chat')}
+   showSheet('actionSheet',0);renderHistory();
+ };
+ document.getElementById('form').onsubmit=e=>{
+   e.preventDefault();const text=inp.value.trim();if(!text)return;ensureConversation();inp.value='';
+   addMessage('user',text,'phone-offline');renderChat();
+   const req=id('req');pending[req]=true;
+   const wait=document.createElement('div');wait.className='m assistant thinking';wait.dataset.req=req;wait.textContent='Thinking locally…';chat.appendChild(wait);app.classList.add('has-chat');chat.scrollTop=chat.scrollHeight;
+   try{nativeChat.ask(JSON.stringify({id:req,conversation_id:current,text}))}catch(err){window.ORION_OFFLINE_RESULT(req,null,String(err))}
+ };
+ window.ORION_OFFLINE_RESULT=function(req,answer,error){
+   const wait=chat.querySelector('[data-req="'+CSS.escape(req)+'"]');if(wait)wait.remove();delete pending[req];
+   if(error){const e=document.createElement('div');e.className='m assistant';e.textContent='Offline model error: '+error;chat.appendChild(e);toast('Offline model could not answer')}
+   else if(answer){const e=document.createElement('div');e.className='m assistant';e.textContent=answer;chat.appendChild(e)}
+   loadSnapshot();chat.scrollTop=chat.scrollHeight;
+ };
+ loadSnapshot();
+})();
+</script>
+</body>
+</html>
