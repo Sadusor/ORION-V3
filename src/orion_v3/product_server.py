@@ -13,7 +13,7 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import unquote, urlparse
 
-from modules.brain_pipeline import BrainPipeline
+from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -22,7 +22,7 @@ STATE_ROOT = pathlib.Path(os.environ.get("LOCALAPPDATA", str(ROOT / ".local"))) 
 STATE_ROOT.mkdir(parents=True, exist_ok=True)
 PID_FILE = STATE_ROOT / "product-ui.pid"
 
-LOCAL_BRAIN = BrainPipeline()
+LOCAL_BRAIN = StreamingBrainPipeline()
 
 DENIED_TOP = {"demo.html", "README.md", "ARCHITECTURE.md", "INTEGRATION.md", "PRODUCT_UI.md", "STATE_CONTRACT.md", "TESTING.md"}
 DENIED_DIRS = {"tests", "tools"}
