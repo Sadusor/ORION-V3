@@ -48,7 +48,7 @@ const ORION_PRODUCT=(function(){
   const a=document.getElementById('app'),top=document.getElementById('top');
   const n=document.createElement('nav');n.id='product-nav';n.setAttribute('aria-label','ORION sections');
   n.innerHTML=
-   '<div class="mobile-nav-head"><img src="icons/orion-mark-transparent-1024.png" alt=""><div><b>ORION</b><small>Personal AI</small></div><button type="button" data-menu-close aria-label="Close menu">✕</button></div>'+
+   '<div class="mobile-nav-head"><img src="icons/sizes/orion-icon-192.png" alt=""><div><b>ORION</b><small>Personal AI</small></div><button type="button" data-menu-close aria-label="Close menu">✕</button></div>'+
    '<div class="mobile-nav-items">'+
    nav.map(([id,label,icon])=>`<button data-view="${id}" title="${label}" aria-label="${label}"><i>${icon}</i><span>${label}</span></button>`).join('')+
    '</div>'+
