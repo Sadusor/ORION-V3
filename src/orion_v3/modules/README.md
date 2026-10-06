@@ -153,3 +153,32 @@ STRATA exposes intake only through an approval-kind route requiring a real user
 gesture. The Android shell exposes the same owner action by long-pressing an exact
 chat message. Phone Settings may show the pending count, but a candidate remains
 `candidate_only` until a separate future Review + Promotion module is qualified.
+
+
+## Canonical Memory Review + Promotion V1
+
+`memory_review_promotion.py` is the first durable canonical-Memory write boundary.
+
+It consumes the frozen Candidate Queue contract and stores review evidence in a
+separate append-only database. The candidate queue itself is not rewritten.
+
+Owner decisions:
+- `PROMOTE` -> terminal; creates one immutable canonical-memory record;
+- `REJECT` -> terminal; creates no canonical memory;
+- `DEFER` -> non-terminal; may later become PROMOTE or REJECT.
+
+Safety boundary:
+- every decision is bound to the exact candidate ID + content SHA-256;
+- client-supplied replacement content is ignored by design;
+- decision events form a previous-hash/event-hash chain;
+- SQLite triggers deny UPDATE/DELETE of decision events;
+- promoted canonical records are immutable in V1;
+- obvious secret-like material is refused from normal Memory promotion;
+- terminal decisions cannot be reversed in V1;
+- repeated identical decisions are idempotent;
+- canonical Memory remains `authority=context_only`;
+- no model, Hand or background process can auto-promote.
+
+The phone and STRATA expose explicit owner `PROMOTE / REJECT / DEFER` controls.
+Canonical Memory retrieval into model prompts is deliberately a later module so
+this durable-write boundary can be qualified and frozen independently.
