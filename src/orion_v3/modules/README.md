@@ -54,3 +54,21 @@ Authority boundary:
 - it cannot browse, inspect files, write memory, or contact cloud models.
 
 The product-server hook remains the same `LOCAL_BRAIN.start()/view()` interface.
+
+
+## Live Local Brain streaming
+
+`streaming_local_brain.py` extends the proven Local Brain state/model-selection contract without modifying `local_brain.py`.
+
+It changes transport only:
+- Ollama `/api/generate` uses `stream: true`;
+- partial text is published as `brain_stream_preview`;
+- final text becomes `brain_conclusion`;
+- the existing verifier pipeline still decides PASS/BLOCK after completion;
+- no execution authority is added.
+
+`streaming_brain_pipeline.py` composes that adapter with the existing verifier.
+
+STRATA uses the separate `ui/strata/modules/live-brain-chat.js` renderer to update one existing chat bubble while output grows. During generation it is visibly marked `LIVE · UNVERIFIED`; after verifier PASS the same bubble becomes `VERIFIED`.
+
+The streaming prompt also grounds model identity to the exact selected Ollama model name, preventing the Local Brain from inventing a different provider/model identity.
