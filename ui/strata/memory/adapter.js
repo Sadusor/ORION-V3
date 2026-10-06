@@ -15,7 +15,7 @@ const MemoryAdapters=(function(){
    sources.push(info)}
   return{nodes,sources}}
  register({id:'orion-candidates',label:'Memory candidates (proposals)',authoritative:false,load:b=>b.getMemoryCandidates?b.getMemoryCandidates():[]});
- register({id:'orion-accepted',label:'Accepted / promoted memory',authoritative:true,available:false,note:'Not exposed by the ORION backend yet'});
+ register({id:'orion-accepted',label:'Canonical memory (context only)',authoritative:true,load:b=>b.getCanonicalMemory?b.getCanonicalMemory():[],note:'Owner-promoted durable context. Canonical does not grant execution authority.'});
  register({id:'orion-project',label:'Project memory',authoritative:true,available:false,note:'Not exposed by the ORION backend yet'});
  register({id:'orion-history',label:'Conversation recall (context only)',authoritative:false,load:(b,q)=>b.getMemoryRecall?b.getMemoryRecall(q):[],note:'Read-only chat-history retrieval with provenance; never canonical authority'});
  return{register,load,describe:()=>reg.map(a=>({id:a.id,label:a.label,available:a.available!==false,authoritative:!!a.authoritative}))}})();
