@@ -14,10 +14,12 @@
 <body>
 <div id="app" class="desk">
   <canvas id="sky"></canvas>
-  <div id="cam"><canvas id="core" aria-label="ORION core"></canvas></div>
+  <div id="cam"><canvas id="core" aria-label="ORION core"></canvas><img id="phoneMark" src="icons/orion-mark-transparent-1024.png" alt="ORION"></div>
+  <div id="phoneWelcome" aria-hidden="true">How can I help?</div>
   <div id="demo" hidden>DEMO / MOCK BACKEND · synthetic data · not ORION</div>
 
   <header id="top">
+    <button class="ib mobile-only" id="mobileMenu" type="button" aria-label="Open ORION menu">☰</button>
     <div class="tl"><span class="brand">ORION</span><span class="pillb" id="proj" hidden></span></div>
     <div id="clock"><b id="clk">--:--</b><span class="cap" id="dt"></span></div>
     <div class="tl">
@@ -51,6 +53,7 @@
 
   <form id="bar" autocomplete="off">
     <input id="inp" placeholder="Ask ORION…" aria-label="Ask ORION">
+    <button type="button" class="rb mobile-only" id="quickb" aria-label="Open ORION tools">＋</button>
     <button type="button" class="rb" id="mic" disabled aria-disabled="true" title="Voice planned">🎙</button>
     <button type="submit" class="rb pri" id="send" aria-label="Send">↑</button>
   </form>
