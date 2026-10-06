@@ -18,6 +18,7 @@ from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.memory_brain_pipeline import MemoryAwareBrainPipeline
+from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
 from modules.update_manager import UpdateError, UpdateManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -30,6 +31,10 @@ APK_FILE = ROOT / "dist" / "ORION-V3-debug.apk"
 
 CHAT_HISTORY = ChatHistoryStore(STATE_ROOT / "chat_history.sqlite3")
 MEMORY_RETRIEVAL = MemoryRetrievalModule(CHAT_HISTORY)
+MEMORY_CANDIDATES = CanonicalMemoryCandidateQueue(
+    STATE_ROOT / "memory_candidates.sqlite3",
+    CHAT_HISTORY,
+)
 LOCAL_BRAIN = MemoryAwareBrainPipeline(
     brain=StreamingBrainPipeline(),
     memory=MEMORY_RETRIEVAL,
@@ -319,7 +324,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/work-exchange/latest":
             return self._json(200, {"items": [], "status": "not_connected"})
         if path == "/api/memory/candidates":
-            return self._json(200, {"candidates": []})
+            return self._json(200, MEMORY_CANDIDATES.list())
         if path == "/api/memory/search":
             try:
                 raw_limit = str((query.get("limit") or ["6"])[0] or "6")
@@ -357,6 +362,24 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/chat-history/sync":
             try:
                 return self._json(200, CHAT_HISTORY.sync(self._read_json()))
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/candidate":
+            try:
+                body = self._read_json()
+                result = MEMORY_CANDIDATES.enqueue_chat_message(
+                    conversation_id=str(body.get("conversation_id", "")),
+                    message_id=str(body.get("message_id", "")),
+                    project_id=(
+                        str(body.get("project_id", ""))
+                        if "project_id" in body
+                        else None
+                    ),
+                    owner_scope=str(body.get("owner_scope", "owner:primary")),
+                )
+                return self._json(201 if result.get("created") else 200, result)
+            except MemoryCandidateError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/update/main":
