@@ -105,15 +105,20 @@ Boundary:
 - same project/person scope only;
 - excludes the current conversation from cross-chat recall;
 - excludes archived/deleted chats;
-- deterministic Unicode lexical BM25-style ranking;
-- every result includes provenance and a passive retrieval trace;
+- deterministic accent-insensitive Unicode lexical BM25-style ranking;
+- explicit `owner:primary` + exact project/default scope;
+- owner-message vs assistant-prior trust tiers, with assistant priors down-weighted;
+- relevance floor so weak matches do not fill the context budget;
+- structural recall delimiters and conservative instruction-like-content filtering;
+- every result includes provenance, hashes, query fingerprint and a passive retrieval trace;
 - no embeddings, cloud calls, file scraping, promotion, consolidation, deletion,
   training, Hands, capabilities, approvals, or execution.
 
 `memory_brain_pipeline.py` composes retrieval in front of the already-proven
 streaming/verifier pipeline without modifying the frozen Local Brain module.
 It restores the original owner goal in the public state and exposes a bounded
-`brain_memory` brief showing whether recall was used.
+`brain_memory` brief with distinct `pass`, `empty`, `filtered` and `error`
+states. Recall is placed before the current owner message in the internal prompt.
 
 V1 deliberately treats chat history as **conversation memory**, not canonical
 promoted Memory. The Memory Explorer labels this source `context only · not
