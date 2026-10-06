@@ -78,11 +78,17 @@ with sync_playwright() as p:
         ok("Not configured" in v and "never authorizes" in v and pg.is_disabled("#vp button.btn") and not pg.locator("#vp video, #vp img").count(), "VIEW PC: not configured, no fake feed, viewing never authorizes control"); shot(pg, f"{name}-viewpc"); pg.click("#vp [data-close]")
         # product navigation + connector/system surface
         demo(pg, "pass");
-        ok(pg.locator("#product-nav [data-view]").count() == 6, "product navigation exposes Home / Work / AI / Memory / Connectors / System")
-        ok(pg.locator("#lane-strip .lane").count() == 4, "four first-class lanes are visible: Personal / Project / Specialists / Background")
+        ok(pg.locator("#product-nav [data-view]").count() == 6, "product navigation exposes Chat / Work / AI / Memory / Connectors / System")
+        ok(pg.locator("#lane-strip .lane").count() == 4, "four first-class lanes exist: Personal / Project / Specialists / Background")
+        if name == "phone":
+            ok(pg.is_visible("#mobileMenu") and pg.is_visible("#phoneMark"), "phone uses the static ORION mark and chat-first menu by default")
+            ok(not pg.is_visible("#lane-strip"), "phone status cards are hidden by default")
+            pg.click("#mobileMenu"); ok(pg.is_visible("#product-nav"), "phone hamburger opens the ORION drawer")
         pg.click('#product-nav [data-view="ai"]'); pg.wait_for_timeout(250); ok(pg.is_visible('#workspace.on') and pg.locator('.ai-slot').count()==5, 'AI surface shows five provider slots')
+        pg.click('#ws-close')
+        if name == "phone": pg.click("#mobileMenu")
         pg.click('#product-nav [data-view="connectors"]'); pg.wait_for_timeout(250); ok(pg.locator('.connector-card').count() >= 8, 'Connectors surface renders replaceable connector cards')
-        pg.click('#ws-close'); pg.click("#ccb"); pg.wait_for_timeout(500)
+        pg.click('#ws-close'); pg.click("#conn" if name == "phone" else "#ccb"); pg.wait_for_timeout(500)
         for sid in ["project", "github", "brain", "hands", "reviewers", "providers", "memory", "runtime", "safety", "logs"]: ok(pg.locator(f'[data-id="{sid}"]').count() == 1, f"Connectors/System section: {sid}")
         hrefs = pg.eval_on_selector_all("#legacy a", "a=>a.map(x=>x.getAttribute('href'))"); ok(hrefs == [], f"no legacy Remote links in product UI: {hrefs}")
         ok(pg.is_visible("#refreshnow") and "automatic" in (pg.get_attribute("#refreshnow", "title") or ""), "Refresh exists as a debug fallback only"); shot(pg, f"{name}-connectors")
