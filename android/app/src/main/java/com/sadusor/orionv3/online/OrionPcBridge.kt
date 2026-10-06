@@ -253,6 +253,46 @@ class OrionPcBridge(
     }
 
     @JavascriptInterface
+    fun proposeMemoryCandidate(requestJson: String, requestId: String): String {
+        val id = requestId.ifBlank { UUID.randomUUID().toString() }
+        val requestBody = try {
+            JSONObject(requestJson)
+        } catch (_: Throwable) {
+            JSONObject()
+        }
+        scope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                try {
+                    val response = request(
+                        "POST",
+                        "/api/memory/candidate",
+                        JSONObject()
+                            .put("conversation_id", requestBody.optString("conversation_id").trim())
+                            .put("message_id", requestBody.optString("message_id").trim())
+                            .put("project_id", requestBody.optString("project_id").trim())
+                            .put("owner_scope", "owner:primary"),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!response.ok) {
+                        JSONObject().put("ok", false).put("error", response.error)
+                    } else {
+                        JSONObject()
+                            .put("ok", true)
+                            .put("created", response.body.optBoolean("created"))
+                            .put("candidate", response.body.optJSONObject("candidate"))
+                            .put("canonical_memory_written", false)
+                    }
+                } catch (t: Throwable) {
+                    JSONObject().put("ok", false).put("error", t.message ?: "Candidate queue failed.")
+                }
+            }
+            emit("ORION_PC_ACTION_RESULT", id, payload)
+        }
+        return id
+    }
+
+    @JavascriptInterface
     fun updateOrion(requestId: String): String {
         val id = requestId.ifBlank { UUID.randomUUID().toString() }
         scope.launch {
@@ -415,6 +455,13 @@ class OrionPcBridge(
                 authenticated = true,
                 timeoutMs = 3500,
             )
+            val memoryCandidates = request(
+                "GET",
+                "/api/memory/candidates",
+                null,
+                authenticated = true,
+                timeoutMs = 3500,
+            )
 
             JSONObject()
                 .put("ok", true)
@@ -431,6 +478,10 @@ class OrionPcBridge(
                     if (models.ok) models.body.optString("default_model") else "",
                 )
                 .put("update", if (update.ok) update.body else JSONObject.NULL)
+                .put(
+                    "memory_candidates",
+                    if (memoryCandidates.ok) memoryCandidates.body else JSONObject.NULL,
+                )
                 .put(
                     "memory_retrieval",
                     status.body
