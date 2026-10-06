@@ -65,31 +65,20 @@ if (($ui -match "OPEN ORION") -or ($ui -match "CHECK ORION") -or ($ui -match "OP
 }
 Write-Host "ORION_ANDROID_NO_LAUNCHER> PASS" -ForegroundColor Green
 
-if ($logs -notmatch "page started:") {
-    throw "ORION_ANDROID_WEBVIEW_START> FAIL | WebView never started loading STRATA"
+if ($logs -notmatch "phone shell started:") {
+    throw "ORION_ANDROID_WEBVIEW_START> FAIL | bundled phone shell never started"
 }
 Write-Host "ORION_ANDROID_WEBVIEW_START> PASS" -ForegroundColor Green
 
-if ($logs -notmatch "page finished:") {
-    throw "ORION_ANDROID_WEBVIEW_FINISH> FAIL | STRATA main page never finished loading"
+if ($logs -notmatch "phone shell finished:") {
+    throw "ORION_ANDROID_WEBVIEW_FINISH> FAIL | bundled phone shell never finished"
 }
 Write-Host "ORION_ANDROID_WEBVIEW_FINISH> PASS" -ForegroundColor Green
 
-if ($logs -notmatch "DOM probe:") {
-    throw "ORION_ANDROID_DOM> FAIL | no DOM probe from loaded STRATA page"
+if ($logs -notmatch "phone shell ready") {
+    throw "ORION_ANDROID_PHONE_SHELL> FAIL | #app / composer readiness was not confirmed"
 }
-Write-Host "ORION_ANDROID_DOM_PROBE> PASS" -ForegroundColor Green
-
-if ($logs -match '"app":false') {
-    throw "ORION_ANDROID_DOM> FAIL | #app missing"
-}
-if ($logs -match '"core":false') {
-    throw "ORION_ANDROID_DOM> FAIL | #core missing"
-}
-if ($logs -match '"composer":false') {
-    throw "ORION_ANDROID_DOM> FAIL | Ask ORION composer missing"
-}
-Write-Host "ORION_ANDROID_STRATA_DOM> PASS" -ForegroundColor Green
+Write-Host "ORION_ANDROID_PHONE_SHELL> PASS" -ForegroundColor Green
 
 if ($logs -match "JS .*Uncaught|JS .*ReferenceError|JS .*TypeError") {
     throw "ORION_ANDROID_WEBVIEW> FAIL | JavaScript error detected"
