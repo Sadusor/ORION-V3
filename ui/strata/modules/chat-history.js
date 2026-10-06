@@ -138,7 +138,7 @@ window.ORION_CHAT_HISTORY=(function(){
  function group(ts){const d=(now()-Number(ts||0))/86400000;return d<=7?'7 Days':d<=30?'30 Days':'Older'}
  function renderHistory(){
   const host=document.getElementById('orionHistoryList'),deskHost=document.getElementById('orionHistoryDesktopList');if(!host&&!deskHost)return;
-  const q=((document.activeElement&&document.activeElement.id==='orionHistoryDesktopSearch'?document.getElementById('orionHistoryDesktopSearch')?.value:document.getElementById('orionHistorySearch')?.value)||'').trim().toLowerCase();
+  const rawQ=(document.activeElement&&document.activeElement.id==='orionHistoryDesktopSearch'?document.getElementById('orionHistoryDesktopSearch')?.value:document.getElementById('orionHistorySearch')?.value)||'';const q=String(rawQ).trim().toLowerCase();
   const items=activeConversations().filter(c=>{
    if(!q)return true;if(String(c.title||'').toLowerCase().includes(q))return true;
    return state.messages.some(m=>m.conversation_id===c.id&&String(m.text||'').toLowerCase().includes(q))
@@ -222,7 +222,7 @@ window.ORION_CHAT_HISTORY=(function(){
   ensureConversation(currentId());
   observeChat();
   let tries=0;const t=setInterval(()=>{if(installUi()||++tries>40)clearInterval(t)},125);
-  syncNow();setInterval(()=>{if(!document.hidden)syncNow()},15000);
+  scheduleSync(700);setInterval(()=>{if(!document.hidden)syncNow()},15000);
   setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
