@@ -25,9 +25,9 @@ console.log('bridge (real HTTP)');
  eq(refreshCalls,0,'manual Refresh was never needed (0 calls)');
  ok(B.getModel().local.verdict==='PASS'&&B.getModel().local.executionState==='completed','final model: execution completed, verdict PASS');
  /* malformed / error bodies => BACKEND ERROR, no new snapshot, never fake idle */
- for(const m of ['html','array','partial','truncated','e500']){const n=snaps.length;await ctl('mode/'+m);await sleep(250);
+ for(const m of ['html','array','partial','truncated','e500']){const n=snaps.length;await ctl('mode/'+m);await B.refresh();await sleep(40);
   ok(last()==='backend_error'&&snaps.length===n,'mode '+m+' => BACKEND ERROR, no snapshot emitted');ok(/./.test(run(ctx,'RealBridge.link().error')),'  error text kept: '+run(ctx,'RealBridge.link().error'))}
- await ctl('mode/ok');await sleep(250);ok(last()==='live','malformed bodies stop => live again');
+ await ctl('mode/ok');await B.refresh();await sleep(40);ok(last()==='live','malformed bodies stop => live again');
  /* offline -> reconnect */
  links.length=0;const n0=snaps.length;await ctl('mode/drop');await sleep(1500);
  const order=[...new Set(links)];ok(order.includes('stale')&&order.includes('reconnecting')&&order.includes('offline'),'dropped connection walks STALE -> RECONNECTING -> DISCONNECTED ('+order.join(' > ')+')');
