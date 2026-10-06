@@ -152,7 +152,7 @@ class OrionPcBridge(
                     val context = if (conversationId.isBlank()) {
                         ""
                     } else {
-                        historyStore.contextFor(conversationId, text)
+                        historyStore.contextFor(conversationId, text, maxRelatedMessages = 0)
                     }
                     val goal = if (context.isBlank()) {
                         text
