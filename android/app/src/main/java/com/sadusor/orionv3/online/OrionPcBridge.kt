@@ -164,7 +164,11 @@ class OrionPcBridge(
                     val start = request(
                         "POST",
                         "/api/local-hand/draft",
-                        JSONObject().put("goal", goal).put("model", model),
+                        JSONObject()
+                            .put("goal", goal)
+                            .put("model", model)
+                            .put("memory_query", text)
+                            .put("conversation_id", conversationId),
                         authenticated = true,
                         timeoutMs = 10000,
                     )
