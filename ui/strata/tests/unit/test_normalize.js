@@ -34,6 +34,6 @@ for(const [n,bad] of [['null',null],['string','<html>'],['array',[]],['empty obj
 ok(run(c,'validateStatus(__v()).ok')===true,'validateStatus accepts a real-shaped view');
 /* memory candidates (real field names) */
 c.__cand={candidates:[{candidate_id:'c1',content:'<b>x</b>',classification:'WORKFLOW',confidence:.7,submitted_at:NOW,source_actor:'a',source_ref:'r',decision:'defer',reason_for_candidate:'why'}]};
-const cand=run(c,'normalizeCandidates(__cand)');eq([cand[0].id,cand[0].kind,cand[0].status,cand[0].project,cand[0].meta.decision,cand[0].t],['c1','candidate','candidate','WORKFLOW','defer','<b>x</b>'],'memory candidates => labelled candidate, grouped by classification, text kept raw (escaped at render)');
+const cand=run(c,'normalizeCandidates(__cand)');eq([cand[0].id,cand[0].kind,cand[0].status,cand[0].project,cand[0].meta.decision,cand[0].t],['c1','candidate','candidate','personal','defer','<b>x</b>'],'legacy-shaped memory candidate => labelled candidate, explicit default scope, text kept raw (escaped at render)');
 c.__bc={nope:1};eq(run(c,'normalizeCandidates(__bc)'),[],'malformed candidates => empty');
 done('normalize');
