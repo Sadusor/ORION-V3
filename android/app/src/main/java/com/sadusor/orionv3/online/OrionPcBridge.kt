@@ -303,16 +303,42 @@ class OrionPcBridge(
         scope.launch {
             val payload = withContext(Dispatchers.IO) {
                 try {
+                    val candidateId = requestBody.optString("candidate_id").trim()
+                    val decision = requestBody.optString("decision").trim()
+                    val expectedHash = requestBody.optString("expected_content_sha256").trim()
+
+                    val prepared = request(
+                        "POST",
+                        "/api/memory/review-ticket",
+                        JSONObject()
+                            .put("candidate_id", candidateId)
+                            .put("decision", decision)
+                            .put("expected_content_sha256", expectedHash)
+                            .put("owner_scope", "owner:primary"),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!prepared.ok) {
+                        return@withContext JSONObject()
+                            .put("ok", false)
+                            .put("error", prepared.error)
+                    }
+
+                    val reviewToken = prepared.body.optString("review_token").trim()
+                    if (reviewToken.isBlank()) {
+                        return@withContext JSONObject()
+                            .put("ok", false)
+                            .put("error", "Owner review token was not issued.")
+                    }
+
                     val response = request(
                         "POST",
                         "/api/memory/decision",
                         JSONObject()
-                            .put("candidate_id", requestBody.optString("candidate_id").trim())
-                            .put("decision", requestBody.optString("decision").trim())
-                            .put(
-                                "expected_content_sha256",
-                                requestBody.optString("expected_content_sha256").trim(),
-                            )
+                            .put("candidate_id", candidateId)
+                            .put("decision", decision)
+                            .put("expected_content_sha256", expectedHash)
+                            .put("review_token", reviewToken)
                             .put("owner_scope", "owner:primary"),
                         authenticated = true,
                         timeoutMs = 8000,
@@ -328,6 +354,10 @@ class OrionPcBridge(
                             .put(
                                 "canonical_memory_written",
                                 response.body.optBoolean("canonical_memory_written"),
+                            )
+                            .put(
+                                "canonical_memory_revoked",
+                                response.body.optBoolean("canonical_memory_revoked"),
                             )
                     }
                 } catch (t: Throwable) {
