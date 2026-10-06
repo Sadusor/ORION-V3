@@ -124,7 +124,7 @@ function Restore-Previous {
         Log ("Source rollback warning: " + $_.Exception.Message)
     }
 
-    if ($ActivatedWindows -and (Test-Path -LiteralPath $BackupWindows -PathType Container)) {
+    if (Test-Path -LiteralPath $BackupWindows -PathType Container) {
         try {
             Remove-Item -LiteralPath $LiveWindows -Recurse -Force -ErrorAction SilentlyContinue
             Move-Item -LiteralPath $BackupWindows -Destination $LiveWindows
@@ -183,13 +183,13 @@ try {
     Remove-Item -LiteralPath $BackupRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
 
-    if (Test-Path -LiteralPath $LiveWindows -PathType Container) {
-        Move-Item -LiteralPath $LiveWindows -Destination $BackupWindows
-    }
-
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Repo "scripts\stop_orion.ps1") *>> $LogPath
     $Stopped = $true
     if ($LASTEXITCODE -ne 0) { throw "Current ORION did not stop cleanly." }
+
+    if (Test-Path -LiteralPath $LiveWindows -PathType Container) {
+        Move-Item -LiteralPath $LiveWindows -Destination $BackupWindows
+    }
 
     Move-Item -LiteralPath $StageWindows -Destination $LiveWindows
     $ActivatedWindows = $true
