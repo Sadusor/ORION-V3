@@ -15,9 +15,10 @@
    ====================================================================== */
 const ROUTES={
  'GET /api/status':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
- 'GET /api/memory/candidates':{kind:'read'},'GET /api/memory/search':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
+ 'GET /api/memory/candidates':{kind:'read'},'GET /api/memory/search':{kind:'read'},'GET /api/memory/canonical':{kind:'read'},'GET /api/memory/decisions':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
  'POST /api/pair':{kind:'auth'},
  'POST /api/memory/candidate':{kind:'approval',note:'Owner-selected exact chat message enters candidate queue only; never canonical Memory.'},
+ 'POST /api/memory/decision':{kind:'approval',note:'Owner-only PROMOTE / REJECT / DEFER decision. PROMOTE writes context-only canonical Memory; terminal decisions are immutable in V1.'},
  'POST /api/chat-history/sync':{kind:'storage'},
  'POST /api/local-hand/draft':{kind:'request',note:'Local Brain proposes. ORION preflight, semantic verifier and original-request authorization decide whether a registered capability starts.'},
  'POST /api/local-hand/revise':{kind:'request'},
