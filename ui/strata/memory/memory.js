@@ -3,7 +3,7 @@ const escH=v=>String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 /* --- memory universe: camera flies through ORION into the constellation --- */
 const muc=$("muc"),mctx=muc.getContext("2d");let MU={nodes:[],sel:null,q:"",old:false,t0:0,hover:null};
 const KC={fact:"#c9eef5",lesson:"#e0b867",evidence:"#9d90e8",candidate:"#9d90e8"};
-async function openMemory(q){layer("cc",0);const mem=await MemoryAdapters.load(B);MU.nodes=mem.nodes;MU.sources=mem.sources;MU.q=q||"";$("mq").value=MU.q;MU.sel=null;$("mud").classList.remove("on");
+async function openMemory(q){layer("cc",0);MU.q=q||"";const mem=await MemoryAdapters.load(B,MU.q);MU.nodes=mem.nodes;MU.sources=mem.sources;$("mq").value=MU.q;MU.sel=null;$("mud").classList.remove("on");
  app.classList.add("mem");S.mem=true;wake();setTimeout(()=>{layer("mu",1);MU.t0=performance.now();muLayout();muLoop()},650)}
 function closeMemory(){layer("mu",0);app.classList.remove("mem");S.mem=false;wake()}
 $("mux").onclick=closeMemory;$("sch").onkeydown=e=>{if(e.key==="Enter")openMemory(e.target.value)};
@@ -27,7 +27,11 @@ function muDraw(){const w=muc.clientWidth,h=muc.clientHeight,p=Math.min((perform
 function hit(ev){const r=muc.getBoundingClientRect();const x=ev.clientX-r.left,y=ev.clientY-r.top;return MU.nodes.filter(visible).find(n=>Math.hypot(n.x-x,n.y-y)<14)}
 muc.onmousemove=e=>{const n=hit(e)||null;if(n!==MU.hover){MU.hover=n;muc.style.cursor=n?"pointer":"";muDraw()}};
 muc.onclick=e=>{const n=hit(e);MU.sel=n||null;const d=$("mud");d.classList.toggle("on",!!n);if(n){const by=MU.nodes.find(x=>x.id===n.by),ft=MU.nodes.find(x=>x.by===n.id);
- d.innerHTML=`<span class="cap">${escH(n.kind)} · ${n.status==="current"?"current authoritative truth":n.status==="candidate"?"CANDIDATE · not promoted Memory":"superseded"}</span><h3>${escH(n.t)}</h3><p>${escH(n.project)} · ${escH(n.date)}${n.src?" · source: "+escH(n.src):""}</p>${n.meta?`<p>Decision: ${escH(n.meta.decision)}${n.meta.confidence!=null?" · confidence "+escH(n.meta.confidence):""}${n.meta.trust?" · trust "+escH(n.meta.trust):""}</p>${n.meta.reason?`<p>Why proposed: ${escH(n.meta.reason)}</p>`:""}`:""}${by?`<p>Replaced by: ${escH(by.t)}</p>`:""}${ft?`<p>Supersedes: ${escH(ft.t)}</p>`:""}`}muDraw()};
-$("mq").oninput=e=>{MU.q=e.target.value;muDraw()};$("tgOld").onclick=e=>{MU.old=!MU.old;e.target.classList.toggle("on",MU.old);muDraw()};
+ const cap=n.meta&&n.meta.authority==="context_only"?"context only · not authority":n.status==="current"?"current authoritative truth":n.status==="candidate"?"CANDIDATE · not promoted Memory":"superseded";
+ const meta=n.meta&&n.meta.authority==="context_only"?`<p>Retrieval: ${escH(n.meta.layer||"L1")}${n.meta.score!=null?" · score "+escH(n.meta.score):""} · provenance ${escH(n.meta.trust||"chat_history")}</p>`:(n.meta?`<p>Decision: ${escH(n.meta.decision)}${n.meta.confidence!=null?" · confidence "+escH(n.meta.confidence):""}${n.meta.trust?" · trust "+escH(n.meta.trust):""}</p>${n.meta.reason?`<p>Why proposed: ${escH(n.meta.reason)}</p>`:""}`:"");
+ d.innerHTML=`<span class="cap">${escH(n.kind)} · ${escH(cap)}</span><h3>${escH(n.t)}</h3><p>${escH(n.project)} · ${escH(n.date)}${n.src?" · source: "+escH(n.src):""}</p>${meta}${by?`<p>Replaced by: ${escH(by.t)}</p>`:""}${ft?`<p>Supersedes: ${escH(ft.t)}</p>`:""}`}muDraw()};
+$("mq").oninput=e=>{MU.q=e.target.value;muDraw()};
+$("mq").onkeydown=async e=>{if(e.key!=="Enter")return;MU.q=e.target.value;const mem=await MemoryAdapters.load(B,MU.q);MU.nodes=mem.nodes;MU.sources=mem.sources;MU.sel=null;$("mud").classList.remove("on");muLayout();muDraw()};
+$("tgOld").onclick=e=>{MU.old=!MU.old;e.target.classList.toggle("on",MU.old);muDraw()};
 addEventListener("resize",()=>{if(S.mem){muLayout();muDraw()}});
 
