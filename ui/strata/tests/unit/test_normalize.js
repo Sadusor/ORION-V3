@@ -36,4 +36,6 @@ ok(run(c,'validateStatus(__v()).ok')===true,'validateStatus accepts a real-shape
 c.__cand={candidates:[{candidate_id:'c1',content:'<b>x</b>',classification:'WORKFLOW',confidence:.7,submitted_at:NOW,source_actor:'a',source_ref:'r',decision:'defer',reason_for_candidate:'why'}]};
 const cand=run(c,'normalizeCandidates(__cand)');eq([cand[0].id,cand[0].kind,cand[0].status,cand[0].project,cand[0].meta.decision,cand[0].t],['c1','candidate','candidate','personal','defer','<b>x</b>'],'legacy-shaped memory candidate => labelled candidate, explicit default scope, text kept raw (escaped at render)');
 c.__bc={nope:1};eq(run(c,'normalizeCandidates(__bc)'),[],'malformed candidates => empty');
+c.__cm={memories:[{memory_id:'cm1',candidate_id:'c1',content:'GREEN 842',project_id:'',created_at_ms:1234,trust_tier:'owner_message_unverified',authority:'context_only',content_sha256:'f'.repeat(64),promoted_decision_id:'d1',promoted_event_hash:'e'.repeat(64)}]};
+const cm=run(c,'normalizeCanonicalMemory(__cm)');eq([cm[0].id,cm[0].kind,cm[0].status,cm[0].source,cm[0].project,cm[0].meta.canonical,cm[0].meta.authority],['cm1','fact','current','orion-accepted','personal',true,'context_only'],'canonical memory => current fact-shaped context, never execution authority');
 done('normalize');
