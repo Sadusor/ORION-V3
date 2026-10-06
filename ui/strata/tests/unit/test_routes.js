@@ -31,5 +31,5 @@ const B=run(ctx,'window.ORION_BRIDGE');
  ok(n===0&&approvals===0,'product connector catalog is status-only before connector wiring ('+n+' call actions, '+approvals+' approval boundaries)');
  const descriptorIds=mk(view()).active.map(x=>x.id);ok(descriptorIds.includes('project')&&descriptorIds.includes('providers')&&descriptorIds.includes('memory')&&descriptorIds.includes('safety'),'product connector catalog exposes truthful status surfaces');
  ok(!mk(view()).active.some(x=>(x.actions||[]).some(a=>a.href)),'product connector catalog has no legacy/Remote navigation actions');
- const kinds=run(c,'Object.values(STRATA_ROUTES).map(r=>r.kind)');ok(kinds.every(k=>['read','auth','request','approval','stop','command','high'].includes(k)),'every registered route has a known kind');
+ const kinds=run(c,'Object.values(STRATA_ROUTES).map(r=>r.kind)');ok(kinds.every(k=>['read','auth','request','approval','stop','storage','command','high'].includes(k)),'every registered route has a known kind');
  done('routes & safety')})();
