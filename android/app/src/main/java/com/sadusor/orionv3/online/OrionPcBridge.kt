@@ -137,6 +137,7 @@ class OrionPcBridge(
             JSONObject()
         }
         val id = request.optString("id").ifBlank { UUID.randomUUID().toString() }
+        val conversationId = request.optString("conversation_id").trim()
         val text = request.optString("text").trim()
         val model = request.optString("model").trim()
 
@@ -148,10 +149,22 @@ class OrionPcBridge(
         scope.launch {
             withContext(Dispatchers.IO) {
                 try {
+                    val context = if (conversationId.isBlank()) {
+                        ""
+                    } else {
+                        historyStore.contextFor(conversationId, text)
+                    }
+                    val goal = if (context.isBlank()) {
+                        text
+                    } else {
+                        "Conversation context from the owner's local chat memory:\n" +
+                            context +
+                            "\n\nAnswer the latest user message in that context."
+                    }
                     val start = request(
                         "POST",
                         "/api/local-hand/draft",
-                        JSONObject().put("goal", text).put("model", model),
+                        JSONObject().put("goal", goal).put("model", model),
                         authenticated = true,
                         timeoutMs = 10000,
                     )
