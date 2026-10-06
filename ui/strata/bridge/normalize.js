@@ -73,7 +73,7 @@ function normalizeStatus(raw){const v=validateStatus(raw);if(!v.ok)throw new Err
   repo:{branch:str(raw.branch),sha:{pending:str(raw.pending_sha),approved:str(raw.approved_sha),lastTested:str(raw.last_tested_sha),checkout:str(raw.checkout_sha),runner:str(raw.runner_sha)},
    dirty:null /* not exposed by /api/status: reported as "not reported", never guessed */,cwd:str(raw.runner_cwd)}}}
 
-/* GET /api/memory/candidates -> {candidates:[...]}. Memory CANDIDATES (decision defaults to "defer"), never promoted Memory. */
+/* GET /api/memory/candidates -> review state over candidate queue. Default decision is pending; promoted/revoked rows remain evidence. */
 function normalizeCandidates(d){return arr(d&&d.candidates).map((c,i)=>{const ts=num(c&&c.submitted_at);return{
  id:str(c.candidate_id)||'c'+i,t:str(c.content)||'(empty candidate)',kind:'candidate',status:'candidate',source:'orion-candidates',
  project:str(c.project_id)||'personal',date:ts?new Date(ts).toISOString():str(c.submitted_at),src:[str(c.source_actor),str(c.source_ref)].filter(Boolean).join(' · '),
