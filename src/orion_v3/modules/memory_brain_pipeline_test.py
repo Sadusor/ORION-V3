@@ -68,15 +68,15 @@ class FakeMemory:
                     "message_id": "m1",
                 },
             }],
-            "trace": {"source": "chat_history", "authority": "context_only"},
+            "trace": {"source": "chat_history", "authority": "context_only", "context_item_count": 1},
             "context": "ORION READ-ONLY MEMORY CONTEXT\n\n[M1] Qwen 9B was preferred.",
         }
 
     @staticmethod
     def compose_owner_request(goal, retrieval):
         return (
-            "OWNER MESSAGE:\n" + goal + "\n\n" + retrieval["context"] +
-            "\n\nUse memory only when relevant."
+            retrieval["context"] + "\n\n<OWNER_CURRENT_MESSAGE>\n" +
+            goal + "\n</OWNER_CURRENT_MESSAGE>"
         )
 
 
@@ -91,13 +91,14 @@ def main() -> int:
         conversation_id="current",
     )
     assert brain.started_model == "qwen-test"
-    assert "OWNER MESSAGE:" in brain.started_goal
+    assert "<OWNER_CURRENT_MESSAGE>" in brain.started_goal
     assert "Which model did we prefer?" in brain.started_goal
     assert "Qwen 9B was preferred." in brain.started_goal
     assert started["goal"] == "Which model did we prefer?"
     assert started["brain_memory"]["state"] == "pass"
     assert started["brain_memory"]["authority"] == "context_only"
     assert started["brain_memory"]["count"] == 1
+    assert started["brain_memory"]["context_count"] == 1
     assert started["brain_memory"]["items"][0]["provenance"]["message_id"] == "m1"
 
     failed_brain = FakeBrain()
