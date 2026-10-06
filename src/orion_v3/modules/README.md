@@ -13,7 +13,7 @@ Boundary:
 - returns advisory conclusion/draft text;
 - owns no tools, Hands, capabilities, approval, execution, STOP, memory promotion, filesystem access, browser access, or cloud access.
 
-The product server is only a narrow transport/state hook.
+The product server is only a narrow transport/state hook. STRATA has one small presentation hook that prints a completed `brain_conclusion` into the existing chat exactly once; it adds no new authority or route.
 
 The first qualification gate proves:
 
