@@ -11,6 +11,7 @@ import android.view.View
 import android.widget.FrameLayout
 import android.widget.TextView
 import android.webkit.ConsoleMessage
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
@@ -65,6 +66,7 @@ class MainActivity : Activity() {
             settings.mediaPlaybackRequiresUserGesture = true
 
             addJavascriptInterface(historyBridge, "ORION_NATIVE_HISTORY")
+            addJavascriptInterface(AppBridge(), "ORION_NATIVE_APP")
             WebView.setWebContentsDebuggingEnabled(true)
 
             webChromeClient = object : WebChromeClient() {
@@ -168,6 +170,13 @@ class MainActivity : Activity() {
 
         setContentView(root)
         loadOnline()
+    }
+
+    inner class AppBridge {
+        @JavascriptInterface
+        fun openOffline() {
+            runOnUiThread { loadOffline() }
+        }
     }
 
     private fun loadOnline() {
