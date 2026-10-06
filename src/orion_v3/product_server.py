@@ -11,11 +11,13 @@ import subprocess
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qs, unquote, urlparse
 
 from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
+from modules.memory_retrieval import MemoryRetrievalModule
+from modules.memory_brain_pipeline import MemoryAwareBrainPipeline
 from modules.update_manager import UpdateError, UpdateManager
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -26,8 +28,12 @@ PID_FILE = STATE_ROOT / "product-ui.pid"
 DEVICES_FILE = STATE_ROOT / "devices.json"
 APK_FILE = ROOT / "dist" / "ORION-V3-debug.apk"
 
-LOCAL_BRAIN = StreamingBrainPipeline()
 CHAT_HISTORY = ChatHistoryStore(STATE_ROOT / "chat_history.sqlite3")
+MEMORY_RETRIEVAL = MemoryRetrievalModule(CHAT_HISTORY)
+LOCAL_BRAIN = MemoryAwareBrainPipeline(
+    brain=StreamingBrainPipeline(),
+    memory=MEMORY_RETRIEVAL,
+)
 UPDATE_MANAGER = UpdateManager(ROOT, STATE_ROOT)
 
 DENIED_TOP = {"demo.html", "README.md", "ARCHITECTURE.md", "INTEGRATION.md", "PRODUCT_UI.md", "STATE_CONTRACT.md", "TESTING.md"}
@@ -166,6 +172,7 @@ class ProductState:
             "provider_vault": {"providers": []},
             "local_brain_default_model": LOCAL_BRAIN.default_model(),
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
+            "memory_retrieval": MEMORY_RETRIEVAL.last(),
         }
 
 
@@ -254,7 +261,9 @@ class Handler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 
     def do_GET(self):
-        path = urlparse(self.path).path
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+        query = parse_qs(parsed_url.query, keep_blank_values=True)
         if path == "/":
             self.send_response(302)
             self.send_header("Location", "/v3/")
@@ -311,6 +320,24 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, {"items": [], "status": "not_connected"})
         if path == "/api/memory/candidates":
             return self._json(200, {"candidates": []})
+        if path == "/api/memory/search":
+            try:
+                raw_limit = str((query.get("limit") or ["6"])[0] or "6")
+                result = MEMORY_RETRIEVAL.retrieve(
+                    str((query.get("q") or [""])[0]),
+                    conversation_id=str((query.get("conversation_id") or [""])[0]),
+                    project_id=(
+                        str((query.get("project_id") or [""])[0])
+                        if "project_id" in query
+                        else None
+                    ),
+                    limit=int(raw_limit),
+                )
+                return self._json(200, result)
+            except (TypeError, ValueError) as exc:
+                return self._json(400, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/reviewers/latest":
             return self._json(200, STATE.view()["reviewer"])
         if path == "/api/providers":
@@ -346,6 +373,13 @@ class Handler(BaseHTTPRequestHandler):
                 LOCAL_BRAIN.start(
                     str(body.get("goal", "")),
                     str(body.get("model", "")),
+                    memory_query=str(body.get("memory_query", "")),
+                    conversation_id=str(body.get("conversation_id", "")),
+                    project_id=(
+                        str(body.get("project_id", ""))
+                        if "project_id" in body
+                        else None
+                    ),
                 )
                 return self._json(202, STATE.view())
             except LocalBrainError as exc:
