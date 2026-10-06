@@ -55,26 +55,32 @@ retrieval into model prompts is deliberately a later module.
 
 Allowed decisions:
 
-- `PROMOTE` — terminal; creates one immutable canonical-memory record;
+- `PROMOTE` — creates one immutable canonical-memory record; may only repeat idempotently or move to REVOKE;
 - `REJECT` — terminal; creates no canonical memory;
-- `DEFER` — non-terminal; the owner may later PROMOTE or REJECT.
+- `DEFER` — non-terminal; the owner may later PROMOTE or REJECT;
+- `REVOKE` — terminal append-only safety action for an already-promoted memory.
 
-V1 terminal decisions cannot be reversed. A future correction/supersession
-module will append a new correction record instead of rewriting history.
+REVOKE never deletes or edits the original promotion evidence or canonical row.
+It makes the memory inactive in canonical reads. Revoked memory cannot be
+re-promoted in V1.
 
-Repeated identical terminal decisions are idempotent.
+Repeated identical decisions use a fresh one-time review ticket but remain
+idempotent at the durable event/state layer.
 
 ## Exact candidate binding
 
-A decision request contains:
+Durable decisions use a two-step owner-authority boundary:
 
-- candidate ID;
-- expected candidate content SHA-256;
-- decision;
-- fixed owner scope `owner:primary`.
+1. an explicit UI gesture requests a short-lived one-time review ticket;
+2. the ticket is bound to candidate ID, exact content SHA-256, exact decision,
+   owner scope, and paired-device actor fingerprint;
+3. the commit request must present that one-time token.
+
+Both review-ticket and decision routes require a **paired owner token even on
+PC loopback**. Ordinary ORION routes retain their existing local-loopback trust.
 
 The server re-reads the candidate from the Candidate Queue and refuses stale or
-forged hashes.
+forged hashes. Review tickets expire after 90 seconds and are consumed once.
 
 The client cannot supply replacement canonical-memory content.
 
@@ -84,6 +90,7 @@ PROMOTE copies the exact candidate content and provenance snapshot.
 
 Decision events are append-only SQLite rows containing:
 
+- monotonic event index;
 - decision ID;
 - candidate ID and content SHA-256;
 - decision;
@@ -92,23 +99,34 @@ Decision events are append-only SQLite rows containing:
 - owner + project scope;
 - source reference;
 - trust origin/tier;
+- paired owner actor fingerprint;
+- SHA-256 of the one-time review token;
 - complete candidate snapshot;
 - decision timestamp;
 - previous event hash;
 - current event hash.
 
-The global decision log forms a tamper-evident hash chain.
+The global decision log forms an in-database tamper-evident hash chain.
+
+This claim is deliberately bounded: it detects mutation/reordering inside the
+database when audited, but a wholesale replacement of the local SQLite file
+cannot be detected until a future external anchor is added.
 
 SQLite triggers deny UPDATE/DELETE on decision events.
 
 Canonical-memory rows are immutable in V1; SQLite triggers deny UPDATE/DELETE.
 
-## Secret boundary
+## Promotion-time safety boundary
 
-Normal canonical Memory is not a secret store.
+Normal canonical Memory is not a secret store and is not an instruction store.
 
-V1 refuses PROMOTE when the exact candidate contains conservative obvious-secret
-patterns such as:
+V1 re-evaluates the exact candidate **again at promotion time**.
+
+PROMOTE is refused for assistant-origin candidates. The owner must restate a
+verified fact in an owner message before it may become canonical Memory.
+
+PROMOTE is also refused when the exact candidate contains conservative
+obvious-secret patterns such as:
 
 - private-key blocks;
 - `password = ...`;
@@ -117,8 +135,12 @@ patterns such as:
 - Authorization Bearer values;
 - explicit `token = ...` values.
 
-The owner may still REJECT such a candidate. There is no V1 override for normal
-Memory promotion.
+The promotion filter also refuses obvious stored instruction/prompt-injection
+patterns, including system/developer override language, "ignore previous
+instructions", "always approve", and approval/policy/verifier bypass language.
+
+The owner may still REJECT or DEFER unsafe candidates. There is no V1 override
+for normal Memory promotion.
 
 ## UI
 
@@ -135,7 +157,7 @@ Settings shows:
 
 Each reviewable candidate has:
 
-`PROMOTE / REJECT / DEFER`
+`PROMOTE / REJECT / DEFER / REVOKE`
 
 PROMOTE requires an explicit confirmation dialog.
 
@@ -156,10 +178,14 @@ Must prove:
 - owner PROMOTE creates exact immutable canonical content;
 - owner REJECT creates no canonical content;
 - DEFER remains reviewable and can later PROMOTE;
-- terminal decision reversal is denied;
+- reject/revoke terminal reversal is denied;
 - repeated identical promotion is idempotent;
 - stale/forged candidate content hash is denied;
+- one-time review tickets reject replay;
+- assistant-origin promotion is denied;
 - secret-like candidate promotion is denied;
+- instruction-like candidate promotion is denied;
+- append-only REVOKE makes promoted memory inactive without deleting evidence;
 - candidate queue remains unchanged;
 - decision rows are append-only;
 - canonical rows are immutable;
@@ -178,14 +204,15 @@ Must prove:
 Use existing real candidates on the phone:
 
 1. PROMOTE the owner-confirmed `GREEN 842` candidate;
-2. Settings must show one more promoted item and one canonical memory;
-3. canonical record must contain exactly the source content;
+2. Settings must show one active promoted item and one active canonical memory;
+3. canonical record must contain exactly the source content and preserved owner trust tier;
 4. attempt PROMOTE again -> idempotent/already recorded;
-5. REJECT the deliberately wrong assistant `BLUE 901` candidate;
-6. it must not enter canonical Memory;
-7. DEFER another harmless candidate;
-8. it remains reviewable;
-9. no existing Conversation Recall behavior may regress.
+5. attempt to PROMOTE the deliberately wrong assistant `BLUE 901` candidate -> refused;
+6. REJECT that assistant candidate;
+7. DEFER another harmless owner candidate;
+8. REVOKE the promoted GREEN 842 memory;
+9. active canonical count must drop while revocation evidence remains;
+10. no existing Conversation Recall behavior may regress.
 
 Only then freeze Review + Promotion V1.
 
