@@ -18,11 +18,14 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.security.MessageDigest
 import java.util.UUID
 
 private const val MODEL_ASSET = "models/Qwen3-0.6B-Q4_0.gguf"
 private const val MODEL_FILE = "Qwen3-0.6B-Q4_0.gguf"
+private const val MODEL_SHA256 = "DA2572F16C06133561CE56ACCAA822216F2391EF4D37FBA427801CD6736417D4"
 
 class OfflineChatBridge(
     private val activity: Activity,
@@ -86,14 +89,25 @@ class OfflineChatBridge(
     }
 
     @JavascriptInterface
-    fun modelInfo(): String =
-        JSONObject()
+    fun modelInfo(): String {
+        val persistent = File(File(activity.filesDir, "models"), MODEL_FILE)
+        val bundled = try {
+            activity.assets.open(MODEL_ASSET, AssetManager.ACCESS_STREAMING).use { }
+            true
+        } catch (_: Throwable) {
+            false
+        }
+        return JSONObject()
             .put("name", "Qwen3-0.6B")
             .put("quant", "Q4_0")
-            .put("asset", MODEL_ASSET)
             .put("offline", true)
             .put("loaded", model != null)
+            .put("installed", persistent.isFile)
+            .put("persistent_bytes", if (persistent.isFile) persistent.length() else 0L)
+            .put("bundled_asset", bundled)
+            .put("verification", "sha256-on-load")
             .toString()
+    }
 
     @JavascriptInterface
     fun reconnect() {
@@ -128,21 +142,53 @@ class OfflineChatBridge(
     private fun materializeModel(context: Context): File {
         val dir = File(context.filesDir, "models").apply { mkdirs() }
         val dst = File(dir, MODEL_FILE)
-        if (dst.isFile && dst.length() > 300_000_000L) return dst
+
+        if (dst.isFile) {
+            if (sha256(dst) == MODEL_SHA256) return dst
+            dst.delete()
+        }
 
         val tmp = File(dir, "$MODEL_FILE.partial")
         if (tmp.exists()) tmp.delete()
-        context.assets.open(MODEL_ASSET, AssetManager.ACCESS_STREAMING).use { input ->
-            FileOutputStream(tmp).use { output ->
-                input.copyTo(output, bufferSize = 1024 * 1024)
-                output.fd.sync()
+
+        try {
+            context.assets.open(MODEL_ASSET, AssetManager.ACCESS_STREAMING).use { input ->
+                FileOutputStream(tmp).use { output ->
+                    input.copyTo(output, bufferSize = 1024 * 1024)
+                    output.fd.sync()
+                }
             }
+        } catch (_: Throwable) {
+            tmp.delete()
+            throw IllegalStateException(
+                "Local Qwen model is not installed on this phone. " +
+                    "Install the one-time offline model pack before using Local.",
+            )
         }
+
+        if (sha256(tmp) != MODEL_SHA256) {
+            tmp.delete()
+            throw IllegalStateException("Local Qwen model failed SHA-256 verification.")
+        }
+
         if (!tmp.renameTo(dst)) {
             tmp.copyTo(dst, overwrite = true)
             tmp.delete()
         }
         return dst
+    }
+
+    private fun sha256(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        FileInputStream(file).use { input ->
+            val buffer = ByteArray(1024 * 1024)
+            while (true) {
+                val read = input.read(buffer)
+                if (read <= 0) break
+                digest.update(buffer, 0, read)
+            }
+        }
+        return digest.digest().joinToString("") { "%02X".format(it) }
     }
 
     private fun buildPrompt(context: String): String =
