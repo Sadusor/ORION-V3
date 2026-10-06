@@ -135,6 +135,10 @@ button{touch-action:manipulation}
       <p id="localModelText">Checking persistent model storage…</p>
     </div>
     <div class="settingRow">
+      <b>PC memory recall</b>
+      <p id="pcMemoryText">Connect to ORION PC for provenance-backed cross-chat recall.</p>
+    </div>
+    <div class="settingRow">
       <b>Local memory</b>
       <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
     </div>
@@ -169,7 +173,7 @@ button{touch-action:manipulation}
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
  let data={conversations:[],messages:[]},current='',menuTarget='',toastTimer=0;
  let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
- let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null};
+ let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null};
  let wasConnected=false, pendingLocal={}, pendingPc={}, pendingActions={};
 
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -254,6 +258,8 @@ button{touch-action:manipulation}
    document.getElementById('updateBtn').disabled=!pc.connected;
    document.getElementById('installBtn').disabled=!pc.connected;
    const u=pc.update||{};document.getElementById('updateText').textContent=u.state?('Update '+String(u.state).toUpperCase()+(u.message?' · '+u.message:'')):'Connect to the PC to check/update ORION.';
+   const mr=pc.memory_retrieval||{},mt=mr.trace||{},mc=Array.isArray(mr.items)?mr.items.length:0;
+   document.getElementById('pcMemoryText').textContent=!pc.connected?'Connect to ORION PC for provenance-backed cross-chat recall.':(mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):'Ready · read-only · context only · canonical promotion is still locked.');
    renderModels();
  }
  function refreshPc(){
@@ -310,7 +316,7 @@ button{touch-action:manipulation}
    chat.scrollTop=chat.scrollHeight;
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
-   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;renderConnection();
+   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;renderConnection();
    if(pc.connected&&!prior)syncHistory();wasConnected=pc.connected;
  };
  window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
