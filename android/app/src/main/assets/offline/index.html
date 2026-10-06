@@ -295,7 +295,7 @@ button{touch-action:manipulation}
    if(selected.startsWith('pc:')){
      if(!pc.connected){toast('PC model unavailable. Choose Local or connect ORION PC.');return}
      pendingPc[req]=createLiveBubble(req,'pc',cid);
-     nativePc.ask(JSON.stringify({id:req,conversation_id:cid,text,model:selected.slice(3)}));
+     const c=conv(cid);nativePc.ask(JSON.stringify({id:req,conversation_id:cid,project_id:(c&&c.project_id)||'',text,model:selected.slice(3)}));
    }else{
      pendingLocal[req]=createLiveBubble(req,'local',cid);
      nativeLocal.ask(JSON.stringify({id:req,conversation_id:cid,text}));
