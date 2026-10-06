@@ -62,8 +62,8 @@ class OfflineChatBridge(
                     systemPrompt = "You are ORION Pocket, a concise private offline assistant. Use the supplied current conversation and relevant same-scope prior chat context. Never claim to be connected to the PC or internet when offline.",
                     maxTokens = 256,
                 )
-                val answer = result.text.trim()
-                if (answer.isEmpty()) throw IllegalStateException("Offline model returned no text.")
+                val answer = cleanModelOutput(result.text)
+                if (answer.isEmpty()) throw IllegalStateException("Offline model returned no visible answer.")
                 historyStore.merge(
                     JSONObject()
                         .put(
@@ -189,6 +189,16 @@ class OfflineChatBridge(
             }
         }
         return digest.digest().joinToString("") { "%02X".format(it) }
+    }
+
+    private fun cleanModelOutput(raw: String): String {
+        var text = raw.replace(
+            Regex("(?is)<think\\b[^>]*>.*?</think>"),
+            "",
+        )
+        // Defensive cleanup for models that emit a stray reasoning tag.
+        text = text.replace(Regex("(?is)</?think\\b[^>]*>"), "")
+        return text.trim()
     }
 
     private fun buildPrompt(context: String): String =
