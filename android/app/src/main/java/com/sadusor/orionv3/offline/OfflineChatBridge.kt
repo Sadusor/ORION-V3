@@ -50,13 +50,13 @@ class OfflineChatBridge(
 
         scope.launch {
             try {
-                val context = historyStore.contextFor(conversationId)
+                val context = historyStore.contextFor(conversationId, text)
                 val prompt = buildPrompt(context.ifBlank { "User: $text" })
                 val loaded = ensureModel()
                 val result = Llama.complete(
                     loaded,
                     prompt = prompt,
-                    systemPrompt = "You are ORION Pocket, a concise private offline assistant. Use the supplied conversation context. Never claim to be connected to the PC or internet when offline.",
+                    systemPrompt = "You are ORION Pocket, a concise private offline assistant. Use the supplied current conversation and relevant same-scope prior chat context. Never claim to be connected to the PC or internet when offline.",
                     maxTokens = 256,
                 )
                 val answer = result.text.trim()
