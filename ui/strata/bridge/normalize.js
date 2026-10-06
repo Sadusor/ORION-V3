@@ -91,7 +91,7 @@ function normalizeMemoryRecall(d){return arr(d&&d.items).map((m,i)=>{
   project:str(p.project_id)||'personal',
   date:ts?new Date(ts).toISOString():'',
   src:[str(p.message_source),str(p.conversation_id),str(p.message_id)].filter(Boolean).join(' · '),
-  meta:{authority:'context_only',trust:'chat_history',score:num(m&&m.score),layer:str(m&&m.layer)||'L1',role:str(p.role),title:str(m&&m.title)}
+  meta:{authority:'context_only',trust:str(m&&m.trust_tier)||str(p.trust_tier)||'unverified',score:num(m&&m.score),layer:str(m&&m.layer)||'message',role:str(p.role),title:str(m&&m.title),riskFlags:arr(m&&m.risk_flags),contextEligible:m&&m.context_eligible!==false}
  }})}
 
 /* open_web_url etc. write JSON into lane.output. Returns {} when it is not JSON. */
