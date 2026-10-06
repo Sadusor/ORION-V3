@@ -154,7 +154,7 @@ button{touch-action:manipulation}
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.5.0 · Memory Review + Promotion V1</p>
+      <p>ORION 0.5.1 · Memory Review + Promotion V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -278,12 +278,13 @@ button{touch-action:manipulation}
    const pending=Number(cq.pending_count||0),deferred=Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0),revoked=Number(cq.revoked_count||0);
    summary.textContent=(pending+deferred)+' awaiting review · '+promoted+' active promoted · '+rejected+' rejected · '+revoked+' revoked. Canonical Memory is context only.';
    list.innerHTML=items.map(c=>{
-     const d=String(c.decision||'pending'),reviewable=d==='pending'||d==='defer',assistant=String(c.source_role||'')==='assistant',revokable=d==='promote';
+     const d=String(c.decision||'pending'),reviewable=d==='pending'||d==='defer',assistant=String(c.source_role||'')==='assistant',revokable=d==='promote',promotionEligible=c.promotion_eligible===true;
      const who=assistant?'assistant prior · unverified':'owner message · unverified';
+     const blockReason=String(c.promotion_block_reason||'');
      let actions='';
      if(reviewable){
-       actions='<div class="candidateActions">'+(assistant?'':'<button data-memory-decision="promote">PROMOTE</button>')+'<button data-memory-decision="reject">REJECT</button><button data-memory-decision="defer">DEFER</button></div>';
-       if(assistant)actions+='<small>Assistant priors cannot be promoted in V1. Restate a verified fact as an owner message first.</small>';
+       actions='<div class="candidateActions">'+(promotionEligible?'<button data-memory-decision="promote">PROMOTE</button>':'')+'<button data-memory-decision="reject">REJECT</button><button data-memory-decision="defer">DEFER</button></div>';
+       if(!promotionEligible)actions+='<small>'+(assistant?'Assistant priors cannot be promoted in V1. Restate a verified fact as an owner message first.':blockReason==='instruction_like'?'Instruction-like owner messages cannot be canonical Memory in V1. Restate as a declarative fact, preference, or decision.':'This candidate is not eligible for canonical promotion.')+'</small>';
      }else if(revokable){
        actions='<button data-memory-decision="revoke">REVOKE canonical memory</button><small>Revocation is append-only; promotion evidence remains.</small>';
      }
