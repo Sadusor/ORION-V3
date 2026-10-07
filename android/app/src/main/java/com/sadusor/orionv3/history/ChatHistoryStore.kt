@@ -129,21 +129,46 @@ class ChatHistoryStore(context: Context) :
         if (role !in setOf("user", "assistant", "system")) return
 
         val created = raw.optLong("created_at_ms", System.currentTimeMillis())
+        val source = clean(raw.optString("source"), 80)
         ensureConversation(db, conversationId, created)
-        db.execSQL(
-            """
-            INSERT OR IGNORE INTO messages(id,conversation_id,role,text,source,created_at_ms)
-            VALUES(?,?,?,?,?,?)
-            """.trimIndent(),
-            arrayOf(
-                id,
-                conversationId,
-                role,
-                text,
-                clean(raw.optString("source"), 80),
-                created,
-            ),
-        )
+
+        // CHAT_SYNC_V1 parity with the PC store: the same completed ORION
+        // assistant reply can arrive once from the live bridge and once from
+        // shared-history sync with different message ids. Collapse only exact
+        // ORION assistant duplicates inside a short window; user turns remain
+        // strictly id-based.
+        var duplicateAssistant = false
+        if (role == "assistant" && source.startsWith("orion")) {
+            duplicateAssistant = db.rawQuery(
+                """
+                SELECT 1 FROM messages
+                WHERE conversation_id=?
+                  AND role='assistant'
+                  AND text=?
+                  AND source LIKE 'orion%'
+                  AND ABS(created_at_ms-?) <= 30000
+                LIMIT 1
+                """.trimIndent(),
+                arrayOf(conversationId, text, created.toString()),
+            ).use { cursor -> cursor.moveToFirst() }
+        }
+
+        if (!duplicateAssistant) {
+            db.execSQL(
+                """
+                INSERT OR IGNORE INTO messages(id,conversation_id,role,text,source,created_at_ms)
+                VALUES(?,?,?,?,?,?)
+                """.trimIndent(),
+                arrayOf(
+                    id,
+                    conversationId,
+                    role,
+                    text,
+                    source,
+                    created,
+                ),
+            )
+        }
         db.execSQL(
             "UPDATE conversations SET updated_at_ms=max(updated_at_ms,?) WHERE id=?",
             arrayOf(created, conversationId),
