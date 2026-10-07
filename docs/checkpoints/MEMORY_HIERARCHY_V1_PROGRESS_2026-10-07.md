@@ -139,3 +139,41 @@ Physical retest:
 - PC connection remained active during the test.
 
 Result: **L1 CURRENT RETRIEVAL AFTER CONSOLIDATION — PASS**.
+
+
+## Owner-reviewed supersession flow — physical PASS
+
+Physical fixture:
+- one active light-mode canonical preference remained current;
+- owner promoted a newer dark-mode canonical preference;
+- one duplicate light preference had been revoked by the owner separately;
+- after refresh, conflict detector showed exactly 1 unresolved personal-scope conflict.
+
+Conflict review UI physically showed:
+- OLDER MEMORY: "I prefer light mode in Orion"
+- NEWER MEMORY: "I prefer dark mode for ORION."
+- action: "Use newer memory · preserve old evidence"
+- explicit confirmation dialog stated the older memory would remain preserved as historical evidence.
+
+Owner confirmed the action.
+
+Post-confirmation physical refresh:
+- Memory conflicts: 0 unresolved high-confidence conflicts;
+- Memory hierarchy: L0 1 current item;
+- duplicates consolidated: 0;
+- L1 current / L2 history ready;
+- raw canonical promotion store still reported 2 active promoted records, as expected because supersession is represented in a separate append-only relation ledger and canonical rows are immutable.
+
+Result: **OWNER-REVIEWED SUPERSESSION FLOW — PASS**.
+
+Architecture evidence:
+- no automatic supersession;
+- explicit owner confirmation required;
+- older canonical evidence preserved;
+- no canonical row mutation/deletion;
+- current retrieval/hierarchy excludes superseded prior memory;
+- raw promotion-store counts remain distinct from current-effective-memory counts.
+
+UX note for later UI polish:
+- "active canonical memories" reflects immutable promotion state and can look confusing after supersession.
+- Consider wording such as "promoted records" plus a separate "current effective memories" count without changing storage semantics.
