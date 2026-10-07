@@ -216,6 +216,9 @@ B.subscribe(ev=>{
   dispatch({type:'snapshot',model:ev.model});
   const L=ev.model&&ev.model.local;
   const live=window.ORION_LIVE_BRAIN_CHAT;
+  if(L&&L.conversationId&&window.ORION_CHAT_HISTORY&&ORION_CHAT_HISTORY.load&&L.conversationId!==V.convId){
+   ORION_CHAT_HISTORY.load(L.conversationId);
+  }
   if(live&&L){
    live.update(L,$('chat'));
    if((L.brainState==='running'&&L.preview)||L.brainState==='ready'){
