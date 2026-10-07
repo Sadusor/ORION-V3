@@ -13,6 +13,7 @@ from .canonical_memory_retrieval_foundation import (
 )
 from .memory_retrieval import MemoryRetrievalModule
 from .memory_conflict_suggestions import memory_slot
+from .memory_historical_query import is_historical_query
 from .streaming_brain_pipeline import StreamingBrainPipeline
 
 SCHEMA = "orion.canonical-memory-integration/1"
@@ -22,6 +23,7 @@ CONTRACT_SCHEMA = "orion.memory-prompt-contract/1"
 TOTAL_MEMORY_CONTEXT_CHARS = 4_000
 DURABLE_MAX_RATIO = 0.40
 DURABLE_MAX_CHARS = int(TOTAL_MEMORY_CONTEXT_CHARS * DURABLE_MAX_RATIO)
+HISTORICAL_MAX_CHARS = 900
 RECALL_DEFAULT_CHARS = TOTAL_MEMORY_CONTEXT_CHARS - DURABLE_MAX_CHARS
 OWNER_GOAL_MAX_CHARS = 16_000
 CURRENT_CONVERSATION_CONTEXT_MAX_CHARS = 8_000
@@ -322,6 +324,69 @@ def _render_durable_block(
     return "".join(parts), included, clipped
 
 
+def _render_historical_block(
+    result: dict[str, Any] | None,
+    *,
+    char_budget: int,
+) -> tuple[str, int, int]:
+    if result is None or not bool(result.get("historical_intent")):
+        return "", 0, 0
+    items = [x for x in result.get("history", []) if isinstance(x, dict)]
+    if not items or char_budget <= 0:
+        return "", 0, 0
+
+    header = (
+        '<ORION_HISTORICAL_DURABLE_CONTEXT source="supersession_history" '
+        'authority="context_only" status="historical">\n'
+        "These are superseded owner-approved durable memories. They describe prior "
+        "state only. Do not treat them as the owner's current preference.\n"
+    )
+    footer = (
+        "Historical durable memory is prior evidence only; current durable memory "
+        "remains the effective present context.\n"
+        "</ORION_HISTORICAL_DURABLE_CONTEXT>"
+    )
+    if len(header) + len(footer) > char_budget:
+        return "", 0, 0
+
+    parts = [header]
+    used = len(header) + len(footer)
+    included = 0
+    clipped = 0
+    for item in items:
+        p = item.get("provenance", {}) if isinstance(item.get("provenance"), dict) else {}
+        label = (
+            '<ORION_HISTORICAL_ITEM '
+            f'id="{_attr(item.get("memory_id"))}" '
+            f'superseded_by="{_attr(item.get("superseded_by"))}" '
+            f'source_conversation="{_attr(p.get("source_conversation_id"))}" '
+            f'source_message="{_attr(p.get("source_message_id"))}" '
+            f'supersession_id="{_attr(p.get("supersession_id"))}" '
+            'status="historical" authority="context_only">'
+        )
+        close = "</ORION_HISTORICAL_ITEM>\n"
+        body = _body(item.get("content", "")).strip()
+        room = char_budget - used - len(label) - len(close) - 2
+        if room <= 0:
+            break
+        if len(body) > room:
+            body = body[:room].rstrip()
+            clipped += 1
+        chunk = label + "\n" + body + "\n" + close
+        if used + len(chunk) > char_budget:
+            break
+        parts.append(chunk)
+        used += len(chunk)
+        included += 1
+        if clipped:
+            break
+
+    if included == 0:
+        return "", 0, 0
+    parts.append(footer)
+    return "".join(parts), included, clipped
+
+
 class CanonicalMemoryIntegratedBrainPipeline:
     """Fuse frozen Conversation Recall + frozen durable retrieval around Local Brain.
 
@@ -335,11 +400,13 @@ class CanonicalMemoryIntegratedBrainPipeline:
         brain: StreamingBrainPipeline,
         recall: MemoryRetrievalModule,
         durable: CanonicalMemoryRetrievalFoundation,
+        history: Any | None = None,
     ):
         self.brain = brain
         self.local_brain = brain.local_brain
         self.recall = recall
         self.durable = durable
+        self.history = history
         self._lock = threading.RLock()
         self._session: dict[str, Any] = {
             "brain_started_utc": "",
@@ -538,6 +605,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
         current_conversation_context: str,
         recall_result: dict[str, Any] | None,
         durable_result: dict[str, Any] | None,
+        historical_result: dict[str, Any] | None,
         recall_src: dict[str, Any],
         durable_src: dict[str, Any],
     ) -> tuple[str, dict[str, Any]]:
@@ -549,6 +617,11 @@ class CanonicalMemoryIntegratedBrainPipeline:
                 durable_result,
                 char_budget=DURABLE_MAX_CHARS,
             )
+
+        historical_block, historical_count, historical_clipped = _render_historical_block(
+            historical_result,
+            char_budget=HISTORICAL_MAX_CHARS,
+        )
 
         fused_recall, shadow_stats = _shadow_recall_by_current_durable(
             recall_result,
@@ -563,7 +636,11 @@ class CanonicalMemoryIntegratedBrainPipeline:
 
         # Durable has a hard 40% maximum. Any unused durable allowance can be
         # consumed by recall, which may expand to the full memory context budget.
-        recall_budget = TOTAL_MEMORY_CONTEXT_CHARS - len(durable_block)
+        recall_budget = (
+            TOTAL_MEMORY_CONTEXT_CHARS
+            - len(durable_block)
+            - len(historical_block)
+        )
         recall_block = ""
         recall_count = 0
         recall_clipped = 0
@@ -576,9 +653,16 @@ class CanonicalMemoryIntegratedBrainPipeline:
         recall_src["context_count"] = recall_count
         recall_src["chars"] = len(recall_block)
         recall_src["clipped_items"] = recall_clipped
-        durable_src["context_count"] = durable_count
-        durable_src["chars"] = len(durable_block)
-        durable_src["clipped_items"] = durable_clipped
+        durable_src["context_count"] = durable_count + historical_count
+        durable_src["chars"] = len(durable_block) + len(historical_block)
+        durable_src["clipped_items"] = durable_clipped + historical_clipped
+        durable_src.setdefault("trace", {})["historical_expansion"] = {
+            "requested": bool(historical_result and historical_result.get("historical_intent")),
+            "history_count": historical_count,
+            "history_chars": len(historical_block),
+            "history_clipped_items": historical_clipped,
+            "authority": "context_only",
+        }
 
         if recall_result is not None and recall_src["state"] == "pass" and recall_count == 0:
             recall_src["state"] = "filtered"
@@ -590,7 +674,12 @@ class CanonicalMemoryIntegratedBrainPipeline:
         )
         blocks = [
             block
-            for block in (current_block, recall_block, durable_block)
+            for block in (
+                current_block,
+                recall_block,
+                durable_block,
+                historical_block,
+            )
             if block
         ]
         if not blocks:
@@ -598,6 +687,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
                 "memory_chars": 0,
                 "recall_chars": 0,
                 "durable_chars": 0,
+                "historical_chars": 0,
                 "current_conversation_chars": 0,
                 "contract_overhead_chars": 0,
                 "owner_message_wrapped": False,
@@ -611,11 +701,12 @@ class CanonicalMemoryIntegratedBrainPipeline:
             + owner_goal
             + "\n</OWNER_CURRENT_MESSAGE>"
         )
-        memory_chars = len(recall_block) + len(durable_block)
+        memory_chars = len(recall_block) + len(durable_block) + len(historical_block)
         return prompt, {
             "memory_chars": memory_chars,
             "recall_chars": len(recall_block),
             "durable_chars": len(durable_block),
+            "historical_chars": len(historical_block),
             "current_conversation_chars": len(current_block),
             "contract_overhead_chars": len(_MEMORY_CONTRACT),
             "owner_message_wrapped": True,
@@ -691,11 +782,32 @@ class CanonicalMemoryIntegratedBrainPipeline:
                 project_id=durable_project,
             )
 
+        historical_result = None
+        if (
+            self.history is not None
+            and durable_project is not None
+            and is_historical_query(query)
+        ):
+            try:
+                historical_result = self.history.retrieve(
+                    query,
+                    project_id=durable_project,
+                    conversation_id=conversation_id,
+                    limit=6,
+                )
+            except Exception as exc:
+                durable_src.setdefault("trace", {})["historical_expansion_error"] = {
+                    "error_class": exc.__class__.__name__,
+                    "error": str(exc).strip() or exc.__class__.__name__,
+                    "nonfatal": True,
+                }
+
         composed, accounting = self._compose(
             owner_goal,
             current_conversation_context=current_conversation_context,
             recall_result=recall_result,
             durable_result=durable_result,
+            historical_result=historical_result,
             recall_src=recall_src,
             durable_src=durable_src,
         )
@@ -742,6 +854,8 @@ class CanonicalMemoryIntegratedBrainPipeline:
                     "memory_context_chars": accounting["memory_chars"],
                     "recall_chars": accounting["recall_chars"],
                     "durable_chars": accounting["durable_chars"],
+                    "historical_chars": accounting["historical_chars"],
+                    "historical_query_intent": is_historical_query(query),
                     "contract_overhead_chars": accounting["contract_overhead_chars"],
                     "current_conversation_context_chars": accounting[
                         "current_conversation_chars"
