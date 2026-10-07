@@ -71,6 +71,30 @@ def main() -> int:
         "preference:mode:orion",
         "light",
     )
+    assert memory_slot("I prefer ORION in dark mode.") == (
+        "preference:mode:orion",
+        "dark",
+    )
+    assert memory_slot("For ORION, I prefer light mode.") == (
+        "preference:mode:orion",
+        "light",
+    )
+    assert memory_slot("My preferred mode for ORION is dark.") == (
+        "preference:mode:orion",
+        "dark",
+    )
+    assert memory_slot("My preferred ORION mode is light.") == (
+        "preference:mode:orion",
+        "light",
+    )
+    assert memory_slot("I prefer Firefox as my browser.") == (
+        "preference:browser:owner",
+        "firefox",
+    )
+    assert memory_slot("My preferred browser is Chrome.") == (
+        "preference:browser:owner",
+        "chrome",
+    )
     assert memory_slot("What mode do I prefer for ORION?") is None
 
     view = MemoryConflictSuggestions(FakeReview(), FakeFoundation()).view()
@@ -95,6 +119,7 @@ def main() -> int:
 
     print("ORION_MEMORY_CONFLICT_SUGGESTIONS_V1> PASS")
     print("SAME_SLOT_DIFFERENT_VALUE> PASS")
+    print("PREFERENCE_PHRASING_NORMALIZATION> PASS")
     print("CROSS_PROJECT_NOT_MERGED> PASS")
     print("OWNER_DECISION_REQUIRED> PASS")
     print("AUTOMATIC_SUPERSESSION> NONE")
