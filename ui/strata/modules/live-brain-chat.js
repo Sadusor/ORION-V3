@@ -57,6 +57,14 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
   }
 
   if(local.brainState==='ready'&&conclusion){
+   const alreadyStored=[...chat.querySelectorAll('.m.or[data-history-loaded="1"]')].some(
+    n=>String(n.textContent||'').trim()===String(conclusion||'').trim()
+   );
+   if(alreadyStored){
+    reset(nextKey);
+    last=conclusion;
+    return;
+   }
    ensure(chat,nextKey);
    bubble.dataset.liveBrain='verified';
    const tag=bubble.firstChild;
