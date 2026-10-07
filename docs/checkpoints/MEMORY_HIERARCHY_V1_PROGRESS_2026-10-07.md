@@ -329,3 +329,43 @@ Physical updater evidence:
 Result: **ISOLATED L2 -> QWEN INTEGRATION GATE — PASS**.
 
 Final physical semantic qualification still required.
+
+
+## Final L2 historical/provenance physical qualification — PASS
+
+Final physical query on Android while explicitly using the PC Qwen model:
+- "What did I previously prefer before dark mode?"
+
+Observed ORION answer:
+- previous preference identified as **light mode**;
+- answer explicitly stated this came from a **historical durable memory**;
+- historical light-mode memory was described as having been **superseded** by the current approved **dark-mode** preference.
+
+Physical evidence also showed:
+- ORION connected to PC;
+- model lane = PC · Qwen3.5;
+- no chronology inversion;
+- no false current conflict;
+- no loss of current dark-mode context.
+
+Result: **L2 HISTORICAL / PROVENANCE EXPANSION — PASS**.
+
+### Memory Hierarchy V1 final status
+
+- L0 current compact hierarchy: PASS
+- duplicate consolidation: PASS
+- L1 current canonical retrieval: PASS
+- stale same-slot Conversation Recall fusion: PASS
+- high-confidence conflict detection: PASS
+- explicit owner-reviewed supersession: PASS
+- old evidence preservation: PASS
+- isolated read-only L2 historical query foundation: PASS
+- isolated L2 -> Qwen integration: PASS
+- final historical semantic recall: PASS
+
+**MEMORY HIERARCHY V1 — PASS / FROZEN**
+
+Freeze rule:
+- do not refactor or modify this hierarchy path during unrelated work;
+- reopen only for a reproducible regression or an explicitly approved new Memory V2 capability;
+- preserve append-only promotion/revocation/supersession evidence and owner-authority boundaries.
