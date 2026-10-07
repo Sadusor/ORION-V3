@@ -218,3 +218,23 @@ Restore commits:
 - `0416fa2a56427f17976fa13bf50441229aed305a` — proven integration regression baseline restored
 
 Status: L2 historical chat routing remains NOT PASSED / NOT FROZEN.
+
+
+## Proven-baseline recovery update — physical PASS
+
+After restoring canonical-memory integration and its regression test to the last physically proven baseline, the owner ran Settings -> Update ORION before seeing the diagnostic prompt.
+
+Physical Android evidence showed:
+- ORION PC: connected;
+- Update ORION: PASS;
+- message: "ORION PC restarted; latest Android APK is ready to install."
+
+Interpretation:
+- source rollback/recovery to the proven memory integration completed successfully;
+- ORION runtime restarted successfully;
+- remote phone connection recovered;
+- no Android code changed in the baseline restore, so APK reinstall is not required for this recovery step.
+
+Result: **PROVEN MEMORY BASELINE RESTORE — PASS**.
+
+L2 historical chat routing remains isolated as the only unfinished Memory Hierarchy V1 gate.
