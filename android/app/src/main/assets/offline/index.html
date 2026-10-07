@@ -144,12 +144,17 @@ button{touch-action:manipulation}
       <p id="canonicalMemoryText">Connect to ORION PC to view promoted canonical context.</p>
     </div>
     <div class="settingRow">
+      <b>Memory conflicts</b>
+      <p id="memoryConflictText">Connect to ORION PC to check for conflicting promoted memories.</p>
+      <button id="reviewConflictsBtn" disabled>Review memory conflicts</button>
+    </div>
+    <div class="settingRow">
       <b>Local memory</b>
       <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.5.2 · Automatic Memory Candidates V1</p>
+      <p>ORION 0.5.3 · Memory Supersession V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -184,6 +189,13 @@ button{touch-action:manipulation}
     <button data-close-sheet>Close</button>
   </section>
 
+  <section class="sheet" id="conflictSheet">
+    <h2>Review memory conflicts</h2>
+    <p id="conflictSummary" style="color:#8e949d">ORION can suggest conflicts, but only you can supersede an older memory.</p>
+    <div id="conflictList"></div>
+    <button data-close-sheet>Close</button>
+  </section>
+
   <div class="toast" id="toast"></div>
 </div>
 <script>
@@ -192,7 +204,7 @@ button{touch-action:manipulation}
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
  let data={conversations:[],messages:[]},current='',menuTarget='',messageTarget='',toastTimer=0;
  let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
- let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null,memory_canonical:null};
+ let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null,memory_canonical:null,memory_conflicts:null};
  let wasConnected=false, pendingLocal={}, pendingPc={}, pendingActions={};
 
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
@@ -286,6 +298,19 @@ button{touch-action:manipulation}
      return '<div class="candidateCard" data-candidate="'+esc(c.candidate_id)+'"><div class="candidateState">'+esc(d.toUpperCase())+' · '+esc(who)+' · '+esc(c.project_id||'personal')+'</div><p>'+esc(c.content||'')+'</p><small>source '+esc(c.source_ref||'')+'</small>'+actions+'</div>';
    }).join('')||'<p style="color:#8e949d;padding:8px">No memory candidates yet.</p>';
  }
+ function renderMemoryConflicts(){
+   const cf=pc.memory_conflicts||{},items=Array.isArray(cf.suggestions)?cf.suggestions:[];
+   const list=document.getElementById('conflictList'),summary=document.getElementById('conflictSummary');
+   summary.textContent=items.length?(items.length+' conflict'+(items.length===1?'':'s')+' need owner review. Nothing is superseded automatically.'):'No unresolved high-confidence memory conflicts.';
+   list.innerHTML=items.map(x=>
+     '<div class="candidateCard" data-conflict="'+esc(x.suggestion_id||'')+'">'+
+     '<div class="candidateState">CONFLICT · '+esc(x.project_id||'personal')+'</div>'+
+     '<small>OLDER MEMORY</small><p>'+esc(x.prior_content||'')+'</p>'+
+     '<small>NEWER MEMORY</small><p>'+esc(x.replacement_content||'')+'</p>'+
+     '<button data-supersede="1">Use newer memory · preserve old evidence</button>'+
+     '</div>'
+   ).join('')||'<p style="color:#8e949d;padding:8px">No unresolved memory conflicts.</p>';
+ }
  function renderConnection(){
    const badge=document.getElementById('conn'),drawer=document.getElementById('drawerConn'),status=document.getElementById('pcStatusText');
    badge.className='conn '+(pc.connected?'pc':pc.reachable&&!pc.paired?'pair':'local');
@@ -309,6 +334,9 @@ button{touch-action:manipulation}
    document.getElementById('reviewCandidatesBtn').disabled=!pc.connected||cc===0;
    const cm=pc.memory_canonical||{},cmc=Number(cm.count||0),cmr=Number(cm.revoked_count||0);
    document.getElementById('canonicalMemoryText').textContent=!pc.connected?'Connect to ORION PC to view promoted canonical context.':(cmc||cmr?(cmc+' active canonical memor'+(cmc===1?'y':'ies')+' · '+cmr+' revoked · context only'):'No canonical memories yet.');
+   const cf=pc.memory_conflicts||{},cfc=Number(cf.count||0);
+   document.getElementById('memoryConflictText').textContent=!pc.connected?'Connect to ORION PC to check for conflicting promoted memories.':(cfc?(cfc+' unresolved conflict'+(cfc===1?'':'s')+' · owner decision required'):'No unresolved high-confidence conflicts.');
+   document.getElementById('reviewConflictsBtn').disabled=!pc.connected||cfc===0;
    renderModels();
  }
  function refreshPc(){
@@ -342,6 +370,7 @@ button{touch-action:manipulation}
  document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const b=document.getElementById('updateBtn');const id=uid('update');pendingActions[id]='update';b.disabled=true;b.classList.add('busy');b.textContent='Starting update…';document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
  document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const b=document.getElementById('installBtn');b.disabled=true;b.classList.add('busy');b.textContent='Opening installer…';const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
  document.getElementById('reviewCandidatesBtn').onclick=()=>{renderMemoryReview();showSheet('reviewSheet')};
+ document.getElementById('reviewConflictsBtn').onclick=()=>{renderMemoryConflicts();showSheet('conflictSheet')};
  document.getElementById('proposeCandidateBtn').onclick=()=>{
    if(!pc.connected)return toast('Connect ORION PC first');
    const m=data.messages.find(x=>x.id===messageTarget),c=m&&conv(m.conversation_id);
@@ -360,6 +389,16 @@ button{touch-action:manipulation}
    const id=uid('memory-'+decision);pendingActions[id]='memory-'+decision;
    nativePc.reviewMemoryCandidate(JSON.stringify({candidate_id:candidate.candidate_id,decision,expected_content_sha256:candidate.content_sha256||''}),id);
    document.querySelectorAll('#reviewSheet [data-memory-decision]').forEach(x=>x.disabled=true);
+ };
+ document.getElementById('conflictSheet').onclick=e=>{
+   const b=e.target.closest('[data-supersede]');if(!b)return;
+   const card=b.closest('[data-conflict]'),items=(pc.memory_conflicts&&Array.isArray(pc.memory_conflicts.suggestions)?pc.memory_conflicts.suggestions:[]);
+   const conflict=items.find(x=>x.suggestion_id===(card&&card.dataset.conflict));
+   if(!conflict)return toast('Conflict is no longer available');
+   if(!confirm('Use the newer memory from now on? The older memory stays preserved as historical evidence.'))return;
+   const id=uid('supersede');pendingActions[id]='supersede';
+   b.disabled=true;b.classList.add('busy');b.textContent='Recording supersession…';
+   nativePc.supersedeMemoryConflict(JSON.stringify({prior_memory_id:conflict.prior_memory_id,replacement_memory_id:conflict.replacement_memory_id}),id);
  };
  document.getElementById('actionSheet').onclick=e=>{const b=e.target.closest('[data-act]');if(!b)return;const c=conv(menuTarget);if(!c)return;const a=b.dataset.act;if(a==='share')shareConversation(c.id);if(a==='pin')patchConversation(c.id,{pinned:asBool(c.pinned)?0:1});if(a==='archive')patchConversation(c.id,{archived:1});if(a==='delete'){patchConversation(c.id,{deleted:1});if(current===c.id){current='';ensureConversation();renderChat()}}if(a==='find'){openConversation(c.id);setTimeout(()=>{const q=prompt('Find in this chat');if(q&&window.find)toast(window.find(q)?'Found':'Not found')},80)}closeSheets()};
  inp.addEventListener('input',autoGrow);
@@ -392,7 +431,7 @@ button{touch-action:manipulation}
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
    const refreshButton=document.getElementById('refreshPc');refreshButton.disabled=false;refreshButton.classList.remove('busy');refreshButton.textContent='Refresh connection';
-   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;pc.memory_canonical=payload.memory_canonical&&typeof payload.memory_canonical==='object'?payload.memory_canonical:null;renderConnection();
+   payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;pc.memory_canonical=payload.memory_canonical&&typeof payload.memory_canonical==='object'?payload.memory_canonical:null;pc.memory_conflicts=payload.memory_conflicts&&typeof payload.memory_conflicts==='object'?payload.memory_conflicts:null;renderConnection();
    // CHAT_SYNC_V1: every successful PC refresh also pulls shared history.
    // This is the missing PC -> phone direction; phone -> PC already syncs
    // before/after PC-model turns.
@@ -406,6 +445,7 @@ button{touch-action:manipulation}
    else if(kind==='update'){const b=document.getElementById('updateBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Update ORION PC';if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
    else if(kind==='install'){const b=document.getElementById('installBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Install latest ORION APK';toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
    else if(kind==='candidate'){toast(payload.ok?(payload.created===false?'Already queued as memory candidate':'Queued as memory candidate'):'Candidate rejected: '+(payload.error||'unknown'));refreshPc()}
+   else if(kind==='supersede'){toast(payload.ok?(payload.created===false?'Supersession already recorded':'Newer memory is now current'):'Supersession refused: '+(payload.error||'unknown'));refreshPc();setTimeout(()=>{if(document.getElementById('conflictSheet').classList.contains('on'))renderMemoryConflicts()},900)}
    else if(kind.startsWith('memory-')){const d=kind.slice(7).toUpperCase();toast(payload.ok?(d+(payload.created===false?' already recorded':' recorded')):('Memory decision refused: '+(payload.error||'unknown')));refreshPc();setTimeout(()=>{if(document.getElementById('reviewSheet').classList.contains('on'))renderMemoryReview()},900)}
  };
  window.ORION_PHONE_BACK=function(){if(document.querySelector('.sheet.on')){closeSheets();return true}if(app.classList.contains('menu-open')){closeDrawer();return true}return false};
