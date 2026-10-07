@@ -339,6 +339,7 @@ def test_08_durable_never_exceeds_40_percent_budget():
     _, wrapped = make_pipeline(FakeRecall(), FakeDurable([huge]))
     state = wrapped.start("question", "qwen-test", conversation_id="c", project_id="p1")
     trace = state["brain_memory"]["trace"]
+    assert trace["durable_chars"] > 0
     assert trace["durable_chars"] <= DURABLE_MAX_CHARS
     assert trace["memory_context_chars"] <= TOTAL_MEMORY_CONTEXT_CHARS
 
