@@ -393,6 +393,71 @@ class OrionPcBridge(
     }
 
     @JavascriptInterface
+    fun supersedeMemoryConflict(requestJson: String, requestId: String): String {
+        val id = requestId.ifBlank { UUID.randomUUID().toString() }
+        val requestBody = try {
+            JSONObject(requestJson)
+        } catch (_: Throwable) {
+            JSONObject()
+        }
+        scope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                try {
+                    val priorMemoryId = requestBody.optString("prior_memory_id").trim()
+                    val replacementMemoryId = requestBody.optString("replacement_memory_id").trim()
+
+                    val prepared = request(
+                        "POST",
+                        "/api/memory/supersession-ticket",
+                        JSONObject()
+                            .put("prior_memory_id", priorMemoryId)
+                            .put("replacement_memory_id", replacementMemoryId)
+                            .put("owner_scope", "owner:primary"),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!prepared.ok) {
+                        return@withContext JSONObject()
+                            .put("ok", false)
+                            .put("error", prepared.error)
+                    }
+
+                    val reviewToken = prepared.body.optString("review_token").trim()
+                    if (reviewToken.isBlank()) {
+                        return@withContext JSONObject()
+                            .put("ok", false)
+                            .put("error", "Owner supersession token was not issued.")
+                    }
+
+                    val response = request(
+                        "POST",
+                        "/api/memory/supersede",
+                        JSONObject()
+                            .put("prior_memory_id", priorMemoryId)
+                            .put("replacement_memory_id", replacementMemoryId)
+                            .put("review_token", reviewToken)
+                            .put("owner_scope", "owner:primary"),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!response.ok) {
+                        JSONObject().put("ok", false).put("error", response.error)
+                    } else {
+                        JSONObject()
+                            .put("ok", true)
+                            .put("created", response.body.optBoolean("created"))
+                            .put("event", response.body.optJSONObject("event"))
+                    }
+                } catch (t: Throwable) {
+                    JSONObject().put("ok", false).put("error", t.message ?: "Memory supersession failed.")
+                }
+            }
+            emit("ORION_PC_ACTION_RESULT", id, payload)
+        }
+        return id
+    }
+
+    @JavascriptInterface
     fun updateOrion(requestId: String): String {
         val id = requestId.ifBlank { UUID.randomUUID().toString() }
         scope.launch {
@@ -569,6 +634,13 @@ class OrionPcBridge(
                 authenticated = true,
                 timeoutMs = 3500,
             )
+            val memoryConflicts = request(
+                "GET",
+                "/api/memory/conflicts",
+                null,
+                authenticated = true,
+                timeoutMs = 3500,
+            )
 
             JSONObject()
                 .put("ok", true)
@@ -592,6 +664,10 @@ class OrionPcBridge(
                 .put(
                     "memory_canonical",
                     if (canonicalMemory.ok) canonicalMemory.body else JSONObject.NULL,
+                )
+                .put(
+                    "memory_conflicts",
+                    if (memoryConflicts.ok) memoryConflicts.body else JSONObject.NULL,
                 )
                 .put(
                     "memory_retrieval",
