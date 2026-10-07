@@ -291,3 +291,41 @@ Physical updater evidence:
 Result: **ISOLATED L2 HISTORICAL QUERY FOUNDATION — PASS**.
 
 Next: connect this already-tested read-only result to Qwen as a separate historical context block without changing L1 retrieval.
+
+
+## Isolated L2 history -> Qwen integration — updater PASS
+
+The safer L2 integration was connected only after the isolated historical-memory module passed independently.
+
+Integration properties:
+- normal L1/current-memory path remains unchanged;
+- explicit historical questions only invoke the isolated read-only history module;
+- historical records are injected in a separate historical durable block;
+- current durable memory remains the effective present context;
+- historical expansion has a separate bounded context budget;
+- historical lookup failure is nonfatal to current-memory answering;
+- no Android code changed.
+
+Regression coverage proves:
+- normal current query does not call history;
+- historical query calls the isolated history reader;
+- current dark-mode durable memory remains present;
+- prior light-mode memory is injected once as historical;
+- historical item is explicitly labeled historical and linked to its superseding memory;
+- owner current message remains last;
+- history failures do not break current durable memory.
+
+Relevant commits:
+- `e84ed89c95834e6fbd577a264ff06e3e0effa1c5`
+- `0d44ee07a47f2dbde08ceec9d83ea6f8bcfe65de`
+- `cce5b0de321ca8a9234ad8622de21f1e266fc8c3`
+- `f97f5d2f9f599a174ebfd6873b75544fa7df1e0b`
+
+Physical updater evidence:
+- Android Settings showed Update PASS;
+- ORION PC restarted;
+- PC remained connected.
+
+Result: **ISOLATED L2 -> QWEN INTEGRATION GATE — PASS**.
+
+Final physical semantic qualification still required.
