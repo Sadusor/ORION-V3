@@ -397,7 +397,10 @@ button{touch-action:manipulation}
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
    payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;pc.memory_canonical=payload.memory_canonical&&typeof payload.memory_canonical==='object'?payload.memory_canonical:null;renderConnection();
-   if(pc.connected&&!prior)syncHistory();wasConnected=pc.connected;
+   // CHAT_SYNC_V1: every successful PC refresh also pulls shared history.
+   // This is the missing PC -> phone direction; phone -> PC already syncs
+   // before/after PC-model turns.
+   if(pc.connected)syncHistory();wasConnected=pc.connected;
  };
  window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
  window.ORION_PC_ACTION_RESULT=function(id,payload){
