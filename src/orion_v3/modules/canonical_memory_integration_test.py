@@ -477,6 +477,32 @@ def test_19_owner_current_message_wins_position_when_memories_conflict():
     assert "do not silently choose a winner" in prompt
 
 
+def test_20_current_durable_preference_marks_older_same_slot_recall_historical():
+    rec = FakeRecall([
+        recall_item("I prefer dark mode for ORION."),
+        recall_item("Unrelated old note stays visible.", item_id="recall-2", message_id="m-2"),
+    ])
+    di = durable_item("My preferred ORION mode is light.", project_id="p1")
+    brain, wrapped = make_pipeline(rec, FakeDurable([di]))
+    state = wrapped.start(
+        "What mode do I prefer for ORION?",
+        "qwen-test",
+        conversation_id="c",
+        project_id="p1",
+    )
+    prompt = brain.started_goal
+    assert "My preferred ORION mode is light." in prompt
+    assert "I prefer dark mode for ORION." not in prompt
+    assert "Unrelated old note stays visible." in prompt
+    shadow = state["brain_memory"]["sources"]["conversation_recall"]["trace"][
+        "durable_slot_shadowing"
+    ]
+    assert shadow["same_slot_older_value"] == 1
+    assert shadow["total_shadowed"] == 1
+    assert shadow["conversation_recall_mutated"] is False
+    assert shadow["authority"] == "context_only"
+
+
 def test_20_prompt_assembly_is_deterministic_for_same_inputs():
     rec1 = FakeRecall([recall_item("recall")])
     d1 = durable_item("durable", project_id="p1")
@@ -511,6 +537,7 @@ TESTS = [
     test_17_unresolved_scope_fails_closed_for_durable_only,
     test_18_all_filtered_means_no_memory_prompt_is_injected,
     test_19_owner_current_message_wins_position_when_memories_conflict,
+    test_20_current_durable_preference_marks_older_same_slot_recall_historical,
     test_20_prompt_assembly_is_deterministic_for_same_inputs,
 ]
 
