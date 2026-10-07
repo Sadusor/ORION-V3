@@ -28,6 +28,15 @@ _PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
         ),
     ),
     (
+        "value_dimension_in_target",
+        re.compile(
+            r"^\s*(?:i|we)\s+prefer\s+(?P<value>.+?)\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)\s+"
+            r"in\s+(?P<target>.+?)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
         "for_target_value_dimension",
         re.compile(
             r"^\s*for\s+(?P<target>.+?),?\s+(?:i|we)\s+prefer\s+"
