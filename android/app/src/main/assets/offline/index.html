@@ -149,12 +149,17 @@ button{touch-action:manipulation}
       <button id="reviewConflictsBtn" disabled>Review memory conflicts</button>
     </div>
     <div class="settingRow">
+      <b>Memory hierarchy</b>
+      <p id="memoryHierarchyText">L0 compact summary · L1 current retrieval · L2 provenance/history expansion.</p>
+      <button id="checkMemoryHierarchyBtn" disabled>Check memory hierarchy</button>
+    </div>
+    <div class="settingRow">
       <b>Local memory</b>
       <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.5.3 · Memory Supersession V1</p>
+      <p>ORION 0.5.4 · Memory Hierarchy V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -337,6 +342,7 @@ button{touch-action:manipulation}
    const cf=pc.memory_conflicts||{},cfc=Number(cf.count||0);
    document.getElementById('memoryConflictText').textContent=!pc.connected?'Connect to ORION PC to check for conflicting promoted memories.':(cfc?(cfc+' unresolved conflict'+(cfc===1?'':'s')+' · owner decision required'):'No unresolved high-confidence conflicts.');
    document.getElementById('reviewConflictsBtn').disabled=!pc.connected||cfc===0;
+   document.getElementById('checkMemoryHierarchyBtn').disabled=!pc.connected;
    renderModels();
  }
  function refreshPc(){
@@ -371,6 +377,12 @@ button{touch-action:manipulation}
  document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const b=document.getElementById('installBtn');b.disabled=true;b.classList.add('busy');b.textContent='Opening installer…';const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
  document.getElementById('reviewCandidatesBtn').onclick=()=>{renderMemoryReview();showSheet('reviewSheet')};
  document.getElementById('reviewConflictsBtn').onclick=()=>{renderMemoryConflicts();showSheet('conflictSheet')};
+ document.getElementById('checkMemoryHierarchyBtn').onclick=()=>{
+   if(!pc.connected)return;
+   const b=document.getElementById('checkMemoryHierarchyBtn'),id=uid('hierarchy');
+   pendingActions[id]='hierarchy';b.disabled=true;b.classList.add('busy');b.textContent='Checking hierarchy…';
+   nativePc.checkMemoryHierarchy(id);
+ };
  document.getElementById('proposeCandidateBtn').onclick=()=>{
    if(!pc.connected)return toast('Connect ORION PC first');
    const m=data.messages.find(x=>x.id===messageTarget),c=m&&conv(m.conversation_id);
@@ -446,6 +458,14 @@ button{touch-action:manipulation}
    else if(kind==='install'){const b=document.getElementById('installBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Install latest ORION APK';toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
    else if(kind==='candidate'){toast(payload.ok?(payload.created===false?'Already queued as memory candidate':'Queued as memory candidate'):'Candidate rejected: '+(payload.error||'unknown'));refreshPc()}
    else if(kind==='supersede'){toast(payload.ok?(payload.created===false?'Supersession already recorded':'Newer memory is now current'):'Supersession refused: '+(payload.error||'unknown'));refreshPc();setTimeout(()=>{if(document.getElementById('conflictSheet').classList.contains('on'))renderMemoryConflicts()},900)}
+   else if(kind==='hierarchy'){
+     const b=document.getElementById('checkMemoryHierarchyBtn');b.disabled=!pc.connected;b.classList.remove('busy');b.textContent='Check memory hierarchy';
+     if(payload.ok&&payload.hierarchy){
+       const h=payload.hierarchy,duplicates=Number(h.duplicate_count||0),count=Number(h.count||0),chars=Number(h.chars||0);
+       document.getElementById('memoryHierarchyText').textContent='L0 '+count+' current items · '+duplicates+' duplicate'+(duplicates===1?'':'s')+' consolidated · '+chars+' chars · L1 current / L2 history ready.';
+       toast('Memory hierarchy checked');
+     }else toast('Hierarchy check failed: '+(payload.error||'unknown'));
+   }
    else if(kind.startsWith('memory-')){const d=kind.slice(7).toUpperCase();toast(payload.ok?(d+(payload.created===false?' already recorded':' recorded')):('Memory decision refused: '+(payload.error||'unknown')));refreshPc();setTimeout(()=>{if(document.getElementById('reviewSheet').classList.contains('on'))renderMemoryReview()},900)}
  };
  window.ORION_PHONE_BACK=function(){if(document.querySelector('.sheet.on')){closeSheets();return true}if(app.classList.contains('menu-open')){closeDrawer();return true}return false};
