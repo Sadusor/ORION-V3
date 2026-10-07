@@ -226,6 +226,6 @@ window.ORION_CHAT_HISTORY=(function(){
   setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
- return{init,sync:syncNow,newChat:newConversation,open:openDrawer,get snapshot(){return state}};
+ return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,get snapshot(){return state}};
 })();
 setTimeout(()=>window.ORION_CHAT_HISTORY.init(),0);
