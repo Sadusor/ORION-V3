@@ -29,7 +29,7 @@ button{touch-action:manipulation}
 .newchat{margin:6px 14px 8px;height:45px;border:0;border-radius:13px;background:#25292e;color:var(--text);font-weight:600}.search{margin:0 14px 8px;height:44px;border-radius:22px;border:1px solid #ffffff10;background:#202327;color:var(--text);padding:0 16px;outline:0}.history{overflow:auto;padding:4px 8px 12px;flex:1}.group h3{margin:14px 10px 5px;color:var(--mut);font-size:12px;font-weight:600}.historyRow{display:grid;grid-template-columns:1fr 38px;align-items:center;gap:5px;border-radius:11px}.historyRow.active{background:#25282c}.historyRow>button:first-child{border:0;background:transparent;color:var(--text);text-align:left;padding:11px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dots{border:0;background:transparent;color:var(--mut);height:36px;border-radius:50%}
 .drawerFoot{border-top:1px solid #ffffff10;padding:8px 14px calc(12px + env(safe-area-inset-bottom));display:grid;gap:7px}.drawerFoot button{height:42px;border:0;border-radius:12px;background:#202327;color:var(--text);text-align:left;padding:0 13px}.drawerFoot small{color:var(--mut)}
 .sheetShade{position:fixed;inset:0;background:#0009;z-index:29;display:none}.sheetShade.on{display:block}.sheet{position:fixed;z-index:30;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));max-height:78dvh;overflow:auto;background:#292d32;border:1px solid #ffffff14;border-radius:22px;padding:10px;display:none;box-shadow:0 18px 50px #000b}.sheet.on{display:block}
-.sheet h2{font-size:17px;margin:6px 8px 12px}.sheet button,.sheet input{width:100%;min-height:46px;border:0;border-radius:14px;background:#34383d;color:var(--text);padding:0 13px;margin:4px 0}.sheet input{outline:0;border:1px solid #ffffff0f}.sheet button:disabled{opacity:.38}.sheet small{display:block;color:var(--mut);font-size:11px}.modelItem{display:flex!important;align-items:center;justify-content:space-between;text-align:left}.modelItem.on{border:1px solid #79d7ee66;color:var(--ion)}.settingRow{padding:10px 8px;border-bottom:1px solid #ffffff0c}.settingRow:last-child{border-bottom:0}.settingRow b{display:block;margin-bottom:3px}.settingRow p{margin:0;color:var(--mut);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.danger{color:var(--danger)!important}
+.sheet h2{font-size:17px;margin:6px 8px 12px}.sheet button,.sheet input{width:100%;min-height:46px;border:1px solid #ffffff18;border-radius:14px;background:#34383d;color:var(--text);padding:0 13px;margin:4px 0}.sheet input{outline:0;border:1px solid #ffffff0f}.sheet button{box-shadow:inset 0 1px 0 #ffffff0d,0 2px 7px #0003;transition:transform .08s,background .08s,border-color .08s,opacity .08s}.sheet button:active:not(:disabled){transform:scale(.975);background:#434950;border-color:#79d7ee55}.sheet button.busy{border-color:#79d7ee77;color:var(--ion);box-shadow:inset 0 0 0 1px #79d7ee22}.sheet button:disabled{opacity:.38}.sheet button.busy:disabled{opacity:.8}.sheet small{display:block;color:var(--mut);font-size:11px}.modelItem{display:flex!important;align-items:center;justify-content:space-between;text-align:left}.modelItem.on{border:1px solid #79d7ee66;color:var(--ion)}.settingRow{padding:10px 8px;border-bottom:1px solid #ffffff0c}.settingRow:last-child{border-bottom:0}.settingRow b{display:block;margin-bottom:3px}.settingRow p{margin:0;color:var(--mut);font-size:12px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.danger{color:var(--danger)!important}
 .actionGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.actionGrid button{min-height:68px;margin:0}.actionGrid .wide{grid-column:1/-1;min-height:46px}
 .candidateCard{margin:8px 0;padding:11px;border:1px solid #ffffff12;border-radius:14px;background:#22262b}.candidateCard p{margin:0 0 8px;white-space:pre-wrap;word-break:break-word}.candidateCard small{margin-bottom:8px}.candidateActions{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.candidateActions button{min-height:42px;padding:0 8px;margin:0}.candidateState{color:var(--mut);font-size:11px;margin-bottom:7px}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:126px;z-index:50;background:#30343a;border:1px solid #ffffff14;border-radius:15px;padding:9px 13px;opacity:0;pointer-events:none;transition:.15s;max-width:84%;text-align:center}.toast.on{opacity:1}
@@ -47,12 +47,7 @@ button{touch-action:manipulation}
   <main id="main">
     <div class="stage">
       <section class="empty">
-        <svg class="orb" viewBox="0 0 100 100" aria-label="ORION">
-          <circle cx="50" cy="50" r="37" fill="none" stroke="#79d7ee" stroke-opacity=".72" stroke-width="2"/>
-          <circle cx="50" cy="50" r="28" fill="#79d7ee" fill-opacity=".07"/>
-          <path d="M20 62L36 34L61 27L78 50L59 73L31 70Z" fill="none" stroke="#79d7ee" stroke-opacity=".55"/>
-          <g fill="#bceefa"><circle cx="20" cy="62" r="2"/><circle cx="36" cy="34" r="2.4"/><circle cx="61" cy="27" r="1.8"/><circle cx="78" cy="50" r="2.6"/><circle cx="59" cy="73" r="2"/><circle cx="31" cy="70" r="1.8"/></g>
-        </svg>
+        <img class="orb" src="file:///android_res/mipmap/ic_launcher.png" alt="ORION">
         <h1>How can I help?</h1>
         <p id="welcomeStatus">Local · Qwen3-0.6B · chat memory ready</p>
       </section>
@@ -141,7 +136,7 @@ button{touch-action:manipulation}
     </div>
     <div class="settingRow">
       <b>Canonical memory candidates</b>
-      <p id="candidateQueueText">Connect to ORION PC to review candidate intake.</p>
+      <p id="candidateQueueText">Connect to ORION PC for automatic memory suggestions and owner review.</p>
       <button id="reviewCandidatesBtn" disabled>Review memory candidates</button>
     </div>
     <div class="settingRow">
@@ -154,7 +149,7 @@ button{touch-action:manipulation}
     </div>
     <div class="settingRow">
       <b>App version</b>
-      <p>ORION 0.5.1 · Memory Review + Promotion V1</p>
+      <p>ORION 0.5.2 · Automatic Memory Candidates V1</p>
     </div>
     <div class="settingRow">
       <b>Power</b>
@@ -310,7 +305,7 @@ button{touch-action:manipulation}
     mc?('Last recall · '+mc+' item'+(mc===1?'':'s')+' · context only · '+String(mt.elapsed_ms==null?'?':mt.elapsed_ms)+' ms'):
     'Ready · read-only · context only · canonical promotion is still locked.';
    const cq=pc.memory_candidates||{},cc=Number(cq.count||0),reviewable=Number(cq.pending_count==null?cc:cq.pending_count)+Number(cq.deferred_count||0),promoted=Number(cq.promoted_count||0),rejected=Number(cq.rejected_count||0),revoked=Number(cq.revoked_count||0);
-   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC to review candidate intake.':(cc?(reviewable+' awaiting review · '+promoted+' active promoted · '+rejected+' rejected · '+revoked+' revoked'):'No candidates yet · owner-selected intake only.');
+   document.getElementById('candidateQueueText').textContent=!pc.connected?'Connect to ORION PC for automatic memory suggestions and owner review.':(cc?(reviewable+' awaiting review · '+promoted+' active promoted · '+rejected+' rejected · '+revoked+' revoked · automatic intake on'):'Automatic selection ready · nothing worth proposing yet · owner review required.');
    document.getElementById('reviewCandidatesBtn').disabled=!pc.connected||cc===0;
    const cm=pc.memory_canonical||{},cmc=Number(cm.count||0),cmr=Number(cm.revoked_count||0);
    document.getElementById('canonicalMemoryText').textContent=!pc.connected?'Connect to ORION PC to view promoted canonical context.':(cmc||cmr?(cmc+' active canonical memor'+(cmc===1?'y':'ies')+' · '+cmr+' revoked · context only'):'No canonical memories yet.');
@@ -341,11 +336,11 @@ button{touch-action:manipulation}
  document.getElementById('sheetShade').onclick=closeSheets;document.querySelectorAll('[data-close-sheet]').forEach(b=>b.onclick=closeSheets);
  document.getElementById('conn').onclick=()=>showSheet('settingsSheet');
  document.getElementById('openZeroTier').onclick=()=>{try{toast(nativePc.openZeroTier()?'ZeroTier opened':'ZeroTier not installed')}catch(_){toast('Could not open ZeroTier')}};
- document.getElementById('refreshPc').onclick=()=>{refreshPc();toast('Checking ORION PC…')};
- document.getElementById('pairBtn').onclick=()=>{const code=document.getElementById('pairCode').value.trim();if(!/^\d{6}$/.test(code))return toast('Enter the 6-digit pairing code');const id=uid('pair');pendingActions[id]='pair';nativePc.pair(code,id)};
- document.getElementById('forgetBtn').onclick=()=>{const id=uid('forget');pendingActions[id]='forget';nativePc.forgetPairing(id)};
- document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const id=uid('update');pendingActions[id]='update';document.getElementById('updateBtn').disabled=true;document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
- document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
+ document.getElementById('refreshPc').onclick=()=>{const b=document.getElementById('refreshPc');b.disabled=true;b.classList.add('busy');b.textContent='Checking…';refreshPc();toast('Checking ORION PC…')};
+ document.getElementById('pairBtn').onclick=()=>{const code=document.getElementById('pairCode').value.trim();if(!/^\d{6}$/.test(code))return toast('Enter the 6-digit pairing code');const b=document.getElementById('pairBtn');b.disabled=true;b.classList.add('busy');b.textContent='Pairing…';const id=uid('pair');pendingActions[id]='pair';nativePc.pair(code,id)};
+ document.getElementById('forgetBtn').onclick=()=>{const b=document.getElementById('forgetBtn');b.disabled=true;b.classList.add('busy');b.textContent='Forgetting…';const id=uid('forget');pendingActions[id]='forget';nativePc.forgetPairing(id)};
+ document.getElementById('updateBtn').onclick=()=>{if(!pc.connected)return;const b=document.getElementById('updateBtn');const id=uid('update');pendingActions[id]='update';b.disabled=true;b.classList.add('busy');b.textContent='Starting update…';document.getElementById('updateText').textContent='Requesting tested update…';nativePc.updateOrion(id)};
+ document.getElementById('installBtn').onclick=()=>{if(!pc.connected)return;const b=document.getElementById('installBtn');b.disabled=true;b.classList.add('busy');b.textContent='Opening installer…';const id=uid('install');pendingActions[id]='install';nativePc.installLatestApk(id)};
  document.getElementById('reviewCandidatesBtn').onclick=()=>{renderMemoryReview();showSheet('reviewSheet')};
  document.getElementById('proposeCandidateBtn').onclick=()=>{
    if(!pc.connected)return toast('Connect ORION PC first');
@@ -396,6 +391,7 @@ button{touch-action:manipulation}
    chat.scrollTop=chat.scrollHeight;
  };
  window.ORION_PC_STATUS_RESULT=function(_,payload){
+   const refreshButton=document.getElementById('refreshPc');refreshButton.disabled=false;refreshButton.classList.remove('busy');refreshButton.textContent='Refresh connection';
    payload=payload||{};const prior=pc.connected;pc.reachable=!!payload.reachable;pc.paired=!!payload.paired;pc.connected=!!payload.connected;pc.default_model=payload.default_model||'';pc.models=Array.isArray(payload.models)?payload.models:[];pc.update=payload.update&&typeof payload.update==='object'?payload.update:null;pc.memory_retrieval=payload.memory_retrieval&&typeof payload.memory_retrieval==='object'?payload.memory_retrieval:null;pc.memory_candidates=payload.memory_candidates&&typeof payload.memory_candidates==='object'?payload.memory_candidates:null;pc.memory_canonical=payload.memory_canonical&&typeof payload.memory_canonical==='object'?payload.memory_canonical:null;renderConnection();
    // CHAT_SYNC_V1: every successful PC refresh also pulls shared history.
    // This is the missing PC -> phone direction; phone -> PC already syncs
@@ -405,10 +401,10 @@ button{touch-action:manipulation}
  window.ORION_PC_HISTORY_RESULT=function(_,payload){if(payload&&payload.ok){loadSnapshot()}};
  window.ORION_PC_ACTION_RESULT=function(id,payload){
    const kind=pendingActions[id]||'';delete pendingActions[id];payload=payload||{};
-   if(kind==='pair'){toast(payload.ok?'Phone paired with ORION':'Pairing failed: '+(payload.error||'unknown'));if(payload.ok)document.getElementById('pairCode').value='';refreshPc()}
-   else if(kind==='forget'){toast('Pairing removed');refreshPc()}
-   else if(kind==='update'){document.getElementById('updateBtn').disabled=false;if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
-   else if(kind==='install'){toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
+   if(kind==='pair'){const b=document.getElementById('pairBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Pair';toast(payload.ok?'Phone paired with ORION':'Pairing failed: '+(payload.error||'unknown'));if(payload.ok)document.getElementById('pairCode').value='';refreshPc()}
+   else if(kind==='forget'){const b=document.getElementById('forgetBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Forget pairing';toast('Pairing removed');refreshPc()}
+   else if(kind==='update'){const b=document.getElementById('updateBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Update ORION PC';if(payload.ok){toast('ORION update worker started');document.getElementById('updateText').textContent='Updating and testing on PC…';setTimeout(refreshPc,4000)}else{toast('Update refused: '+(payload.error||'unknown'));refreshPc()}}
+   else if(kind==='install'){const b=document.getElementById('installBtn');b.disabled=false;b.classList.remove('busy');b.textContent='Install latest ORION APK';toast(payload.ok?'Android installer opened':(payload.error||'Install failed'))}
    else if(kind==='candidate'){toast(payload.ok?(payload.created===false?'Already queued as memory candidate':'Queued as memory candidate'):'Candidate rejected: '+(payload.error||'unknown'));refreshPc()}
    else if(kind.startsWith('memory-')){const d=kind.slice(7).toUpperCase();toast(payload.ok?(d+(payload.created===false?' already recorded':' recorded')):('Memory decision refused: '+(payload.error||'unknown')));refreshPc();setTimeout(()=>{if(document.getElementById('reviewSheet').classList.contains('on'))renderMemoryReview()},900)}
  };
