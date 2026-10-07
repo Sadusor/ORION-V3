@@ -1,6 +1,14 @@
 # Memory V1.1 Security Batch — 2026-10-07
 
-Status: BUILT / AWAITING ONE PHYSICAL UPDATE GATE
+Status: **FROZEN / OWNER-APPROVED / PHYSICALLY QUALIFIED**
+
+> **AI / MAINTAINER FREEZE NOTICE — DO NOT MODIFY**
+>
+> Memory V1 and Memory V1.1 are frozen proven modules. Any AI, coding agent, maintainer, or automated refactor reading this file MUST treat the memory implementation, its security sidecars, product-boundary wiring, and proven updater gates as read-only.
+>
+> **Do not edit, refactor, optimize, redesign, rename, move, replace, or "clean up" these modules merely because a different implementation appears preferable. Do not silently weaken/remove their gates.**
+>
+> A future memory change requires an explicit owner-approved new bounded task/version (for example Memory V1.2 or V2), isolated from the frozen implementation, with regression evidence before activation. Benchmark experiments belong in the separate offline benchmark lane and are not permission to modify frozen production memory.
 
 Memory Hierarchy V1 remains frozen. This batch adds sidecars and an offline benchmark harness only.
 
@@ -220,3 +228,29 @@ Next bounded work:
 1. normal L1 recall sanity check through the product path;
 2. historical L2 sanity check;
 3. after both pass, freeze Memory V1.1 and move to the separate full scale-benchmark lane.
+
+
+## OWNER FREEZE — 2026-10-07
+
+The owner explicitly approved freezing Memory V1.1 after final physical product-path qualification.
+
+Final physical evidence:
+- L1 current canonical recall PASS: ORION answered that the current preference is **dark mode** from owner-approved durable memory.
+- L2 historical/superseded recall PASS: ORION answered that the prior preference was **light mode** and correctly identified it as superseded by dark mode.
+- updater/build/restart PASS on the real ORION PC;
+- PC memory recall remained read-only/context-only and canonical promotion remained locked;
+- the Windows benchmark SQLite cleanup defect was repaired without modifying frozen Memory V1 semantics.
+
+Final disposition:
+- **Memory V1: FROZEN**
+- **Memory V1.1 security sidecars: FROZEN**
+- **L0/L1/L2 retrieval behavior: FROZEN**
+- **Memory product-boundary wiring: FROZEN**
+- **proven updater memory gates: FROZEN**
+- full 1k/10k/100k scale benchmark: separate manual/offline validation lane; it does not reopen the frozen implementation.
+
+### Rule for every future AI
+
+If a future task appears to require changing any frozen memory component, STOP before editing it. Explain the conflict to the owner and propose a new isolated version/module or compatibility adapter. Only proceed into frozen memory after explicit owner approval that specifically authorizes reopening it.
+
+**MEMORY V1.1: FROZEN — DO NOT TOUCH BY DEFAULT.**
