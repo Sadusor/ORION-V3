@@ -6,9 +6,11 @@ from typing import Any
 
 SCHEMA = "orion.memory-conflict-suggestions/1"
 
+# Conservative, deterministic owner-statement forms only. Different natural
+# phrasings that describe the same preference are normalized to the same slot.
 _PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     (
-        "preference",
+        "value_dimension_for_target",
         re.compile(
             r"^\s*(?:i|we)\s+prefer\s+(?P<value>.+?)\s+"
             r"(?P<dimension>mode|theme|color|model|browser|editor|language)\s+"
@@ -17,10 +19,56 @@ _PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
         ),
     ),
     (
-        "preferred",
+        "target_in_value_dimension",
         re.compile(
-            r"^\s*(?:my|our)\s+preferred\s+(?P<dimension>[a-z0-9 _./+\-]{2,48})"
-            r"\s+(?:is|are)\s+(?P<value>.+?)[.!]?\s*$",
+            r"^\s*(?:i|we)\s+prefer\s+(?P<target>.+?)\s+in\s+"
+            r"(?P<value>.+?)\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
+        "for_target_value_dimension",
+        re.compile(
+            r"^\s*for\s+(?P<target>.+?),?\s+(?:i|we)\s+prefer\s+"
+            r"(?P<value>.+?)\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
+        "preferred_dimension_for_target",
+        re.compile(
+            r"^\s*(?:my|our)\s+preferred\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)\s+"
+            r"for\s+(?P<target>.+?)\s+(?:is|are)\s+(?P<value>.+?)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
+        "preferred_target_dimension",
+        re.compile(
+            r"^\s*(?:my|our)\s+preferred\s+(?P<target>.+?)\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)\s+"
+            r"(?:is|are)\s+(?P<value>.+?)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
+        "value_as_my_dimension",
+        re.compile(
+            r"^\s*(?:i|we)\s+prefer\s+(?P<value>.+?)\s+as\s+"
+            r"(?:my|our)\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)[.!]?\s*$",
+            re.I,
+        ),
+    ),
+    (
+        "preferred_dimension",
+        re.compile(
+            r"^\s*(?:my|our)\s+preferred\s+"
+            r"(?P<dimension>mode|theme|color|model|browser|editor|language)\s+"
+            r"(?:is|are)\s+(?P<value>.+?)[.!]?\s*$",
             re.I,
         ),
     ),
@@ -51,13 +99,27 @@ def memory_slot(text: str) -> tuple[str, str] | None:
         value = groups.get("value", "")
         if not value:
             return None
-        if kind == "preference":
-            slot = f"preference:{groups.get('dimension','')}:{groups.get('target','')}"
-        elif kind == "preferred":
-            slot = f"preferred:{groups.get('dimension','')}"
-        else:
-            slot = f"naming:{groups.get('target','')}"
-        return slot, value
+
+        if kind == "naming":
+            target = groups.get("target", "")
+            if not target:
+                return None
+            return f"naming:{target}", value
+
+        dimension = groups.get("dimension", "")
+        target = groups.get("target", "")
+        if not dimension:
+            return None
+
+        # Personal/global preferences intentionally share the stable "owner"
+        # target so "I prefer Firefox as my browser" and
+        # "My preferred browser is Chrome" conflict with each other.
+        if kind in {"value_as_my_dimension", "preferred_dimension"}:
+            target = "owner"
+
+        if not target:
+            return None
+        return f"preference:{dimension}:{target}", value
     return None
 
 
