@@ -194,6 +194,32 @@ class MemoryConsolidation:
             "authority": "context_only",
         }
 
+    def retrieve(
+        self,
+        query: str,
+        *,
+        project_id: str = "",
+        conversation_id: str = "",
+        limit: int = 6,
+        include_historical: bool = False,
+        context_char_budget: int | None = None,
+        owner_scope: str = "owner:primary",
+    ) -> dict[str, Any]:
+        raw = self.foundation.retrieve(
+            query,
+            project_id=project_id,
+            conversation_id=conversation_id,
+            limit=limit,
+            include_historical=include_historical,
+            context_char_budget=context_char_budget,
+            owner_scope=owner_scope,
+        )
+        out = self.dedupe_retrieval(raw)
+        out["hierarchy_level"] = "L2" if include_historical else "L1"
+        if include_historical:
+            out["historical_expansion"] = True
+        return out
+
     def l1(
         self,
         query: str,
@@ -202,16 +228,13 @@ class MemoryConsolidation:
         conversation_id: str = "",
         limit: int = 6,
     ) -> dict[str, Any]:
-        raw = self.foundation.retrieve(
+        return self.retrieve(
             query,
             project_id=project_id,
             conversation_id=conversation_id,
             limit=limit,
             include_historical=False,
         )
-        out = self.dedupe_retrieval(raw)
-        out["hierarchy_level"] = "L1"
-        return out
 
     def l2(
         self,
@@ -221,14 +244,10 @@ class MemoryConsolidation:
         conversation_id: str = "",
         limit: int = 12,
     ) -> dict[str, Any]:
-        raw = self.foundation.retrieve(
+        return self.retrieve(
             query,
             project_id=project_id,
             conversation_id=conversation_id,
             limit=limit,
             include_historical=True,
         )
-        out = self.dedupe_retrieval(raw)
-        out["hierarchy_level"] = "L2"
-        out["historical_expansion"] = True
-        return out
