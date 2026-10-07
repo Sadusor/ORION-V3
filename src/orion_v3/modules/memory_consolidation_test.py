@@ -122,6 +122,9 @@ def main() -> int:
     assert semantic_key("I prefer dark mode for ORION.") != semantic_key(
         "I prefer light mode for ORION."
     )
+    assert semantic_key("I prefer light mode in Orion.") == semantic_key(
+        "My preferred ORION mode is light."
+    )
 
     foundation = FakeFoundation()
     module = MemoryConsolidation(FakeReview(), foundation)
