@@ -27,6 +27,7 @@ from modules.memory_auto_candidate import AutomaticMemoryCandidateSelector
 from modules.memory_conflict_suggestions import MemoryConflictSuggestions
 from modules.memory_consolidation import MemoryConsolidation
 from modules.memory_historical_query import MemoryHistoricalQuery
+from modules.memory_integrity_anchor import MemoryIntegrityAnchor, MemoryIntegrityError
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -69,6 +70,12 @@ MEMORY_HISTORY = MemoryHistoricalQuery(
     MEMORY_REVIEW,
     CANONICAL_MEMORY_RETRIEVAL,
 )
+MEMORY_INTEGRITY = MemoryIntegrityAnchor(
+    STATE_ROOT / "memory_sidecars",
+    MEMORY_REVIEW,
+    CANONICAL_MEMORY_RETRIEVAL,
+)
+MEMORY_INTEGRITY.initialize()
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
     recall=MEMORY_RETRIEVAL,
@@ -215,6 +222,7 @@ class ProductState:
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
             "memory_retrieval": MEMORY_RETRIEVAL.last(),
             "memory_auto_candidate": MEMORY_AUTO_CANDIDATES.status(),
+            "memory_integrity": MEMORY_INTEGRITY.status(),
         }
 
 
@@ -382,6 +390,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, MEMORY_CONFLICTS.view())
         if path == "/api/memory/supersessions":
             return self._json(200, CANONICAL_MEMORY_RETRIEVAL.supersessions())
+        if path == "/api/memory/integrity":
+            return self._json(200, MEMORY_INTEGRITY.status())
         if path == "/api/memory/hierarchy/l0":
             return self._json(
                 200,
@@ -455,6 +465,7 @@ class Handler(BaseHTTPRequestHandler):
             "/api/memory/decision",
             "/api/memory/supersession-ticket",
             "/api/memory/supersede",
+            "/api/memory/integrity/reanchor",
         }:
             if not self._require_owner_token():
                 return
@@ -508,6 +519,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/memory/decision":
             try:
+                if not MEMORY_INTEGRITY.writes_allowed():
+                    return self._json(423, {
+                        "ok": False,
+                        "error": "MEMORY_WRITES_FROZEN",
+                        "reason": MEMORY_INTEGRITY.status().get("reason", ""),
+                        "route": path,
+                    })
                 body = self._read_json()
                 result = MEMORY_REVIEW.decide(
                     candidate_id=str(body.get("candidate_id", "")),
@@ -517,6 +535,13 @@ class Handler(BaseHTTPRequestHandler):
                     owner_scope=str(body.get("owner_scope", "owner:primary")),
                     actor_fingerprint=self._owner_actor_fingerprint(),
                 )
+                if result.get("created"):
+                    MEMORY_INTEGRITY.observe_commit(
+                        cause="memory_decision:" + str(
+                            result.get("decision", {}).get("decision") or "unknown"
+                        ),
+                        actor_fingerprint=self._owner_actor_fingerprint(),
+                    )
                 return self._json(201 if result.get("created") else 200, result)
             except MemoryReviewError as exc:
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
@@ -538,6 +563,13 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/memory/supersede":
             try:
+                if not MEMORY_INTEGRITY.writes_allowed():
+                    return self._json(423, {
+                        "ok": False,
+                        "error": "MEMORY_WRITES_FROZEN",
+                        "reason": MEMORY_INTEGRITY.status().get("reason", ""),
+                        "route": path,
+                    })
                 body = self._read_json()
                 result = CANONICAL_MEMORY_RETRIEVAL.supersede(
                     prior_memory_id=str(body.get("prior_memory_id", "")),
@@ -546,11 +578,36 @@ class Handler(BaseHTTPRequestHandler):
                     owner_scope=str(body.get("owner_scope", "owner:primary")),
                     actor_fingerprint=self._owner_actor_fingerprint(),
                 )
+                if result.get("created"):
+                    MEMORY_INTEGRITY.observe_commit(
+                        cause="memory_supersession",
+                        actor_fingerprint=self._owner_actor_fingerprint(),
+                    )
                 return self._json(201 if result.get("created") else 200, result)
             except CanonicalMemoryRetrievalFoundationError as exc:
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/integrity/reanchor":
+            try:
+                body = self._read_json()
+                result = MEMORY_INTEGRITY.accept_current(
+                    actor_fingerprint=self._owner_actor_fingerprint(),
+                    reason=str(body.get("reason", "")),
+                )
+                return self._json(200, result)
+            except MemoryIntegrityError as exc:
+                return self._json(409, {
+                    "ok": False,
+                    "error": str(exc),
+                    "route": path,
+                })
+            except Exception as exc:
+                return self._json(500, {
+                    "ok": False,
+                    "error": str(exc),
+                    "route": path,
+                })
         if path == "/api/update/main":
             try:
                 result = UPDATE_MANAGER.apply(STATE.started_commit)
