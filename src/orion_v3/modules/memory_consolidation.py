@@ -190,6 +190,8 @@ class MemoryConsolidation:
             "items": items,
             "count": len(items),
             "chars": used,
+            "group_count": int(groups.get("group_count") or 0),
+            "duplicate_count": int(groups.get("duplicate_count") or 0),
             "limits": {"items": L0_MAX_ITEMS, "chars": L0_MAX_CHARS},
             "authority": "context_only",
         }
