@@ -458,6 +458,35 @@ class OrionPcBridge(
     }
 
     @JavascriptInterface
+    fun checkMemoryHierarchy(requestId: String): String {
+        val id = requestId.ifBlank { UUID.randomUUID().toString() }
+        scope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                try {
+                    val response = request(
+                        "GET",
+                        "/api/memory/hierarchy/l0",
+                        null,
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!response.ok) {
+                        JSONObject().put("ok", false).put("error", response.error)
+                    } else {
+                        JSONObject()
+                            .put("ok", true)
+                            .put("hierarchy", response.body)
+                    }
+                } catch (t: Throwable) {
+                    JSONObject().put("ok", false).put("error", t.message ?: "Memory hierarchy check failed.")
+                }
+            }
+            emit("ORION_PC_ACTION_RESULT", id, payload)
+        }
+        return id
+    }
+
+    @JavascriptInterface
     fun updateOrion(requestId: String): String {
         val id = requestId.ifBlank { UUID.randomUUID().toString() }
         scope.launch {
