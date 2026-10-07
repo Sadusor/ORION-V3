@@ -369,3 +369,37 @@ Freeze rule:
 - do not refactor or modify this hierarchy path during unrelated work;
 - reopen only for a reproducible regression or an explicitly approved new Memory V2 capability;
 - preserve append-only promotion/revocation/supersession evidence and owner-authority boundaries.
+
+
+## Memory V1.1a — Integrity Anchor isolated gate PASS
+
+A new module was added as a strict sidecar outside frozen Memory Hierarchy V1:
+
+- `src/orion_v3/modules/memory_integrity_anchor.py`
+
+It does not modify candidate selection, promotion semantics, canonical rows, L0/L1/L2, conflict detection, supersession semantics, Conversation Recall, or Qwen prompt fusion.
+
+Standalone regression coverage includes:
+- bootstrap anchor creation;
+- unchanged restart verification;
+- normal durable-state evolution;
+- known rollback detection;
+- unknown replacement/tamper detection;
+- internal append-only chain audit failure;
+- anchor-log corruption detection;
+- explicit owner re-anchor;
+- post-commit anchor-write failure freezing future durable writes;
+- canonical rows mutated by sidecar = NONE.
+
+Relevant commits:
+- `2302621251785d4c670d23dc66cbc9a8abdb3ace` — integrity sidecar
+- `dbe12da9a351c02c48af40c4da6457366d2b1b97` — isolated adversarial tests
+- `a8129f427cc3ec427a67fa5f5bfa27596557c203` — updater gate
+
+Physical updater evidence:
+- Android Settings showed **Update PASS**;
+- ORION PC restarted successfully.
+
+Result: **MEMORY V1.1a INTEGRITY ANCHOR ISOLATED GATE — PASS**.
+
+Next step: product-server wiring only (startup verification, status exposure, post-commit observer, and write-freeze preflight). Frozen Memory V1 modules remain untouched.
