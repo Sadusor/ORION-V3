@@ -17,7 +17,8 @@ from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
-from modules.memory_brain_pipeline import MemoryAwareBrainPipeline
+from modules.canonical_memory_retrieval_foundation import CanonicalMemoryRetrievalFoundation
+from modules.canonical_memory_integration import CanonicalMemoryIntegratedBrainPipeline
 from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
@@ -40,9 +41,15 @@ MEMORY_REVIEW = CanonicalMemoryReviewPromotion(
     STATE_ROOT / "canonical_memory.sqlite3",
     MEMORY_CANDIDATES,
 )
-LOCAL_BRAIN = MemoryAwareBrainPipeline(
+CANONICAL_MEMORY_RETRIEVAL = CanonicalMemoryRetrievalFoundation(
+    MEMORY_REVIEW,
+    STATE_ROOT / "canonical_memory_supersession.sqlite3",
+    MEMORY_CANDIDATES,
+)
+LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
-    memory=MEMORY_RETRIEVAL,
+    recall=MEMORY_RETRIEVAL,
+    durable=CANONICAL_MEMORY_RETRIEVAL,
 )
 UPDATE_MANAGER = UpdateManager(ROOT, STATE_ROOT)
 
@@ -461,6 +468,7 @@ class Handler(BaseHTTPRequestHandler):
                         if "project_id" in body
                         else None
                     ),
+                    owner_message=str(body.get("owner_message", "")),
                 )
                 return self._json(202, STATE.view())
             except LocalBrainError as exc:
