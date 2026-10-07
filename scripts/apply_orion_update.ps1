@@ -196,8 +196,26 @@ try {
         "memory_product_server_test.py"
     )) {
         $CurrentGate = $memoryTest
-        & python.exe (Join-Path $Repo ("src\orion_v3\modules\" + $memoryTest)) *>> $LogPath
-        if ($LASTEXITCODE -ne 0) { throw ("Memory Retrieval regression failed: " + $memoryTest) }
+        $memoryTestPath = Join-Path $Repo ("src\orion_v3\modules\" + $memoryTest)
+
+        if ($memoryTest -eq "memory_scale_benchmark_smoke_test.py") {
+            $previousErrorActionPreference = $ErrorActionPreference
+            $ErrorActionPreference = "Continue"
+            & python.exe $memoryTestPath *>> $LogPath
+            $memoryExitCode = $LASTEXITCODE
+            $ErrorActionPreference = $previousErrorActionPreference
+
+            if ($memoryExitCode -ne 0) {
+                $detail = ((Get-Content -LiteralPath $LogPath -Tail 10) -join " | ").Trim()
+                if ($detail.Length -gt 900) {
+                    $detail = $detail.Substring($detail.Length - 900)
+                }
+                throw ("Memory Retrieval regression failed: " + $memoryTest + " | " + $detail)
+            }
+        } else {
+            & python.exe $memoryTestPath *>> $LogPath
+            if ($LASTEXITCODE -ne 0) { throw ("Memory Retrieval regression failed: " + $memoryTest) }
+        }
     }
 
     $CurrentGate = "STRATA tests/run_tests.py --no-browser"
