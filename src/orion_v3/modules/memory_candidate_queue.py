@@ -42,14 +42,15 @@ class CanonicalMemoryCandidateQueue:
     This module is deliberately NOT canonical memory.
 
     It may:
-    - snapshot an exact existing chat message after an authenticated owner request;
+    - snapshot an exact existing chat message after an authenticated owner request
+      or a trusted automatic-selector decision;
     - store immutable provenance for later review;
     - list queued candidates.
 
     It may NOT:
     - promote/reject canonical memory;
     - rewrite or delete chat history;
-    - infer candidates automatically;
+    - infer candidates itself;
     - accept arbitrary client-supplied candidate text;
     - grant authority, permissions, capabilities, or execution.
     """
@@ -107,6 +108,7 @@ class CanonicalMemoryCandidateQueue:
         message_id: str,
         project_id: str | None = None,
         owner_scope: str = OWNER_SCOPE,
+        reason_for_candidate: str = "owner_selected_exact_chat_message",
     ) -> dict[str, Any]:
         conversation_id = _clean(conversation_id, 120)
         message_id = _clean(message_id, 160)
@@ -187,7 +189,7 @@ class CanonicalMemoryCandidateQueue:
             "trust_origin": trust_origin,
             "trust_tier": trust_tier,
             "classification": "conversation_recall",
-            "reason_for_candidate": "owner_selected_exact_chat_message",
+            "reason_for_candidate": _clean(reason_for_candidate, 160) or "owner_selected_exact_chat_message",
             "state": "pending",
             "submitted_at_ms": now_ms,
         }
