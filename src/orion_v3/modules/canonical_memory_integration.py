@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import datetime as _dt
+import hashlib
 import html
 import threading
 from typing import Any
@@ -330,6 +331,50 @@ class CanonicalMemoryIntegratedBrainPipeline:
             src["error_utc"] = _now()
             return None, src
 
+    def _verify_durable_prompt_items(
+        self,
+        result: dict[str, Any],
+    ) -> tuple[dict[str, Any], int]:
+        """Recheck selected durable items against immutable canonical rows at prompt time."""
+        review = getattr(self.durable, "review", None)
+        if review is None or not hasattr(review, "list_canonical"):
+            raise RuntimeError("Durable prompt integrity source is unavailable.")
+        listed = review.list_canonical(include_revoked=True)
+        rows = {
+            str(item.get("memory_id") or ""): item
+            for item in listed.get("all_memories", [])
+            if isinstance(item, dict) and str(item.get("memory_id") or "")
+        }
+        safe_items: list[dict[str, Any]] = []
+        excluded = 0
+        for item in result.get("items", []):
+            if not isinstance(item, dict):
+                excluded += 1
+                continue
+            memory_id = str(item.get("memory_id") or "")
+            row = rows.get(memory_id)
+            provenance = item.get("provenance", {}) if isinstance(item.get("provenance"), dict) else {}
+            if not row:
+                excluded += 1
+                continue
+            full_content = str(row.get("content") or "")
+            full_hash = hashlib.sha256(full_content.encode("utf-8")).hexdigest()
+            if (
+                not bool(row.get("active"))
+                or str(row.get("status") or "") != "active"
+                or full_hash != str(row.get("content_sha256") or "")
+                or str(item.get("content_sha256") or "") != full_hash
+                or str(provenance.get("candidate_id") or "") != str(row.get("candidate_id") or "")
+                or str(provenance.get("promotion_event_id") or "") != str(row.get("promoted_decision_id") or "")
+                or str(provenance.get("promotion_event_hash") or "") != str(row.get("promoted_event_hash") or "")
+            ):
+                excluded += 1
+                continue
+            safe_items.append(copy.deepcopy(item))
+        verified = copy.deepcopy(result)
+        verified["items"] = safe_items
+        return verified, excluded
+
     def _retrieve_durable(
         self,
         query: str,
@@ -338,17 +383,21 @@ class CanonicalMemoryIntegratedBrainPipeline:
         project_id: str,
     ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         try:
-            result = self.durable.retrieve(
+            raw = self.durable.retrieve(
                 query,
                 project_id=project_id,
                 conversation_id=conversation_id,
                 context_char_budget=DURABLE_MAX_CHARS,
             )
+            result, prompt_integrity_excluded = self._verify_durable_prompt_items(raw)
             src = self._blank_source("owner_approved_durable", _state_from_durable(result))
             src["count"] = len(result.get("items", []))
             src["query_fingerprint"] = str(result.get("query_fingerprint") or "")
             src["scope"] = copy.deepcopy(result.get("scope", {}))
             src["trace"] = copy.deepcopy(result.get("trace", {}))
+            src["trace"]["prompt_integrity_excluded"] = prompt_integrity_excluded
+            if prompt_integrity_excluded and not result.get("items"):
+                src["state"] = "filtered"
             return result, src
         except Exception as exc:
             src = self._blank_source("owner_approved_durable", "error")
