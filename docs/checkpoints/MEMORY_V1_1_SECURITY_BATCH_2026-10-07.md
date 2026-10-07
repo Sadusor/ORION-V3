@@ -122,3 +122,37 @@ Remaining qualification:
 - one bounded normal L1 physical sanity check;
 - one bounded historical L2 sanity check if needed;
 - then run the full manual 1k/10k/100k scale benchmark separately because it is intentionally not part of normal updater/runtime.
+
+
+## Batched updater attempt — FAILED / RECOVERED
+
+The first actual attempt to install the full Memory V1.1 batch failed in the updater regression gate and ORION recovered the previous proven runtime.
+
+Important correction:
+- an earlier screenshot showing Update PASS belonged to the previous integrity-only runtime;
+- `/api/health` proved the running commit was still `03e8bb62c633af0432cdf610595810f44cffce7e`;
+- therefore the full V1.1 batch had NOT yet been installed.
+
+Root cause found in the new product-wiring regression fixture, not in Memory V1 behavior:
+
+The fixture contained:
+1. an older same-slot dark-mode recall statement; and
+2. the source chat statement that had been promoted into the current light-mode durable memory.
+
+Frozen V1 correctly shadowed both recall items:
+- one same-slot older-value item;
+- one same-slot same-value duplicate.
+
+The new test incorrectly asserted that exactly one item would be shadowed, causing an AssertionError / traceback and correctly blocking the update.
+
+Repair:
+- product-wiring test now derives the expected shadow count from frozen V1;
+- requires at least one older-value shadow;
+- requires the audit sidecar to write exactly the same number of observed events;
+- verifies the stale dark -> current light event explicitly;
+- no Memory V1 module or shadowing algorithm changed.
+
+Repair commit:
+- `1587df1a360907700c52f99201933100a8eadbae`
+
+Status: **FULL MEMORY V1.1 BATCH STILL AWAITING PHYSICAL UPDATER PASS**.
