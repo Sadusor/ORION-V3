@@ -403,3 +403,31 @@ Physical updater evidence:
 Result: **MEMORY V1.1a INTEGRITY ANCHOR ISOLATED GATE — PASS**.
 
 Next step: product-server wiring only (startup verification, status exposure, post-commit observer, and write-freeze preflight). Frozen Memory V1 modules remain untouched.
+
+
+## Memory V1.1a — Integrity Anchor live product-boundary wiring PASS
+
+The integrity sidecar was wired only at the ORION product-server boundary. Frozen Memory V1 modules were not modified.
+
+Live V1.1a behavior:
+- verify durable-memory integrity state at ORION startup;
+- expose read-only integrity status;
+- observe successful durable decisions/supersessions after V1 commits;
+- freeze future durable-memory writes when integrity state is unsafe;
+- keep reads available while writes are frozen;
+- paired owner may explicitly accept/re-anchor current state;
+- STOP, Qwen retrieval, L0/L1/L2, Conversation Recall, and TheHands remain independent.
+
+Relevant commits:
+- `cad88139248569895c3a09ef882e9f61e1c40e82` — product-boundary integrity wiring
+- `10809a7220bd8f49a73f31988dd0514dddf84903` — product wiring regression
+- `03e8bb62c633af0432cdf610595810f44cffce7e` — updater regression gate
+
+Physical updater evidence:
+- Android Settings showed **Update PASS**;
+- ORION PC restarted successfully;
+- phone remained connected to ORION PC.
+
+Result: **MEMORY V1.1a INTEGRITY ANCHOR LIVE WIRING — PASS**.
+
+Next V1.1 deliverable: Shadowing Audit observer. The frozen same-slot shadowing algorithm remains unchanged.
