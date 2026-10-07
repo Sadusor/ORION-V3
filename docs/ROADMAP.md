@@ -2,7 +2,145 @@
 
 All milestones are gated by physical evidence.
 
-## Immediate owner-approved build — Connectors + ORION product UI
+## PRIORITY — Autonomous Work Loop V1 (owner-locked 2026-10-07)
+
+This supersedes the previous immediate connectors/UI sequence as the current build priority. Connector/UI work remains valid recorded work and resumes after the autonomous loop foundation is physically proven.
+
+### Locked principles
+
+- ORION owns authority, state transitions, STOP and verification; models never become authority.
+- The project folder is the **Vault**. `STATE.md` is its canonical current-state/front-page file.
+- Qwen/replacement local models reason and propose; deterministic ORION code authorizes.
+- The Work Hand executes only inside a physically proven confined workspace before autonomous writes are enabled.
+- Real authenticated evidence determines PASS/FAIL; model claims never do.
+- Existing ORION STOP remains authoritative.
+- GREEN work proceeds without owner approval; YELLOW waits for the owner; RED/frozen operations are denied before Hands.
+- Continuity belongs to ORION/Vault, not to Qwen.
+- Round-3 architecture is a direction/principle set, not a component contract. The physical loop may falsify future component hypotheses.
+- Build the smallest next proof: physical PASS -> freeze -> extend. Do not pre-build speculative stores/frameworks.
+
+### Milestone 0 — Audit + donor reuse map (CURRENT PRIORITY)
+
+Before coding, inspect the actual ORION-V3, TheHands and donor code and classify each needed capability:
+
+`EXISTS / PARTIAL / MISSING / REUSE`
+
+Audit at minimum: project state/Vault candidates, Qwen invocation, TheHands invocation, evidence, STOP, GREEN/YELLOW/RED checks, frozen-path enforcement, Git, owner-input hook, status/events and workspace confinement.
+
+Donor-first rule: reuse or adapt proven code/patterns before creating new components. Current high-value donor targets are recorded in `docs/AUTONOMOUS_WORK_LOOP_V1_2026-10-07.md` and `docs/DONORS.md`.
+
+### Milestone 1 — Minimal Vault
+
+Create one disposable Work project:
+
+```text
+<work-project>/
+  STATE.md
+  JOURNAL.md
+  repo/
+```
+
+`STATE.md` contains current project state only: objective, checkpoint/current task, last verified result, next action, blocked state, active project constraints and frozen boundaries. It must not become a shadow Memory.
+
+`JOURNAL.md` is append-only narrative/evidence references. Reusable durable lessons remain candidates for the existing frozen ORION Memory pipeline rather than a second memory system.
+
+### Milestone 2 — Confined Work Hand
+
+Find and physically test the smallest existing confinement mechanism compatible with Windows + TheHands. Audit in this order:
+
+1. existing TheHands confinement/path enforcement;
+2. existing donor/runtime confinement that fits the machine and workflow;
+3. WSL2 / Windows Sandbox / restricted-user or ACL approaches where appropriate;
+4. custom sandbox only if simpler existing mechanisms fail.
+
+Hard gate: autonomous writes do not begin until the Hand is proven unable to write outside its assigned workspace. If confinement is not ready, the loop remains read-only/dry-run.
+
+### Milestone 3 — Tiny autonomous loop
+
+Implement the smallest loop:
+
+`STATE -> Qwen -> ORION check -> Hands -> authenticated evidence -> STATE`
+
+No new Memory, evidence DB, event bus, workflow DSL, Council framework, polished Work UI or notification taxonomy.
+
+The loop must have a hook for a new owner instruction at the start of each cycle so later Work Chat integration does not require redesign.
+
+### Milestone 4 — First physical qualification: FAIL across restart
+
+One qualification path must prove all of the following:
+
+1. owner says `Continue` once;
+2. ORION reads the correct STATE;
+3. Qwen proposes one bounded task;
+4. ORION classifies from concrete properties;
+5. GREEN runs without owner approval inside the confined workspace;
+6. real evidence authenticates a deliberate FAIL;
+7. kill/restart ORION before repair;
+8. fresh Qwen receives STATE + authenticated failure with no owner reminder;
+9. Qwen proposes a bounded repair;
+10. Hands executes; real evidence authenticates PASS;
+11. ORION updates STATE and appends JOURNAL;
+12. a YELLOW operation waits for owner;
+13. a frozen/RED write is denied before Hands;
+14. existing ORION STOP halts the loop;
+15. the owner can watch the real cycle live from one simple terminal view.
+
+PASS is all-or-nothing. Record separately what this milestone did **not** prove.
+
+### Milestone 5 — Model replacement
+
+Before adding enrichment, replace Qwen with another protocol-compatible local model and prove continuation from the same Vault/evidence. This tests that continuity belongs to ORION, not Qwen.
+
+### Milestone 6 — Existing Memory integration
+
+Add retrieval from the already-frozen ORION Memory as context enrichment only. Vault remains project truth; Memory remains reusable durable knowledge. Do not reopen Memory V1/V1.1.
+
+### Milestone 7 — Separate Work Chat
+
+Reuse ORION's existing chat infrastructure for a project-scoped Work thread. Normal Chat remains independently usable while Work runs. Do not create a permanent file-based second chat system.
+
+### Milestone 8 — Qualified Skills
+
+Add skills only after the core loop is proven. First candidates:
+
+1. repository/code search and compact code map;
+2. documentation/research retrieval;
+3. Git/project inspection.
+
+Qwen may request; ORION authorizes; Skills return data and never gain authority.
+
+### Milestone 9 — Cloud specialists / Council
+
+Add replaceable cloud specialists only after the local loop is qualified. Start small (Architect + Adversarial) and reuse existing provider infrastructure.
+
+### Milestone 10 — Work observability/UI
+
+Build the real Work UI around observed needs and real backend events. Target surfaces: Work Chat, Activity, Plan, Council, Files/Vault, Evidence. No fake thinking/progress.
+
+### Milestone 11 — Headless + notifications
+
+Same loop with UI attached or detached. Add minimal owner notifications for decisions/blocked/unrecoverable/denied states; routine GREEN work stays quiet.
+
+### Milestone 12 — Phone supervision
+
+Project status, Work Chat, Activity, Council summary, evidence details, decisions, Pause/Resume and global STOP. Phone is supervision, not a mini IDE.
+
+### Milestone 13 — Extended qualification + freeze
+
+Qualify longer continuity, model/provider replacement, YELLOW/RED, confinement attacks, detach/attach, Pause/Resume, STOP and truthful evidence. Then freeze **Autonomous Work Loop V1**.
+
+### Milestone 14 — Use it to help build ORION
+
+Only after qualification, give the frozen loop one small non-protected ORION roadmap task. Self-development never unlocks ORION authority, STOP, evidence verification, frozen Memory, frozen Hands core or the confinement boundary.
+
+### First-milestone claim discipline
+
+A first PASS proves only the bounded claim tested. It does not prove multi-day/multi-project autonomy, general model independence, long-running stability, full skill/council correctness or self-development safety. Each next claim requires its own physical gate.
+
+
+## Previous priority — Connectors + ORION product UI (preserved / deferred)
+
+
 
 Owner-locked sequence as of 2026-10-05:
 
