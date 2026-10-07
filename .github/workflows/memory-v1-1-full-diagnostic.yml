@@ -1,0 +1,87 @@
+name: Memory V1.1 Full Updater Diagnostic
+
+on:
+  push:
+    branches:
+      - diag/memory-v1-1-full-updater
+  workflow_dispatch:
+
+jobs:
+  updater-memory-regressions:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Chat history
+        run: python src/orion_v3/modules/chat_history_test.py
+
+      - name: Memory retrieval
+        run: python src/orion_v3/modules/memory_retrieval_test.py
+
+      - name: Memory retrieval adversarial
+        run: python src/orion_v3/modules/memory_retrieval_adversarial_test.py
+
+      - name: Memory candidate queue
+        run: python src/orion_v3/modules/memory_candidate_queue_test.py
+
+      - name: Memory auto candidate
+        run: python src/orion_v3/modules/memory_auto_candidate_test.py
+
+      - name: Memory conflict suggestions
+        run: python src/orion_v3/modules/memory_conflict_suggestions_test.py
+
+      - name: Memory consolidation
+        run: python src/orion_v3/modules/memory_consolidation_test.py
+
+      - name: Memory historical query
+        run: python src/orion_v3/modules/memory_historical_query_test.py
+
+      - name: Memory integrity anchor
+        run: python src/orion_v3/modules/memory_integrity_anchor_test.py
+
+      - name: Memory integrity product wiring
+        run: python src/orion_v3/modules/memory_integrity_product_wiring_test.py
+
+      - name: Memory shadow audit
+        run: python src/orion_v3/modules/memory_shadow_audit_test.py
+
+      - name: Memory shadow audit product wiring
+        run: python src/orion_v3/modules/memory_shadow_audit_product_wiring_test.py
+
+      - name: Memory scale benchmark smoke
+        run: python src/orion_v3/modules/memory_scale_benchmark_smoke_test.py
+
+      - name: Memory candidate product server
+        run: python src/orion_v3/modules/memory_candidate_product_server_test.py
+
+      - name: Memory review promotion
+        run: python src/orion_v3/modules/memory_review_promotion_test.py
+
+      - name: Memory review product server
+        run: python src/orion_v3/modules/memory_review_product_server_test.py
+
+      - name: Canonical memory retrieval foundation
+        run: python src/orion_v3/modules/canonical_memory_retrieval_foundation_test.py
+
+      - name: Canonical memory integration
+        run: python src/orion_v3/modules/canonical_memory_integration_test.py
+
+      - name: Canonical memory product wiring
+        run: python src/orion_v3/modules/canonical_memory_product_wiring_test.py
+
+      - name: Memory brain pipeline
+        run: python src/orion_v3/modules/memory_brain_pipeline_test.py
+
+      - name: Memory product server
+        run: python src/orion_v3/modules/memory_product_server_test.py
+
+      - name: STRATA no-browser regression
+        working-directory: ui/strata
+        run: python tests/run_tests.py --no-browser
