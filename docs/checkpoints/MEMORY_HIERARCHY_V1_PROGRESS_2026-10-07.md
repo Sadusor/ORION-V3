@@ -238,3 +238,21 @@ Interpretation:
 Result: **PROVEN MEMORY BASELINE RESTORE — PASS**.
 
 L2 historical chat routing remains isolated as the only unfinished Memory Hierarchy V1 gate.
+
+
+## Proven baseline sanity retest after rollback — PASS
+
+After the restored baseline update passed, the first retest accidentally used the phone-local model and therefore had no access to PC canonical memory. This was correctly identified as a model-selection issue, not a Memory failure.
+
+Owner then selected the PC model and asked:
+- "What mode do I prefer for ORION?"
+
+Physical result:
+- model pill: PC · Qwen3.5
+- ORION answer: "Based on the owner-approved durable memory in your context, you prefer dark mode for ORION."
+- no stale light-mode conflict surfaced;
+- superseded prior memory did not leak into current recall.
+
+Result: **CURRENT CANONICAL RETRIEVAL BASELINE AFTER ROLLBACK — PASS**.
+
+The current-memory path remains frozen/proven. L2 historical chat routing is the only unfinished hierarchy gate and must be rebuilt separately.
