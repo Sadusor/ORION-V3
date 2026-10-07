@@ -75,6 +75,10 @@ def main() -> int:
         "preference:mode:orion",
         "dark",
     )
+    assert memory_slot("I prefer light mode in Orion.") == (
+        "preference:mode:orion",
+        "light",
+    )
     assert memory_slot("For ORION, I prefer light mode.") == (
         "preference:mode:orion",
         "light",
