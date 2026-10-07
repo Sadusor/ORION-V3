@@ -1,0 +1,44 @@
+name: Memory V1.1 Gate
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "src/orion_v3/modules/memory_shadow_audit.py"
+      - "src/orion_v3/modules/memory_shadow_audit_test.py"
+      - "src/orion_v3/modules/memory_shadow_audit_product_wiring_test.py"
+      - "src/orion_v3/modules/memory_scale_benchmark_smoke_test.py"
+      - "src/orion_v3/modules/memory_integrity_anchor.py"
+      - "src/orion_v3/modules/memory_integrity_anchor_test.py"
+      - "src/orion_v3/modules/memory_integrity_product_wiring_test.py"
+      - "src/orion_v3/product_server.py"
+      - "tools/bench/memory_scale_benchmark.py"
+      - ".github/workflows/memory-v1-1-gate.yml"
+
+jobs:
+  memory-v1-1:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Integrity anchor isolated
+        run: python src/orion_v3/modules/memory_integrity_anchor_test.py
+
+      - name: Integrity product wiring
+        run: python src/orion_v3/modules/memory_integrity_product_wiring_test.py
+
+      - name: Shadow audit isolated
+        run: python src/orion_v3/modules/memory_shadow_audit_test.py
+
+      - name: Shadow audit product wiring
+        run: python src/orion_v3/modules/memory_shadow_audit_product_wiring_test.py
+
+      - name: Scale benchmark smoke
+        run: python src/orion_v3/modules/memory_scale_benchmark_smoke_test.py
