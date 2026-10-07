@@ -595,7 +595,7 @@ class OrionPcBridge(
                 "/api/health",
                 null,
                 authenticated = false,
-                timeoutMs = 1800,
+                timeoutMs = 4000,
             )
             if (!health.ok) {
                 return JSONObject()
