@@ -25,6 +25,7 @@ from modules.canonical_memory_integration import CanonicalMemoryIntegratedBrainP
 from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
 from modules.memory_auto_candidate import AutomaticMemoryCandidateSelector
 from modules.memory_conflict_suggestions import MemoryConflictSuggestions
+from modules.memory_consolidation import MemoryConsolidation
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -59,10 +60,14 @@ MEMORY_CONFLICTS = MemoryConflictSuggestions(
     MEMORY_REVIEW,
     CANONICAL_MEMORY_RETRIEVAL,
 )
+MEMORY_CONSOLIDATION = MemoryConsolidation(
+    MEMORY_REVIEW,
+    CANONICAL_MEMORY_RETRIEVAL,
+)
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
     recall=MEMORY_RETRIEVAL,
-    durable=CANONICAL_MEMORY_RETRIEVAL,
+    durable=MEMORY_CONSOLIDATION,
 )
 UPDATE_MANAGER = UpdateManager(ROOT, STATE_ROOT)
 
@@ -204,6 +209,7 @@ class ProductState:
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
             "memory_retrieval": MEMORY_RETRIEVAL.last(),
             "memory_auto_candidate": MEMORY_AUTO_CANDIDATES.status(),
+            "memory_hierarchy": MEMORY_CONSOLIDATION.l0(""),
         }
 
 
@@ -371,10 +377,43 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, MEMORY_CONFLICTS.view())
         if path == "/api/memory/supersessions":
             return self._json(200, CANONICAL_MEMORY_RETRIEVAL.supersessions())
+        if path == "/api/memory/hierarchy/l0":
+            return self._json(
+                200,
+                MEMORY_CONSOLIDATION.l0(
+                    str((query.get("project_id") or [""])[0])
+                ),
+            )
+        if path == "/api/memory/hierarchy/l1":
+            try:
+                return self._json(
+                    200,
+                    MEMORY_CONSOLIDATION.l1(
+                        str((query.get("q") or [""])[0]),
+                        project_id=str((query.get("project_id") or [""])[0]),
+                        conversation_id=str((query.get("conversation_id") or [""])[0]),
+                        limit=int(str((query.get("limit") or ["6"])[0] or "6")),
+                    ),
+                )
+            except (TypeError, ValueError) as exc:
+                return self._json(400, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/hierarchy/l2":
+            try:
+                return self._json(
+                    200,
+                    MEMORY_CONSOLIDATION.l2(
+                        str((query.get("q") or [""])[0]),
+                        project_id=str((query.get("project_id") or [""])[0]),
+                        conversation_id=str((query.get("conversation_id") or [""])[0]),
+                        limit=int(str((query.get("limit") or ["12"])[0] or "12")),
+                    ),
+                )
+            except (TypeError, ValueError) as exc:
+                return self._json(400, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/memory/search":
             try:
                 raw_limit = str((query.get("limit") or ["6"])[0] or "6")
-                result = MEMORY_RETRIEVAL.retrieve(
+                result = MEMORY_CONSOLIDATION.l1(
                     str((query.get("q") or [""])[0]),
                     conversation_id=str((query.get("conversation_id") or [""])[0]),
                     project_id=(
