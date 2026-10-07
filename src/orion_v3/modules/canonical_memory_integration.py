@@ -25,8 +25,8 @@ RECALL_DEFAULT_CHARS = TOTAL_MEMORY_CONTEXT_CHARS - DURABLE_MAX_CHARS
 OWNER_GOAL_MAX_CHARS = 16_000
 CURRENT_CONVERSATION_CONTEXT_MAX_CHARS = 8_000
 
-LEGACY_PHONE_CONTEXT_PREFIX = "Conversation context from the owner\'s local chat memory:\\n"
-LEGACY_PHONE_CONTEXT_SUFFIX = "\\n\\nAnswer the latest user message in that context."
+LEGACY_PHONE_CONTEXT_PREFIX = "Conversation context from the owner\'s local chat memory:\n"
+LEGACY_PHONE_CONTEXT_SUFFIX = "\n\nAnswer the latest user message in that context."
 
 RECALL_EPISTEMIC_STATUS = "conversation recall context"
 DURABLE_EPISTEMIC_STATUS = "owner-approved durable context, not verified truth"
