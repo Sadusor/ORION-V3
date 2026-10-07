@@ -161,7 +161,10 @@ def _render_recall_block(
         )
         close = "</ORION_RECALL_ITEM>\n"
         body = _body(item.get("content", "")).strip()
-        room = char_budget - used - len(label) - len(close)
+        # The rendered item includes two newline characters around the body.
+        # Account for them before clipping so a clipped item fills the budget
+        # instead of being discarded by the final size check.
+        room = char_budget - used - len(label) - len(close) - 2
         if room <= 0:
             break
         if len(body) > room:
@@ -230,7 +233,10 @@ def _render_durable_block(
         )
         close = "</ORION_DURABLE_ITEM>\n"
         body = _body(item.get("content", "")).strip()
-        room = char_budget - used - len(label) - len(close)
+        # The rendered item includes two newline characters around the body.
+        # Account for them before clipping so a clipped item fills the budget
+        # instead of being discarded by the final size check.
+        room = char_budget - used - len(label) - len(close) - 2
         if room <= 0:
             break
         if len(body) > room:
