@@ -143,3 +143,18 @@ Current priority is donor reuse for the minimal `STATE -> model -> ORION -> Hand
 | owner-needed UX later | PizzaBot/KIRA/Orion-Copilot patterns | background-work/needs-you and remote supervision patterns | a second remote authority |
 
 Immediate rule: **do not code from a donor until the Step-0 audit identifies a concrete missing capability.** Prefer adapting a narrow proven function/pattern behind ORION semantics over importing a donor subsystem.
+
+
+## 2026-10-07 external donor research — Autonomous Work Loop
+
+Detailed exact-file audit: `docs/AUTONOMOUS_WORK_LOOP_V1_DONOR_CODE_AUDIT_2026-10-07.md`.
+
+New candidates:
+- **Anthropic Sandbox Runtime (Apache-2.0)** — current first external candidate to physically benchmark for Windows-native Work Hand confinement. Dedicated sandbox user + NTFS ACE filesystem rules + WFP network fence. Windows support is alpha; qualification required before adoption.
+- **OpenAI Codex Windows sandbox (Apache-2.0)** — high-value source for Windows sandbox policy and especially `codex-rs/windows-sandbox-rs/sandbox_smoketests.py`; public 2026 Windows regressions mean runtime is challenger, not trusted baseline.
+- **fmuecke/agent-win-sandbox** — useful dedicated-user/broker/firewall reference, but author explicitly says it is not hard containment; reference/fallback only.
+- **anthropics/skills** — later Skill research source only, after ORION skill qualification exists.
+- **nanobrowser/nanobrowser (Apache-2.0)** — later browser-Hand challenger; not core-loop priority.
+- **syntax-syndicate/nono-agent-sandbox (Apache-2.0)** — capability/audit reference; Windows is roadmap rather than current implementation, so not a current confinement candidate.
+
+Priority change from this research: benchmark native Windows Anthropic SRT before defaulting to WSL/Docker, while reusing Codex's sandbox smoke tests as attack cases.
