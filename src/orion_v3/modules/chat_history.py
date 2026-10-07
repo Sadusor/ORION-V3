@@ -147,10 +147,29 @@ class ChatHistoryStore:
                         "INSERT OR IGNORE INTO conversations(id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,?,?)",
                         (m["conversation_id"], "", "", 0, 0, 0, ts, ts),
                     )
-                con.execute(
-                    "INSERT OR IGNORE INTO messages(id,conversation_id,role,text,source,created_at_ms) VALUES(?,?,?,?,?,?)",
-                    (m["id"], m["conversation_id"], m["role"], m["text"], m["source"], m["created_at_ms"]),
-                )
+                # CHAT_SYNC_V1: phone and desktop may observe the same completed
+                # Qwen reply and assign different local message ids. Keep user turns
+                # strictly id-based, but collapse duplicate ORION assistant writes
+                # when the content is identical and timestamps are close.
+                duplicate_assistant = None
+                if m["role"] == "assistant" and m["source"].startswith("orion"):
+                    duplicate_assistant = con.execute(
+                        """
+                        SELECT id FROM messages
+                        WHERE conversation_id=?
+                          AND role='assistant'
+                          AND text=?
+                          AND source LIKE 'orion%'
+                          AND ABS(created_at_ms-?) <= 30000
+                        LIMIT 1
+                        """,
+                        (m["conversation_id"], m["text"], m["created_at_ms"]),
+                    ).fetchone()
+                if duplicate_assistant is None:
+                    con.execute(
+                        "INSERT OR IGNORE INTO messages(id,conversation_id,role,text,source,created_at_ms) VALUES(?,?,?,?,?,?)",
+                        (m["id"], m["conversation_id"], m["role"], m["text"], m["source"], m["created_at_ms"]),
+                    )
                 con.execute(
                     "UPDATE conversations SET updated_at_ms=max(updated_at_ms,?) WHERE id=?",
                     (m["created_at_ms"], m["conversation_id"]),
