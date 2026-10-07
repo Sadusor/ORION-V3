@@ -177,3 +177,25 @@ Architecture evidence:
 UX note for later UI polish:
 - "active canonical memories" reflects immutable promotion state and can look confusing after supersession.
 - Consider wording such as "promoted records" plus a separate "current effective memories" count without changing storage semantics.
+
+
+## L2 integration update — regression gate FAIL before activation
+
+Attempted L2 chat-routing update failed during the updater regression wall before activation.
+
+Observed on Android Settings:
+- Update FAILED
+- traceback reported
+- previous ORION recovery attempted
+
+Root cause in the staged L2 patch:
+- the new integration regression expected durable prompt items to expose an explicit `status="current|historical"` label;
+- the durable prompt renderer text described current/historical semantics but omitted the actual status attribute;
+- therefore the canonical-memory integration regression failed as designed and the updater recovered the previous ORION build.
+
+Bounded repair:
+- emit the existing item status on `ORION_DURABLE_ITEM` prompt records;
+- no storage, promotion, recall, supersession, Android, updater, or authority behavior changed;
+- repair commit: `53b81620ce9d73a631a68bab1d3c07386c390689`.
+
+Classification: regression gate FAIL / rollback PASS. Re-run required before L2 physical qualification.
