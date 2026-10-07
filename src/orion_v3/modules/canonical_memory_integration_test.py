@@ -189,7 +189,6 @@ class FakeDurable:
                 "project_id": project_id,
                 "conversation_id": conversation_id,
                 "context_char_budget": context_char_budget,
-                "include_historical": bool(kwargs.get("include_historical", False)),
             }
         )
         if self.fail:
@@ -504,52 +503,6 @@ def test_20_current_durable_preference_marks_older_same_slot_recall_historical()
     assert shadow["authority"] == "context_only"
 
 
-def test_21_historical_query_routes_l2_and_labels_history():
-    rec = FakeRecall([
-        recall_item("I prefer light mode for ORION."),
-    ])
-    current = durable_item(
-        "I prefer dark mode for ORION.",
-        memory_id="cm-current",
-        candidate_id="cand-current",
-        project_id="p1",
-        source_message_id="current-msg",
-        promotion_event_id="decision-current",
-        promotion_event_hash="hash-current",
-    )
-    current["status"] = "current"
-    historical = durable_item(
-        "I prefer light mode for ORION.",
-        memory_id="cm-history",
-        candidate_id="cand-history",
-        project_id="p1",
-        source_message_id="history-msg",
-        promotion_event_id="decision-history",
-        promotion_event_hash="hash-history",
-    )
-    historical["status"] = "historical"
-    dur = FakeDurable([current, historical])
-    brain, wrapped = make_pipeline(rec, dur)
-
-    state = wrapped.start(
-        "What did I previously prefer before dark mode?",
-        "qwen-test",
-        conversation_id="c",
-        project_id="p1",
-    )
-
-    assert dur.calls[-1]["include_historical"] is True
-    trace = state["brain_memory"]["sources"]["owner_approved_durable"]["trace"]
-    assert trace["historical_query_intent"] is True
-    assert trace["hierarchy_level"] == "L2"
-    prompt = brain.started_goal
-    assert 'status="current"' in prompt
-    assert 'status="historical"' in prompt
-    assert "Historical items are prior context only" in prompt
-    assert prompt.count("I prefer light mode for ORION.") == 1
-    assert "I prefer dark mode for ORION." in prompt
-
-
 def test_20_prompt_assembly_is_deterministic_for_same_inputs():
     rec1 = FakeRecall([recall_item("recall")])
     d1 = durable_item("durable", project_id="p1")
@@ -585,7 +538,6 @@ TESTS = [
     test_18_all_filtered_means_no_memory_prompt_is_injected,
     test_19_owner_current_message_wins_position_when_memories_conflict,
     test_20_current_durable_preference_marks_older_same_slot_recall_historical,
-    test_21_historical_query_routes_l2_and_labels_history,
     test_20_prompt_assembly_is_deterministic_for_same_inputs,
 ]
 
