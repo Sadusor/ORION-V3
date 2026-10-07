@@ -209,7 +209,6 @@ class ProductState:
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
             "memory_retrieval": MEMORY_RETRIEVAL.last(),
             "memory_auto_candidate": MEMORY_AUTO_CANDIDATES.status(),
-            "memory_hierarchy": MEMORY_CONSOLIDATION.l0(""),
         }
 
 
@@ -413,7 +412,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/memory/search":
             try:
                 raw_limit = str((query.get("limit") or ["6"])[0] or "6")
-                result = MEMORY_CONSOLIDATION.l1(
+                result = MEMORY_RETRIEVAL.retrieve(
                     str((query.get("q") or [""])[0]),
                     conversation_id=str((query.get("conversation_id") or [""])[0]),
                     project_id=(
