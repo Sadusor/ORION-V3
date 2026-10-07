@@ -218,6 +218,7 @@ def seed_supersessions(
     fixture: Fixture,
 ) -> None:
     import sqlite3
+    from contextlib import closing
 
     rows = []
     prev = ""
@@ -253,7 +254,7 @@ def seed_supersessions(
     if not rows:
         return
 
-    with sqlite3.connect(foundation.supersession_path) as con:
+    with closing(sqlite3.connect(foundation.supersession_path)) as con, con:
         con.executemany(
             """
             INSERT INTO supersession_events(
