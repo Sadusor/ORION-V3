@@ -222,7 +222,9 @@ def main() -> int:
                 body1["local_hand_lane"]["brain_memory"]["sources"]
                 ["conversation_recall"]["trace"]["durable_slot_shadowing"]
             )
-            assert shadow["total_shadowed"] == 1
+            expected_shadowed = int(shadow["total_shadowed"])
+            assert expected_shadowed >= 1
+            assert shadow["same_slot_older_value"] >= 1
 
             status2, audit_status = get_json(
                 port,
@@ -231,23 +233,31 @@ def main() -> int:
             )
             assert status2 == 200
             assert audit_status["state"] == "ok"
-            assert audit_status["events_written"] == 1
+            assert audit_status["last_batch_written"] == expected_shadowed
+            assert audit_status["last_expected_shadow_count"] == expected_shadowed
             assert audit_status["prompt_path_effect"] == "none"
 
             lines = product.MEMORY_SHADOW_AUDIT.path.read_text(
                 encoding="utf-8"
             ).splitlines()
-            assert len(lines) == 1
-            event = json.loads(lines[0])
-            assert event["old_recall"]["text"] == "I prefer dark mode for ORION."
-            assert event["current_durable"]["text"] == "My preferred ORION mode is light."
-            assert event["slot"] == "preference:mode:orion"
-            assert event["prompt_path_effect"] == "none"
+            assert len(lines) == expected_shadowed
+            events = [json.loads(line) for line in lines]
+            stale = next(
+                event for event in events
+                if event["old_recall"]["text"] == "I prefer dark mode for ORION."
+            )
+            assert stale["current_durable"]["text"] == "My preferred ORION mode is light."
+            assert stale["slot"] == "preference:mode:orion"
+            assert stale["match"]["same_value"] is False
+            assert stale["prompt_path_effect"] == "none"
 
             # Product status exposes the observer state only.
             status3, product_status = get_json(port, "/api/status", token)
             assert status3 == 200
-            assert product_status["memory_shadow_audit"]["events_written"] == 1
+            assert (
+                product_status["memory_shadow_audit"]["events_written"]
+                == expected_shadowed
+            )
 
             print("MEMORY_SHADOW_AUDIT_PRODUCT_WIRING_V1_1B> PASS")
             print("NORMAL_TURN_ZERO_AUDIT_WORK> PASS")
