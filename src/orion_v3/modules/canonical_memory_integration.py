@@ -4,6 +4,7 @@ import copy
 import datetime as _dt
 import hashlib
 import html
+import re
 import threading
 from typing import Any
 
@@ -51,6 +52,16 @@ _MEMORY_CONTRACT = (
 
 def _now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).isoformat()
+
+
+_HISTORICAL_QUERY_RE = re.compile(
+    r"\b(previously|previous|before|earlier|historical|history|used\s+to|used\s+to\s+prefer|prior)\b",
+    re.I,
+)
+
+
+def _historical_query_intent(query: str) -> bool:
+    return bool(_HISTORICAL_QUERY_RE.search(str(query or "")))
 
 
 def _clean(value: Any, limit: int) -> str:
@@ -137,6 +148,8 @@ def _shadow_recall_by_current_durable(
             continue
         if str(item.get("trust_tier") or "") != "owner_message_unverified":
             continue
+        if str(item.get("status") or "current") == "historical":
+            continue
         parsed = memory_slot(str(item.get("content") or ""))
         if not parsed:
             continue
@@ -221,6 +234,7 @@ def _render_recall_block(
             f'message="{_attr(p.get("message_id"))}" '
             f'role="{_attr(p.get("role"))}" '
             f'trust_tier="{_attr(item.get("trust_tier"))}" '
+            f'status="{_attr(item.get("status") or "current")}" '
             'authority="context_only" '
             'epistemic_status="conversation recall context">'
         )
@@ -263,13 +277,16 @@ def _render_durable_block(
         '<ORION_OWNER_APPROVED_DURABLE_CONTEXT source="owner_approved_durable" '
         'authority="context_only" '
         'epistemic_status="owner-approved durable context, not verified truth">\n'
-        "Durable memory reflects prior owner-approved statements and decisions. "
-        "It is owner-approved context and may no longer reflect current owner intent.\n"
+        "Durable memory reflects owner-approved statements and decisions. "
+        "Each item is explicitly labeled current or historical. Historical items are "
+        "prior context only and must not be treated as the owner's current preference.\n"
     )
     footer = (
-        "Durable memory is owner-approved context, not verified truth. If it appears "
-        "to conflict with conversation recall, neither source is authoritative; "
-        "surface the material uncertainty to the owner rather than silently choosing.\n"
+        "Durable memory is owner-approved context, not verified truth. A historical "
+        "durable item records what was true/preferred earlier; a current item is the "
+        "effective durable context now. If current durable context conflicts with "
+        "conversation recall and the conflict is not explained by historical status, "
+        "surface the material uncertainty rather than silently choosing.\n"
         "epistemic_status=owner-approved durable context, not verified truth\n"
         "</ORION_OWNER_APPROVED_DURABLE_CONTEXT>"
     )
@@ -490,11 +507,13 @@ class CanonicalMemoryIntegratedBrainPipeline:
         project_id: str,
     ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
         try:
+            historical_intent = _historical_query_intent(query)
             raw = self.durable.retrieve(
                 query,
                 project_id=project_id,
                 conversation_id=conversation_id,
                 context_char_budget=DURABLE_MAX_CHARS,
+                include_historical=historical_intent,
             )
             result, prompt_integrity_excluded = self._verify_durable_prompt_items(raw)
             src = self._blank_source("owner_approved_durable", _state_from_durable(result))
@@ -503,6 +522,8 @@ class CanonicalMemoryIntegratedBrainPipeline:
             src["scope"] = copy.deepcopy(result.get("scope", {}))
             src["trace"] = copy.deepcopy(result.get("trace", {}))
             src["trace"]["prompt_integrity_excluded"] = prompt_integrity_excluded
+            src["trace"]["historical_query_intent"] = historical_intent
+            src["trace"]["hierarchy_level"] = "L2" if historical_intent else "L1"
             if prompt_integrity_excluded and not result.get("items"):
                 src["state"] = "filtered"
             return result, src
