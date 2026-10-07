@@ -124,3 +124,22 @@ See `docs/decisions/0003-donor-contract-patterns.md`.
 - Neither donor is adopted or physically tested yet. Pin exact revisions before a falsification spike.
 
 Detailed review: `docs/reference/2026-10-05-soup-training-and-soup-wall-donor-review.md`.
+
+
+## Autonomous Work Loop V1 donor priority — 2026-10-07
+
+Current priority is donor reuse for the minimal `STATE -> model -> ORION -> Hands -> evidence -> STATE` loop. Adoption still requires bounded audit/physical proof.
+
+| Need | First donor/code to inspect | Intended reuse | Do not import |
+|---|---|---|---|
+| proposal/approval/evidence binding | OpenMuse + Jev Harness | frozen proposal hashes, CAS/stale rejection, idempotency/receipts, evidence-grounded decisions | donor authority/agent state |
+| deterministic Hand shape | CLI-Anything + existing TheHands | typed one-operation commands, machine receipts, inspect-before-mutate, artifact verification | a second executor authority |
+| workspace confinement | existing TheHands first; OpenSandbox/OpenJarvis sandbox patterns as challengers | mount allowlists/isolation/runtime patterns if they fit Windows workflow | a new sandbox platform before proving need |
+| local model/tool registry later | OpenJarvis | replaceable registries/tool contracts; event adapters | OpenJarvis agent authority or default-allow policy |
+| first code-search Skill | Aider repo-map; Graft/codebase-memory-mcp as challengers | bounded symbol/repo context without dumping whole repo | editing authority / canonical project truth |
+| Skills later | OpenJarvis skill system + Hermes donor catalog | manifest/capability/dependency/qualification ideas | auto-trusting discovered/community skills |
+| evidence/provenance | existing TheHands + KnowledgeOS patterns | real receipts, evidence/interpretation separation, traceable provenance | a second evidence database |
+| provider/cloud roles later | existing ORION provider work + WORKSHOP/OpenJarvis patterns | replaceable provider mapping/health | provider-owned authority |
+| owner-needed UX later | PizzaBot/KIRA/Orion-Copilot patterns | background-work/needs-you and remote supervision patterns | a second remote authority |
+
+Immediate rule: **do not code from a donor until the Step-0 audit identifies a concrete missing capability.** Prefer adapting a narrow proven function/pattern behind ORION semantics over importing a donor subsystem.
