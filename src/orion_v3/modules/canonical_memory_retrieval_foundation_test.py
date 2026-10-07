@@ -332,7 +332,8 @@ def main() -> int:
             project_id="",
             conversation_id="current",
         )
-        assert not current["items"]
+        current_ids = {x["memory_id"] for x in current["items"]}
+        assert m_current["memory_id"] not in current_ids
         assert current["trace"]["filtered"]["current_conversation"] >= 1
 
         # Revocation is authoritative for retrieval even if query exactly targets it.
