@@ -26,6 +26,7 @@ from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, Memory
 from modules.memory_auto_candidate import AutomaticMemoryCandidateSelector
 from modules.memory_conflict_suggestions import MemoryConflictSuggestions
 from modules.memory_consolidation import MemoryConsolidation
+from modules.memory_historical_query import MemoryHistoricalQuery
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -64,10 +65,15 @@ MEMORY_CONSOLIDATION = MemoryConsolidation(
     MEMORY_REVIEW,
     CANONICAL_MEMORY_RETRIEVAL,
 )
+MEMORY_HISTORY = MemoryHistoricalQuery(
+    MEMORY_REVIEW,
+    CANONICAL_MEMORY_RETRIEVAL,
+)
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
     recall=MEMORY_RETRIEVAL,
     durable=MEMORY_CONSOLIDATION,
+    history=MEMORY_HISTORY,
 )
 UPDATE_MANAGER = UpdateManager(ROOT, STATE_ROOT)
 
