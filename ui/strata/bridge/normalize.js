@@ -19,7 +19,7 @@ const excerpt=(t,n)=>{t=str(t).trim();if(t.length<=n)return t;return '…'+t.sli
 function normLane(l){l=l&&typeof l==='object'?l:{};const run=str(l.run_state)||'idle',res=str(l.result);
  return{runState:run,executionState:EXEC[run]||'unknown',result:res,verdict:VERDICT[res]||null,output:str(l.output),error:str(l.error),activity:str(l.activity),
  evidencePath:str(l.evidence_path),startedUtc:str(l.started_utc),finishedUtc:str(l.finished_utc),exitCode:num(l.exit_code),pid:num(l.pid),
- goal:str(l.goal),brainState:str(l.brain_state)||'idle',brainPhase:str(l.brain_phase)||'idle',brainStartedUtc:str(l.brain_started_utc),
+ goal:str(l.goal),conversationId:str(l.conversation_id),brainState:str(l.brain_state)||'idle',brainPhase:str(l.brain_phase)||'idle',brainStartedUtc:str(l.brain_started_utc),
  preview:str(l.brain_stream_preview),model:str(l.brain_model),conclusion:str(l.brain_conclusion),brainError:str(l.brain_error),
  nextScript:str(l.brain_next_script),nextCapability:str(l.brain_next_capability),nextArtifactPath:str(l.brain_next_artifact_path),nextUrl:str(l.brain_next_url),nextBrowser:str(l.brain_next_browser),
  preflight:str(l.brain_preflight),preflightReason:str(l.brain_preflight_reason),
