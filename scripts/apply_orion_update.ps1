@@ -181,6 +181,7 @@ try {
         "memory_historical_query_test.py",
         "memory_integrity_anchor_test.py",
         "memory_integrity_product_wiring_test.py",
+        "memory_shadow_audit_test.py",
         "memory_candidate_product_server_test.py",
         "memory_review_promotion_test.py",
         "memory_review_product_server_test.py",
