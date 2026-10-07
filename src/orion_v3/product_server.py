@@ -17,10 +17,14 @@ from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
-from modules.canonical_memory_retrieval_foundation import CanonicalMemoryRetrievalFoundation
+from modules.canonical_memory_retrieval_foundation import (
+    CanonicalMemoryRetrievalFoundation,
+    CanonicalMemoryRetrievalFoundationError,
+)
 from modules.canonical_memory_integration import CanonicalMemoryIntegratedBrainPipeline
 from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
 from modules.memory_auto_candidate import AutomaticMemoryCandidateSelector
+from modules.memory_conflict_suggestions import MemoryConflictSuggestions
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -50,6 +54,10 @@ CANONICAL_MEMORY_RETRIEVAL = CanonicalMemoryRetrievalFoundation(
     MEMORY_REVIEW,
     STATE_ROOT / "canonical_memory_supersession.sqlite3",
     MEMORY_CANDIDATES,
+)
+MEMORY_CONFLICTS = MemoryConflictSuggestions(
+    MEMORY_REVIEW,
+    CANONICAL_MEMORY_RETRIEVAL,
 )
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
@@ -359,6 +367,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, MEMORY_REVIEW.list_canonical())
         if path == "/api/memory/decisions":
             return self._json(200, MEMORY_REVIEW.decisions())
+        if path == "/api/memory/conflicts":
+            return self._json(200, MEMORY_CONFLICTS.view())
+        if path == "/api/memory/supersessions":
+            return self._json(200, CANONICAL_MEMORY_RETRIEVAL.supersessions())
         if path == "/api/memory/search":
             try:
                 raw_limit = str((query.get("limit") or ["6"])[0] or "6")
@@ -394,7 +406,12 @@ class Handler(BaseHTTPRequestHandler):
 
         # Canonical-memory review is a durable write boundary. Unlike ordinary
         # V3 routes, loopback is not implicitly trusted here.
-        if path in {"/api/memory/review-ticket", "/api/memory/decision"}:
+        if path in {
+            "/api/memory/review-ticket",
+            "/api/memory/decision",
+            "/api/memory/supersession-ticket",
+            "/api/memory/supersede",
+        }:
             if not self._require_owner_token():
                 return
         elif not self._require_auth():
@@ -458,6 +475,35 @@ class Handler(BaseHTTPRequestHandler):
                 )
                 return self._json(201 if result.get("created") else 200, result)
             except MemoryReviewError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/supersession-ticket":
+            try:
+                body = self._read_json()
+                result = CANONICAL_MEMORY_RETRIEVAL.prepare_supersession(
+                    prior_memory_id=str(body.get("prior_memory_id", "")),
+                    replacement_memory_id=str(body.get("replacement_memory_id", "")),
+                    owner_scope=str(body.get("owner_scope", "owner:primary")),
+                    actor_fingerprint=self._owner_actor_fingerprint(),
+                )
+                return self._json(200, result)
+            except CanonicalMemoryRetrievalFoundationError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/memory/supersede":
+            try:
+                body = self._read_json()
+                result = CANONICAL_MEMORY_RETRIEVAL.supersede(
+                    prior_memory_id=str(body.get("prior_memory_id", "")),
+                    replacement_memory_id=str(body.get("replacement_memory_id", "")),
+                    review_token=str(body.get("review_token", "")),
+                    owner_scope=str(body.get("owner_scope", "owner:primary")),
+                    actor_fingerprint=self._owner_actor_fingerprint(),
+                )
+                return self._json(201 if result.get("created") else 200, result)
+            except CanonicalMemoryRetrievalFoundationError as exc:
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
