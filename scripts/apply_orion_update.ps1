@@ -177,6 +177,7 @@ try {
         "memory_candidate_queue_test.py",
         "memory_auto_candidate_test.py",
         "memory_conflict_suggestions_test.py",
+        "memory_consolidation_test.py",
         "memory_candidate_product_server_test.py",
         "memory_review_promotion_test.py",
         "memory_review_product_server_test.py",
