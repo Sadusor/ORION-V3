@@ -222,12 +222,13 @@ After that repair, the same physical Update ORION PC path passed completely and 
 
 ## Final status
 
-MEMORY V1.1 SECURITY BATCH — PHYSICAL UPDATER PASS / FREEZE CANDIDATE
+MEMORY V1.1 SECURITY BATCH — FROZEN / PHYSICALLY QUALIFIED
 
-Next bounded work:
-1. normal L1 recall sanity check through the product path;
-2. historical L2 sanity check;
-3. after both pass, freeze Memory V1.1 and move to the separate full scale-benchmark lane.
+Qualification closure:
+- L1 physical sanity: PASS.
+- L2 historical sanity: PASS.
+- full 1k/10k/100k offline scale benchmark: COMPLETED 2026-10-07.
+- Memory V1/V1.1 remains frozen; scale findings are V2 planning inputs only.
 
 
 ## OWNER FREEZE — 2026-10-07
@@ -254,3 +255,61 @@ Final disposition:
 If a future task appears to require changing any frozen memory component, STOP before editing it. Explain the conflict to the owner and propose a new isolated version/module or compatibility adapter. Only proceed into frozen memory after explicit owner approval that specifically authorizes reopening it.
 
 **MEMORY V1.1: FROZEN — DO NOT TOUCH BY DEFAULT.**
+
+
+## Full offline scale benchmark — COMPLETED 2026-10-07
+
+Authoritative physical evidence was published automatically by the proven TheHands GitHub evidence path:
+- repository: `Sadusor/TheHands-`
+- results branch: `thehands-results`
+- session: `266e5c11a349`
+- evidence source commit: `20dd1ec5360d0c9c4264b9d1aad3f81a4bd7fdcf`
+- ORION source SHA during benchmark: `508854d3879c8d4eaa66cf2163298e673c9eff80`
+- host: Windows 11 AMD64 / Python 3.13.3
+- combined TheHands execution result: PASS
+- production-memory writes: NONE
+- frozen Memory V1 modified: false
+- production runtime loaded: false
+
+Measured results:
+
+| Synthetic scale | Cold | Warm p50 | Warm p99 | Top-1 | Top-5 | Scope isolation | L1/L2 | Threshold |
+|---:|---:|---:|---:|---:|---:|:---:|:---:|:---:|
+| 1,000 | 23.586 ms | 21.300 ms | 22.240 ms | 1.000 | 1.000 | PASS | PASS | PASS |
+| 10,000 | 211.493 ms | 210.299 ms | 217.755 ms | 1.000 | 1.000 | PASS | PASS | FAIL |
+| 100,000 | 2158.563 ms | 2160.575 ms | 2281.335 ms | 1.000 | 1.000 | PASS | PASS | FAIL |
+
+Interpretation:
+- correctness remained perfect in this synthetic benchmark through 100,000 records: Top-1=100%, Top-5=100%, project/scope isolation PASS, L1/L2 current-vs-historical correctness PASS;
+- 1K met every frozen benchmark threshold;
+- 10K missed only the warm-p50 target (210.299 ms measured vs 200 ms target);
+- 100K missed only the warm-p50 target (2160.575 ms measured vs 800 ms target); its cold and p99 thresholds still passed;
+- the measured 10K/100K failures are therefore scale/latency findings, not correctness failures;
+- process working-set/RAM values were null in this run. Do not invent RAM conclusions; RAM measurement remains an instrumentation gap.
+
+### Million-scale implication
+
+The measured sequence is approximately linear over the tested range. A naive extrapolation from 100K (about 2.16 s warm p50) suggests that a full scan at 1,000,000 records could be on the order of ~20-22 seconds. **This is an extrapolation, not a measured 1M result.**
+
+A ~20-second interactive recall would be unacceptable for the intended ORION experience. This does NOT authorize optimization of frozen V1/V1.1.
+
+Architectural consequence for a future owner-approved Memory V2 / Scale Layer:
+1. preserve frozen V1/V1.1 semantics and correctness as the baseline;
+2. add an isolated, replaceable indexed/hierarchical candidate-selection layer in front of retrieval;
+3. narrow a very large corpus to a bounded relevant candidate set before final ranking;
+4. benchmark candidate approaches against this exact baseline;
+5. consider the existing memory/context donors already recorded in `docs/DONORS.md` (KnowledgeOS, agentmemory, TencentDB-Agent-Memory, OpenViking, memanto, codebase-memory-mcp, Graft, Aider repo-map ideas);
+6. do not adopt a donor merely because it is faster: provenance, project isolation, L1/L2/supersession correctness and ORION authority boundaries must remain intact.
+
+Important production-boundary reminder:
+- current `CanonicalMemoryCandidateQueue.MAX_CANDIDATES = 500`;
+- above that boundary this harness measures the frozen retrieval core using synthetic public projections;
+- therefore 10K/100K results are scale research, not a claim that V1 production ingestion currently supports those corpus sizes.
+
+### Continuity rule for future AIs
+
+Before making any memory decision, read this checkpoint and the ORION V3 engineering freeze rule. Do not infer current state from chat recollection alone when repository evidence is available.
+
+For TheHands physical runs, check the proven GitHub evidence branch (`Sadusor/TheHands-@thehands-results`) before asking the owner to repeat a run, provide a screenshot, or manually transcribe output. The published session evidence is the authoritative execution record when present.
+
+**CLOSED BASELINE: Memory V1/V1.1 is frozen. Future million-scale work belongs to a new isolated Memory V2 / Scale Layer and requires explicit owner approval.**
