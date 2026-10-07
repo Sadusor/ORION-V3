@@ -278,6 +278,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
         self._lock = threading.RLock()
         self._session: dict[str, Any] = {
             "brain_started_utc": "",
+            "conversation_id": "",
             "owner_goal": "",
             "memory": self._blank_brief("idle"),
         }
@@ -698,6 +699,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
         with self._lock:
             self._session = {
                 "brain_started_utc": stamp,
+                "conversation_id": conversation_id,
                 "owner_goal": owner_goal,
                 "memory": brief,
             }
@@ -710,6 +712,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
             session = copy.deepcopy(self._session)
 
         if stamp and stamp == session.get("brain_started_utc"):
+            base["conversation_id"] = session.get("conversation_id", "")
             base["goal"] = session.get("owner_goal", "")
             base["brain_memory"] = session.get("memory", self._blank_brief("idle"))
         else:
