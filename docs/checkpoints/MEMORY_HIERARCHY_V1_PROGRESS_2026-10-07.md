@@ -199,3 +199,22 @@ Bounded repair:
 - repair commit: `53b81620ce9d73a631a68bab1d3c07386c390689`.
 
 Classification: regression gate FAIL / rollback PASS. Re-run required before L2 physical qualification.
+
+
+## L2 retry — second regression block; integration restored to last proven baseline
+
+A second L2 update attempt was also blocked by the updater regression wall before activation.
+
+Because the phone browser cannot access authenticated update diagnostics without the paired owner token, ORION security was not weakened to expose the update log.
+
+Professional recovery decision:
+- stop layering patches onto the failed L2 integration attempt;
+- restore `canonical_memory_integration.py` and its integration test to the last physically proven baseline from checkpoint commit `bb942cf840320f9971b11057be3837392ae4a42d`;
+- keep all already-proven L0/L1, duplicate consolidation, stale-recall fusion, conflict detection and supersession behavior;
+- redesign L2 as a smaller isolated follow-up rather than risking the proven current-memory path.
+
+Restore commits:
+- `512743d06d40cc6e58811dbd1be3be341b678ec6` — proven integration baseline restored
+- `0416fa2a56427f17976fa13bf50441229aed305a` — proven integration regression baseline restored
+
+Status: L2 historical chat routing remains NOT PASSED / NOT FROZEN.
