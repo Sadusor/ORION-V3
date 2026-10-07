@@ -156,3 +156,67 @@ Repair commit:
 - `1587df1a360907700c52f99201933100a8eadbae`
 
 Status: **FULL MEMORY V1.1 BATCH STILL AWAITING PHYSICAL UPDATER PASS**.
+
+
+## Final physical qualification — PASS
+
+Final owner-observed updater result on 2026-10-07:
+- Update PASS.
+- ORION PC restarted successfully.
+- PC memory recall reported Ready, read-only, context only, with canonical promotion still locked.
+- Frozen Memory V1 remained unchanged.
+
+### Updater incident and repair record
+
+The first full-batch attempts correctly rolled back to the previous proven runtime instead of activating an unqualified build.
+
+A STRATA real-bridge regression assertion was found to have a timing race: it required backend_error to remain the final link state after a delay. The assertion was narrowed to prove that backend_error occurred during the test step, without changing product behavior.
+Repair commit: 2667f6f29d53bb3aa61b11d2131d1c226a65efc3.
+
+The remaining physical-PC failure was then isolated to memory_scale_benchmark_smoke_test.py. The updater was given diagnostic-only gate labeling and child-process output capture so the phone could show the actual terminal exception.
+Diagnostic commits:
+- 3f788aa267dace21fbcfaee772c17fbdbd63dddc
+- d77fc43b9cc557437564e03e437a63a79cb234fc
+- 84ec13bbc2faf97360c0ebbf05182e569518763f
+
+The real exception was Windows WinError 32 while TemporaryDirectory tried to remove the benchmark supersession.sqlite3 file.
+
+Root cause: the benchmark fixture used the sqlite3 connection context manager for transaction handling, but the connection object could remain open until later cleanup. Windows therefore still saw the temporary SQLite file as in use.
+
+Final repair in tools/bench/memory_scale_benchmark.py:
+- use contextlib.closing around the benchmark SQLite connection;
+- preserve the transaction context;
+- explicitly close the connection before temporary-directory cleanup.
+
+Final repair commit: 508854d3879c8d4eaa66cf2163298e673c9eff80.
+
+Final repair scope:
+- one benchmark file only;
+- two lines added and one line changed;
+- no Memory V1 change;
+- no Memory V1.1 sidecar behavior change;
+- no product-server change;
+- no Android change;
+- no rollback weakening.
+
+After that repair, the same physical Update ORION PC path passed completely and restarted ORION.
+
+### Frozen lessons
+
+- Do not weaken a regression gate merely to obtain PASS; isolate the real failure.
+- Updater failures should identify the active gate.
+- Windows child-process diagnostics must preserve the useful final exception.
+- Temporary SQLite benchmark fixtures must explicitly close connections before directory cleanup.
+- Do not use paid GitHub Actions for routine ORION testing unless the owner explicitly approves it.
+- Keep the full 1k/10k/100k memory scale benchmark manual/offline.
+- Keep the 250-record smoke as a correctness gate unless a later explicit decision changes it.
+- Freeze the proven updater path unless a concrete new failure or approved requirement requires a change.
+
+## Final status
+
+MEMORY V1.1 SECURITY BATCH — PHYSICAL UPDATER PASS / FREEZE CANDIDATE
+
+Next bounded work:
+1. normal L1 recall sanity check through the product path;
+2. historical L2 sanity check;
+3. after both pass, freeze Memory V1.1 and move to the separate full scale-benchmark lane.
