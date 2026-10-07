@@ -128,6 +128,7 @@ if (!$Worker) {
 Remove-Item -LiteralPath $LogPath -Force -ErrorAction SilentlyContinue
 $ActivatedWindows = $false
 $Stopped = $false
+$CurrentGate = "startup"
 
 function Restore-Previous {
     Log "Attempting previous ORION recovery."
@@ -166,6 +167,7 @@ try {
     }
 
     Write-Status -State "testing" -Message "Running ORION regression gates" -Commit $ExpectedCommit
+    $CurrentGate = "chat_history_test.py"
     Log "Running chat-history regression."
     & python.exe (Join-Path $Repo "src\orion_v3\modules\chat_history_test.py") *>> $LogPath
     if ($LASTEXITCODE -ne 0) { throw "Chat-history regression failed." }
@@ -193,10 +195,12 @@ try {
         "memory_brain_pipeline_test.py",
         "memory_product_server_test.py"
     )) {
+        $CurrentGate = $memoryTest
         & python.exe (Join-Path $Repo ("src\orion_v3\modules\" + $memoryTest)) *>> $LogPath
         if ($LASTEXITCODE -ne 0) { throw ("Memory Retrieval regression failed: " + $memoryTest) }
     }
 
+    $CurrentGate = "STRATA tests/run_tests.py --no-browser"
     Log "Running STRATA regression suite."
     Push-Location (Join-Path $Repo "ui\strata")
     try {
@@ -208,12 +212,14 @@ try {
 
     Write-Status -State "building" -Message "Building staged PC UI and latest Android APK" -Commit $ExpectedCommit
 
+    $CurrentGate = "desktop build"
     Remove-Item -LiteralPath $StageRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $StageRoot | Out-Null
 
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Repo "scripts\build_desktop.ps1") -OutputDirectory $StageWindows *>> $LogPath
     if ($LASTEXITCODE -ne 0) { throw "Updated ORION desktop build failed." }
 
+    $CurrentGate = "Android APK build"
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File (Join-Path $Repo "android\scripts\build.ps1") *>> $LogPath
     if ($LASTEXITCODE -ne 0) { throw "Updated ORION Android build failed." }
 
@@ -224,6 +230,7 @@ try {
 
     Write-Status -State "restarting" -Message "Activating tested ORION build" -Commit $ExpectedCommit
 
+    $CurrentGate = "stop current ORION"
     Remove-Item -LiteralPath $BackupRoot -Recurse -Force -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Force -Path $BackupRoot | Out-Null
 
@@ -239,9 +246,11 @@ try {
     $ActivatedWindows = $true
     Remove-Item -LiteralPath $StageRoot -Recurse -Force -ErrorAction SilentlyContinue
 
+    $CurrentGate = "start updated ORION"
     Write-Status -State "starting" -Message "Starting updated ORION" -Commit $ExpectedCommit
     [void](Start-OrionDetached)
 
+    $CurrentGate = "verify updated runtime"
     Write-Status -State "verifying" -Message "Waiting for updated ORION runtime" -Commit $ExpectedCommit
     $running = ""
     for ($i=0; $i -lt 80; $i++) {
@@ -264,6 +273,9 @@ try {
 }
 catch {
     $message = $_.Exception.Message
+    if ($CurrentGate) {
+        $message = "[" + $CurrentGate + "] " + $message
+    }
     Log ("UPDATE FAIL " + $message)
 
     if ($Stopped) {
