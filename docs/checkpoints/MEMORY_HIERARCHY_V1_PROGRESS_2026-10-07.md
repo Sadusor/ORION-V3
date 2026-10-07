@@ -80,3 +80,26 @@ Result: PASS.
 4. Final bounded stress/adversarial pass: duplicate, contradiction, scope, typo, restart persistence and context budget.
 
 Do not freeze Memory Hierarchy V1 until these remaining gates are physically evidenced.
+
+
+## Remote connectivity interruption during physical qualification
+
+During the L1 physical test the Android app intermittently fell back to LOCAL even though the PC backend remained reachable.
+
+Isolation evidence:
+- Android refresh alone did not reliably recover immediately.
+- ZeroTier was restarted once during diagnosis.
+- While the app showed connection problems, Chrome on the same phone successfully reached `http://10.109.233.27:8890/api/health` and ORION returned `ok: true`.
+- This isolated the observed failure away from Memory and the PC backend.
+
+Bounded fix:
+- Android ORION health timeout increased only from 1800 ms to 4000 ms.
+- No backend, Memory, updater, ZeroTier logic, or frozen module was changed.
+- commit: `1496abbb6b9d22716f896ad70aa7c3df1e77377a`
+
+Physical result after update + APK install:
+- phone reconnected to PC;
+- remained connected during a short idle stability observation;
+- owner reported: "It's seems fine".
+
+Classification: remote-health-timeout stability PASS for this observation. If the disconnect recurs, reopen it as a separate connectivity issue rather than altering Memory.
