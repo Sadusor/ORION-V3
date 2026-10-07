@@ -199,18 +199,49 @@ try {
         $memoryTestPath = Join-Path $Repo ("src\orion_v3\modules\" + $memoryTest)
 
         if ($memoryTest -eq "memory_scale_benchmark_smoke_test.py") {
-            $previousErrorActionPreference = $ErrorActionPreference
-            $ErrorActionPreference = "Continue"
-            & python.exe $memoryTestPath *>> $LogPath
-            $memoryExitCode = $LASTEXITCODE
-            $ErrorActionPreference = $previousErrorActionPreference
+            $stdoutPath = Join-Path $env:TEMP ("orion_bench_smoke_stdout_" + [Guid]::NewGuid().ToString("N") + ".log")
+            $stderrPath = Join-Path $env:TEMP ("orion_bench_smoke_stderr_" + [Guid]::NewGuid().ToString("N") + ".log")
 
-            if ($memoryExitCode -ne 0) {
-                $detail = ((Get-Content -LiteralPath $LogPath -Tail 10) -join " | ").Trim()
-                if ($detail.Length -gt 900) {
-                    $detail = $detail.Substring($detail.Length - 900)
+            try {
+                $psi = New-Object System.Diagnostics.ProcessStartInfo
+                $psi.FileName = "python.exe"
+                $escapedTestPath = $memoryTestPath.Replace('"', '\"')
+                $psi.Arguments = '-X utf8 "' + $escapedTestPath + '"'
+                $psi.UseShellExecute = $false
+                $psi.CreateNoWindow = $true
+                $psi.RedirectStandardOutput = $true
+                $psi.RedirectStandardError = $true
+                $psi.EnvironmentVariables["PYTHONIOENCODING"] = "utf-8"
+
+                $proc = New-Object System.Diagnostics.Process
+                $proc.StartInfo = $psi
+                [void]$proc.Start()
+                $stdoutText = $proc.StandardOutput.ReadToEnd()
+                $stderrText = $proc.StandardError.ReadToEnd()
+                $proc.WaitForExit()
+                $memoryExitCode = $proc.ExitCode
+
+                Set-Content -LiteralPath $stdoutPath -Value $stdoutText -Encoding UTF8
+                Set-Content -LiteralPath $stderrPath -Value $stderrText -Encoding UTF8
+
+                if ($stdoutText) { Add-Content -LiteralPath $LogPath -Value $stdoutText -Encoding UTF8 }
+                if ($stderrText) { Add-Content -LiteralPath $LogPath -Value $stderrText -Encoding UTF8 }
+
+                if ($memoryExitCode -ne 0) {
+                    $errorLine = ($stderrText -split "\r?\n" | Where-Object { $_.Trim() } | Select-Object -Last 1)
+                    if (!$errorLine) {
+                        $errorLine = ($stdoutText -split "\r?\n" | Where-Object { $_.Trim() } | Select-Object -Last 1)
+                    }
+                    if (!$errorLine) { $errorLine = "no child error text captured" }
+                    $errorLine = ([string]$errorLine).Trim()
+                    if ($errorLine.Length -gt 700) {
+                        $errorLine = $errorLine.Substring($errorLine.Length - 700)
+                    }
+                    throw ("Memory Retrieval regression failed: " + $memoryTest + " | EXIT=" + $memoryExitCode + " | ERROR: " + $errorLine)
                 }
-                throw ("Memory Retrieval regression failed: " + $memoryTest + " | " + $detail)
+            }
+            finally {
+                Remove-Item -LiteralPath $stdoutPath, $stderrPath -Force -ErrorAction SilentlyContinue
             }
         } else {
             & python.exe $memoryTestPath *>> $LogPath
