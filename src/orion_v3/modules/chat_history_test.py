@@ -83,6 +83,45 @@ def main() -> int:
         assert second["conversations"][0]["pinned"] == 1
         assert [m["id"] for m in second["messages"]] == ["m1", "m2"]
 
+        # Mirrored phone/desktop saves of the same ORION reply collapse to one.
+        mirrored = store.sync(
+            {
+                "conversations": [
+                    {
+                        "id": "c2",
+                        "title": "Sync",
+                        "project_id": "orion-v3",
+                        "pinned": 0,
+                        "archived": 0,
+                        "deleted": 0,
+                        "created_at_ms": 4000,
+                        "updated_at_ms": 4000,
+                    }
+                ],
+                "messages": [
+                    {
+                        "id": "a-phone",
+                        "conversation_id": "c2",
+                        "role": "assistant",
+                        "text": "same verified reply",
+                        "source": "orion-pc",
+                        "created_at_ms": 4100,
+                    },
+                    {
+                        "id": "a-desktop",
+                        "conversation_id": "c2",
+                        "role": "assistant",
+                        "text": "same verified reply",
+                        "source": "orion-live-pc",
+                        "created_at_ms": 4200,
+                    },
+                ],
+            }
+        )
+        c2 = [m for m in mirrored["messages"] if m["conversation_id"] == "c2"]
+        assert len(c2) == 1
+        assert c2[0]["text"] == "same verified reply"
+
         # Older metadata cannot resurrect a newer tombstone.
         store.sync(
             {
