@@ -28,6 +28,7 @@ from modules.memory_conflict_suggestions import MemoryConflictSuggestions
 from modules.memory_consolidation import MemoryConsolidation
 from modules.memory_historical_query import MemoryHistoricalQuery
 from modules.memory_integrity_anchor import MemoryIntegrityAnchor, MemoryIntegrityError
+from modules.memory_shadow_audit import MemoryShadowAudit
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -76,6 +77,11 @@ MEMORY_INTEGRITY = MemoryIntegrityAnchor(
     CANONICAL_MEMORY_RETRIEVAL,
 )
 MEMORY_INTEGRITY.initialize()
+MEMORY_SHADOW_AUDIT = MemoryShadowAudit(
+    STATE_ROOT / "memory_sidecars",
+    MEMORY_RETRIEVAL,
+    MEMORY_CONSOLIDATION,
+)
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
     brain=StreamingBrainPipeline(),
     recall=MEMORY_RETRIEVAL,
@@ -223,6 +229,7 @@ class ProductState:
             "memory_retrieval": MEMORY_RETRIEVAL.last(),
             "memory_auto_candidate": MEMORY_AUTO_CANDIDATES.status(),
             "memory_integrity": MEMORY_INTEGRITY.status(),
+            "memory_shadow_audit": MEMORY_SHADOW_AUDIT.status(),
         }
 
 
@@ -392,6 +399,8 @@ class Handler(BaseHTTPRequestHandler):
             return self._json(200, CANONICAL_MEMORY_RETRIEVAL.supersessions())
         if path == "/api/memory/integrity":
             return self._json(200, MEMORY_INTEGRITY.status())
+        if path == "/api/memory/shadow-audit":
+            return self._json(200, MEMORY_SHADOW_AUDIT.status())
         if path == "/api/memory/hierarchy/l0":
             return self._json(
                 200,
@@ -619,7 +628,7 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/local-hand/draft":
             try:
                 body = self._read_json()
-                LOCAL_BRAIN.start(
+                started = LOCAL_BRAIN.start(
                     str(body.get("goal", "")),
                     str(body.get("model", "")),
                     memory_query=str(body.get("memory_query", "")),
@@ -631,6 +640,44 @@ class Handler(BaseHTTPRequestHandler):
                     ),
                     owner_message=str(body.get("owner_message", "")),
                 )
+
+                # Memory V1.1b is observation-only. Frozen V1 has already made
+                # the shadowing decision and built the prompt at this point.
+                # Only a non-zero frozen-V1 shadow count triggers audit work.
+                try:
+                    shadow = (
+                        started.get("brain_memory", {})
+                        .get("sources", {})
+                        .get("conversation_recall", {})
+                        .get("trace", {})
+                        .get("durable_slot_shadowing", {})
+                    )
+                    expected_shadow_count = int(
+                        shadow.get("total_shadowed") or 0
+                    )
+                    if expected_shadow_count > 0:
+                        audit_query = str(
+                            body.get("memory_query")
+                            or body.get("owner_message")
+                            or body.get("goal")
+                            or ""
+                        )
+                        MEMORY_SHADOW_AUDIT.observe(
+                            audit_query,
+                            conversation_id=str(
+                                body.get("conversation_id", "")
+                            ),
+                            project_id=(
+                                str(body.get("project_id", ""))
+                                if "project_id" in body
+                                else None
+                            ),
+                            expected_shadow_count=expected_shadow_count,
+                        )
+                except Exception:
+                    # Audit is never allowed to change or block Qwen behavior.
+                    pass
+
                 return self._json(202, STATE.view())
             except LocalBrainError as exc:
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
