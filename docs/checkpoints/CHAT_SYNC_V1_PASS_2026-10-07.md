@@ -1,12 +1,14 @@
 # CHAT_SYNC_V1 — PHYSICAL PASS / FREEZE
 
 Date: 2026-10-07
-Status: PASS / FROZEN
+Status: PASS / FROZEN — TWO-WAY LIVE SYNC PROVEN
 Freeze commit: `cf88be425f0c98f9e6c6ef1ae5a16b75ab583e78`
 
 ## Proven physical behavior
 
 Physical phone → PC test `SYNC TEST 03` passed.
+
+Physical PC → phone live test `PC LIVE SYNC TEST 02` also passed without closing or reopening the Android app.
 
 Observed:
 - a new chat created on the Android ORION app is persisted into the PC-owned chat history;
@@ -15,7 +17,8 @@ Observed:
 - the Qwen 9B reply appears once on the PC;
 - the verified reply is not duplicated;
 - the reply is not painted into an older/open conversation;
-- phone and PC therefore share the same conversation identity for this tested path.
+- phone and PC therefore share the same conversation identity for this tested path;
+- PC-authored messages appear on the already-open phone app during normal connected refresh, proving live PC → phone history pull.
 
 ## CHAT_SYNC_V1 fixes included
 
@@ -24,6 +27,15 @@ Observed:
 3. Suppress a second live VERIFIED bubble when the reply is already stored.
 4. Carry the active `conversation_id` through the ORION backend status model.
 5. Route the PC live/verified reply into the matching synced conversation.
+
+## Final two-way proof
+
+CHAT_SYNC_V1 is considered complete only after both directions physically passed:
+
+- phone → PC: PASS
+- PC → phone while phone remains open: PASS
+
+A semantic-verification failure observed during `PC LIVE SYNC TEST 02` is recorded as unrelated to chat transport: the PC-authored user message still appeared on the phone, so transport/history synchronization passed.
 
 ## Freeze rule
 
