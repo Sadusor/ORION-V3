@@ -103,3 +103,39 @@ Physical result after update + APK install:
 - owner reported: "It's seems fine".
 
 Classification: remote-health-timeout stability PASS for this observation. If the disconnect recurs, reopen it as a separate connectivity issue rather than altering Memory.
+
+
+## L1 current retrieval after consolidation — initial FAIL then repaired PASS
+
+Initial physical L1 query:
+- owner asked: "What mode do I prefer for ORION?"
+- durable canonical context correctly contained the current light-mode preference;
+- ordinary Conversation Recall still surfaced an older dark-mode owner statement;
+- the existing fusion safety contract therefore surfaced an unresolved conflict and asked the owner to clarify.
+
+Classification:
+- canonical L1 retrieval itself was correct;
+- failure was in fusion semantics between current durable memory and stale same-slot Conversation Recall.
+
+Bounded repair:
+- only the canonical-memory integration/fusion layer changed;
+- frozen Conversation Recall storage/retrieval was not changed;
+- canonical storage was not changed;
+- for deterministic owner preference/naming slots only, an older owner recall statement mapping to the same slot as current owner-approved durable memory is omitted from the prompt as historical context;
+- unrelated recall remains available;
+- generic conflicts that cannot be proven to share the same deterministic slot still surface normally;
+- history remains retrievable in L2/provenance expansion;
+- no authority change.
+
+Relevant commits:
+- `7bb0dcf3845117cc34556c01845c4e57fc95fcfa` — same-slot stale recall shadowing at fusion
+- `77dd5dfd37187ef7dc1fd9cb3dff0657d3d4f2cf` — regression for current durable vs stale recall
+
+Physical retest:
+- owner asked again: "What mode do I prefer for ORION?"
+- ORION PC replied: "Based on the owner-approved durable memory in your context, you prefer light mode in ORION."
+- no dark/light clarification requested;
+- no duplicate/repeated memory surfaced;
+- PC connection remained active during the test.
+
+Result: **L1 CURRENT RETRIEVAL AFTER CONSOLIDATION — PASS**.
