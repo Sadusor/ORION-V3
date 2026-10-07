@@ -94,3 +94,31 @@ This V1.1 batch is qualified through one combined updater run covering:
 - STRATA/build/restart verification.
 
 No Android code changed in this batch.
+
+
+## Physical batched updater qualification — PASS
+
+The owner performed one combined ORION update after V1.1a/V1.1b/V1.1c were batched.
+
+Android Settings showed:
+- **Update PASS**
+- ORION PC restarted successfully
+- phone remained connected to ORION PC
+
+The updater gate included:
+- Memory V1.1a integrity-anchor isolated regression;
+- integrity product-boundary wiring regression;
+- Memory V1.1b shadow-audit isolated regression;
+- shadow-audit product-boundary wiring regression;
+- Memory V1.1c offline scale-benchmark smoke gate;
+- all existing Memory V1 regression walls;
+- STRATA regression/build/restart verification.
+
+Result: **MEMORY V1.1 SECURITY BATCH — UPDATER PASS**.
+
+No Android code changed in this batch, so no APK installation is required.
+
+Remaining qualification:
+- one bounded normal L1 physical sanity check;
+- one bounded historical L2 sanity check if needed;
+- then run the full manual 1k/10k/100k scale benchmark separately because it is intentionally not part of normal updater/runtime.
