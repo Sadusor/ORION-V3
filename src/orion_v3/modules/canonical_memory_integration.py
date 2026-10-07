@@ -310,6 +310,7 @@ def _render_durable_block(
             f'promotion_event_hash="{_attr(p.get("promotion_event_hash"))}" '
             f'project_scope="{_attr(item.get("project_id"))}" '
             f'trust_tier="{_attr(item.get("trust_tier"))}" '
+            f'status="{_attr(item.get("status") or "current")}" '
             'authority="context_only" '
             'epistemic_status="owner-approved durable context, not verified truth">'
         )
