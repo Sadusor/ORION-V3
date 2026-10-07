@@ -256,3 +256,38 @@ Physical result:
 Result: **CURRENT CANONICAL RETRIEVAL BASELINE AFTER ROLLBACK — PASS**.
 
 The current-memory path remains frozen/proven. L2 historical chat routing is the only unfinished hierarchy gate and must be rebuilt separately.
+
+
+## Isolated historical-memory query module — updater gate PASS
+
+A new read-only L2 historical query module was introduced separately from the proven L1/current-memory integration.
+
+Module contract:
+- historical intent is deterministic (previously / before / earlier / history / prior / used to);
+- starts from the already-proven current durable retrieval result;
+- walks the append-only supersession ledger backwards;
+- returns superseded canonical records as historical context only;
+- preserves candidate/source and supersession provenance;
+- does not mutate canonical rows, decisions, recall, or supersession events;
+- current-memory chat integration remains unchanged.
+
+Regression fixture proves:
+- current anchor = dark mode;
+- historical expansion = prior light mode;
+- supersession provenance preserved;
+- canonical rows mutated = NONE;
+- authority = context only.
+
+Relevant commits:
+- `e3622f04fe7a83100bd1b88a49dc598f65de15f3` — isolated historical query module
+- `c4b90b809aceb789d5d6f5578edcf874e5f2be16` — isolated historical query regression
+- `c040c930cb14b62516f9e44fcdd2de80ca8b0ed8` — updater gate inclusion
+
+Physical updater evidence:
+- Android Settings showed Update PASS;
+- ORION PC restarted successfully;
+- PC remained connected.
+
+Result: **ISOLATED L2 HISTORICAL QUERY FOUNDATION — PASS**.
+
+Next: connect this already-tested read-only result to Qwen as a separate historical context block without changing L1 retrieval.
