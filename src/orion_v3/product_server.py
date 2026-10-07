@@ -20,6 +20,7 @@ from modules.memory_retrieval import MemoryRetrievalModule
 from modules.canonical_memory_retrieval_foundation import CanonicalMemoryRetrievalFoundation
 from modules.canonical_memory_integration import CanonicalMemoryIntegratedBrainPipeline
 from modules.memory_candidate_queue import CanonicalMemoryCandidateQueue, MemoryCandidateError
+from modules.memory_auto_candidate import AutomaticMemoryCandidateSelector
 from modules.memory_review_promotion import CanonicalMemoryReviewPromotion, MemoryReviewError
 from modules.update_manager import UpdateError, UpdateManager
 
@@ -39,6 +40,10 @@ MEMORY_CANDIDATES = CanonicalMemoryCandidateQueue(
 )
 MEMORY_REVIEW = CanonicalMemoryReviewPromotion(
     STATE_ROOT / "canonical_memory.sqlite3",
+    MEMORY_CANDIDATES,
+)
+MEMORY_AUTO_CANDIDATES = AutomaticMemoryCandidateSelector(
+    CHAT_HISTORY,
     MEMORY_CANDIDATES,
 )
 CANONICAL_MEMORY_RETRIEVAL = CanonicalMemoryRetrievalFoundation(
@@ -190,6 +195,7 @@ class ProductState:
             "local_brain_default_model": LOCAL_BRAIN.default_model(),
             "update_status": {"phase": "", "detail": "", "error": "", "target_sha": ""},
             "memory_retrieval": MEMORY_RETRIEVAL.last(),
+            "memory_auto_candidate": MEMORY_AUTO_CANDIDATES.status(),
         }
 
 
@@ -395,7 +401,15 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/chat-history/sync":
             try:
-                return self._json(200, CHAT_HISTORY.sync(self._read_json()))
+                body = self._read_json()
+                synced = CHAT_HISTORY.sync(body)
+                # Automatic memory selection is advisory intake only. A selector
+                # failure must never break chat sync or write canonical memory.
+                try:
+                    MEMORY_AUTO_CANDIDATES.consider_sync(body)
+                except Exception:
+                    pass
+                return self._json(200, synced)
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
         if path == "/api/memory/candidate":
