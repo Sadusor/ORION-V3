@@ -93,12 +93,15 @@ def main() -> int:
         import product_server as product
         from modules.canonical_memory_integration import CanonicalMemoryIntegratedBrainPipeline
         from modules.canonical_memory_retrieval_foundation import CanonicalMemoryRetrievalFoundation
+        from modules.memory_historical_query import MemoryHistoricalQuery
 
         assert isinstance(product.LOCAL_BRAIN, CanonicalMemoryIntegratedBrainPipeline)
         assert isinstance(
             product.CANONICAL_MEMORY_RETRIEVAL,
             CanonicalMemoryRetrievalFoundation,
         )
+        assert isinstance(product.MEMORY_HISTORY, MemoryHistoricalQuery)
+        assert product.LOCAL_BRAIN.history is product.MEMORY_HISTORY
 
         product.CHAT_HISTORY.sync(
             {
