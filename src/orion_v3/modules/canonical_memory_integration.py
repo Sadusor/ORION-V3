@@ -525,7 +525,7 @@ class CanonicalMemoryIntegratedBrainPipeline:
             + "\n\n"
             + "\n\n".join(blocks)
             + "\n\n<OWNER_CURRENT_MESSAGE>\n"
-            + _body(owner_goal)
+            + owner_goal
             + "\n</OWNER_CURRENT_MESSAGE>"
         )
         memory_chars = len(recall_block) + len(durable_block)
