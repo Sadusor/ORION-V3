@@ -150,6 +150,29 @@ class OrionPcBridge(
         scope.launch {
             withContext(Dispatchers.IO) {
                 try {
+                    // CHAT_SYNC_V1: the PC is the conversation source of truth.
+                    // Persist the phone's just-entered user turn before Qwen starts so
+                    // desktop/history readers never observe an answer without its question.
+                    val historyBeforeBrain = request(
+                        "POST",
+                        "/api/chat-history/sync",
+                        historyStore.snapshot(),
+                        authenticated = true,
+                        timeoutMs = 8000,
+                    )
+                    if (!historyBeforeBrain.ok) {
+                        emitChat(
+                            id,
+                            "",
+                            true,
+                            historyBeforeBrain.error.ifBlank {
+                                "Could not sync the user message to ORION PC."
+                            },
+                        )
+                        return@withContext
+                    }
+                    historyStore.merge(historyBeforeBrain.body.toString())
+
                     val context = if (conversationId.isBlank()) {
                         ""
                     } else {
