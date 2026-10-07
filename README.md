@@ -43,6 +43,21 @@ Replaceable Hands
 
 OpenJarvis is a candidate substrate, not ORION's authority.
 
+
+## Development storage rule
+
+**Owner directive: all new ORION/TheHands development work belongs on E:.**
+
+For this workstation:
+- repositories and project folders -> `E:\...`;
+- test/gate folders, benchmarks, temporary clones and large build artifacts -> `E:\...`;
+- regenerable caches/models -> `E:\ORION-CACHE\...`;
+- C: is reserved for small Windows/application state such as pairing, SQLite memory/chat databases, approvals and compact runtime/config files.
+
+When staging ORION work through TheHands, explicitly use an E: working directory for any new project, benchmark, gate, clone or other substantial development output. Do not create new large development folders on C: just because a tool's default path is under `%LOCALAPPDATA%` or the user profile.
+
+The 2026-10-07 storage audit/migration proved the main growth was development caches, not Git branches. Existing verified E-backed redirects should remain in place. Small persistent ORION state may remain on C: unless a separate migration is intentionally designed and qualified.
+
 ## Engineering execution / rollback
 
 Manual engineering Remote work is routed through `Sadusor/TheHands-`.
