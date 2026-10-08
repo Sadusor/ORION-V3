@@ -28,6 +28,7 @@ def test_engine_applies_bound_execution_pass(tmp_path):
         proposal, evidence,
         required_type="execution",
         expected_source_revision="sha123",
+        trusted_verifier_pass=True,
         next_action_on_pass="next bounded task",
         next_action_on_fail="repair",
     )
