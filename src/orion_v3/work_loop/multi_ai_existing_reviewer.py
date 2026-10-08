@@ -34,13 +34,14 @@ def _responses(state, ids):
         raise ValueError("two attributable cloud responses required")
     return tuple((identity, found[identity]) for identity in ids)
 
-def _round(connector, prompt, ids, *, stop_requested, deadline_seconds=90):
+def _round(connector, prompt, ids, *, stop_requested, deadline_seconds=120):
     if stop_requested():
         raise RuntimeError("STOP before cloud request")
     if len(prompt) > 12000:
         raise ValueError("prompt exceeds bound")
     connector.start(prompt, list(ids), popup_windows=False)
     deadline = time.monotonic() + deadline_seconds
+    last_state = None
     try:
         while time.monotonic() < deadline:
             if stop_requested():
@@ -48,9 +49,21 @@ def _round(connector, prompt, ids, *, stop_requested, deadline_seconds=90):
             state = connector.view()
             if not isinstance(state, dict):
                 raise ValueError("invalid connector state")
+            last_state = state
             if str(state.get("state") or "").lower() in _TERMINAL:
                 return _responses(state, ids)
             time.sleep(.25)
+        entries = (last_state or {}).get("reviewers") or []
+        if isinstance(entries, dict):
+            entries = list(entries.values())
+        summary = []
+        for item in entries:
+            if isinstance(item, dict):
+                summary.append(str(item.get("reviewer_id") or "?")[:50] + ":"
+                               + str(item.get("state") or "?")[:30] + ":"
+                               + ("OUTPUT" if isinstance(item.get("output"), str) and item["output"].strip() else "EMPTY"))
+        print("ORION_COUNCIL> TIMEOUT_DIAGNOSTIC", str((last_state or {}).get("state") or "?")[:30],
+              ",".join(summary)[:500], flush=True)
         raise TimeoutError("cloud reviewer deadline")
     finally:
         try:
