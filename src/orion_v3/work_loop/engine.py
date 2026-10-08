@@ -8,6 +8,7 @@ transition independently testable.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import Callable
 
 from .contracts import EvidenceRecord, Proposal, RiskClass
 from .policy import PolicyDecision, classify_proposal
@@ -54,9 +55,10 @@ class WorkLoopEngine:
         expected_source_revision: str | None,
         next_action_on_pass: str,
         next_action_on_fail: str,
+        commit_guard: Callable[[], bool] | None = None,
     ) -> AppliedEvidence:
         prepared = self.prepare(proposal)
-        if prepared.policy.risk == RiskClass.RED:
+        if prepared.policy.risk != RiskClass.GREEN or not prepared.policy.allowed_to_execute:
             return AppliedEvidence(
                 VerificationResult(False, "indeterminate", "proposal is RED"),
                 False,
@@ -72,6 +74,8 @@ class WorkLoopEngine:
         next_action = (
             next_action_on_pass if verification.verdict == "pass" else next_action_on_fail
         )
+        if commit_guard is not None and not commit_guard():
+            return AppliedEvidence(VerificationResult(False, 'indeterminate', 'commit blocked by STOP'), False)
         self.vault.record_verified_result(
             evidence,
             next_action=next_action,
