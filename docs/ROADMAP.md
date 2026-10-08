@@ -2,6 +2,28 @@
 
 All milestones are gated by physical evidence.
 
+## ACTIVE ROADMAP UPDATE — 2026-10-08
+
+This update supersedes the immediate sequence under the older Autonomous Work Loop V1 heading below. The earlier milestones remain historical context. Read AI_OPERATOR_BRIEF.md and AGENTS.md first.
+
+**Verified starting point:** most recent checked TheHands result: 57 passed, 3 skipped; real execution disabled. This is not evidence of OS isolation. TheHands is the separate frozen Android-to-Windows engineering remote; only its designated GitCheck test-command interface may be changed for ORION testing.
+
+**A. Authority + Vault transaction gate (current):** retain existing work_loop modules and test contracts. First prove a successful independent read observation cannot promote execution PASS or change STATE/JOURNAL. Next test replay, contradictory executor evidence, STOP during verification, interrupted recovery, and file changes between verification and commit. Extend existing Vault and authorization contracts only where needed. Freeze interfaces after evidence, not threat-model testing.
+
+**B. Donor review and Windows isolation spike (parallel):** inspect source, revision and license of Codex Windows sandbox, agentbox, dsh-sandbox, Windows API examples and existing ORION donors before adapting. Evaluate restricted execution identities, ACLs, AppContainer and disposable sandbox approaches. Job Objects control process lifetime but not filesystem or network access. Physical tests must prove OS denial of unauthorized file access and network connections. No untrusted real execution before isolation proof.
+
+**C. First physical operation:** prefer one approved Git patch in a disposable worktree, bound to exact project/task, source revision, patch bytes, paths, nonce and expiry. Independently verify results and prevent unauthorized canonical commits. Git patch checking alone does not establish isolation, atomicity or rollback. If Git complexity blocks a small first proof, use an append-one-line disposable protocol fixture instead. STOP does not undo physical changes. Crashes never automatically re-execute.
+
+**D. Adversarial qualification gate:** malicious receipts, replay, unrelated side effects, STOP during execution/verification, file replacement, crash/restart and OS-level isolation must pass before adding a second operation. Record exact physical evidence and skipped cases.
+
+**E. Product integration after proof:** integrate Qwen/replacement model proposals, existing frozen Memory read-only, existing PC/Android ORION product shells, connectors, Work Chat, truthful evidence/STOP, deterministic Git/search/repo-map skills, cloud specialists, headless supervision and benchmarks in that order where dependencies permit. Do not rebuild proven UI or TheHands. Preserve the Personal Assistant alongside Work.
+
+**Corrections to the external review:** hard links share file identity; Job Objects do not sandbox network/filesystem; an unanchored journal hash chain does not defeat privileged rewrite; workspace snapshots cannot prove absence of all other effects; verify-to-commit checks alone do not eliminate races against concurrent writers.
+
+**Next bounded action:** test successful read observation non-promotion, then audit Vault commit/STOP seam and donor implementations. Keep execution disabled.
+
+---
+
 ## PRIORITY — Autonomous Work Loop V1 (owner-locked 2026-10-07)
 
 This supersedes the previous immediate connectors/UI sequence as the current build priority. Connector/UI work remains valid recorded work and resumes after the autonomous loop foundation is physically proven.
