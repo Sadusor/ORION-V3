@@ -1,9 +1,14 @@
 # ORION V3 Roadmap
 
-## ORION-ONLY OWNER BOUNDARY — 2026-10-08
+## CURRENT ACTIVE DIRECTION — 2026-10-08 (Decision 0019 supersedes older active-task wording)
 
-The active engineering collaboration loop (owner, ChatGPT, DeepSeek) must be developed and tested **inside ORION V3 only** using ORION-owned interfaces, tests and evidence. **No code, adapter, import, test runner, documentation dependency, or execution path to the separate TheHands project is permitted.** References elsewhere in older sections are historical records, not active instructions. ORION's own `work_loop` Hand is distinct. No cross-repository staging or GitCheck integration. The experimental cross-project evidence adapter was deleted and its staged external test cleared. Proceed with an ORION-only collaboration protocol and isolated tests before product integration.
+**Priority:** prove Autonomous Work Loop V1 using **Qwen + ORION's own Work Hand**: Vault STATE -> Qwen bounded Proposal -> ORION GREEN/YELLOW/RED authorization -> ORION Work Hand -> independent evidence -> Vault STATE/JOURNAL. First prove safe dry-run integration, then physical bounded execution only after confinement qualification, then deliberate FAIL -> restart -> fresh Qwen -> repair -> PASS against the 15-condition acceptance contract.
 
+**Current implementation:** existing `src/orion_v3/work_loop/` modules include coordinator, engine, Vault, authorization, STOP, verifier, simulated Hand and execution Protocol. The coordinator is simulation-only and its evidence is indeterminate; no real Work Hand is enabled. The 8-check Windows combined qualification is NOT RUN; filesystem partial PASS, network INCONCLUSIVE. Real execution DISABLED. GitHub offline coordinator workflow staged at commit `27aef8e7`, test result not yet verified. Separate experimental `engineering_cycle.py` is **not** the current autonomous loop and must not be wired in as an execution authority.
+
+**Next bounded sequence:** (1) run/inspect existing ORION coordinator regression and evidence; (2) audit Qwen's existing ORION model interface and implement the narrowest model-output -> typed Proposal adapter, with offline rejection tests; (3) qualify existing ORION Work Hand sandbox/STOP/commit gates physically without weakening them; (4) prove the original FAIL/restart/repair/PASS milestone; (5) model swap, frozen Memory, Work Chat, Skills, cloud specialists, UI and phone supervision in that order.
+
+**Boundary:** the separate TheHands project is historical remote-UX inspiration, **not** ORION's Hand, runner, dependency, test path or evidence schema. Do not modify or integrate it. Historic descriptions below are retained as records, not current instructions. No parallel authority, Vault, STOP, memory, or app. No changes to frozen modules or real execution authorization.
 
 ## ACTIVE ROADMAP UPDATE — 2026-10-08
 
