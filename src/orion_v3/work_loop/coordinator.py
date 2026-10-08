@@ -16,6 +16,7 @@ from .engine import WorkLoopEngine
 from .executor import ExecutionRequest
 from .stop import StopSource
 from .commit_coordinator import CommitCoordinator
+from .vault import VaultError
 
 
 @dataclass(frozen=True, slots=True)
@@ -55,7 +56,8 @@ class WorkLoopCoordinator:
         if evidence.verdict != "indeterminate":
             return CycleOutcome("blocked", "dry-run executor returned unexpected verdict", evidence)
         generation = self.commit_coordinator.snapshot()
-        checked = self.engine.apply_evidence(
+        try:
+            checked = self.engine.apply_evidence(
             proposal, evidence, required_type="execution",
             expected_source_revision=self.source_revision,
             next_action_on_pass="await next task",
@@ -63,7 +65,9 @@ class WorkLoopCoordinator:
             commit_guard=lambda: not self.stop.stop_requested(),
             commit_coordinator=self.commit_coordinator,
             expected_generation=generation,
-        )
+            )
+        except VaultError as exc:
+            return CycleOutcome("stopped" if self.stop.stop_requested() else "blocked", str(exc), evidence)
         if not checked.verification.accepted:
             return CycleOutcome("blocked", checked.verification.reason, evidence)
         return CycleOutcome("dry_run", "no operation executed; qualification still required", evidence)
