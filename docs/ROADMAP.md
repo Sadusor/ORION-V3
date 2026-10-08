@@ -1,13 +1,9 @@
 # ORION V3 Roadmap
 
-## CURRENT OWNER PRIORITY OVERRIDE — 2026-10-08 (read first)
+## ORION-ONLY OWNER BOUNDARY — 2026-10-08
 
-**Build and physically prove the existing human + AI engineering collaboration loop (owner + ChatGPT + DeepSeek + TheHands GitCheck) as an isolated, replaceable ORION V3 subsystem. Connect it to the rest of ORION V3 only after proof.** The canonical explanation and bounded plan are in `docs/decisions/0018-prove-human-ai-engineering-loop-before-orion-integration.md`.
+The active engineering collaboration loop (owner, ChatGPT, DeepSeek) must be developed and tested **inside ORION V3 only** using ORION-owned interfaces, tests and evidence. **No code, adapter, import, test runner, documentation dependency, or execution path to the separate TheHands project is permitted.** References elsewhere in older sections are historical records, not active instructions. ORION's own `work_loop` Hand is distinct. No cross-repository staging or GitCheck integration. The experimental cross-project evidence adapter was deleted and its staged external test cleared. Proceed with an ORION-only collaboration protocol and isolated tests before product integration.
 
-Order: full repository/documentation and real-interface audit → map existing collaboration stages to modules → implement smallest missing adapter → test approved real GitCheck task and evidence → FAIL/repair/PASS and continuity → freeze → integrate into ORION V3. The previous 'Authority + Vault gate' and Qwen/AppContainer Milestone 3.5 remain valid later work, **not the active immediate build target**. This owner clarification supersedes the earlier 'ACTIVE ROADMAP UPDATE' heading for priority only. Do not mark existing Work Loop or Windows confinement production-qualified.
-
-
-All milestones are gated by physical evidence.
 
 ## ACTIVE ROADMAP UPDATE — 2026-10-08
 
@@ -355,8 +351,3 @@ Council V0 is fixed at three models: independent first proposals followed by exa
 
 Run one unscored warm-up and three scored repetitions initially; only extend close finalists. Safety violations disqualify before correctness/efficiency comparisons.
 
-## Step 1 audit gate — COMPLETE FOR PINNED TEXT SOURCES (2026-10-08)
-
-Reviewed the full returned content of 321 tracked ORION V3 text/source/config files and 73 TheHands text/source/config files. Binary/unrecognized assets inventoried; no physical tests run. Canonical audit: `docs/audits/2026-10-08-engineering-loop-step1-audit.md`.
-
-**NEXT ACTIVE IMPLEMENTATION:** isolated, read-only `engineering_loop` typed cycle/evidence adapter binding owner task, review, expected ORION revision, TheHands exact GitCheck source/tree, published session and evidence. Its result must not promote PASS merely from process exit 0; require matching target revision and independently checked acceptance assertions. Start with real existing PASS and FAIL evidence fixtures, then physical GitCheck qualification. Do not edit frozen TheHands, ORION Memory or product UI. Autonomous Qwen/Windows Work Hand remains later.
