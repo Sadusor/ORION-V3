@@ -46,7 +46,7 @@ class WorkLoopCoordinator:
         if self.stop.stop_requested():
             return CycleOutcome("stopped", "authoritative STOP requested")
         expires = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
-        auth = issue_authorization(proposal, RiskClass.GREEN, expires, self.secret)
+        auth = issue_authorization(proposal, RiskClass.GREEN, expires, self.secret, source_revision=self.source_revision)
         evidence = self.executor.execute(ExecutionRequest(proposal, auth))
         if self.stop.stop_requested():
             return CycleOutcome("stopped", "STOP requested before evidence commit", evidence)
