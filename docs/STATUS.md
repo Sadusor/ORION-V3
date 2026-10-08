@@ -1,3 +1,15 @@
+## CANONICAL CURRENT STATUS — 2026-10-08 (supersedes all older active-task sections below)
+
+**Verified milestone:** the three-cloud-reviewer → local Qwen 9B advisory synthesis pipeline physically PASSED in session `e00f23a8b5c0`, using ORION V3 revision `d83b4c91c4254d78fdce2b75ced5155ab9724902`. GPT-OSS 120B, Groq Qwen 27B, and GPT-OSS 20B each returned output. Local `qwen35-9b-orion:latest` synthesized and saved an **unapproved, unexecuted** proposal. Full evidence, failures, constraints and next-chat handoff: [FROZEN BASELINE](checkpoints/2026-10-08-cloud-qwen-baseline-freeze-and-handoff.md).
+
+**Freeze:** reference revision is immutable. No production execution, native Work Hand, authorization integration, independent verification, Windows full confinement or restart/repair/PASS qualified by this milestone. Existing ORION frozen modules remain untouched.
+
+**Next bounded task:** ORION-native Qwen visibility, validated advisory → typed Proposal → existing ORION authority/Vault dry-run. Only then confinement/STOP qualification and native execution.
+
+**Strict separation:** the separate TheHands product is not part of ORION, not its native Hand, not a dependency or development target. Prior references below are historical records and **not current instructions**. ORION native Hand belongs to `src/orion_v3/work_loop/`.
+
+---
+
 # ORION V3 Status
 
 ## CURRENT ACTIVE DIRECTION — 2026-10-08 (Decision 0019 supersedes older active-task wording)
