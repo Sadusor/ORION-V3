@@ -1,3 +1,5 @@
+> **CURRENT CANONICAL HANDOFF (2026-10-08):** [Frozen three-cloud → Qwen advisory baseline](docs/checkpoints/2026-10-08-cloud-qwen-baseline-freeze-and-handoff.md) and [Current roadmap](docs/ROADMAP.md). The advisory loop physically passed; ORION-native authorization, Hand execution and independent verification remain unqualified. **The separate TheHands product is not an ORION module or dependency.** Older engineering-remote references below are historical only and must not direct new work.
+
 > **AI / model joining this project:** Read [AI_OPERATOR_BRIEF.md](AI_OPERATOR_BRIEF.md) first. Recover current state from the canonical status/checkpoint and verified evidence before proposing changes.
 
 # ORION V3
