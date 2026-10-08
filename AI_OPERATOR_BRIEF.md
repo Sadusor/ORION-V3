@@ -1,5 +1,10 @@
 # ORION V3 — AI Operator Brief
 
+## OWNER PRIORITY CORRECTION — 2026-10-08
+
+Read `docs/decisions/0018-prove-human-ai-engineering-loop-before-orion-integration.md` before choosing the next implementation. The **current** target is to reproduce, test and freeze the owner + ChatGPT + DeepSeek + TheHands/GitCheck engineering collaboration loop as a replaceable ORION V3 subsystem, then integrate it with existing ORION authority/Vault/UI. This is **not** the same as the later Qwen-driven Autonomous Work Loop V1. Do not assume an AppContainer append-line executor is the immediate next module. Preserve the established remote and actual evidence/approval boundaries. Repository-wide documentation/source audit is in progress, not falsely claimed complete.
+
+
 > **READ THIS FIRST when joining or resuming ORION V3.**
 >
 > This document describes **HOW to work on ORION**. The repository's current STATUS/LATEST/checkpoint and verified evidence tell you **WHERE ORION currently is**. Never use stale test counts or chat memory as current truth.
