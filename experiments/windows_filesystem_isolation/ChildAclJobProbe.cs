@@ -76,7 +76,10 @@ int main(int argc,char**argv){
  string vs=Environment.GetEnvironmentVariable("ORION_VS_INSTALL")??"";
  if(string.IsNullOrWhiteSpace(vs))throw new Exception("ORION_VS_INSTALL missing");
  string vcvars=Path.Combine(vs,"VC","Auxiliary","Build","vcvars64.bat");
- var build=new ProcessStartInfo("cmd.exe","/d /s /c \"call \"\""+vcvars+"\"\" >nul && cl /nologo /W4 /WX /MT /Fe:\"\""+script+"\"\" \"\""+nativeSource+"\"\"\""){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
+ string compileBat=Path.Combine(root,"compile-native.cmd");
+ File.WriteAllText(compileBat,"@echo off\r\ncall \""+vcvars+"\" >nul\r\nif errorlevel 1 exit /b 10\r\ncl /nologo /W4 /WX /MT /Fe:\""+script+"\" \""+nativeSource+"\"\r\nexit /b %errorlevel%\r\n");
+ var build=new ProcessStartInfo("cmd.exe"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
+ build.ArgumentList.Add("/d");build.ArgumentList.Add("/c");build.ArgumentList.Add(compileBat);
  using(var compiler=Process.Start(build)??throw new Exception("MSVC failed to start")){
  string output=compiler.StandardOutput.ReadToEnd()+compiler.StandardError.ReadToEnd();
  compiler.WaitForExit();if(compiler.ExitCode!=0)throw new Exception("MSVC_BUILD_FAILED "+output);
