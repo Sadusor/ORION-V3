@@ -54,16 +54,33 @@ internal static class Program {
   acl.AddAccessRule(new FileSystemAccessRule(sid,FileSystemRights.Read|FileSystemRights.Write,AccessControlType.Allow));
   new FileInfo(file).SetAccessControl(acl);
  }
- string script=Path.Combine(inside,"child.ps1");
- File.WriteAllText(script,@"param([string]$Inside,[string]$Outside,[string]$Result)
- $a='ERROR';$b='ERROR';$c='ERROR';$d='ERROR'
- try{$null=[IO.File]::ReadAllText($Inside);$a='ALLOW'}catch{$a='DENY'}
- try{[IO.File]::AppendAllText($Inside,'x');$b='ALLOW'}catch{$b='DENY'}
- try{$null=[IO.File]::ReadAllText($Outside);$c='ALLOW'}catch{$c='DENY'}
- try{[IO.File]::AppendAllText($Outside,'x');$d='ALLOW'}catch{$d='DENY'}
- [IO.File]::WriteAllText($Result,($a+','+$b+','+$c+','+$d))
- Start-Sleep -Seconds 90
- ");
+ string script=Path.Combine(inside,"native_child.exe");
+ string nativeSource=Path.Combine(root,"native_child.c");
+ File.WriteAllText(nativeSource,@"#include <windows.h>
+int main(int argc,char**argv){
+ if(argc!=4)return 10;
+ const char* paths[2]={argv[1],argv[2]};
+ char results[5]={'D','D','D','D',0};
+ for(int i=0;i<2;i++){
+ HANDLE h=CreateFileA(paths[i],GENERIC_READ,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+ if(h!=INVALID_HANDLE_VALUE){results[i*2]='A';CloseHandle(h);}
+ h=CreateFileA(paths[i],FILE_APPEND_DATA,FILE_SHARE_READ|FILE_SHARE_WRITE,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
+ if(h!=INVALID_HANDLE_VALUE){results[i*2+1]='A';CloseHandle(h);}
+ }
+ HANDLE o=CreateFileA(argv[3],GENERIC_WRITE,FILE_SHARE_READ,NULL,CREATE_ALWAYS,FILE_ATTRIBUTE_NORMAL,NULL);
+ if(o==INVALID_HANDLE_VALUE)return 11;
+ DWORD n=0;BOOL ok=WriteFile(o,results,4,&n,NULL);CloseHandle(o);
+ if(!ok||n!=4)return 12;
+ Sleep(90000);return 0;
+ }");
+ string vs=Environment.GetEnvironmentVariable("ORION_VS_INSTALL")??"";
+ if(string.IsNullOrWhiteSpace(vs))throw new Exception("ORION_VS_INSTALL missing");
+ string vcvars=Path.Combine(vs,"VC","Auxiliary","Build","vcvars64.bat");
+ var build=new ProcessStartInfo("cmd.exe","/d /s /c \"call \"\""+vcvars+"\"\" >nul && cl /nologo /W4 /WX /MT /Fe:\"\""+script+"\"\" \"\""+nativeSource+"\"\"\""){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};
+ using(var compiler=Process.Start(build)??throw new Exception("MSVC failed to start")){
+ string output=compiler.StandardOutput.ReadToEnd()+compiler.StandardError.ReadToEnd();
+ compiler.WaitForExit();if(compiler.ExitCode!=0)throw new Exception("MSVC_BUILD_FAILED "+output);
+ }
  var scriptAcl=new FileInfo(script).GetAccessControl();
  scriptAcl.AddAccessRule(new FileSystemAccessRule(sid,FileSystemRights.ReadAndExecute,AccessControlType.Allow));
  new FileInfo(script).SetAccessControl(scriptAcl);
@@ -72,8 +89,8 @@ internal static class Program {
  job=CreateJobObjectW(IntPtr.Zero,null); if(job==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error(),"CreateJobObjectW");
  var limits=new EXT(); limits.basic.flags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
  Ensure(SetInformationJobObject(job,9,ref limits,(uint)Marshal.SizeOf<EXT>()),"SetInformationJobObject");
- string ps=System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System),"WindowsPowerShell","v1.0","powershell.exe");
- var command=new StringBuilder("\""+ps+"\" -NoProfile -NonInteractive -File \""+script+"\" -Inside \""+allowed+"\" -Outside \""+forbidden+"\" -Result \""+result+"\"");
+ string ps=script;
+ var command=new StringBuilder("\""+ps+"\" \""+allowed+"\" \""+forbidden+"\" \""+result+"\"");
  var si=new STARTUPINFO{cb=(uint)Marshal.SizeOf<STARTUPINFO>()};
  Ensure(CreateProcessAsUserW(restricted,ps,command,IntPtr.Zero,IntPtr.Zero,false,CREATE_SUSPENDED|CREATE_NO_WINDOW,IntPtr.Zero,root,ref si,out child),"CreateProcessAsUserW");
  Ensure(AssignProcessToJobObject(job,child.hProcess),"AssignProcessToJobObject");
@@ -85,8 +102,8 @@ internal static class Program {
  }
  string evidence=File.ReadAllText(result);
  if(evidence=="pending")throw new Exception("CHILD_BOOTSTRAP_BLOCKED: timeout");
- bool valid=evidence=="ALLOW,ALLOW,DENY,DENY" && File.ReadAllText(forbidden)==nonce;
- Console.WriteLine("CHILD_ACL_RESULT> "+evidence);
+ bool valid=evidence=="AADD" && File.ReadAllText(forbidden)==nonce;
+ Console.WriteLine("CHILD_ACL_RESULT> "+evidence+" (A=allowed,D=denied; read/write inside then outside)");
  Console.WriteLine("OUTSIDE_UNCHANGED> "+(File.ReadAllText(forbidden)==nonce));
  if(!valid)throw new Exception("CHILD_ACL_GATE_FAIL");
  Ensure(TerminateJobObject(job,1),"TerminateJobObject");
