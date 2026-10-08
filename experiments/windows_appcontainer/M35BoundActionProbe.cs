@@ -56,7 +56,7 @@ internal static class Program{
    string approvedWrite=Path.Combine(inside,"approved.txt");
    string outsideWrite=Path.Combine(outside,"unauthorized.txt");
    // Windows cmd builtins only; paths are disposable GUID-based paths under TEMP.
-   string commands="type "+Q(allowed)+" > "+Q(output)+" & echo ORION M35 approved fixture> "+Q(approvedWrite)+" & copy /y "+Q(denied)+" "+Q(leak)+" >nul 2>nul & echo forbidden > "+Q(outsideWrite)+" & exit /b 0";
+   string commands="type "+Q(allowed)+" > "+Q(output)+" & >"+Q(approvedWrite)+" echo ORION M35 approved fixture & copy /y "+Q(denied)+" "+Q(leak)+" >nul 2>nul & echo forbidden > "+Q(outsideWrite)+" & exit /b 0";
    Console.WriteLine("FIXTURE> DISPOSABLE_WORKSPACE_READY");
    IntPtr size=IntPtr.Zero;InitializeProcThreadAttributeList(IntPtr.Zero,1,0,ref size);
    if(size==IntPtr.Zero)throw new Exception("ATTRIBUTE_SIZE_FAILED");
