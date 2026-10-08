@@ -9,8 +9,6 @@ from pathlib import Path
 from orion_v3.work_loop.contracts import WorkState
 from orion_v3.work_loop.vault import ProjectVault
 from orion_v3.work_loop.engine import WorkLoopEngine
-from orion_v3.work_loop.coordinator import WorkLoopCoordinator
-from orion_v3.work_loop.stop import StopSource
 from tiny_calculator_preview import build_proposal
 
 def main():
@@ -28,10 +26,9 @@ def main():
         prepared=engine.prepare(proposal)
         print("TINY_DEMO> POLICY",prepared.policy.risk.value,prepared.policy.reason,flush=True)
         if prepared.policy.risk.value!="green":raise SystemExit("policy rejected calculator")
-        # Deliberately do not grant native execution: coordinator uses simulated Hand only.
-        # STOP construction follows the existing native ORION contract.
+        # Deliberately do not invoke a Hand or grant native execution.
         print("TINY_DEMO> PROPOSAL_HASH",proposal.proposal_hash,flush=True)
-        print("TINY_DEMO> SIMULATED_HAND_ONLY",flush=True)
+        print("TINY_DEMO> HAND_NOT_INVOKED",flush=True)
         print("TINY_DEMO> NATIVE_EXECUTION_NOT_AUTHORIZED",flush=True)
         print("TINY_DEMO> VAULT_STATE",vault.load().checkpoint,flush=True)
         print("TINY_DEMO> NO_CALCULATOR_FILE_WRITTEN",not (root/"repo"/"calculator.py").exists(),flush=True)
