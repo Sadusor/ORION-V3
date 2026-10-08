@@ -217,3 +217,7 @@ Then **continue the existing project instead of inventing a new roadmap**.
 ## Permanent rule
 
 **This file describes HOW to work on ORION. Current canonical project documents and verified evidence determine WHERE ORION is.**
+
+## Audit checkpoint — 2026-10-08
+
+Pinned text/source audit completed for 321 ORION V3 and 73 TheHands recognized text/source/config files. Exact review/contract findings are in `docs/audits/2026-10-08-engineering-loop-step1-audit.md`. Remaining assets were inventoried, not interpreted as code; no physical test was run. **Critical:** TheHands evidence `source_commit` identifies TheHands code, **not** automatically the ORION V3 target code; script exit `PASS` is not independent ORION feature PASS. Next is a small read-only `engineering_loop` evidence/checkpoint adapter, not a new autonomous Hand.
