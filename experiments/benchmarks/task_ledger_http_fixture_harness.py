@@ -26,8 +26,14 @@ class ReferenceLedger:
         with self.connect() as db:
             db.execute("CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, state TEXT NOT NULL)")
 
+    @contextmanager
     def connect(self):
-        return sqlite3.connect(self.db_path, timeout=5)
+        db = sqlite3.connect(self.db_path, timeout=5)
+        try:
+            with db:
+                yield db
+        finally:
+            db.close()
 
     def handle(self, method, path, raw):
         def reply(code, obj):
