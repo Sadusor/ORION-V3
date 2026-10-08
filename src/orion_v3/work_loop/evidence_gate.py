@@ -10,4 +10,4 @@ from .contracts import EvidenceRecord
 
 
 def independently_verified_pass(evidence: EvidenceRecord, *, trusted_result: bool = False) -> bool:
-    return evidence.verdict == "pass" and trusted_result is True
+    return False  # No authenticated independent verifier is wired yet
