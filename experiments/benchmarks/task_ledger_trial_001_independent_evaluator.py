@@ -20,8 +20,8 @@ def extract(text: str) -> dict[str, str]:
     heading still takes precedence; no code is executed during extraction.
     """
     out = {}
-    heading = re.compile(r"^\\*\\*([^\\n*]+)\\*\\*\\s*$")
-    fence_start = re.compile(r"^\\x60{3}python\\s*$")
+    heading = re.compile(r"^\*\*([^\n*]+)\*\*\s*$")
+    fence_start = re.compile(r"^\x60{3}python\s*$")
     lines = text.splitlines()
     i = 0
     while i < len(lines):
@@ -40,7 +40,7 @@ def extract(text: str) -> dict[str, str]:
         while end < len(lines) and lines[end].strip() != "```":
             end += 1
         if end < len(lines):
-            out[name] = "\\n".join(lines[j + 1:end]) + "\\n"
+            out[name] = "\n".join(lines[j + 1:end]) + "\n"
             i = end + 1
         else:
             i += 1
