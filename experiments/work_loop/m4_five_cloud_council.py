@@ -99,8 +99,8 @@ try:
                    "Write a concise proposed plan and acceptance tests. "
                    "Never claim approval, execution, or verified PASS.\\n"
                    + "\\n".join("CLOUD_RESPONSE_"+str(i)+":\\n"+o for i,o in enumerate(outputs,1)))
-        body=json.dumps({"model":"qwen35-9b-orion","prompt":synthesis,
-                         "stream":False,"options":{"num_predict":800,"temperature":0.2}}).encode()
+        body=json.dumps({"model":"qwen35-9b-orion:latest","prompt":synthesis,
+                         "stream":False,"think":False,"options":{"num_predict":1000,"temperature":0.2}}).encode()
         print("M4_QWEN> LOCAL_SYNTHESIS_REQUEST",flush=True)
         try:
             req=urllib.request.Request("http://127.0.0.1:11434/api/generate",
