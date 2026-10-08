@@ -21,16 +21,17 @@ class Authorization:
     expires_at: str
     nonce: str
     signature: str
+    source_revision: str = ""
 
 
-def _payload(project_id: str, task_id: str, proposal_hash: str, risk: RiskClass, expires_at: str, nonce: str) -> bytes:
+def _payload(project_id: str, task_id: str, proposal_hash: str, risk: RiskClass, expires_at: str, nonce: str, source_revision: str = "") -> bytes:
     return json.dumps(
-        [project_id, task_id, proposal_hash, risk.value, expires_at, nonce],
+        [project_id, task_id, proposal_hash, risk.value, expires_at, nonce, source_revision],
         separators=(",", ":"),
     ).encode("utf-8")
 
 
-def issue_authorization(proposal: Proposal, risk: RiskClass, expires_at: str, secret: bytes) -> Authorization:
+def issue_authorization(proposal: Proposal, risk: RiskClass, expires_at: str, secret: bytes, *, source_revision: str = "") -> Authorization:
     if risk == RiskClass.RED:
         raise ValueError("RED proposals cannot be authorized")
     expiry = datetime.fromisoformat(expires_at)
@@ -40,13 +41,15 @@ def issue_authorization(proposal: Proposal, risk: RiskClass, expires_at: str, se
     nonce = secrets.token_hex(16)
     signature = hmac.new(
         secret,
-        _payload(proposal.project_id, proposal.task_id, proposal.proposal_hash, risk, expires_at, nonce),
+        _payload(proposal.project_id, proposal.task_id, proposal.proposal_hash, risk, expires_at, nonce, source_revision),
         hashlib.sha256,
     ).hexdigest()
-    return Authorization(proposal.project_id, proposal.task_id, proposal.proposal_hash, risk, expires_at, nonce, signature)
+    return Authorization(proposal.project_id, proposal.task_id, proposal.proposal_hash, risk, expires_at, nonce, signature, source_revision)
 
 
-def verify_authorization(auth: Authorization, proposal: Proposal, secret: bytes, now: datetime | None = None) -> bool:
+def verify_authorization(auth: Authorization, proposal: Proposal, secret: bytes, now: datetime | None = None, *, expected_source_revision: str | None = None) -> bool:
+    if expected_source_revision is not None and auth.source_revision != expected_source_revision:
+        return False
     if auth.project_id != proposal.project_id or auth.task_id != proposal.task_id:
         return False
     if auth.proposal_hash != proposal.proposal_hash or auth.risk == RiskClass.RED:
@@ -62,7 +65,7 @@ def verify_authorization(auth: Authorization, proposal: Proposal, secret: bytes,
         return False
     expected = hmac.new(
         secret,
-        _payload(auth.project_id, auth.task_id, auth.proposal_hash, auth.risk, auth.expires_at, auth.nonce),
+        _payload(auth.project_id, auth.task_id, auth.proposal_hash, auth.risk, auth.expires_at, auth.nonce, auth.source_revision),
         hashlib.sha256,
     ).hexdigest()
     return hmac.compare_digest(auth.signature, expected)
