@@ -45,3 +45,7 @@ The existing manual workflow is:
 ## Documentation precedence
 
 This owner clarification supersedes any statement that *immediate* priority is an autonomous Qwen→AppContainer append-line execution test. Those tests remain optional **later** Work Loop qualification gates, not the primary current build objective. Older roadmap entries remain historical; do not erase them. This decision is not a claim that the full repository has been read or that implementation is complete.
+
+## Audit progress and remaining scope (truthful)
+
+GitHub tree at commit `17809e6da14f7a26514ca5a51f464d13406ef857`: 436 entries, 364 blobs, 3.75 MB tracked, tree not truncated. Reviewed full canonical operator brief, freeze rule and Autonomous Work Loop specification; read core roadmap/architecture/status and inspected key runtime, Android, UI, Work Loop and Vault code. Retrieved the first twelve `docs/` Markdown blobs in the documentation sweep. **This is NOT a completed full-file, whole-repository audit.** Remaining Markdown/reference/evidence documents and source/tests still require exhaustive review, with findings reconciled to the active engineering collaboration objective. No new real-execution permission was enabled. Future operator must not infer a full audit from the tree inventory.
