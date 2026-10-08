@@ -42,6 +42,20 @@ def verify_read_observation(proposal: Proposal, evidence: EvidenceRecord, *,
     path = proposal.args.get("path")
     if not isinstance(path, str):
         raise ValueError("missing read path")
+    # Reject link traversal even when the final resolved path remains inside
+    # the workspace. A preflight check is not an OS sandbox guarantee.
+    from .paths import resolved_workspace
+    raw_root = resolved_workspace(proposal.workspace)
+    raw_candidate = Path(path).expanduser()
+    if not raw_candidate.is_absolute():
+        raw_candidate = raw_root / raw_candidate
+    current = raw_candidate
+    while True:
+        if current.is_symlink():
+            raise ValueError("symlink traversal forbidden")
+        if current == raw_root or current == current.parent:
+            break
+        current = current.parent
     target = require_inside_workspace(path, proposal.workspace)
     if not target.is_file() or target.is_symlink():
         raise ValueError("not a regular non-symlink file")
