@@ -10,7 +10,7 @@ def proposal(workspace, operation="filesystem.write", **kwargs):
 
 
 def test_workspace_write_is_green(tmp_path):
-    decision = classify_proposal(proposal(tmp_path, path="repo/a.txt"))
+    decision = classify_proposal(proposal(tmp_path, path="repo/a.txt", content="test"))
     assert decision.risk == RiskClass.GREEN
     assert decision.allowed_to_execute is True
 
@@ -36,9 +36,9 @@ def test_frozen_overlap_is_red(tmp_path):
 
 
 def test_network_and_install_are_yellow(tmp_path):
-    p = Proposal("project", "task", "filesystem.write", str(tmp_path), {"path": "a.txt"}, requested_network=True)
+    p = Proposal("project", "task", "filesystem.write", str(tmp_path), {"path": "a.txt", "content": "test"}, requested_network=True)
     assert classify_proposal(p).risk == RiskClass.YELLOW
-    p = Proposal("project", "task", "filesystem.write", str(tmp_path), {"path": "a.txt"}, requested_install=True)
+    p = Proposal("project", "task", "filesystem.write", str(tmp_path), {"path": "a.txt", "content": "test"}, requested_install=True)
     assert classify_proposal(p).risk == RiskClass.YELLOW
 
 
