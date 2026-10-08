@@ -22,4 +22,4 @@ jobs:
         env:
           PYTHONPATH: src
         run: |
-          python -m unittest -v orion_v3.work_loop.multi_ai_plan_test orion_v3.work_loop.multi_ai_cloud_rounds_test
+          python -m unittest -v orion_v3.work_loop.multi_ai_plan_test orion_v3.work_loop.multi_ai_cloud_rounds_test orion_v3.work_loop.multi_ai_existing_reviewer_test
