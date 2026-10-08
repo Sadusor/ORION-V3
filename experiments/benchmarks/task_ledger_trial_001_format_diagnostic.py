@@ -68,7 +68,7 @@ def main() -> None:
     raw = (folder / "cloud-output.txt").read_bytes()
     if len(raw) > MAX_BYTES:
         raise RuntimeError("oversized saved response")
-    text = raw.decode("utf-8").replace("\\r\\n", "\\n")
+    text = raw.decode("utf-8").replace("\r\n", "\n")
     manifest = json.loads((folder / "manifest.json").read_text(encoding="utf-8"))
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     if digest != manifest["output_sha256"]:
