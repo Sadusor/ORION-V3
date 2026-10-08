@@ -19,7 +19,7 @@ class SimulatedWorkHand:
 
     def execute(self, request: ExecutionRequest) -> EvidenceRecord:
         p = request.proposal
-        authorized = verify_authorization(request.authorization, p, self._secret)
+        authorized = verify_authorization(request.authorization, p, self._secret, expected_source_revision=self._revision)
         if authorized and self._nonce_store is not None:
             authorized = self._nonce_store.consume(request.authorization.nonce)
         return EvidenceRecord(
