@@ -13,8 +13,15 @@ try {
         throw "Wrong ORION branch: $branch"
     }
     Write-Host "ORION_WORK_LOOP_TEST START branch=$branch"
-    & $Python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py tests/test_work_loop_model_cycle_simulation.py
-    $code = $LASTEXITCODE
+    $oldPythonPath = $env:PYTHONPATH
+    $src = Join-Path $repo "src"
+    $env:PYTHONPATH = if ($oldPythonPath) { "$src$([IO.Path]::PathSeparator)$oldPythonPath" } else { $src }
+    try {
+        & $Python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py tests/test_work_loop_model_cycle_simulation.py
+        $code = $LASTEXITCODE
+    } finally {
+        $env:PYTHONPATH = $oldPythonPath
+    }
     if ($code -ne 0) { throw "ORION_WORK_LOOP_TEST FAIL exit=$code" }
     Write-Host "ORION_WORK_LOOP_TEST PASS (offline simulation only; physical qualification NOT RUN)"
 }
