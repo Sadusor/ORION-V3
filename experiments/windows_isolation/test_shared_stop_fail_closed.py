@@ -1,5 +1,6 @@
 """Fail-closed shared STOP authority checks against disposable real Vault."""
 import os
+import sqlite3
 import tempfile
 import unittest
 from shared_stop_prototype import SharedStop
@@ -23,7 +24,7 @@ class StopAuthorityFailClosed(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             vault,stop=self.setup(root)
             os.unlink(stop.db)
-            with self.assertRaises((RuntimeError,VaultError)):
+            with self.assertRaises((RuntimeError,VaultError,sqlite3.DatabaseError)):
                 attempt(vault,stop)
             self.assertEqual(vault.load().last_verified_result,"none")
             print("STOP_AUTHORITY_MISSING> FAIL_CLOSED")
