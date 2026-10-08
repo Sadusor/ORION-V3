@@ -28,3 +28,7 @@ GitCheck session `e3296ce50195`, TheHands source `32e5930`: six real-Vault exper
 ## Fail-closed authority qualification — 2026-10-08
 
 TheHands GitCheck session `03bb1e6561a0`, source `7093975`: 9/9 experimental STOP/Vault tests PASS. Includes missing STOP authority, corrupt SQLite STOP authority, monotonic STOP persistence, real Vault STOP guard, cross-process parent STOP/child commit, 12 concurrent STOP/commit iterations (10 rejected; 2 committed before STOP), and pending transaction recovery. This validates the tested prototype behaviors only; AppContainer and full eight-check combined qualification remain NOT RUN. Production execution remains DISABLED.
+
+## Physical evidence 2026-10-08 — session af7a5f6970d7
+
+FILESYSTEM PASS: approved workspace read/write allowed, outside read/write denied, outside fixture unchanged, disposable AppContainer profile cleanup succeeded. NETWORK INCONCLUSIVE: live host listener reachable by host, AppContainer native Winsock child timed out (`NETWORK_ISOLATION> INCONCLUSIVE_TIMEOUT`, child exit 12). A timeout is NOT a network-denial PASS. Do not relax acceptance criterion or enable execution. Investigate native socket error reporting and Windows filtering diagnostics in a dedicated diagnostic module before re-running combined gate. Remote V1 unchanged.
