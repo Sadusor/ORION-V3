@@ -55,11 +55,12 @@ class ProjectVault:
         *,
         next_action: str,
         blocked: bool | None = None,
+        commit_guard=None,
     ) -> WorkState:
         with self._mutex:
-            return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked)
+            return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked, commit_guard=commit_guard)
 
-    def _record_under_mutex(self, evidence, *, next_action, blocked):
+    def _record_under_mutex(self, evidence, *, next_action, blocked, commit_guard):
         current = self.load()
         if evidence.project_id != current.project_id or evidence.task_id != current.current_task:
             raise VaultError("evidence does not belong to current Vault task")
@@ -74,6 +75,8 @@ class ProjectVault:
             f"task={evidence.task_id} proposal={evidence.proposal_hash[:12]} "
             f"source={evidence.source}@{evidence.source_revision} {evidence.detail}".strip()
         )
+        if commit_guard is not None and not commit_guard():
+            raise VaultError("STOP blocked Vault commit")
         self.pending_path.write_text(json.dumps({"entry": entry, "state": updated.__dict__ if hasattr(updated, "__dict__") else {k: getattr(updated, k) for k in updated.__dataclass_fields__}}), encoding="utf-8")
         self._write_state(updated)
         self.append_journal(entry)
