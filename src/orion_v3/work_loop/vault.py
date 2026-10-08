@@ -53,6 +53,10 @@ class ProjectVault:
         next_action: str,
         blocked: bool | None = None,
     ) -> WorkState:
+        with self._mutex:
+            return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked)
+
+    def _record_under_mutex(self, evidence, *, next_action, blocked):
         current = self.load()
         if evidence.project_id != current.project_id or evidence.task_id != current.current_task:
             raise VaultError("evidence does not belong to current Vault task")
