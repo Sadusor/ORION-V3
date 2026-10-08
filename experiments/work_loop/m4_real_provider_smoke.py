@@ -48,12 +48,12 @@ catalog=connector.refresh_catalog()
 models=list(catalog.get("models") or [])
 cloud=[m for m in models if isinstance(m,dict)
        and str(m.get("provider") or m.get("adapter") or "").lower() not in ("ollama","local")
-       and m.get("id")]
-print("M4_LIVE_PROVIDER> CATALOG_MODELS",len(models),"CLOUD_CANDIDATES",len(cloud))
+       and m.get("reviewer_id") and m.get("available") is True]
+print("M4_LIVE_PROVIDER> CATALOG_MODELS",len(models),"AVAILABLE_CLOUD_CANDIDATES",len(cloud))
 if not cloud:
-    print("M4_LIVE_PROVIDER> NO_CONFIGURED_CLOUD_CANDIDATE")
+    print("M4_LIVE_PROVIDER> NO_AVAILABLE_CLOUD_CANDIDATE")
     raise SystemExit(0)
-selected=str(cloud[0]["id"])
+selected=str(cloud[0]["reviewer_id"])
 print("M4_LIVE_PROVIDER> SELECTED_EXISTING_PROVIDER",str(cloud[0].get("provider") or cloud[0].get("adapter") or "configured")[:50])
 prompt="ORION V3 connectivity check. Reply exactly: ORION_PROVIDER_READY. Do not execute code or request tools."
 connector.start(prompt,[selected],popup_windows=False)
