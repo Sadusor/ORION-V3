@@ -12,6 +12,7 @@ import json
 import threading
 
 from .contracts import EvidenceRecord, WorkState
+from .vault_lock import exclusive_vault_lock
 
 
 _STATE_MARKER = "<!-- ORION_WORK_STATE_V1 -->"
@@ -40,8 +41,11 @@ class ProjectVault:
             self.journal_path.write_text("# Work Journal\n\n", encoding="utf-8")
 
     def load(self) -> WorkState:
-        with self._mutex:
+        with self._mutex, exclusive_vault_lock(self.root):
             self._recover_pending()
+            return self._read_state()
+
+    def _read_state(self) -> WorkState:
         text = self.state_path.read_text(encoding="utf-8")
         marker = _STATE_MARKER + "\n"
         if marker not in text:
@@ -57,11 +61,12 @@ class ProjectVault:
         blocked: bool | None = None,
         commit_guard=None,
     ) -> WorkState:
-        with self._mutex:
+        with self._mutex, exclusive_vault_lock(self.root):
             return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked, commit_guard=commit_guard)
 
     def _record_under_mutex(self, evidence, *, next_action, blocked, commit_guard):
-        current = self.load()
+        self._recover_pending()
+        current = self._read_state()
         if evidence.project_id != current.project_id or evidence.task_id != current.current_task:
             raise VaultError("evidence does not belong to current Vault task")
         updated = replace(
