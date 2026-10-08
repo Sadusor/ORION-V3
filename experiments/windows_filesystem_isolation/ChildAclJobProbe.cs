@@ -93,6 +93,18 @@ int main(int argc,char**argv){
  var limits=new EXT(); limits.basic.flags=JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
  Ensure(SetInformationJobObject(job,9,ref limits,(uint)Marshal.SizeOf<EXT>()),"SetInformationJobObject");
  string ps=script;
+ Console.WriteLine("DIAGNOSTIC> native executable prepared");
+ foreach(string path in new[]{script,Path.Combine(Environment.SystemDirectory,"kernel32.dll"),Path.Combine(Environment.SystemDirectory,"kernelbase.dll"),Path.Combine(Environment.SystemDirectory,"ntdll.dll")}){
+  try {
+   bool readable=false;string error="";
+   WindowsIdentity.RunImpersonated(new Microsoft.Win32.SafeHandles.SafeAccessTokenHandle(restricted),()=>{
+    try{using var stream=new FileStream(path,FileMode.Open,FileAccess.Read,FileShare.ReadWrite|FileShare.Delete);readable=stream.ReadByte()>=0;}
+    catch(Exception ex){error=ex.GetType().Name+":"+ex.HResult.ToString("X8");}
+   });
+   Console.WriteLine("RESTRICTED_READ> "+Path.GetFileName(path)+" "+(readable?"ALLOW":"DENY")+" "+error);
+  }catch(Exception ex){Console.WriteLine("RESTRICTED_READ> "+Path.GetFileName(path)+" DIAGNOSTIC_ERROR "+ex.GetType().Name);}
+ }
+
  var command=new StringBuilder("\""+ps+"\" \""+allowed+"\" \""+forbidden+"\" \""+result+"\"");
  var si=new STARTUPINFO{cb=(uint)Marshal.SizeOf<STARTUPINFO>()};
  Ensure(CreateProcessAsUserW(restricted,ps,command,IntPtr.Zero,IntPtr.Zero,false,CREATE_SUSPENDED|CREATE_NO_WINDOW,IntPtr.Zero,root,ref si,out child),"CreateProcessAsUserW");
