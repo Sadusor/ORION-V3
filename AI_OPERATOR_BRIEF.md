@@ -1,9 +1,10 @@
 # ORION V3 — AI Operator Brief
 
-## ORION-ONLY OWNER BOUNDARY — 2026-10-08
+## CURRENT OWNER PRIORITY — Qwen + ORION Hands Autonomous Work Loop V1
 
-The active engineering collaboration loop (owner, ChatGPT, DeepSeek) must be developed and tested **inside ORION V3 only** using ORION-owned interfaces, tests and evidence. **No code, adapter, import, test runner, documentation dependency, or execution path to the separate TheHands project is permitted.** References elsewhere in older sections are historical records, not active instructions. ORION's own `work_loop` Hand is distinct. No cross-repository staging or GitCheck integration. The experimental cross-project evidence adapter was deleted and its staged external test cleared. Proceed with an ORION-only collaboration protocol and isolated tests before product integration.
+The active project is the existing Autonomous Work Loop V1: Vault STATE -> Qwen typed proposal -> ORION policy/authorization -> ORION Work Hand -> independently verified evidence -> Vault STATE/JOURNAL. First test the existing coordinator and connect Qwen with offline contracts. Real execution remains disabled until Windows isolation and STOP/commit qualification pass. The main physical milestone is FAIL -> restart -> fresh Qwen -> repair -> PASS. Cloud specialists, Skills and Work UI come later.
 
+TheHands is a separate product and may inform remote UX only. It is not the ORION Work Hand, a test runner, a code or evidence dependency, or a runtime adapter. Older instructions below that direct use of its GitCheck workflow are historical, not active. Decision 0019 controls the current work. Do not add parallel authority, Vault, STOP or memory systems.
 
 ## 1. Prime directive
 
