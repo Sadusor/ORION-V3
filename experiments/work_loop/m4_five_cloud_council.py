@@ -7,6 +7,7 @@ import sys
 import time
 import json
 import urllib.request
+import urllib.error
 import hashlib
 from pathlib import Path
 
@@ -118,6 +119,8 @@ try:
             print("M4_LOOP> CLOUD_TO_QWEN_ADVISORY_COMPLETE_NO_EXECUTION",flush=True)
         except Exception as exc:
             print("M4_QWEN> SYNTHESIS_FAILED",type(exc).__name__,flush=True)
+            if isinstance(exc,urllib.error.HTTPError):print("M4_QWEN> HTTP_STATUS",exc.code,flush=True)
+            if isinstance(exc,RuntimeError):print("M4_QWEN> RUNTIME_CATEGORY", "EMPTY_RESPONSE" if "empty Qwen response" in str(exc) else "OTHER",flush=True)
             raise SystemExit(4)
 finally:
     if layout_process.poll() is None:
