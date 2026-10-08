@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 import hashlib
 import json
+import hmac
 
 from .contracts import Proposal
 
@@ -38,3 +39,16 @@ def bind_fixed_action(proposal: Proposal, revision: str) -> FixedActionManifest:
         raise ValueError("fixed-action proposal mismatch")
     return FixedActionManifest(proposal.proposal_hash, str(root), str(target),
                                hashlib.sha256(content.encode()).hexdigest(), revision)
+
+
+def authenticate_manifest(manifest: FixedActionManifest, secret: bytes) -> str:
+    """MAC the complete canonical manifest, not just its proposal hash."""
+    if len(secret) < 32:
+        raise ValueError("manifest key too short")
+    return hmac.new(secret, manifest.canonical_bytes(), hashlib.sha256).hexdigest()
+
+
+def verify_manifest_mac(manifest: FixedActionManifest, secret: bytes, mac: str) -> bool:
+    if not isinstance(mac, str) or len(mac) != 64:
+        return False
+    return hmac.compare_digest(authenticate_manifest(manifest, secret), mac)
