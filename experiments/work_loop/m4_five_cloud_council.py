@@ -2,6 +2,7 @@
 from __future__ import annotations
 import ast
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -58,6 +59,7 @@ prompt=("ORION V3 architecture review: deterministic approval/policy authority, 
         "Advisory only: no tools, execution, credentials, or claimed PASS.")
 connector.start(prompt,[str(m["reviewer_id"]) for m in selected],popup_windows=True)
 print("M4_COUNCIL> FIVE_INDIVIDUAL_REVIEWER_WINDOWS_REQUESTED")
+layout_process=subprocess.Popen([sys.executable,str(Path(__file__).with_name("m4_reviewer_window_grid.py"))],creationflags=subprocess.CREATE_NO_WINDOW)
 print("M4_COUNCIL> IDENTICAL_PROMPT_SENT_TO_FIVE")
 deadline=time.monotonic()+110
 try:
@@ -81,6 +83,10 @@ try:
     print("M4_COUNCIL> RESPONSES_CONFIRMED",completed)
     print("M4_COUNCIL> QWEN_SYNTHESIS_REQUIRES_VERIFIED_OUTPUTS")
 finally:
+    if layout_process.poll() is None:
+        layout_process.terminate()
+        try:layout_process.wait(timeout=3)
+        except subprocess.TimeoutExpired:layout_process.kill()
     try:
         if str(connector.view().get("state") or "").lower() not in ("completed","complete","error","failed","stopped"):
             connector.stop()
