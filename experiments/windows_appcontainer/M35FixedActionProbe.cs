@@ -85,7 +85,8 @@ internal static class Program{
    Console.WriteLine("OUTSIDE_WRITE> "+(deniedWrite?"DENY":"UNEXPECTED_ALLOW"));
    Console.WriteLine("OUTSIDE_UNCHANGED> "+outsideUnchanged);
    if(!readOk||!writeOk||!deniedRead||!deniedWrite||!outsideUnchanged)throw new Exception("FILESYSTEM_ISOLATION_GATE_FAILED");
-   Console.WriteLine("M35_FIXED_ACTION> PASS_APPCONTAINER_EXECUTED");\n   Console.WriteLine("APPCONTAINER_FILESYSTEM> PASS_DISPOSABLE_FIXTURE_ONLY");
+   Console.WriteLine("M35_FIXED_ACTION> PASS_APPCONTAINER_EXECUTED");
+   Console.WriteLine("APPCONTAINER_FILESYSTEM> PASS_DISPOSABLE_FIXTURE_ONLY");
    Console.WriteLine("COMBINED_QUALIFICATION> INCOMPLETE_NETWORK_STOP_COMMIT_PENDING");
    status=0;
   }catch(Exception ex){Console.WriteLine("APPCONTAINER_CHILD_BOOTSTRAP> FAIL "+ex.Message);}
