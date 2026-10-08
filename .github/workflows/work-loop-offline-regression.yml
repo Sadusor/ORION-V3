@@ -1,0 +1,28 @@
+name: ORION Work Loop offline regression
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - spike/windows-isolation-preflight-20261008
+    paths:
+      - 'src/orion_v3/work_loop/**'
+      - 'tests/test_work_loop_coordinator.py'
+      - '.github/workflows/work-loop-offline-regression.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-coordinator:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline test dependencies
+        run: python -m pip install -e '.[dev]'
+      - name: Run existing coordinator tests (no real Hand)
+        run: python -m pytest -q tests/test_work_loop_coordinator.py
