@@ -82,6 +82,8 @@ class WorkLoopEngine:
         next_action_on_fail: str,
         commit_guard: Callable[[], bool] | None = None,
         trusted_verifier_pass: bool = False,
+        commit_coordinator=None,
+        expected_generation: int | None = None,
     ) -> AppliedEvidence:
         prepared = self.prepare(proposal)
         if prepared.policy.risk != RiskClass.GREEN or not prepared.policy.allowed_to_execute:
@@ -109,5 +111,7 @@ class WorkLoopEngine:
             next_action=next_action,
             blocked=verification.verdict != "pass",
             commit_guard=commit_guard,
+            commit_coordinator=commit_coordinator,
+            expected_generation=expected_generation,
         )
         return AppliedEvidence(verification, True)
