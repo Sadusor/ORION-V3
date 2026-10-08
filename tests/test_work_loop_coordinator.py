@@ -54,3 +54,32 @@ def test_wrong_task_denied(tmp_path):
     p = Proposal("demo", "wrong", "filesystem.read", str(tmp_path / "project" / "repo"))
     assert loop.cycle(p).status == "denied"
     assert vault.load().last_verified_result == "none"
+
+
+def test_stop_during_executor_prevents_state_commit(tmp_path):
+    loop, vault = make(tmp_path)
+    stop = loop.stop
+
+    class StopDuringExecution:
+        def execute(self, request):
+            from orion_v3.work_loop.contracts import EvidenceRecord
+            stop.active = True
+            p = request.proposal
+            return EvidenceRecord(p.project_id, p.task_id, p.proposal_hash,
+                                  "execution", "indeterminate", "test-executor",
+                                  "fixture-rev", "nothing executed")
+
+    loop.executor = StopDuringExecution()
+    outcome = loop.cycle(proposal(tmp_path))
+    assert outcome.status == "stopped"
+    assert vault.load().last_verified_result == "none"
+    assert "nothing executed" not in vault.journal_path.read_text(encoding="utf-8")
+
+
+def test_repeat_dry_run_never_records_pass(tmp_path):
+    loop, vault = make(tmp_path)
+    p = proposal(tmp_path)
+    for _ in range(2):
+        assert loop.cycle(p).status == "dry_run"
+    assert vault.load().last_verified_result == "execution:indeterminate"
+    assert vault.load().blocked is True
