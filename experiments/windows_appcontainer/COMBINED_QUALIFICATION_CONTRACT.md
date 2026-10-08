@@ -17,3 +17,10 @@ One GitCheck, only when all checks implemented:
 No elevation, permanent firewall rules, Windows DLL ACL edits, production Hands execution, or changes to Remote V1. Do not claim full qualification from the existing three partial passes.
 
 Herald overview experiment is opt-in and read-only; not connected to UI or canonical memory.
+
+
+## Verified STOP/Vault evidence — 2026-10-08
+
+GitCheck session `e3296ce50195`, TheHands source `32e5930`: six real-Vault experimental tests passed, including 12 concurrent cross-process trials (10 rejected, 2 committed before STOP). Controlled parent STOP then child commit rejected; commit-first and STOP-first tests passed; one injected pending-write interruption recovered without duplicate journal entries. Experimental prototype commit `e1730d7` uses the existing Vault SQLite lock and a separate monotonic STOP_AUTHORITY SQLite file.
+
+**Scope limitation:** these tests do not establish AppContainer filesystem/network isolation, Job Object descendant termination, production STOP integration, or comprehensive crash safety. The 8-point combined Windows acceptance contract above remains NOT RUN. No production execution authorization is implied.
