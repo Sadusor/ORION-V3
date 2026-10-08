@@ -47,3 +47,29 @@ Inventory: `docs/audits/2026-10-08-tracked-file-inventory.md` (366 ORION V3 trac
 An isolated `src/orion_v3/engineering_loop/` **read-only evidence + checkpoint adapter**, not a new Hand or agent. Inputs: approved task identity, expected exact Git source/Hand tree, reviewer decision and observed TheHands result. Outputs: a truthful normalized cycle record and next action (PASS→freeze or FAIL→repair), without changing TheHands or granting execution. Verify against real session `088f1873516b` plus a known FAIL result. Owner approval remains in TheHands until explicitly integrated.
 
 This is a **design recommendation pending exact source and schema audit**, not implemented code or qualified behavior.
+
+## Repository-wide text review completed — 2026-10-08
+
+At pinned ORION V3 tree `38a41ba68690b9834540abba699ed922d6466cec`, fetched and reviewed the **full returned blob contents** of all **321 files** matching source/document/config extensions (`.md .py .ps1 .json .js .kt .cs .xml .yml .yaml .toml .html .css .kts`). This included **all Markdown documents**, Android, desktop, product server, memory modules/tests, Work Loop, Windows experiments, UI, scripts and tests. Separately fetched/reviewed **73** TheHands source/document/config files from its `main` tree (88 total tracked blobs). Remaining binary assets and uncommon extensions were inventoried, not interpreted as executable text. These are source-content inspections, **not runtime test execution or proof of correctness**.
+
+### Precise TheHands code and evidence contract (verified from source)
+
+- `server/thehands_server.py:541` `HandsRuntime.git_check(hand_id)` records `source_commit`, `tree_sha`, `checked_at`, label and working directory. **No execution**.
+- `server/thehands_server.py:574` `approve_and_run` re-fetches and checks the current Hand tree, then calls `approve` and `run`. `run` (line 596) verifies the approved Hand tree and starts a detached Git worktree.
+- `server/session_supervisor.py:71` `start_powershell_file` starts the approved PowerShell file. `stop` (line 183) targets its session.
+- `server/thehands_server.py:679` `_finalize` maps completed exit 0 to `PASS`, stopped to `STOPPED`, otherwise `FAIL`. **This is a process exit verdict, not a claim that the intended ORION feature was independently qualified.**
+- `_publish_evidence` (line 772) writes `thehands.github-evidence.v1` to `thehands-results:docs/thehands/session-results/<session_id>.json`, plus `thehands.session-index.v1` at `docs/thehands/session-index.json`. Index fields: `session_id, hand_id, result, source_commit, hand_tree_sha, recorded_at`. Detail includes `evidence_id, source_system, hand_id, result, source_commit, hand_tree_sha, started_at, finished_at, recorded_at, working_directory, output_tail, provenance`.
+- **Important identity distinction:** `source_commit` in TheHands evidence is **TheHands GitCheck repository revision**, not necessarily the **ORION V3 revision tested by the PowerShell script**. For ORION module acceptance, the script must also emit a verifiable ORION revision/test target and assertions, or the engineering-loop adapter must mark the ORION target identity **UNVERIFIED**.
+- TheHands `Manual PowerShell` uses owner paste/run and lacks the checked source/tree and GitHub evidence semantics of normal GitCheck. It is not a substitute for acceptance evidence.
+
+### Findings for next implementation
+
+1. **Existing and reusable:** GitCheck identity/approval, exact detached execution, session supervisor, STOP, evidence publication, immutable result files, canonical ORION memory and UI, ORION Work Loop contracts.
+2. **Missing for this owner workflow:** a V3-owned typed engineering-cycle record linking **task + ORION target revision + proposed diff + DeepSeek review + owner approval + TheHands session + independently evaluated acceptance evidence + next repair/freeze action**.
+3. **Missing:** proven automated provider transport for ChatGPT and DeepSeek in this loop. Initial protocol can preserve manual review while remaining provider-neutral.
+4. **Do not conflate:** `WorkLoopCoordinator` simulated autonomous Qwen execution with the collaboration loop; `git_check` script PASS with verified functional PASS; TheHands source commit with ORION target commit.
+5. **No code or physical tests run** during this repository content audit; actual module implementation and physical acceptance remain pending.
+
+### Step 1 verdict
+
+**Repository text/source/document review: COMPLETE for tracked recognized text formats at pinned tree; binary/unrecognized formats: INVENTORIED; runtime verification: NOT RUN.** Documentation priority reconciliation and interface mapping: COMPLETE for the immediate engineering-loop scope. Future source changes require a delta audit; this result does not freeze code or qualify a new product module.
