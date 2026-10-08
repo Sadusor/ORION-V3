@@ -84,5 +84,6 @@ class WorkLoopEngine:
             evidence,
             next_action=next_action,
             blocked=verification.verdict != "pass",
+            commit_guard=commit_guard,
         )
         return AppliedEvidence(verification, True)
