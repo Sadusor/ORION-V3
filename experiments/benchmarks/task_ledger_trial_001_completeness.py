@@ -22,8 +22,10 @@ def check(text: str) -> dict:
     for index, match in enumerate(blocks, 1):
         tag = match.group(1).strip().lower()
         body = match.group(2)
-        header = text[max(0, match.start()-180):match.start()]
-        labels = re.findall(r"(?:task_ledger[/\\][\w.-]+\.py|tests?[/\\][\w./-]+\.py)", header, re.I)
+        # Only the immediately preceding line may name this fenced file.
+        # A broad lookback incorrectly attributed earlier filenames to later blocks.
+        preceding = text[:match.start()].rstrip().split("\n")[-1].strip()
+        labels = re.findall(r"(?:task_ledger[/\\][\w.-]+\.py|tests?[/\\][\w./-]+\.py)", preceding, re.I)
         if tag.endswith(".py"):
             labels.append(tag.replace("\\", "/"))
         if tag not in ("python", "py") and not tag.endswith(".py"):
