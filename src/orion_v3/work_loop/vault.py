@@ -9,6 +9,8 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+import os
+import uuid
 import threading
 
 from .contracts import EvidenceRecord, WorkState
@@ -82,11 +84,22 @@ class ProjectVault:
         )
         if commit_guard is not None and not commit_guard():
             raise VaultError("STOP blocked Vault commit")
-        self.pending_path.write_text(json.dumps({"entry": entry, "state": updated.__dict__ if hasattr(updated, "__dict__") else {k: getattr(updated, k) for k in updated.__dataclass_fields__}}), encoding="utf-8")
+        self._write_pending({"entry": entry, "state": {k: getattr(updated, k) for k in updated.__dataclass_fields__}})
         self._write_state(updated)
         self.append_journal(entry)
         self.pending_path.unlink()
         return updated
+
+    def _write_pending(self, payload: dict) -> None:
+        temp = self.root / ("PENDING_" + uuid.uuid4().hex + ".tmp")
+        try:
+            with temp.open("w", encoding="utf-8") as stream:
+                json.dump(payload, stream)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temp, self.pending_path)
+        finally:
+            temp.unlink(missing_ok=True)
 
     def _recover_pending(self) -> None:
         if not self.pending_path.exists():
