@@ -39,11 +39,8 @@ def extract(text: str) -> dict[str, str]:
         end = j + 1
         while end < len(lines) and lines[end].strip() != "```":
             end += 1
-        if end < len(lines):
-            out[name] = "\n".join(lines[j + 1:end]) + "\n"
-            i = end + 1
-        else:
-            i += 1
+        out[name] = "\n".join(lines[j + 1:end]) + "\n"
+        i = end + 1 if end < len(lines) else len(lines)
     return out
 
 def imported_names(tree: ast.AST) -> set[str]:
@@ -60,6 +57,8 @@ def analyze(text: str) -> dict:
     findings = []
     def finding(code, detail):
         findings.append({"id": code, "detail": detail})
+    if text.rstrip().endswith("body ="):
+        finding("TRUNCATED_SUBMISSION", "Original response ends inside tests/test_api.py; test file incomplete")
     for name in REQUIRED:
         if name not in sources:
             finding("MISSING_FILE", name)
