@@ -11,7 +11,7 @@ def test_nonce_replay_rejected_across_instances(tmp_path):
     p = Proposal("p", "t", "filesystem.read", str(tmp_path))
     secret = b"test"
     auth = issue_authorization(p, RiskClass.GREEN,
-        (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat(), secret)
+        (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat(), secret, source_revision="rev")
     path = tmp_path / "nonces.sqlite3"
     first = SimulatedWorkHand(secret=secret, source_revision="rev", nonce_store=NonceStore(path))
     assert first.execute(ExecutionRequest(p, auth)).verdict == "indeterminate"
@@ -23,7 +23,7 @@ def test_invalid_auth_does_not_consume_nonce(tmp_path):
     from dataclasses import replace
     p = Proposal("p", "t", "filesystem.read", str(tmp_path))
     auth = issue_authorization(p, RiskClass.GREEN,
-        (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat(), b"right")
+        (datetime.now(timezone.utc) + timedelta(seconds=60)).isoformat(), b"right", source_revision="rev")
     hand = SimulatedWorkHand(secret=b"right", source_revision="rev",
                              nonce_store=NonceStore(tmp_path / "nonces.sqlite3"))
     assert hand.execute(ExecutionRequest(p, replace(auth, signature="0"*64))).verdict == "fail"
