@@ -57,6 +57,7 @@ class WorkLoopCoordinator:
             expected_source_revision=self.source_revision,
             next_action_on_pass="await next task",
             next_action_on_fail="await qualified executor",
+            commit_guard=lambda: not self.stop.stop_requested(),
         )
         if not checked.verification.accepted:
             return CycleOutcome("blocked", checked.verification.reason, evidence)
