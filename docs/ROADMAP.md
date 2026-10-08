@@ -1,3 +1,25 @@
+## ACTIVE ROADMAP — END-OF-DAY 2026-10-09 (Decision 0020; supersedes older active sections)
+
+**Product goal:** owner requests a project -> two different cloud models independently design it -> cross-review -> owner approves exact plan -> cloud models author/review patches -> ORION native authority/Hand safely executes and independently tests -> evidence-led repair/restart -> Vault continuity -> phone supervision.
+
+**Physical PASS:** PowerShell 1 evidence `thehands-58edd7d97157` confirms 20/20 offline protocol tests, two independent responses and two cross-reviews from GPT-OSS 120B + GPT-OSS 20B using existing ORION connector. Advisory saved locally at `E:\\ORION-WORKLOOP-REMOTE-TEST\\artifacts\\multi-ai\\live-70483bb2c45747e3b58cf4215d0221db.json`. Owner approval NOT granted; no generated code executed. Earlier GPT-OSS 120B + Qwen 27B cross-review failed; error handled fail-closed. Full evidence checkpoint: [two-cloud physical PASS](checkpoints/2026-10-08-two-cloud-collaboration-physical-pass.md).
+
+**What is not yet done:** inspect the four advisory texts, synthesize a bounded plan with explicit disagreements and hash, present owner approval; cooperative cloud patch production/review; typed patch authorization; combined Windows filesystem+network confinement and STOP qualification; native execution; independent FAIL->restart->repair->PASS; unattended loop; Work/phone UI integration.
+
+**Next gates, strictly ordered:**
+1. Safely export/read the four advisory outputs (no credentials); show model disagreements and owner-reviewable exact plan/digest.
+2. Implement and physically test cloud patch author/reviewer protocol with frozen scope, approval and negative tests; no execution.
+3. Qualify native ORION Work Hand combined filesystem+network isolation, process-tree STOP, replay/race/commit denials.
+4. Run tiny disposable owner-approved project end-to-end with independent test failure, restart and cloud repair to PASS; record Vault evidence.
+5. Add bounded GREEN unattended continuation, YELLOW owner notifications, RED denial, provider fallback, budgets, recovery and kill switch.
+6. Integrate existing Work UI, phone supervision, Memory retrieval and model replacement; then extended reliability/security trials.
+
+**Autonomy status:** advisory collaboration physically proven; autonomous coding/execution NOT qualified. No percentage from test counts should be interpreted as overall product completion. Provisional engineering estimate: roughly one-quarter to one-third of the *core unattended build-loop journey* is established in reusable foundations, not a measured release-progress score. Supervised tiny-project operation may take multiple engineering sessions after security gates; unattended bounded GREEN tasks likely weeks of successful integration/testing, not ready today. Unrestricted full-PC autonomous work has no responsible delivery date.
+
+**Separation:** TheHands is a separate product used solely as a temporary owner-controlled PowerShell 1 transport for this physical proof. It is NOT an ORION dependency, Hand, runtime, authority, or product module. ORION V1 Remote, frozen memory and production authority unchanged. Older sections below are historical and may contradict this active update.
+
+---
+
 ## CANONICAL ROADMAP POSITION — 2026-10-08 (supersedes conflicting older sections)
 
 **M4 advisory council + Qwen synthesis: PHYSICAL PASS / FROZEN EXPERIMENTAL BASELINE.** Evidence session `e00f23a8b5c0`; exact tested ORION revision `d83b4c91c4254d78fdce2b75ced5155ab9724902`. Three successful Groq cloud reviews → local Qwen 9B nonthinking synthesis → saved advisory, with no execution or approval. [Full frozen checkpoint](checkpoints/2026-10-08-cloud-qwen-baseline-freeze-and-handoff.md).
