@@ -29,7 +29,11 @@ try {
  RunStep 'BUILD_NATIVE_CHILD' $dotnet.Source @('publish',(Join-Path $root 'child/NativeWinsockChild.csproj'),'-c','Release','-o',(Join-Path $root 'child-out'),'-v','quiet')
  RunStep 'BUILD_NETWORK_HARNESS' $dotnet.Source @('build',(Join-Path $root 'net/Probe.csproj'),'-c','Release','-o',(Join-Path $root 'net-out'),'-v','quiet')
  Copy-Item (Join-Path $root 'child-out/NativeWinsockChild.exe') (Join-Path $root 'net-out/NativeWinsockChild.exe') -Force
- foreach($item in @(@('FILESYSTEM',(Join-Path $root 'fs-out/Probe.dll'))),@('NETWORK',(Join-Path $root 'net-out/Probe.dll')))) {
+ $checks = @(
+  ,@('FILESYSTEM', (Join-Path $root 'fs-out/Probe.dll'))
+  ,@('NETWORK', (Join-Path $root 'net-out/Probe.dll'))
+ )
+ foreach($item in $checks) {
   $label=$item[0];$dll=$item[1]
   $output= & $dotnet.Source $dll 2>&1
   $exit=$LASTEXITCODE
