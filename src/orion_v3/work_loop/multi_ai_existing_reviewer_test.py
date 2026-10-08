@@ -29,6 +29,21 @@ class Tests(unittest.TestCase):
         self.assertNotIn("cloud-a response", c.prompts[0])
         self.assertIn("cloud-a response", c.prompts[1])
         self.assertEqual(p.approved_digest, "")
+    def test_large_independent_outputs_fit_review_prompt(self):
+        class LongConnector(FakeConnector):
+            def view(self):
+                return {"state": "completed", "reviewers": [
+                    {"reviewer_id": name, "state": "completed",
+                     "output": name + " " + ("X" * 11000)}
+                    for name in self.ids]}
+        c = LongConnector()
+        p = run_council(connector=c, reviewer_ids=["a", "b"],
+                        project_id="p", task_id="t", objective="small app",
+                        stop_requested=lambda: False)
+        self.assertEqual(p.stage, "plan")
+        self.assertEqual(len(p.proposals[0][1]), 11002)
+        self.assertLessEqual(len(c.prompts[1]), 12000)
+        self.assertIn("TRUNCATED FOR REVIEW INPUT", c.prompts[1])
     def test_missing_attribution_fails_closed(self):
         with self.assertRaises(ValueError):
             _responses({"reviewers": [{"state": "completed", "output": "x"}]}, ("a", "b"))
