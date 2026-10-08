@@ -34,12 +34,11 @@ def main():
     folder=runtime_root()/"coding-mode"/"reviewers"/"task-ledger-trial-001"
     path=folder/"cloud-output.txt"
     manifest=json.loads((folder/"manifest.json").read_text(encoding="utf-8"))
-    data=path.read_bytes()
-    if len(data)>1_000_000:raise RuntimeError("oversized saved response")
-    if hashlib.sha256(data).hexdigest()!=manifest["output_sha256"]:
-        raise RuntimeError("saved output hash mismatch")
+    data=path.read_text(encoding="utf-8")
+    if len(data.encode("utf-8"))>1_000_000:raise RuntimeError("oversized saved response")
+    # The producer hashes the Unicode response encoded as UTF-8 BEFORE write_text.\n    # On Windows, write_text may translate LF to CRLF on disk; read_text reverses it.\n    if hashlib.sha256(data.encode("utf-8")).hexdigest()!=manifest["output_sha256"]:\n        raise RuntimeError("saved output normalized-text hash mismatch")
     print("LEDGER_INSPECT> SAVED_OUTPUT_HASH_VERIFIED",flush=True)
-    result=inspect(data.decode("utf-8"))
+    result=inspect(data)
     # Store only metadata; never extract or run model code.
     out=folder/"static-inspection.json"
     if out.exists():raise RuntimeError("inspection exists; refusing overwrite")
