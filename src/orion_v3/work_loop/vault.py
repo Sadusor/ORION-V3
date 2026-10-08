@@ -15,6 +15,7 @@ import threading
 
 from .contracts import EvidenceRecord, WorkState
 from .vault_lock import exclusive_vault_lock
+from .vault_transaction import new_pending, parse_pending, journal_entry, journal_contains
 
 
 _STATE_MARKER = "<!-- ORION_WORK_STATE_V1 -->"
@@ -84,9 +85,10 @@ class ProjectVault:
         )
         if commit_guard is not None and not commit_guard():
             raise VaultError("STOP blocked Vault commit")
-        self._write_pending({"entry": entry, "state": {k: getattr(updated, k) for k in updated.__dataclass_fields__}})
+        pending = new_pending(entry, {k: getattr(updated, k) for k in updated.__dataclass_fields__})
+        self._write_pending(pending)
         self._write_state(updated)
-        self.append_journal(entry)
+        self.append_journal(journal_entry(entry, pending["txid"]))
         self.pending_path.unlink()
         return updated
 
@@ -105,11 +107,12 @@ class ProjectVault:
         if not self.pending_path.exists():
             return
         transaction = json.loads(self.pending_path.read_text(encoding="utf-8"))
-        state = WorkState(**transaction["state"])
+        entry, state_payload, txid = parse_pending(transaction)
+        state = WorkState(**state_payload)
         self._write_state(state)
-        entry = transaction["entry"]
-        if not self.journal_path.exists() or entry not in self.journal_path.read_text(encoding="utf-8"):
-            self.append_journal(entry)
+        existing = self.journal_path.read_text(encoding="utf-8") if self.journal_path.exists() else ""
+        if not journal_contains(existing, entry, txid):
+            self.append_journal(journal_entry(entry, txid))
         self.pending_path.unlink()
 
     def append_journal(self, entry: str) -> None:
