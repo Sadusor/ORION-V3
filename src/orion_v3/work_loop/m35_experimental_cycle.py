@@ -28,6 +28,82 @@ REQUIRED = (
 )
 
 
+def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_requested) -> dict:
+    """Experimental exact-target child, with trusted coordinator and independent byte check.
+
+    STOP is sampled at boundaries; no claim of continuous production STOP.
+    """
+    import hashlib
+    base = base.resolve(strict=True)
+    probe_dll = probe_dll.resolve(strict=True)
+    if base.drive.upper() != "E:" or not probe_dll.is_file() or not revision:
+        raise ValueError("invalid bounded native execution")
+    with TemporaryDirectory(prefix="ORION-M35-", dir=str(base)) as temp:
+        root = Path(temp).resolve(strict=True)
+        workspace = root / "ORION-M35-workspace"
+        workspace.mkdir()
+        vault = ProjectVault(root / "vault")
+        # Windows cmd.exe produces CRLF. The signed bytes MUST match the child.
+        content = "ORION M35 approved fixture\\r\\n"
+        proposal = Proposal("orion-m35", "native-bound-write", "filesystem.write",
+                            str(workspace), {"path": str(workspace / "approved.txt"),
+                                             "content": content})
+        vault.initialize(WorkState(project_id=proposal.project_id,
+                                   objective="Prove exact-target native binding",
+                                   checkpoint="M3.5-bound-experimental", current_task=proposal.task_id))
+        secret = secrets.token_bytes(32)
+        expiry = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
+        auth = issue_authorization(proposal, RiskClass.GREEN, expiry, secret, source_revision=revision)
+        from .m35_binding import bind_fixed_action
+        # Separate bounded Windows CRLF contract: the signed proposal, not the child,
+        # determines the expected exact file hash.
+        from .authorization import verify_authorization
+        from .policy import classify_proposal
+        if (proposal.operation != "filesystem.write" or
+            proposal.args["path"] != str(workspace / "approved.txt") or
+            proposal.args["content"] != content or
+            classify_proposal(proposal).risk != RiskClass.GREEN or
+            not verify_authorization(auth, proposal, secret, expected_source_revision=revision)):
+            raise RuntimeError("bound authorization rejected")
+        expected = hashlib.sha256(content.encode("utf-8")).hexdigest()
+        if stop_requested():
+            raise RuntimeError("STOP before bound native child")
+        result = subprocess.run(["dotnet", str(probe_dll), str(workspace), expected],
+                                capture_output=True, text=True, timeout=20, check=False)
+        print(result.stdout, end="", flush=True)
+        if result.stderr:
+            print(result.stderr, flush=True)
+        required = ("M35_BOUND_ACTION> PASS_EXACT_BYTES_AT_AUTHORIZED_TARGET",
+                    "OUTSIDE_READ> DENY", "OUTSIDE_WRITE> DENY",
+                    "PROFILE_DELETE_HRESULT> 0x00000000")
+        if result.returncode != 0 or any(x not in result.stdout for x in required):
+            raise RuntimeError("bound native child failed")
+        if stop_requested():
+            raise RuntimeError("STOP after bound native child")
+        target = workspace / "approved.txt"
+        if not target.is_file() or target.read_bytes() != content.encode("utf-8"):
+            raise RuntimeError("bound file exact bytes mismatch")
+        if hashlib.sha256(target.read_bytes()).hexdigest() != expected:
+            raise RuntimeError("bound file SHA256 mismatch")
+        print("M35_BOUND_CYCLE> AUTHORIZED_TARGET_AND_BYTES_INDEPENDENTLY_VERIFIED", flush=True)
+        evidence = EvidenceRecord(proposal.project_id, proposal.task_id,
+                                  proposal.proposal_hash, "execution", "pass",
+                                  "m35-bound-native-child", revision,
+                                  "disposable exact-target byte match; continuous STOP unqualified")
+        verified = verify_evidence(proposal, evidence, required_type="execution",
+                                   expected_source_revision=revision)
+        if not verified.accepted:
+            raise RuntimeError("bound evidence rejected")
+        vault.record_verified_result(evidence, next_action="Qualify production STOP",
+                                     commit_guard=lambda: not stop_requested())
+        if vault.load().last_verified_result != "execution:pass":
+            raise RuntimeError("bound Vault readback failed")
+        print("M35_BOUND_CYCLE> VAULT_EXECUTION_RECORDED_PASS", flush=True)
+        return {"proposal_to_child": "experimental_pass",
+                "exact_bytes": "pass", "vault": "pass",
+                "production_stop": "not_qualified"}
+
+
 def run_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_requested) -> dict:
     """Only an owner-started fixed fixture; caller supplies STOP observation.
 
