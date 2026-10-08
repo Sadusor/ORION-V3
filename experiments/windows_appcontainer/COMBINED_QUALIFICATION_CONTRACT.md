@@ -24,3 +24,7 @@ Herald overview experiment is opt-in and read-only; not connected to UI or canon
 GitCheck session `e3296ce50195`, TheHands source `32e5930`: six real-Vault experimental tests passed, including 12 concurrent cross-process trials (10 rejected, 2 committed before STOP). Controlled parent STOP then child commit rejected; commit-first and STOP-first tests passed; one injected pending-write interruption recovered without duplicate journal entries. Experimental prototype commit `e1730d7` uses the existing Vault SQLite lock and a separate monotonic STOP_AUTHORITY SQLite file.
 
 **Scope limitation:** these tests do not establish AppContainer filesystem/network isolation, Job Object descendant termination, production STOP integration, or comprehensive crash safety. The 8-point combined Windows acceptance contract above remains NOT RUN. No production execution authorization is implied.
+
+## Fail-closed authority qualification — 2026-10-08
+
+TheHands GitCheck session `03bb1e6561a0`, source `7093975`: 9/9 experimental STOP/Vault tests PASS. Includes missing STOP authority, corrupt SQLite STOP authority, monotonic STOP persistence, real Vault STOP guard, cross-process parent STOP/child commit, 12 concurrent STOP/commit iterations (10 rejected; 2 committed before STOP), and pending transaction recovery. This validates the tested prototype behaviors only; AppContainer and full eight-check combined qualification remain NOT RUN. Production execution remains DISABLED.
