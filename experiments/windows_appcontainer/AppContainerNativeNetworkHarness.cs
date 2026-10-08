@@ -59,6 +59,10 @@ internal static class Program{
    // Windows cmd builtins only; paths are disposable GUID-based paths under TEMP.
    string exe=Path.GetFullPath(Path.Combine(AppContext.BaseDirectory,"NativeWinsockChild.exe"));
    if(!File.Exists(exe))throw new Exception("NATIVE_CHILD_NOT_PUBLISHED");
+   // Grant execute on disposable published binary only; never alter system paths.
+   var exeAcl=new FileInfo(exe).GetAccessControl();
+   exeAcl.AddAccessRule(new FileSystemAccessRule(appSid,FileSystemRights.ReadAndExecute,AccessControlType.Allow));
+   new FileInfo(exe).SetAccessControl(exeAcl);
    Console.WriteLine("FIXTURE> DISPOSABLE_WORKSPACE_READY");
    IntPtr size=IntPtr.Zero;InitializeProcThreadAttributeList(IntPtr.Zero,1,0,ref size);
    if(size==IntPtr.Zero)throw new Exception("ATTRIBUTE_SIZE_FAILED");
