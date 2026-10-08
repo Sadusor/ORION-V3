@@ -354,3 +354,9 @@ After the Agent mechanics gate, compare reasoning tier × execution tier using t
 Council V0 is fixed at three models: independent first proposals followed by exactly two frozen cross-review rounds where every model sees all previous-round answers and objections. ORION, not an LLM judge, arbitrates using visible deterministic evidence. Hidden evaluator tests are never feedback.
 
 Run one unscored warm-up and three scored repetitions initially; only extend close finalists. Safety violations disqualify before correctness/efficiency comparisons.
+
+## Step 1 audit gate — COMPLETE FOR PINNED TEXT SOURCES (2026-10-08)
+
+Reviewed the full returned content of 321 tracked ORION V3 text/source/config files and 73 TheHands text/source/config files. Binary/unrecognized assets inventoried; no physical tests run. Canonical audit: `docs/audits/2026-10-08-engineering-loop-step1-audit.md`.
+
+**NEXT ACTIVE IMPLEMENTATION:** isolated, read-only `engineering_loop` typed cycle/evidence adapter binding owner task, review, expected ORION revision, TheHands exact GitCheck source/tree, published session and evidence. Its result must not promote PASS merely from process exit 0; require matching target revision and independently checked acceptance assertions. Start with real existing PASS and FAIL evidence fixtures, then physical GitCheck qualification. Do not edit frozen TheHands, ORION Memory or product UI. Autonomous Qwen/Windows Work Hand remains later.
