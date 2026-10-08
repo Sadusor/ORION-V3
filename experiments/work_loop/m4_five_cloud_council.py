@@ -56,7 +56,8 @@ prompt=("ORION V3 architecture review: deterministic approval/policy authority, 
         "loop, one failure mode and one measurable acceptance test. "
         "Advisory only: no tools, execution, credentials, or claimed PASS.")
 connector.start(prompt,[str(m["reviewer_id"]) for m in selected],popup_windows=True)
-print("M4_COUNCIL> FIVE_INDIVIDUAL_REVIEWER_WINDOWS_REQUESTED")\nprint("M4_COUNCIL> IDENTICAL_PROMPT_SENT_TO_FIVE")
+print("M4_COUNCIL> FIVE_INDIVIDUAL_REVIEWER_WINDOWS_REQUESTED")
+print("M4_COUNCIL> IDENTICAL_PROMPT_SENT_TO_FIVE")
 deadline=time.monotonic()+110
 try:
     while time.monotonic()<deadline:
