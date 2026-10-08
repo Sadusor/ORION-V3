@@ -11,7 +11,7 @@ def setup_engine(tmp_path):
 
 def test_engine_rejects_wrong_task_before_hand(tmp_path):
     engine, _ = setup_engine(tmp_path)
-    proposal = Proposal("demo", "other", "filesystem.write", str(tmp_path), {"path": "repo/x"})
+    proposal = Proposal("demo", "other", "filesystem.write", str(tmp_path), {"path": "repo/x", "content": "fixture"})
     prepared = engine.prepare(proposal)
     assert prepared.policy.risk == RiskClass.RED
     assert prepared.policy.allowed_to_execute is False
