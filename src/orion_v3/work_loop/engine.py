@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Callable
 
 from .contracts import EvidenceRecord, Proposal, RiskClass
+from .evidence_gate import independently_verified_pass
 from .policy import PolicyDecision, classify_proposal
 from .vault import ProjectVault
 from .verifier import VerificationResult, verify_evidence
@@ -56,6 +57,7 @@ class WorkLoopEngine:
         next_action_on_pass: str,
         next_action_on_fail: str,
         commit_guard: Callable[[], bool] | None = None,
+        trusted_verifier_pass: bool = False,
     ) -> AppliedEvidence:
         prepared = self.prepare(proposal)
         if prepared.policy.risk != RiskClass.GREEN or not prepared.policy.allowed_to_execute:
@@ -71,6 +73,8 @@ class WorkLoopEngine:
         )
         if not verification.accepted:
             return AppliedEvidence(verification, False)
+        if verification.verdict == 'pass' and not independently_verified_pass(evidence, trusted_result=trusted_verifier_pass):
+            return AppliedEvidence(VerificationResult(False, 'indeterminate', 'independent PASS verification required'), False)
         next_action = (
             next_action_on_pass if verification.verdict == "pass" else next_action_on_fail
         )
