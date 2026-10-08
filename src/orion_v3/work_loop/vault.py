@@ -63,9 +63,23 @@ class ProjectVault:
         next_action: str,
         blocked: bool | None = None,
         commit_guard=None,
+        commit_coordinator=None,
+        expected_generation: int | None = None,
     ) -> WorkState:
-        with self._mutex, exclusive_vault_lock(self.root):
-            return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked, commit_guard=commit_guard)
+        if commit_coordinator is None:
+            if expected_generation is not None:
+                raise VaultError("generation requires commit coordinator")
+            with self._mutex, exclusive_vault_lock(self.root):
+                return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked, commit_guard=commit_guard)
+        if expected_generation is None:
+            raise VaultError("coordinated commit requires expected generation")
+        from .commit_coordinator import CommitStopped
+        try:
+            with commit_coordinator.commit_window(expected_generation):
+                with self._mutex, exclusive_vault_lock(self.root):
+                    return self._record_under_mutex(evidence, next_action=next_action, blocked=blocked, commit_guard=commit_guard)
+        except CommitStopped as exc:
+            raise VaultError("STOP blocked Vault commit") from exc
 
     def _record_under_mutex(self, evidence, *, next_action, blocked, commit_guard):
         self._recover_pending()
