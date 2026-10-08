@@ -20,7 +20,7 @@ internal static class Program {
    if(startup!=0)return 5;
    sock=socket(2,1,6);
    if(sock==new IntPtr(-1)){Console.WriteLine("SOCKET_ERROR> "+WSAGetLastError());return 6;}
-   byte[] address={16,0,(byte)(port>>8),(byte)port,127,0,0,1,0,0,0,0,0,0,0,0};
+   byte[] address={2,0,(byte)(port>>8),(byte)port,127,0,0,1,0,0,0,0,0,0,0,0};
    int result=connect(sock,address,address.Length);
    int error=result==0?0:WSAGetLastError();
    Console.WriteLine("CONNECT_RESULT> "+result);
