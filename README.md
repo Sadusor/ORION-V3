@@ -1,3 +1,5 @@
+> **AI / model joining this project:** Read [AI_OPERATOR_BRIEF.md](AI_OPERATOR_BRIEF.md) first. Recover current state from the canonical status/checkpoint and verified evidence before proposing changes.
+
 # ORION V3
 
 ORION V3 is a clean rebuild experiment for the ORION personal AI control plane.
