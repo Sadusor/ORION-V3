@@ -1,21 +1,9 @@
 # ORION V3 Status
 
-## Current owner correction — 2026-10-08 (supersedes stale 2026-10-05 priority)
+## ORION-ONLY OWNER BOUNDARY — 2026-10-08
 
-**ACTIVE:** develop the owner + ChatGPT + DeepSeek engineering collaboration loop as a modular ORION V3 subsystem; prove it using the existing TheHands GitCheck/evidence/owner approval workflow **before** connecting it to ORION V3 product surfaces and authority modules. See `docs/decisions/0018-prove-human-ai-engineering-loop-before-orion-integration.md`.
+The active engineering collaboration loop (owner, ChatGPT, DeepSeek) must be developed and tested **inside ORION V3 only** using ORION-owned interfaces, tests and evidence. **No code, adapter, import, test runner, documentation dependency, or execution path to the separate TheHands project is permitted.** References elsewhere in older sections are historical records, not active instructions. ORION's own `work_loop` Hand is distinct. No cross-repository staging or GitCheck integration. The experimental cross-project evidence adapter was deleted and its staged external test cleared. Proceed with an ORION-only collaboration protocol and isolated tests before product integration.
 
-**VERIFIED:** TheHands read-only module inventory GitCheck session `088f1873516b` PASS, source `06f3b2d3cc7873bcc58b5656a314145c432d0fd1`; this proves inventory script execution, not real ORION Work Hand activation. Existing WorkLoopCoordinator still uses SimulatedWorkHand. Real autonomous execution remains disabled. Earlier WFP network timeout is inconclusive for general egress isolation.
-
-**NOT YET VERIFIED:** full repository file-by-file review, end-to-end replicated human/AI collaboration loop, autonomous Work Loop V1, ORION product integration. Avoid claiming completion or changing frozen modules.
-
-
-Updated: 2026-10-05
-
-## Stage
-
-Native ORION PC + Android phone product surfaces are physically working. Next product wiring target: Local Brain / connectors.
-
-ORION-V3 is a completely separate repository from the proven ORION implementation.
 
 ## Current claims
 
@@ -433,6 +421,3 @@ Next bounded product task:
 
 TheHands remains a separate frozen engineering Remote and is not to be recreated inside the ORION product UI.
 
-## Repository audit result — 2026-10-08
-
-**STEP 1 SOURCE/DOCUMENT AUDIT COMPLETE at pinned tree**: 321 ORION V3 recognized text/source/config files and 73 TheHands recognized text/source/config files fetched and inspected; remaining binary/unrecognized assets inventoried. No runtime tests were run as part of this review. See `docs/audits/2026-10-08-engineering-loop-step1-audit.md`. **Next module:** V3-owned engineering-cycle record/evidence adapter. Distinguish TheHands GitCheck `source_commit` (TheHands revision) from the ORION target revision; a TheHands process exit 0 is not independent ORION acceptance. Previous status paragraph saying 'full repository file-by-file review NOT YET VERIFIED' was true at the time of writing and is superseded for recognized tracked text files by this pinned audit.
