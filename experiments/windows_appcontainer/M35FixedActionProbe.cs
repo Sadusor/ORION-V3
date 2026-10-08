@@ -28,7 +28,10 @@ internal static class Program{
  static void Check(bool ok,string name){if(!ok)throw new Win32Exception(Marshal.GetLastWin32Error(),name);}
  static string Hex(int n)=>"0x"+unchecked((uint)n).ToString("X8");
  static string Q(string path)=>((char)34)+path+((char)34);
- static int Main(){
+ static int Main(string[] args){
+  // Fixed fixture accepts only its exact expected content hash; never a command.
+  const string expectedHash="";
+  if(args.Length!=0){Console.WriteLine("M35_NATIVE_INPUT> DENY_UNSUPPORTED_ARGUMENTS");return 9;}
   if(!OperatingSystem.IsWindows())return 2;
   string name="ORION.V3.Child."+Guid.NewGuid().ToString("N");IntPtr sid=IntPtr.Zero,list=IntPtr.Zero,cap=IntPtr.Zero,job=IntPtr.Zero;ProcessInfo child=default;bool profile=false,initialized=false;int status=1;string root=Path.Combine(Path.GetTempPath(),"orion-acl-gate-"+Guid.NewGuid().ToString("N"));
   try{
