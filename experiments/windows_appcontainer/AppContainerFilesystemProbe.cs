@@ -27,6 +27,7 @@ internal static class Program{
  [DllImport("kernel32.dll")]static extern IntPtr LocalFree(IntPtr ptr);
  static void Check(bool ok,string name){if(!ok)throw new Win32Exception(Marshal.GetLastWin32Error(),name);}
  static string Hex(int n)=>"0x"+unchecked((uint)n).ToString("X8");
+ static string Q(string path)=>((char)34)+path+((char)34);
  static int Main(){
   if(!OperatingSystem.IsWindows())return 2;
   string name="ORION.V3.Child."+Guid.NewGuid().ToString("N");IntPtr sid=IntPtr.Zero,list=IntPtr.Zero,cap=IntPtr.Zero,job=IntPtr.Zero;ProcessInfo child=default;bool profile=false,initialized=false;int status=1;string root=Path.Combine(Path.GetTempPath(),"orion-acl-gate-"+Guid.NewGuid().ToString("N"));
@@ -50,7 +51,7 @@ internal static class Program{
    string output=Path.Combine(inside,"read_result.txt"),leak=Path.Combine(inside,"leak.txt");
    string outsideWrite=Path.Combine(outside,"unauthorized.txt");
    // Windows cmd builtins only; paths are disposable GUID-based paths under TEMP.
-   string commands="type \\""+allowed+"\\" > \\""+output+"\\" & copy /y \\""+denied+"\\" \\""+leak+"\\" >nul 2>nul & echo forbidden > \\""+outsideWrite+"\\" & exit /b 0";
+   string commands="type "+Q(allowed)+" > "+Q(output)+" & copy /y "+Q(denied)+" "+Q(leak)+" >nul 2>nul & echo forbidden > "+Q(outsideWrite)+" & exit /b 0";
    Console.WriteLine("FIXTURE> DISPOSABLE_WORKSPACE_READY");
    IntPtr size=IntPtr.Zero;InitializeProcThreadAttributeList(IntPtr.Zero,1,0,ref size);
    if(size==IntPtr.Zero)throw new Exception("ATTRIBUTE_SIZE_FAILED");
