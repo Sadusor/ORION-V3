@@ -49,6 +49,14 @@ models=list(catalog.get("models") or [])
 cloud=[m for m in models if isinstance(m,dict)
        and str(m.get("provider") or m.get("adapter") or "").lower() not in ("ollama","local")
        and m.get("reviewer_id") and m.get("available") is True]
+def preference(item):
+    model=str(item.get("model") or "").lower()
+    provider=str(item.get("provider") or "").lower()
+    if "gpt-oss-120b" in model: return 0
+    if "gpt-oss-20b" in model: return 1
+    if "gemini" in provider: return 9
+    return 3
+cloud.sort(key=preference)
 print("M4_LIVE_PROVIDER> CATALOG_MODELS",len(models),"AVAILABLE_CLOUD_CANDIDATES",len(cloud))
 if not cloud:
     print("M4_LIVE_PROVIDER> NO_AVAILABLE_CLOUD_CANDIDATE")
