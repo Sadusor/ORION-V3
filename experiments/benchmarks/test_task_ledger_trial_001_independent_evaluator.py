@@ -59,7 +59,7 @@ class EvaluatorTests(unittest.TestCase):
         self.assertEqual(analyze(pack(files))["assessment"], "STATIC_ONLY")
 
     def test_readme_nested_fence_before_tests(self):
-        readme = "**README.md**\\n```markdown\\n# Example\\n```bash\\npython -m task_ledger\\n```\\n```\\n\\n"
+        readme = "**README.md**\n```markdown\n# Example\n```bash\npython -m task_ledger\n```\n```\n\n"
         sample = readme + pack(BASE)
         parsed = extract(sample)
         self.assertIn("tests/test_api.py", parsed)
@@ -69,7 +69,7 @@ class EvaluatorTests(unittest.TestCase):
         from task_ledger_trial_001_independent_evaluator import SOURCE
         parsed = extract(SOURCE.read_text(encoding="utf-8"))
         self.assertIn("tests/test_api.py", parsed)
-        self.assertIn("sys.executable", parsed["tests/test_api.py"])
+        self.assertIn("sys.executable", parsed["tests/test_api.py"])\n        self.assertIn("TRUNCATED_SUBMISSION", [f["id"] for f in analyze(SOURCE.read_text(encoding="utf-8"))["findings"]])
 
     def test_source_boundaries(self):
         self.assertEqual(len(extract(pack(BASE))), 5)
