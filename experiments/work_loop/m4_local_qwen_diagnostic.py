@@ -18,7 +18,7 @@ if not matches:raise SystemExit(3)
 model=next((n for n in matches if "orion" in n.lower()),matches[0])
 print("M4_QWEN_DIAG> SELECTED_MODEL",model)
 payload=json.dumps({"model":model,"prompt":"Reply with one short sentence: Qwen is ready.",
-                    "stream":False,"options":{"num_predict":80,"temperature":0}}).encode()
+                    "stream":False,"think":False,"options":{"num_predict":240,"temperature":0}}).encode()
 try:
     req=urllib.request.Request(BASE+"/api/generate",data=payload,
                                headers={"Content-Type":"application/json"})
