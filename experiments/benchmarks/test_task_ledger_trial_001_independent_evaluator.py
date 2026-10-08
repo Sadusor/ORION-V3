@@ -69,7 +69,8 @@ class EvaluatorTests(unittest.TestCase):
         from task_ledger_trial_001_independent_evaluator import SOURCE
         parsed = extract(SOURCE.read_text(encoding="utf-8"))
         self.assertIn("tests/test_api.py", parsed)
-        self.assertIn("sys.executable", parsed["tests/test_api.py"])\n        self.assertIn("TRUNCATED_SUBMISSION", [f["id"] for f in analyze(SOURCE.read_text(encoding="utf-8"))["findings"]])
+        self.assertIn("sys.executable", parsed["tests/test_api.py"])
+        self.assertIn("TRUNCATED_SUBMISSION", [f["id"] for f in analyze(SOURCE.read_text(encoding="utf-8"))["findings"]])
 
     def test_source_boundaries(self):
         self.assertEqual(len(extract(pack(BASE))), 5)
