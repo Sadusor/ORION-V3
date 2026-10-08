@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import hashlib
 import hmac
 import json
@@ -33,6 +33,10 @@ def _payload(project_id: str, task_id: str, proposal_hash: str, risk: RiskClass,
 def issue_authorization(proposal: Proposal, risk: RiskClass, expires_at: str, secret: bytes) -> Authorization:
     if risk == RiskClass.RED:
         raise ValueError("RED proposals cannot be authorized")
+    expiry = datetime.fromisoformat(expires_at)
+    now = datetime.now(timezone.utc)
+    if expiry.tzinfo is None or not now < expiry <= now + timedelta(minutes=5):
+        raise ValueError('authorization expiry must be within five minutes')
     nonce = secrets.token_hex(16)
     signature = hmac.new(
         secret,
@@ -54,7 +58,7 @@ def verify_authorization(auth: Authorization, proposal: Proposal, secret: bytes,
     if expiry.tzinfo is None:
         return False
     now = now or datetime.now(timezone.utc)
-    if expiry <= now:
+    if expiry <= now or expiry > now + timedelta(minutes=5):
         return False
     expected = hmac.new(
         secret,
