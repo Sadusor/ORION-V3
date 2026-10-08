@@ -17,9 +17,13 @@ class NonceStore:
         if not isinstance(nonce, str) or len(nonce) != 32:
             return False
         try:
-            with sqlite3.connect(self.path, timeout=5) as db:
-                db.execute("CREATE TABLE IF NOT EXISTS used_nonces (nonce TEXT PRIMARY KEY)")
-                db.execute("INSERT INTO used_nonces(nonce) VALUES (?)", (nonce,))
+            db = sqlite3.connect(self.path, timeout=5)
+            try:
+                with db:
+                    db.execute("CREATE TABLE IF NOT EXISTS used_nonces (nonce TEXT PRIMARY KEY)")
+                    db.execute("INSERT INTO used_nonces(nonce) VALUES (?)", (nonce,))
+            finally:
+                db.close()
             return True
         except (sqlite3.IntegrityError, sqlite3.OperationalError):
             return False
