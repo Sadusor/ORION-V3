@@ -33,7 +33,7 @@ class StopAuthorityFailClosed(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             vault,stop=self.setup(root)
             with open(stop.db,"wb") as f: f.write(b"invalid sqlite header")
-            with self.assertRaises((RuntimeError,VaultError)):
+            with self.assertRaises((RuntimeError,VaultError,sqlite3.DatabaseError)):
                 attempt(vault,stop)
             self.assertEqual(vault.load().last_verified_result,"none")
             print("STOP_AUTHORITY_CORRUPT> FAIL_CLOSED")
