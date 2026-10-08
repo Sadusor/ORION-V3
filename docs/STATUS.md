@@ -1,5 +1,14 @@
 # ORION V3 Status
 
+## Current owner correction — 2026-10-08 (supersedes stale 2026-10-05 priority)
+
+**ACTIVE:** develop the owner + ChatGPT + DeepSeek engineering collaboration loop as a modular ORION V3 subsystem; prove it using the existing TheHands GitCheck/evidence/owner approval workflow **before** connecting it to ORION V3 product surfaces and authority modules. See `docs/decisions/0018-prove-human-ai-engineering-loop-before-orion-integration.md`.
+
+**VERIFIED:** TheHands read-only module inventory GitCheck session `088f1873516b` PASS, source `06f3b2d3cc7873bcc58b5656a314145c432d0fd1`; this proves inventory script execution, not real ORION Work Hand activation. Existing WorkLoopCoordinator still uses SimulatedWorkHand. Real autonomous execution remains disabled. Earlier WFP network timeout is inconclusive for general egress isolation.
+
+**NOT YET VERIFIED:** full repository file-by-file review, end-to-end replicated human/AI collaboration loop, autonomous Work Loop V1, ORION product integration. Avoid claiming completion or changing frozen modules.
+
+
 Updated: 2026-10-05
 
 ## Stage
