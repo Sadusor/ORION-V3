@@ -31,9 +31,9 @@ internal static class Program {
  entryPtr=Marshal.AllocHGlobal(Marshal.SizeOf<SID_AND_ATTRIBUTES>());
  Marshal.StructureToPtr(new SID_AND_ATTRIBUTES{Sid=sidPtr,Attributes=0},entryPtr,false);
  // Only the fresh fixture gets an ACL change. No parent directory or user profile changes.
- var acl=File.GetAccessControl(permitted);
+ var acl=new FileInfo(permitted).GetAccessControl();
  acl.AddAccessRule(new FileSystemAccessRule(restrictingSid,FileSystemRights.Read|FileSystemRights.Write,AccessControlType.Allow));
- File.SetAccessControl(permitted,acl);
+ new FileInfo(permitted).SetAccessControl(acl);
  Require(OpenProcessToken(Process.GetCurrentProcess().Handle,ACCESS,out source),"OpenProcessToken");
  Require(CreateRestrictedToken(source,DISABLE_MAX_PRIVILEGE,0,IntPtr.Zero,0,IntPtr.Zero,1,entryPtr,out token),"CreateRestrictedToken");
  bool insideRead=false,insideWrite=false,outsideRead=false,outsideWrite=false;
