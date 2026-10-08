@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 import hashlib
 import json
+import math
 from typing import Any
 
 
@@ -27,8 +28,20 @@ class Proposal:
     requested_system_change: bool = False
 
     def canonical_payload(self) -> bytes:
+        def validate(value):
+            if isinstance(value, dict):
+                if any(not isinstance(k, str) for k in value):
+                    raise ValueError('proposal object keys must be strings')
+                for child in value.values(): validate(child)
+            elif isinstance(value, list):
+                for child in value: validate(child)
+            elif isinstance(value, float) and not math.isfinite(value):
+                raise ValueError('non-finite proposal number')
+            elif value is not None and not isinstance(value, (str, int, float, bool)):
+                raise ValueError('unsupported proposal value')
+        validate(self.args)
         return json.dumps(
-            asdict(self), sort_keys=True, separators=(",", ":"), ensure_ascii=False
+            asdict(self), sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
         ).encode("utf-8")
 
     @property
