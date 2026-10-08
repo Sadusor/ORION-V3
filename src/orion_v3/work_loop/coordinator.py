@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 
 from .authorization import issue_authorization
 from .contracts import EvidenceRecord, Proposal, RiskClass
-from .dry_run import DryRunExecutor
+from .simulated_hand import SimulatedWorkHand
 from .engine import WorkLoopEngine
 from .executor import ExecutionRequest
 from .stop import StopSource
@@ -31,7 +31,7 @@ class WorkLoopCoordinator:
         self.secret = secret
         self.source_revision = source_revision
         self.stop = stop
-        self.executor = DryRunExecutor(secret=secret, source_revision=source_revision)
+        self.executor = SimulatedWorkHand(secret=secret, source_revision=source_revision)
 
     def cycle(self, proposal: Proposal) -> CycleOutcome:
         if self.stop.stop_requested():
