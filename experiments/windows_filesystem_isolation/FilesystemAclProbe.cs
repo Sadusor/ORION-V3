@@ -37,14 +37,16 @@ internal static class Program {
  Require(OpenProcessToken(Process.GetCurrentProcess().Handle,ACCESS,out source),"OpenProcessToken");
  Require(CreateRestrictedToken(source,DISABLE_MAX_PRIVILEGE,0,IntPtr.Zero,0,IntPtr.Zero,1,entryPtr,out token),"CreateRestrictedToken");
  bool insideRead=false,insideWrite=false,outsideRead=false,outsideWrite=false;
+ string insideReadError="",insideWriteError="",outsideReadError="",outsideWriteError="";
  using(var identity=new WindowsIdentity(token)){
  WindowsIdentity.RunImpersonated(identity.AccessToken,()=>{
- try{insideRead=File.ReadAllText(permitted)==nonce;}catch(Exception e){Console.WriteLine("INSIDE_READ_ERROR> "+e.GetType().Name);}
- try{File.AppendAllText(permitted,"x");insideWrite=true;}catch(Exception e){Console.WriteLine("INSIDE_WRITE_ERROR> "+e.GetType().Name);}
- try{outsideRead=File.ReadAllText(forbidden)==nonce;}catch(Exception e){Console.WriteLine("OUTSIDE_READ_DENIED> "+e.GetType().Name);}
- try{File.AppendAllText(forbidden,"x");outsideWrite=true;}catch(Exception e){Console.WriteLine("OUTSIDE_WRITE_DENIED> "+e.GetType().Name);}
+ try{insideRead=File.ReadAllText(permitted)==nonce;}catch(Exception e){insideReadError=e.GetType().Name;}
+ try{File.AppendAllText(permitted,"x");insideWrite=true;}catch(Exception e){insideWriteError=e.GetType().Name;}
+ try{outsideRead=File.ReadAllText(forbidden)==nonce;}catch(Exception e){outsideReadError=e.GetType().Name;}
+ try{File.AppendAllText(forbidden,"x");outsideWrite=true;}catch(Exception e){outsideWriteError=e.GetType().Name;}
  });
  }
+ Console.WriteLine($"OPERATION_ERRORS> inside_read={insideReadError}; inside_write={insideWriteError}; outside_read={outsideReadError}; outside_write={outsideWriteError}");
  bool outsideUnchanged=File.ReadAllText(forbidden)==nonce;
  Console.WriteLine($"INSIDE_READ> {insideRead}; INSIDE_WRITE> {insideWrite}; OUTSIDE_READ> {outsideRead}; OUTSIDE_WRITE> {outsideWrite}; OUTSIDE_UNCHANGED> {outsideUnchanged}");
  bool pass=insideRead&&insideWrite&&!outsideRead&&!outsideWrite&&outsideUnchanged;
