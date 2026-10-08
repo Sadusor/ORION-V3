@@ -32,5 +32,5 @@ def test_red_cannot_be_authorized():
 def test_expired_authorization_fails():
     proposal = p()
     expired = (datetime.now(timezone.utc) - timedelta(seconds=1)).isoformat()
-    auth = issue_authorization(proposal, RiskClass.GREEN, expired, SECRET)
-    assert not verify_authorization(auth, proposal, SECRET)
+    with pytest.raises(ValueError, match="authorization expiry"):
+        issue_authorization(proposal, RiskClass.GREEN, expired, SECRET)
