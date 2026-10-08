@@ -46,6 +46,8 @@ class WorkLoopCoordinator:
         expires = (datetime.now(timezone.utc) + timedelta(minutes=2)).isoformat()
         auth = issue_authorization(proposal, RiskClass.GREEN, expires, self.secret)
         evidence = self.executor.execute(ExecutionRequest(proposal, auth))
+        if self.stop.stop_requested():
+            return CycleOutcome("stopped", "STOP requested before evidence commit", evidence)
         if evidence.verdict != "indeterminate":
             return CycleOutcome("blocked", "dry-run executor returned unexpected verdict", evidence)
         checked = self.engine.apply_evidence(
