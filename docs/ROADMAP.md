@@ -1,3 +1,21 @@
+## CANONICAL ROADMAP POSITION — 2026-10-08 (supersedes conflicting older sections)
+
+**M4 advisory council + Qwen synthesis: PHYSICAL PASS / FROZEN EXPERIMENTAL BASELINE.** Evidence session `e00f23a8b5c0`; exact tested ORION revision `d83b4c91c4254d78fdce2b75ced5155ab9724902`. Three successful Groq cloud reviews → local Qwen 9B nonthinking synthesis → saved advisory, with no execution or approval. [Full frozen checkpoint](checkpoints/2026-10-08-cloud-qwen-baseline-freeze-and-handoff.md).
+
+**CURRENT NEXT MILESTONES (in order):**
+1. ORION-native visible Qwen console, orderly medium-sized layout, no orphaned processes; test actual visibility.
+2. Read-only saved-advisory import and deterministic schema/provenance/hash validation; bounded typed Proposal adapter with negative tests.
+3. Connect only to existing ORION authorization, STOP, verifier, Vault STATE/JOURNAL in dry-run; model text cannot self-authorize or self-certify PASS.
+4. Qualify Windows filesystem + network isolation and process-tree STOP physically. Existing network proof inconclusive; full combined gate not run.
+5. Approved confined native Hand execution; independently verified evidence; deliberate FAIL → restart → Qwen repair → PASS → Vault persistence.
+6. After proven, integrate Work UI/phone, Skills, Memory retrieval and model/provider swaps without modifying frozen components.
+
+**Boundaries:** ORION native Work Hand is under `src/orion_v3/work_loop/`. The separate TheHands project is unrelated and must not be used as an ORION module, code dependency, execution substrate or engineering route. Historical references below document past experiments only. No edits to ORION V1 Remote, frozen Memory or production authority.
+
+**Current exact phase:** after advisory synthesis PASS, **before** ORION-native authority/Hand/verification integration. This is not an end-to-end autonomous loop PASS.
+
+---
+
 # ORION V3 Roadmap
 
 ## CURRENT ACTIVE DIRECTION — 2026-10-08 (Decision 0019 supersedes older active-task wording)
