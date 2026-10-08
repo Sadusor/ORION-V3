@@ -17,7 +17,30 @@ sys.path.insert(0,str(donor))
 from provider_vault import ProviderVault
 from reviewer_connector import ReviewerConnector
 
-runtime=Path(os.environ.get("ORION_RUNTIME_DIR",str(Path.home())))/".orion"/"runtime"
+# Recover only the original runtime assignment's string constants, not secrets.
+import ast
+probe_tree=ast.parse((donor/"cloud_e2e_brainstorm_probe.py").read_text(encoding="utf-8-sig"))
+runtime_nodes=[n for n in ast.walk(probe_tree) if isinstance(n,ast.Assign)
+               and any(isinstance(t,ast.Name) and t.id=="runtime" for t in n.targets)]
+if len(runtime_nodes)!=1: raise RuntimeError("original runtime assignment changed")
+runtime_expr=runtime_nodes[0].value
+if not isinstance(runtime_expr,ast.BinOp): raise RuntimeError("unexpected original runtime expression")
+parts=[]
+node=runtime_expr
+while isinstance(node,ast.BinOp) and isinstance(node.op,ast.Div):
+    if not isinstance(node.right,ast.Constant) or not isinstance(node.right.value,str):
+        raise RuntimeError("unexpected runtime suffix")
+    parts.insert(0,node.right.value)
+    node=node.left
+if not isinstance(node,ast.Call) or not isinstance(node.func,ast.Name) or node.func.id!="Path":
+    raise RuntimeError("unexpected runtime root")
+envcall=node.args[0] if len(node.args)==1 else None
+if not isinstance(envcall,ast.Call) or not isinstance(envcall.func,ast.Attribute) or envcall.func.attr!="get":
+    raise RuntimeError("unexpected runtime environment lookup")
+if not isinstance(envcall.args[0],ast.Constant) or not isinstance(envcall.args[0].value,str):
+    raise RuntimeError("unexpected runtime env name")
+runtime=Path(os.environ.get(envcall.args[0].value,str(Path.home())))
+for segment in parts: runtime=runtime/segment
 vault=ProviderVault(runtime/"provider-vault")
 review_root=runtime/"coding-mode"/"reviewers"
 connector=ReviewerConnector(review_root,provider_vault=vault,configured_free_providers=[])
