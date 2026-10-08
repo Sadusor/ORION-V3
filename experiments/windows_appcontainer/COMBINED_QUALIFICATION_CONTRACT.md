@@ -32,3 +32,7 @@ TheHands GitCheck session `03bb1e6561a0`, source `7093975`: 9/9 experimental STO
 ## Physical evidence 2026-10-08 — session af7a5f6970d7
 
 FILESYSTEM PASS: approved workspace read/write allowed, outside read/write denied, outside fixture unchanged, disposable AppContainer profile cleanup succeeded. NETWORK INCONCLUSIVE: live host listener reachable by host, AppContainer native Winsock child timed out (`NETWORK_ISOLATION> INCONCLUSIVE_TIMEOUT`, child exit 12). A timeout is NOT a network-denial PASS. Do not relax acceptance criterion or enable execution. Investigate native socket error reporting and Windows filtering diagnostics in a dedicated diagnostic module before re-running combined gate. Remote V1 unchanged.
+
+## WFP read-only diagnostic — session fe4793d2cc05
+
+GitCheck PASS means diagnostic executed, not network qualification. Security log query for 5152/5157 returned no matching events. Audit policy was not modified. Network isolation remains INCONCLUSIVE and real execution DISABLED. Next gate: read-only audit-policy readiness and Security-log accessibility check; do not silently enable auditing or infer a WFP drop from timeout.
