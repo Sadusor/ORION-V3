@@ -69,7 +69,9 @@ class Handler(BaseHTTPRequestHandler):
         allowed_from="PENDING" if new=="RUNNING" else "RUNNING"
         with self.server.connect() as c:
             cursor=c.execute("UPDATE tasks SET state=? WHERE id=? AND state=?",(new,p[1],allowed_from))
-            if cursor.rowcount==1:return self.reply(200,{"id":p[1],"state":new})
+            if cursor.rowcount==1:
+                c.commit()
+                return self.reply(200,{"id":p[1],"state":new})
             exists=c.execute("SELECT 1 FROM tasks WHERE id=?",(p[1],)).fetchone()
         return self.reply(409 if exists else 404,{"error":"illegal transition" if exists else "not found"})
     def log_message(self,*args):pass
