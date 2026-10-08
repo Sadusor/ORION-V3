@@ -1,11 +1,18 @@
 """Contract tests only: no external GitHub, PowerShell or live execution."""
 import pytest
+import hmac
+import hashlib
 from orion_v3.engineering_loop import assess_cycle, EvidenceContractError
 
 O = "a" * 40
 T = "b" * 40
 H = "c" * 40
 S = "session_123"
+KEY = b"fixture-verifier-key"
+def receipt(revision=O, session=S, key=KEY):
+    return {"schema": "orion.engineering-acceptance.v1", "session_id": session,
+            "orion_revision": revision, "verdict": "PASS",
+            "mac": hmac.new(key, f"{session}|{revision}|PASS".encode(), hashlib.sha256).hexdigest()}
 
 def evidence(result="PASS"):
     return {"schema": "thehands.github-evidence.v1", "evidence_id": "thehands-" + S,
@@ -23,11 +30,11 @@ def test_script_pass_does_not_prove_orion_pass():
     assert check(evidence(), observed_orion_revision=O).product_verdict == "UNVERIFIED"
 
 def test_matching_revision_and_independent_acceptance():
-    x = check(evidence(), observed_orion_revision=O, acceptance_passed=True)
+    x = check(evidence(), observed_orion_revision=O, acceptance_receipt=receipt(), verifier_key=KEY)
     assert x.product_verdict == "PASS" and x.next_action == "document_and_freeze"
 
 def test_wrong_orion_revision_blocks_pass():
-    assert check(evidence(), observed_orion_revision="d"*40, acceptance_passed=True).product_verdict == "UNVERIFIED"
+    assert check(evidence(), observed_orion_revision="d"*40, acceptance_receipt=receipt(), verifier_key=KEY).product_verdict == "UNVERIFIED"
 
 def test_failed_and_stopped_run_never_pass():
     for result in ("FAIL", "STOPPED"):
@@ -39,3 +46,10 @@ def test_failed_and_stopped_run_never_pass():
 def test_mismatched_published_evidence_is_rejected(field, value):
     e = evidence(); e[field] = value
     with pytest.raises(EvidenceContractError): check(e)
+
+def test_forged_verifier_receipt_rejected():
+    forged = receipt(); forged['mac'] = '0' * 64
+    assert check(evidence(), observed_orion_revision=O, acceptance_receipt=forged, verifier_key=KEY).product_verdict == 'UNVERIFIED'
+
+def test_receipt_for_other_session_rejected():
+    assert check(evidence(), observed_orion_revision=O, acceptance_receipt=receipt(session='another_session'), verifier_key=KEY).product_verdict == 'UNVERIFIED'
