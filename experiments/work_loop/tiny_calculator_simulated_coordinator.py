@@ -38,7 +38,8 @@ def main():
         assert result.evidence.verdict=="indeterminate",result.evidence
         print("TINY_SIM> EVIDENCE",result.evidence.verdict,result.evidence.source,flush=True)
         state=vault.load()
-        assert state.last_verified_result=="none",state
+        assert state.last_verified_result=="execution:indeterminate",state
+        assert state.blocked is True,state
         assert not (vault.repo_path/"calculator.py").exists()
         assert not (vault.repo_path/"test_calculator.py").exists()
         print("TINY_SIM> NO_FALSE_PASS_NO_FILES PASS",flush=True)
@@ -49,7 +50,7 @@ def main():
             next_action_on_pass="WRONG",next_action_on_fail="WRONG",
             trusted_verifier_pass=True)
         assert not check.state_updated,check
-        assert vault.load().last_verified_result=="none"
+        assert vault.load().last_verified_result=="execution:indeterminate"
         print("TINY_SIM> FORGED_PASS_DENIED",check.verification.reason,flush=True)
         stopped=WorkLoopCoordinator(engine,secret=b"tiny-demo-ephemeral-key-only",
             source_revision="tiny-calculator-sim-v1",stop=AlwaysStopped()).cycle(proposal)
