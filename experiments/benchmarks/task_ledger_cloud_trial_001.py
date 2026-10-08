@@ -27,7 +27,7 @@ def main():
     contract=(ROOT/"docs/benchmarks/TASK_LEDGER_HTTP_CONTRACT_V01.md").read_text(encoding="utf-8")
     prompt=("Implement the following benchmark independently. Return source as inert text only. "
             "No tools, no execution, no claims of PASS. Provide a complete Python package and >=20 tests.\n\n"
-            +task+"\n\n"+contract)
+            +contract)
     # Connector's request bridge currently has a 4096-character prompt cap; check first.
     if len(prompt)>4096:raise RuntimeError("prompt exceeds existing reviewer bridge bound")
     sys.path.insert(0,str(DONOR))
