@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 import secrets
 import subprocess
+import time
 from tempfile import TemporaryDirectory
 
 from .authorization import issue_authorization
@@ -68,15 +69,31 @@ def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, 
         expected = hashlib.sha256(content.encode("utf-8")).hexdigest()
         if stop_requested():
             raise RuntimeError("STOP before bound native child")
-        result = subprocess.run(["dotnet", str(probe_dll), str(workspace), expected],
-                                capture_output=True, text=True, timeout=20, check=False)
-        print(result.stdout, end="", flush=True)
-        if result.stderr:
-            print(result.stderr, flush=True)
+        # Poll a live STOP source while the child runs. Kill on STOP/timeout;
+        # this does not yet establish native descendant/Job Object termination.
+        child = subprocess.Popen(["dotnet", str(probe_dll), str(workspace), expected],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        deadline = time.monotonic() + 20
+        try:
+            while child.poll() is None:
+                if stop_requested():
+                    raise RuntimeError("STOP during bound native child")
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("bound native child timeout")
+                time.sleep(0.025)
+            stdout, stderr = child.communicate(timeout=2)
+        except BaseException:
+            if child.poll() is None:
+                child.kill()
+            child.communicate(timeout=5)
+            raise
+        print(stdout, end="", flush=True)
+        if stderr:
+            print(stderr, flush=True)
         required = ("M35_BOUND_ACTION> PASS_EXACT_BYTES_AT_AUTHORIZED_TARGET",
                     "OUTSIDE_READ> DENY", "OUTSIDE_WRITE> DENY",
                     "PROFILE_DELETE_HRESULT> 0x00000000")
-        if result.returncode != 0 or any(x not in result.stdout for x in required):
+        if child.returncode != 0 or any(x not in stdout for x in required):
             raise RuntimeError("bound native child failed")
         if stop_requested():
             raise RuntimeError("STOP after bound native child")
