@@ -11,8 +11,8 @@ def run():
     proposal=build_proposal(workspace)
     cases={
         "calculator":classify_proposal(proposal,["protected.py"]),
-        "path_escape":classify_proposal(replace(proposal,args={"path":"../outside.py","content":"x"}),["protected.py"]),
-        "frozen_path":classify_proposal(replace(proposal,args={"path":"protected.py","content":"x"}),["protected.py"]),
+        "path_escape":classify_proposal(replace(proposal,args={"path":str(__import__("pathlib").Path(workspace).parent/"outside.py"),"content":"x"}),["protected.py"]),
+        "frozen_path":classify_proposal(replace(proposal,args={"path":str(__import__("pathlib").Path(workspace)/"protected.py"),"content":"x"}),["protected.py"]),
         "network":classify_proposal(replace(proposal,requested_network=True),["protected.py"]),
     }
     expected={"calculator":RiskClass.GREEN,"path_escape":RiskClass.RED,
