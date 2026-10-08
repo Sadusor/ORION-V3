@@ -73,3 +73,9 @@ At pinned ORION V3 tree `38a41ba68690b9834540abba699ed922d6466cec`, fetched and 
 ### Step 1 verdict
 
 **Repository text/source/document review: COMPLETE for tracked recognized text formats at pinned tree; binary/unrecognized formats: INVENTORIED; runtime verification: NOT RUN.** Documentation priority reconciliation and interface mapping: COMPLETE for the immediate engineering-loop scope. Future source changes require a delta audit; this result does not freeze code or qualify a new product module.
+
+## Step 2 isolated module staged — physical test pending
+
+New files: `src/orion_v3/engineering_loop/__init__.py`, `evidence.py`, `tests/test_engineering_loop_evidence.py`. These normalize exact TheHands published session identity and require an **HMAC-authenticated verifier receipt** bound to ORION revision + session before granting product PASS. The `verifier_key` is an external authority-owned secret; models and scripts must not control it. The module does **not** implement or run the verifier, automate ChatGPT/DeepSeek, write Vault, grant approval or execute Hands. No production wiring.
+
+Pinned source revision: `2e6cfae8259215a1d8366e121fb47e6e1cfd2668`. TheHands designated GitCheck command staged on main `0d9562f09fa7ce9bdfb1a6efd6c90e3a8c098124` to run isolated pytest in disposable detached worktree and print actual ORION revision. **STAGED, NOT PHYSICALLY PASSED.** The owner must run GitHub Check → Approve & Start before qualifying this module. Review the contract and tests after physical results; do not freeze until PASS.
