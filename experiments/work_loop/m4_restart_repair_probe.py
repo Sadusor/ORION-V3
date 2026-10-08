@@ -49,6 +49,34 @@ elif phase == "restart":
                                     trusted_verifier_pass=True)
     assert not outcome.state_updated and engine.vault.load().last_verified_result == "test:fail"
     print("M4_RECOVERY> UNVERIFIED_PASS_DENIED_VAULT_FAIL_PRESERVED_PASS")
-    print("M4_RECOVERY> REAL_QWEN_AND_VERIFIED_REPAIR_PASS_NOT_YET_QUALIFIED")
+    from orion_v3.work_loop.m4_fixture_verifier import verify_fixture_and_record
+    target = workspace / "fixture.txt"
+    target.write_bytes(b"wrong")
+    try:
+        verify_fixture_and_record(engine, proposal, source_revision="m4-recovery-v1",
+                                  stop_requested=lambda: False)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("wrong bytes were accepted")
+    assert engine.vault.load().last_verified_result == "test:fail"
+    print("M4_RECOVERY> WRONG_BYTES_REJECTED_FAIL_PRESERVED_PASS")
+    target.write_bytes(b"repaired")
+    try:
+        verify_fixture_and_record(engine, proposal, source_revision="m4-recovery-v1",
+                                  stop_requested=lambda: True)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("STOP failed to deny PASS")
+    assert engine.vault.load().last_verified_result == "test:fail"
+    print("M4_RECOVERY> STOP_BLOCKED_VERIFIER_PASS")
+    verify_fixture_and_record(engine, proposal, source_revision="m4-recovery-v1",
+                              stop_requested=lambda: False)
+    assert engine.vault.load().last_verified_result == "test:pass"
+    assert not engine.vault.load().blocked
+    assert "TEST PASS" in engine.vault.journal_path.read_text(encoding="utf-8")
+    print("M4_RECOVERY> INDEPENDENT_FIXTURE_BYTES_VERIFIED_AND_VAULT_PASS")
+    print("M4_RECOVERY> REAL_QWEN_AND_NATIVE_REPAIR_EXECUTION_NOT_YET_QUALIFIED")
 else:
     raise SystemExit("invalid phase")
