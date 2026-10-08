@@ -58,6 +58,19 @@ class EvaluatorTests(unittest.TestCase):
         files = dict(BASE, **{"task_ledger/app.py": "raise RuntimeError('must never execute')"})
         self.assertEqual(analyze(pack(files))["assessment"], "STATIC_ONLY")
 
+    def test_readme_nested_fence_before_tests(self):
+        readme = "**README.md**\\n```markdown\\n# Example\\n```bash\\npython -m task_ledger\\n```\\n```\\n\\n"
+        sample = readme + pack(BASE)
+        parsed = extract(sample)
+        self.assertIn("tests/test_api.py", parsed)
+        self.assertEqual(len(parsed), 5)
+
+    def test_real_frozen_submission_test_module(self):
+        from task_ledger_trial_001_independent_evaluator import SOURCE
+        parsed = extract(SOURCE.read_text(encoding="utf-8"))
+        self.assertIn("tests/test_api.py", parsed)
+        self.assertIn("sys.executable", parsed["tests/test_api.py"])
+
     def test_source_boundaries(self):
         self.assertEqual(len(extract(pack(BASE))), 5)
 
