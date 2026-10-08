@@ -25,7 +25,6 @@ def runtime_root():
 
 def main():
     contract=(ROOT/"docs/benchmarks/TASK_LEDGER_HTTP_CONTRACT_V01.md").read_text(encoding="utf-8")
-    task=(ROOT/"docs/benchmarks/TRIAL_001_CLOUD_BASELINE.md").read_text(encoding="utf-8")
     prompt=("Implement the following benchmark independently. Return source as inert text only. "
             "No tools, no execution, no claims of PASS. Provide a complete Python package and >=20 tests.\n\n"
             +task+"\n\n"+contract)
