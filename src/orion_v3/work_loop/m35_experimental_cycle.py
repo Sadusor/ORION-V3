@@ -68,20 +68,20 @@ def run_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_r
         if stop_requested():
             raise RuntimeError("STOP before Vault record")
         evidence = EvidenceRecord(proposal.project_id, proposal.task_id,
-                                  proposal.proposal_hash, "execution", "pass",
+                                  proposal.proposal_hash, "manual", "pass",
                                   "m35-native-fixture", revision,
-                                  "separate fixed child fixture; not proposal-target binding")
-        verified = verify_evidence(proposal, evidence, required_type="execution",
+                                  "sandbox fixture qualification only; signed proposal target NOT executed")
+        verified = verify_evidence(proposal, evidence, required_type="manual",
                                    expected_source_revision=revision)
         if not verified.accepted:
             raise RuntimeError("evidence binding rejected")
         vault.record_verified_result(evidence, next_action="Qualify proposal-to-child binding",
                                      commit_guard=lambda: not stop_requested())
         state = vault.load()
-        if state.last_verified_result != "execution:pass":
+        if state.last_verified_result != "manual:pass":
             raise RuntimeError("Vault did not record verified fixture")
-        if "EXECUTION PASS" not in vault.journal_path.read_text(encoding="utf-8"):
+        if "MANUAL PASS" not in vault.journal_path.read_text(encoding="utf-8"):
             raise RuntimeError("Vault journal missing result")
-        print("M35_CYCLE> VAULT_RECORDED_PASS", flush=True)
+        print("M35_CYCLE> VAULT_FIXTURE_RECORDED_PASS_NOT_PROPOSAL_EXECUTION", flush=True)
         return {"fixture": "pass", "vault": "pass", "proposal_to_child": "not_qualified",
                 "production_stop": "not_qualified"}
