@@ -44,7 +44,7 @@ def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, 
         workspace.mkdir()
         vault = ProjectVault(root / "vault")
         # Windows cmd.exe produces CRLF. The signed bytes MUST match the child.
-        content = "ORION M35 approved fixture\\r\\n"
+        content = "ORION M35 approved fixture\r\n"
         proposal = Proposal("orion-m35", "native-bound-write", "filesystem.write",
                             str(workspace), {"path": str(workspace / "approved.txt"),
                                              "content": content})
