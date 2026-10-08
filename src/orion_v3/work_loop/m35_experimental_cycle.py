@@ -13,6 +13,7 @@ from tempfile import TemporaryDirectory
 from .authorization import issue_authorization
 from .contracts import EvidenceRecord, Proposal, RiskClass, WorkState
 from .m35_preflight import validate_disposable_append
+from .m35_binding import bind_fixed_action, authenticate_manifest, verify_manifest_mac
 from .verifier import verify_evidence
 from .vault import ProjectVault
 
@@ -52,8 +53,13 @@ def run_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_r
         auth = issue_authorization(proposal, RiskClass.GREEN, expiry, secret, source_revision=revision)
         validate_disposable_append(proposal, auth, secret=secret,
                                    source_revision=revision, workspace=workspace)
+        manifest = bind_fixed_action(proposal, revision)
+        mac = authenticate_manifest(manifest, secret)
+        if not verify_manifest_mac(manifest, secret, mac):
+            raise RuntimeError("manifest authentication failed")
         if stop_requested():
             raise RuntimeError("STOP before fixture")
+        print("M35_CYCLE> AUTHENTICATED_MANIFEST_PASS_NOT_NATIVE_ENFORCED", flush=True)
         print("M35_CYCLE> SIGNED_AUTHORIZATION_PASS", flush=True)
         # Existing native fixture creates and confines its OWN disposable path.
         # No user/model-controlled shell commands or file paths reach this child.
