@@ -8,6 +8,7 @@ from dataclasses import dataclass
 import hashlib
 import hmac
 import os
+import stat
 from pathlib import Path
 from .contracts import EvidenceRecord, Proposal
 from .paths import require_inside_workspace
@@ -53,6 +54,10 @@ def verify_read_observation(proposal: Proposal, evidence: EvidenceRecord, *,
     while True:
         if current.is_symlink():
             raise ValueError("symlink traversal forbidden")
+        if os.name == "nt" and current.exists():
+            attrs = getattr(current.stat(follow_symlinks=False), "st_file_attributes", 0)
+            if attrs & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400):
+                raise ValueError("Windows reparse-point traversal forbidden")
         if current == raw_root or current == current.parent:
             break
         current = current.parent
