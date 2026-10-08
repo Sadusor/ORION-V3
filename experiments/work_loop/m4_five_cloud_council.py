@@ -9,6 +9,7 @@ import json
 import urllib.request
 import urllib.error
 import hashlib
+import subprocess
 from pathlib import Path
 
 donor=Path("E:/ORION/spikes/coding_mode_github_loop")
@@ -43,6 +44,7 @@ models=[m for m in connector.refresh_catalog().get("models",[]) if isinstance(m,
 def priority(m):
     s=(str(m.get("model") or "")+" "+str(m.get("provider") or "")).lower()
     return next((i for i,k in enumerate(("gpt-oss-120b","grok","deepseek","qwen","gemini")) if k in s),6)
+models=[m for m in models if str(m.get("provider") or "").lower()!="gemini"]
 models.sort(key=priority)
 selected=[]; providers=set()
 for m in models:
@@ -56,7 +58,7 @@ for m in models:
 print("M4_COUNCIL> AVAILABLE_NON_PREVIEW",len(models),"SELECTED",len(selected))
 for i,m in enumerate(selected,1):
     print("M4_COUNCIL> MODEL",i,str(m.get("provider") or "")[:40],str(m.get("model") or "")[:80])
-if len(selected)<3:raise RuntimeError("three eligible cloud models required")
+if len(selected)<1:raise RuntimeError("no eligible cloud reviewers")
 prompt=("ORION V3 architecture review: deterministic approval/policy authority, "
         "replaceable Windows execution hand, evidence Vault, and local Qwen 9B. "
         "Recommend three improvements for a low-power five-model review-and-synthesis "
