@@ -51,7 +51,7 @@ internal static class Program {
  Console.WriteLine(pass?"RESULT> PASS_DISPOSABLE_ACL_IMPERSONATION_ONLY":"RESULT> FAIL_FILESYSTEM_BOUNDARY");
  Console.WriteLine("CHILD_PROCESS_ISOLATION> UNTESTED\nNETWORK_ISOLATION> UNTESTED\nREAL_EXECUTION> DISABLED");
  return pass?0:1;
- }catch(Exception e){try { File.WriteAllText(Path.Combine(Path.GetTempPath(),"orion-acl-diagnostic.txt"),e.ToString()); } catch {} return 2;}
+ }catch(Exception e){try { File.WriteAllText(Environment.GetEnvironmentVariable("ORION_ACL_DIAGNOSTIC") ?? Path.Combine(root,"failure.txt"),e.ToString()); } catch {} return 2;}
  finally {
  if(token!=IntPtr.Zero)CloseHandle(token);if(source!=IntPtr.Zero)CloseHandle(source);
  if(entryPtr!=IntPtr.Zero)Marshal.FreeHGlobal(entryPtr);if(sidPtr!=IntPtr.Zero)Marshal.FreeHGlobal(sidPtr);
