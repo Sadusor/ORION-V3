@@ -1,0 +1,25 @@
+name: Multi-AI advisory contract tests
+on:
+  push:
+    branches:
+      - spike/windows-isolation-preflight-20261008
+    paths:
+      - 'src/orion_v3/work_loop/multi_ai_*.py'
+      - '.github/workflows/multi-ai-advisory-gate.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  offline-advisory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Run no-network multi-AI protocol tests
+        env:
+          PYTHONPATH: src
+        run: |
+          python -m unittest -v orion_v3.work_loop.multi_ai_plan_test orion_v3.work_loop.multi_ai_cloud_rounds_test
