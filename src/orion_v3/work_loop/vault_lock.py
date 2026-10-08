@@ -14,7 +14,8 @@ def exclusive_vault_lock(root: Path):
         yield
         connection.execute("COMMIT")
     except BaseException:
-        connection.execute("ROLLBACK")
+        if connection.in_transaction:
+            connection.execute("ROLLBACK")
         raise
     finally:
         connection.close()
