@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import re
+import hashlib
+import hmac
 from typing import Any, Mapping
 
 _SHA = re.compile(r"^[0-9a-f]{40}$")
@@ -41,11 +43,12 @@ def assess_cycle(*, session_id: str, expected_orion_revision: str,
                  expected_thehands_commit: str, expected_hand_tree: str,
                  expected_hand_id: str, published: Mapping[str, Any],
                  observed_orion_revision: str | None = None,
-                 acceptance_passed: bool = False) -> EvidenceAssessment:
-    """Assess one owner-approved run; acceptance_passed is external verifier truth.
+                 acceptance_receipt: Mapping[str, Any] | None = None,
+                 verifier_key: bytes | None = None) -> EvidenceAssessment:
+    """Assess a published run; only a signed trusted verifier receipt can grant PASS.
 
-    No model, reviewer or script text may set acceptance_passed without a
-    separate trusted verifier. This function never performs that verification.
+    Verifier keys must be supplied by the ORION authority layer, never a model,
+    TheHands output, or the owner-authored test script. No verification is run here.
     """
     if not isinstance(session_id, str) or not _SESSION.fullmatch(session_id):
         raise EvidenceContractError("invalid session_id")
@@ -66,15 +69,25 @@ def assess_cycle(*, session_id: str, expected_orion_revision: str,
     if result not in ("PASS", "FAIL", "STOPPED"):
         raise EvidenceContractError("unknown TheHands result")
     observed = None if observed_orion_revision is None else _sha(observed_orion_revision, "observed_orion_revision")
+    accepted = False
+    if acceptance_receipt is not None and isinstance(verifier_key, bytes) and verifier_key:
+        if isinstance(acceptance_receipt, Mapping) and acceptance_receipt.get("schema") == "orion.engineering-acceptance.v1":
+            message = f"{session_id}|{orion}|PASS".encode("utf-8")
+            expected_mac = hmac.new(verifier_key, message, hashlib.sha256).hexdigest()
+            accepted = (acceptance_receipt.get("session_id") == session_id and
+                        acceptance_receipt.get("orion_revision") == orion and
+                        acceptance_receipt.get("verdict") == "PASS" and
+                        isinstance(acceptance_receipt.get("mac"), str) and
+                        hmac.compare_digest(acceptance_receipt["mac"], expected_mac))
     if result == "STOPPED":
         verdict, reason, action = "STOPPED", "owner or session STOP", "review_stop"
     elif result == "FAIL":
         verdict, reason, action = "FAIL", "GitCheck process failed", "repair"
     elif observed != orion:
         verdict, reason, action = "UNVERIFIED", "ORION target revision not independently matched", "verify_revision"
-    elif not acceptance_passed:
+    elif not accepted:
         verdict, reason, action = "UNVERIFIED", "independent ORION acceptance not established", "verify_acceptance"
     else:
-        verdict, reason, action = "PASS", "independent acceptance supplied for matching ORION revision", "document_and_freeze"
+        verdict, reason, action = "PASS", "trusted verifier receipt matched ORION revision and session", "document_and_freeze"
     return EvidenceAssessment(session_id, expected_hand_id, th, tree, orion, observed,
                               result, verdict, reason, action)
