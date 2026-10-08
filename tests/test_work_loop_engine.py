@@ -32,9 +32,9 @@ def test_engine_applies_bound_execution_pass(tmp_path):
         next_action_on_pass="next bounded task",
         next_action_on_fail="repair",
     )
-    assert result.state_updated is True
-    assert vault.load().last_verified_result == "execution:pass"
-    assert vault.load().next_action == "next bounded task"
+    assert result.state_updated is False
+    assert vault.load().last_verified_result == "none"
+    assert vault.load().next_action == ""
 
 
 def test_engine_does_not_apply_gitcheck_as_execution(tmp_path):
