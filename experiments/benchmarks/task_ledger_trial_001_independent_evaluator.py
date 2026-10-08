@@ -14,7 +14,37 @@ REQUIRED = ("task_ledger/__init__.py", "task_ledger/db.py", "task_ledger/app.py"
 FENCE = re.compile(r"(?m)^\*\*([^\n*]+)\*\*\s*\n\x60\x60\x60python\s*\n(.*?)^\x60\x60\x60\s*$", re.S | re.M)
 
 def extract(text: str) -> dict[str, str]:
-    return {m.group(1).strip(): m.group(2) for m in FENCE.finditer(text)}
+    """Extract named Python fences, including fences following Markdown examples.
+
+    A README may contain its own fenced shell commands. A subsequent file
+    heading still takes precedence; no code is executed during extraction.
+    """
+    out = {}
+    heading = re.compile(r"^\\*\\*([^\\n*]+)\\*\\*\\s*$")
+    fence_start = re.compile(r"^\\x60{3}python\\s*$")
+    lines = text.splitlines()
+    i = 0
+    while i < len(lines):
+        m = heading.match(lines[i])
+        if not m:
+            i += 1
+            continue
+        name = m.group(1).strip()
+        j = i + 1
+        while j < len(lines) and not lines[j].strip():
+            j += 1
+        if j >= len(lines) or not fence_start.match(lines[j]):
+            i += 1
+            continue
+        end = j + 1
+        while end < len(lines) and lines[end].strip() != "```":
+            end += 1
+        if end < len(lines):
+            out[name] = "\\n".join(lines[j + 1:end]) + "\\n"
+            i = end + 1
+        else:
+            i += 1
+    return out
 
 def imported_names(tree: ast.AST) -> set[str]:
     names = set()
