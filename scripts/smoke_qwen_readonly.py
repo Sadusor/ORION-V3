@@ -11,11 +11,17 @@ from orion_v3.work_loop.policy import classify_proposal
 from orion_v3.work_loop.vault import ProjectVault
 
 
+def stage(label: str, message: str) -> None:
+    print(f"\n[{label}] {message}", flush=True)
+
+
 def main() -> None:
+    stage("01/07", "Checking local Ollama and required Qwen 9B model")
     brain = LocalBrainModule(preferred_model="qwen3.5-9b-orion")
     models = brain._available_models()
     if "qwen3.5-9b-orion" not in models:
         raise RuntimeError("Expected qwen3.5-9b-orion missing; no fallback model allowed")
+    stage("02/07", "Creating disposable Vault; no project files will be changed")
     with tempfile.TemporaryDirectory(prefix="orion-qwen-readonly-", dir=str(Path.cwd())) as directory:
         vault = ProjectVault(Path(directory) / "vault")
         vault.initialize(WorkState(
@@ -23,14 +29,23 @@ def main() -> None:
             checkpoint="Before read-only proposal", current_task="Propose git.status only",
             constraints=["No execution", "No network access by proposed operation", "No file changes"],
         ))
+        state = vault.load()
+        print("VAULT TASK> " + state.current_task, flush=True)
+        print("VAULT OBJECTIVE> " + state.objective, flush=True)
+        print("VAULT CONSTRAINTS> " + "; ".join(state.constraints), flush=True)
         before = vault.state_path.read_bytes()
+        stage("03/07", "Sending bounded proposal request to real Qwen; waiting for response")
         proposal = propose_from_local_qwen(vault, brain=brain, model="qwen3.5-9b-orion")
+        stage("04/07", "Qwen response received; displaying typed proposal")
         risk = classify_proposal(proposal)
         print("MODEL> qwen3.5-9b-orion")
         print("PROPOSAL> " + json.dumps({"operation": proposal.operation, "args": proposal.args,
               "requested_network": proposal.requested_network, "requested_install": proposal.requested_install,
               "requested_system_change": proposal.requested_system_change}, ensure_ascii=False))
-        print("POLICY> " + risk.risk.value)
+        stage("05/07", "ORION policy classification")
+        print("POLICY> " + risk.risk.value, flush=True)
+        print("POLICY REASON> " + risk.reason, flush=True)
+        stage("06/07", "Checking canonical Vault unchanged and workspace untouched")
         assert proposal.project_id == "qwen-smoke"
         assert proposal.task_id == "Propose git.status only"
         assert vault.state_path.read_bytes() == before
@@ -38,7 +53,8 @@ def main() -> None:
         assert not list(vault.repo_path.iterdir())
         if proposal.operation != "git.status" or proposal.args or risk.risk.value != "green":
             raise RuntimeError("Model proposal was not the expected GREEN git.status; no execution occurred")
-        print("ORION_QWEN_READONLY> PASS; PROPOSAL_ONLY; NOTHING_EXECUTED")
+        stage("07/07", "Verification complete")
+        print("ORION_QWEN_READONLY> PASS; PROPOSAL_ONLY; NOTHING_EXECUTED", flush=True)
 
 
 if __name__ == "__main__":
