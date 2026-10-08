@@ -20,10 +20,9 @@ def main() -> None:
     brain = LocalBrainModule(preferred_model="qwen3.5-9b-orion")
     models = brain._available_models()
     print("OLLAMA MODELS> " + json.dumps(models), flush=True)
-    matches = [name for name in models if "qwen" in name.lower() and "9b" in name.lower()]
-    if len(matches) != 1:
-        raise RuntimeError("Need exactly one Qwen 9B model; available matches: " + repr(matches))
-    selected_model = matches[0]
+    selected_model = "qwen35-9b-orion:latest"
+    if selected_model not in models:
+        raise RuntimeError("Required ORION-tuned Qwen 9B model unavailable: " + selected_model)
     print("SELECTED MODEL> " + selected_model, flush=True)
     stage("02/07", "Creating disposable Vault; no project files will be changed")
     with tempfile.TemporaryDirectory(prefix="orion-qwen-readonly-", dir=str(Path.cwd())) as directory:
