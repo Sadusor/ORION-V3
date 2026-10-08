@@ -53,7 +53,7 @@ internal static class Program {
   acl.AddAccessRule(new FileSystemAccessRule(sid,FileSystemRights.Read|FileSystemRights.Write,AccessControlType.Allow));
   new FileInfo(file).SetAccessControl(acl);
  }
- string script=Path.Combine(root,"child.ps1");
+ string script=Path.Combine(inside,"child.ps1");
  File.WriteAllText(script,@"param([string]$Inside,[string]$Outside,[string]$Result)
  $a='ERROR';$b='ERROR';$c='ERROR';$d='ERROR'
  try{$null=[IO.File]::ReadAllText($Inside);$a='ALLOW'}catch{$a='DENY'}
@@ -63,6 +63,9 @@ internal static class Program {
  [IO.File]::WriteAllText($Result,($a+','+$b+','+$c+','+$d))
  Start-Sleep -Seconds 90
  ");
+ var scriptAcl=new FileInfo(script).GetAccessControl();
+ scriptAcl.AddAccessRule(new FileSystemAccessRule(sid,FileSystemRights.ReadAndExecute,AccessControlType.Allow));
+ new FileInfo(script).SetAccessControl(scriptAcl);
  Ensure(OpenProcessToken(Process.GetCurrentProcess().Handle,TOKEN_DUPLICATE|TOKEN_ASSIGN_PRIMARY|TOKEN_QUERY|TOKEN_ADJUST_DEFAULT|TOKEN_ADJUST_SESSIONID,out source),"OpenProcessToken");
  Ensure(CreateRestrictedToken(source,DISABLE_MAX_PRIVILEGE,0,IntPtr.Zero,0,IntPtr.Zero,1,sidEntry,out restricted),"CreateRestrictedToken");
  job=CreateJobObjectW(IntPtr.Zero,null); if(job==IntPtr.Zero) throw new Win32Exception(Marshal.GetLastWin32Error(),"CreateJobObjectW");
@@ -76,7 +79,7 @@ internal static class Program {
  if(ResumeThread(child.hThread)==uint.MaxValue) throw new Win32Exception(Marshal.GetLastWin32Error(),"ResumeThread");
  var sw=Stopwatch.StartNew();
  while(File.ReadAllText(result)=="pending" && sw.ElapsedMilliseconds<15000) {
-  if(WaitForSingleObject(child.hProcess,0)==0)throw new Exception("CHILD_BOOTSTRAP_BLOCKED: exited before result");
+  if(WaitForSingleObject(child.hProcess,0)==0)throw new Exception("CHILD_BOOTSTRAP_BLOCKED: exited before result; executable or script inaccessible to restricting SID");
   System.Threading.Thread.Sleep(100);
  }
  string evidence=File.ReadAllText(result);
