@@ -38,7 +38,8 @@ try {
   Write-Host ('HARNESS_PATH> '+$dll)
   Write-Host ('HARNESS_EXISTS> '+(Test-Path -LiteralPath $dll))
   Write-Host ('HARNESS_DOTNET> '+$dotnet.Source)
-  try { $output= & $dotnet.Source $dll 2>&1 } catch { Write-Host ('HARNESS_LAUNCH_ERROR> '+$_.Exception.GetType().FullName+' '+$_.Exception.Message); throw }
+  $ErrorActionPreference = 'Continue'
+  try { $output= & $dotnet.Source $dll 2>&1 } finally { $ErrorActionPreference = 'Stop' }
   $exit=$LASTEXITCODE
   $output | ForEach-Object {Write-Host "$label> $_"}
   $report.checks += @{name=$label;exit=$exit;output=@($output | ForEach-Object {"$_"})}
