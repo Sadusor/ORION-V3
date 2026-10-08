@@ -1,5 +1,12 @@
 # ORION V3 Roadmap
 
+## CURRENT OWNER PRIORITY OVERRIDE — 2026-10-08 (read first)
+
+**Build and physically prove the existing human + AI engineering collaboration loop (owner + ChatGPT + DeepSeek + TheHands GitCheck) as an isolated, replaceable ORION V3 subsystem. Connect it to the rest of ORION V3 only after proof.** The canonical explanation and bounded plan are in `docs/decisions/0018-prove-human-ai-engineering-loop-before-orion-integration.md`.
+
+Order: full repository/documentation and real-interface audit → map existing collaboration stages to modules → implement smallest missing adapter → test approved real GitCheck task and evidence → FAIL/repair/PASS and continuity → freeze → integrate into ORION V3. The previous 'Authority + Vault gate' and Qwen/AppContainer Milestone 3.5 remain valid later work, **not the active immediate build target**. This owner clarification supersedes the earlier 'ACTIVE ROADMAP UPDATE' heading for priority only. Do not mark existing Work Loop or Windows confinement production-qualified.
+
+
 All milestones are gated by physical evidence.
 
 ## ACTIVE ROADMAP UPDATE — 2026-10-08
