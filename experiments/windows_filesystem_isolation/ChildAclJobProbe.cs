@@ -27,6 +27,7 @@ internal static class Program {
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool SetInformationJobObject(IntPtr job,int cls,ref EXT info,uint size);
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool AssignProcessToJobObject(IntPtr job,IntPtr process);
  [DllImport("kernel32.dll",SetLastError=true)] static extern uint ResumeThread(IntPtr thread);
+ [DllImport("kernel32.dll",SetLastError=true)] static extern bool GetExitCodeProcess(IntPtr process,out uint code);
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool TerminateProcess(IntPtr process,uint code);
  [DllImport("kernel32.dll",SetLastError=true)] static extern bool TerminateJobObject(IntPtr job,uint code);
  [DllImport("kernel32.dll",SetLastError=true)] static extern uint WaitForSingleObject(IntPtr handle,uint ms);
@@ -79,7 +80,7 @@ internal static class Program {
  if(ResumeThread(child.hThread)==uint.MaxValue) throw new Win32Exception(Marshal.GetLastWin32Error(),"ResumeThread");
  var sw=Stopwatch.StartNew();
  while(File.ReadAllText(result)=="pending" && sw.ElapsedMilliseconds<15000) {
-  if(WaitForSingleObject(child.hProcess,0)==0)throw new Exception("CHILD_BOOTSTRAP_BLOCKED: exited before result; executable or script inaccessible to restricting SID");
+  if(WaitForSingleObject(child.hProcess,0)==0){Ensure(GetExitCodeProcess(child.hProcess,out uint code),"GetExitCodeProcess");throw new Exception("CHILD_BOOTSTRAP_BLOCKED: exit=0x"+code.ToString("X8"));}
   System.Threading.Thread.Sleep(100);
  }
  string evidence=File.ReadAllText(result);
