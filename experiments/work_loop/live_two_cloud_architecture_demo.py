@@ -61,9 +61,11 @@ def choose_two(catalog):
     def priority(m):
         label = str(m.get("model") or "").lower()
         if "gpt-oss-120b" in label: return 0
-        if "qwen" in label and ("27b" in label or "32b" in label): return 1
-        if "gpt-oss-20b" in label: return 2
+        if "gpt-oss-20b" in label: return 1
+        if "qwen" in label and ("27b" in label or "32b" in label): return 9
+        if "gpt-oss-20b" in label: return 1
         return 5
+    valid = [m for m in valid if "qwen/qwen3.8-27b" not in str(m.get("model") or "").lower()]
     valid.sort(key=priority)
     picked = []
     for item in valid:
