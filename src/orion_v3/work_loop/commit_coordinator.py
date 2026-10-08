@@ -6,6 +6,10 @@ cross-process atomicity, OS isolation, or cancellation of committed effects.
 from __future__ import annotations
 from contextlib import contextmanager
 from threading import RLock
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .stop import StopSource
 
 
 class CommitStopped(RuntimeError):
@@ -13,7 +17,8 @@ class CommitStopped(RuntimeError):
 
 
 class CommitCoordinator:
-    def __init__(self):
+    def __init__(self, stop_source: StopSource | None = None):
+        self._stop_source = stop_source
         self._lock = RLock()
         self._generation = 0
         self._stopped = False
@@ -37,6 +42,14 @@ class CommitCoordinator:
     @contextmanager
     def commit_window(self, expected_generation: int):
         with self._lock:
-            if self._stopped or self._generation != expected_generation:
+            # Fail closed if the authoritative STOP source is unreadable.
+            try:
+                authoritative_stop = (
+                    self._stop_source.stop_requested()
+                    if self._stop_source is not None else False
+                )
+            except Exception as exc:
+                raise CommitStopped("authoritative STOP unavailable") from exc
+            if authoritative_stop or self._stopped or self._generation != expected_generation:
                 raise CommitStopped("STOP or stale generation blocked commit")
             yield
