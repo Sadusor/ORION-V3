@@ -32,7 +32,8 @@ connector=ReviewerConnector(runtime/"coding-mode"/"reviewers",
                             configured_free_providers=[])
 models=[m for m in connector.refresh_catalog().get("models",[]) if isinstance(m,dict)
         and m.get("available") is True and m.get("reviewer_id")
-        and str(m.get("provider") or "").lower() not in ("ollama","local")]
+        and str(m.get("provider") or "").lower() not in ("ollama","local")
+        and "preview" not in str(m.get("model") or "").lower()]
 def priority(m):
     s=(str(m.get("model") or "")+" "+str(m.get("provider") or "")).lower()
     return next((i for i,k in enumerate(("gpt-oss-120b","grok","deepseek","qwen","gemini")) if k in s),6)
@@ -45,11 +46,11 @@ for m in models:
     if len(selected)==5:break
 for m in models:
     if len(selected)==5:break
-    if m not in selected:selected.append(m)
-print("M4_COUNCIL> AVAILABLE",len(models),"SELECTED",len(selected))
+    if m not in selected and str(m.get("provider") or "").lower()!="gemini":selected.append(m)
+print("M4_COUNCIL> AVAILABLE_NON_PREVIEW",len(models),"SELECTED",len(selected))
 for i,m in enumerate(selected,1):
     print("M4_COUNCIL> MODEL",i,str(m.get("provider") or "")[:40],str(m.get("model") or "")[:80])
-if len(selected)!=5:raise RuntimeError("five available cloud models required")
+if len(selected)!=5:raise RuntimeError("five eligible non-preview cloud models required; no fallback to broken preview endpoints")
 prompt=("ORION V3 architecture review: deterministic approval/policy authority, "
         "replaceable Windows execution hand, evidence Vault, and local Qwen 9B. "
         "Recommend three improvements for a low-power five-model review-and-synthesis "
