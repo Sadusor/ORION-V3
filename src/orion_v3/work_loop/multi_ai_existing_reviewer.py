@@ -50,6 +50,17 @@ def _round(connector, prompt, ids, *, stop_requested, deadline_seconds=120):
             if not isinstance(state, dict):
                 raise ValueError("invalid connector state")
             last_state = state
+            entries = state.get("reviewers") or []
+            if isinstance(entries, dict):
+                entries = list(entries.values())
+            for item in entries:
+                if isinstance(item, dict) and str(item.get("state") or "").lower() in {
+                    "error", "failed", "failure", "cancelled", "canceled", "denied"
+                }:
+                    identity = str(item.get("reviewer_id") or "unknown")[:90]
+                    status = str(item.get("state") or "error")[:30]
+                    print("ORION_COUNCIL> PROVIDER_FAILURE", identity, status, flush=True)
+                    raise RuntimeError("cloud reviewer failed: " + identity + " (" + status + ")")
             if str(state.get("state") or "").lower() in _TERMINAL:
                 return _responses(state, ids)
             time.sleep(.25)
