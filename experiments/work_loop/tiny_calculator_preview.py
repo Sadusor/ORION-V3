@@ -25,7 +25,7 @@ def test_negative():
 def build_proposal(workspace: str) -> Proposal:
     return Proposal(project_id=PROJECT,task_id=TASK,
         operation="filesystem.write",workspace=workspace,
-        args={"path":"calculator.py","content":SOURCE},
+        args={"path":str(Path(workspace)/"calculator.py"),"content":SOURCE},
         requested_network=False,requested_install=False,requested_system_change=False)
 
 def preview(workspace: str) -> dict:
