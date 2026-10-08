@@ -96,7 +96,7 @@ try:
                    "Write a concise proposed plan and acceptance tests. "
                    "Never claim approval, execution, or verified PASS.\\n"
                    + "\\n".join("CLOUD_RESPONSE_"+str(i)+":\\n"+o for i,o in enumerate(outputs,1)))
-        body=json.dumps({"model":"qwen3.5-9b-orion","prompt":synthesis,
+        body=json.dumps({"model":"qwen35-9b-orion","prompt":synthesis,
                          "stream":False,"options":{"num_predict":800,"temperature":0.2}}).encode()
         print("M4_QWEN> LOCAL_SYNTHESIS_REQUEST",flush=True)
         try:
@@ -118,6 +118,7 @@ try:
             print("M4_LOOP> CLOUD_TO_QWEN_ADVISORY_COMPLETE_NO_EXECUTION",flush=True)
         except Exception as exc:
             print("M4_QWEN> SYNTHESIS_FAILED",type(exc).__name__,flush=True)
+            raise SystemExit(4)
 finally:
     if layout_process.poll() is None:
         layout_process.terminate()
