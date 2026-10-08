@@ -80,6 +80,7 @@ internal static class Program{
    Console.WriteLine("APPCONTAINER_CHILD_BOOTSTRAP> PASS");
    bool readOk=File.Exists(output)&&File.ReadAllText(output).Trim()==nonce;
    bool writeOk=File.Exists(approvedWrite)&&Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(File.ReadAllBytes(approvedWrite))).Equals(args[1],StringComparison.OrdinalIgnoreCase);
+   if(File.Exists(approvedWrite) && !writeOk){byte[] actual=File.ReadAllBytes(approvedWrite);Console.WriteLine("M35_BOUND_DIAGNOSTIC> EXPECTED_SHA256="+args[1]+" ACTUAL_SHA256="+Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(actual))+" BYTE_COUNT="+actual.Length+" HEX="+Convert.ToHexString(actual));}
    bool deniedRead=!File.Exists(leak);
    bool deniedWrite=!File.Exists(outsideWrite);
    bool outsideUnchanged=File.ReadAllText(denied)==nonce;
