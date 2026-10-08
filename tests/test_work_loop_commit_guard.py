@@ -1,0 +1,32 @@
+from orion_v3.work_loop.contracts import EvidenceRecord, Proposal, WorkState
+from orion_v3.work_loop.engine import WorkLoopEngine
+from orion_v3.work_loop.vault import ProjectVault
+
+
+def test_stop_guard_blocks_commit_after_verification(tmp_path):
+    vault = ProjectVault(tmp_path / "vault")
+    vault.initialize(WorkState("demo", "goal", "checkpoint", "task"))
+    engine = WorkLoopEngine(vault)
+    p = Proposal("demo", "task", "filesystem.read", str(vault.repo_path))
+    e = EvidenceRecord("demo", "task", p.proposal_hash, "execution",
+                       "indeterminate", "sim", "rev", "dry run")
+    result = engine.apply_evidence(p, e, required_type="execution",
+        expected_source_revision="rev", next_action_on_pass="next",
+        next_action_on_fail="wait", commit_guard=lambda: False)
+    assert not result.state_updated
+    assert vault.load().last_verified_result == "none"
+
+
+def test_yellow_evidence_cannot_update_state(tmp_path):
+    vault = ProjectVault(tmp_path / "vault")
+    vault.initialize(WorkState("demo", "goal", "checkpoint", "task"))
+    engine = WorkLoopEngine(vault)
+    p = Proposal("demo", "task", "filesystem.read", str(vault.repo_path),
+                 requested_network=True)
+    e = EvidenceRecord("demo", "task", p.proposal_hash, "execution",
+                       "pass", "attacker", "rev", "fake")
+    result = engine.apply_evidence(p, e, required_type="execution",
+        expected_source_revision="rev", next_action_on_pass="next",
+        next_action_on_fail="wait")
+    assert not result.state_updated
+    assert vault.load().last_verified_result == "none"
