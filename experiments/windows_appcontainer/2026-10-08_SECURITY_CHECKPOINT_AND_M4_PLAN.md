@@ -39,3 +39,6 @@ Decision: stop expanding WFP audit research; reuse existing safety controls; pri
 
 ## Definition of done for this checkpoint
 Decision recorded; previous PASS/FAIL/INCONCLUSIVE evidence preserved; next work is bounded product execution rather than further WFP diagnostics.
+
+## Roadmap reconciliation — important correction
+The canonical `docs/ROADMAP.md` defines Milestone 4 as an all-or-nothing **FAIL-across-restart autonomous loop** with 15 acceptance conditions, not merely creation of a text file. The small file task is a **preliminary execution smoke test**, not Milestone 4 PASS. It must not silently replace the existing milestone. The roadmap also names a preceding read-observation non-promotion and Vault seam check. Before staging real execution, inspect actual work_loop modules and preserve existing ORION approval/STOP authority. This checkpoint's earlier wording was too broad; this paragraph corrects it.
