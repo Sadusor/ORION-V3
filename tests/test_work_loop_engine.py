@@ -19,7 +19,7 @@ def test_engine_rejects_wrong_task_before_hand(tmp_path):
 
 def test_engine_applies_bound_execution_pass(tmp_path):
     engine, vault = setup_engine(tmp_path)
-    proposal = Proposal("demo", "task-1", "filesystem.write", str(tmp_path), {"path": "repo/x"})
+    proposal = Proposal("demo", "task-1", "filesystem.write", str(tmp_path), {"path": "repo/x", "content": "fixture"})
     evidence = EvidenceRecord(
         "demo", "task-1", proposal.proposal_hash, "execution", "pass",
         "thehands", "sha123", "physical receipt"
@@ -38,7 +38,7 @@ def test_engine_applies_bound_execution_pass(tmp_path):
 
 def test_engine_does_not_apply_gitcheck_as_execution(tmp_path):
     engine, vault = setup_engine(tmp_path)
-    proposal = Proposal("demo", "task-1", "filesystem.write", str(tmp_path), {"path": "repo/x"})
+    proposal = Proposal("demo", "task-1", "filesystem.write", str(tmp_path), {"path": "repo/x", "content": "fixture"})
     evidence = EvidenceRecord(
         "demo", "task-1", proposal.proposal_hash, "git_check", "pass",
         "github", "sha123"
