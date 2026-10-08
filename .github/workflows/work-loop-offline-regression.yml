@@ -9,6 +9,7 @@ on:
       - 'src/orion_v3/work_loop/**'
       - 'tests/test_work_loop_coordinator.py'
       - 'tests/test_work_loop_model_proposal.py'
+      - 'tests/test_work_loop_model_cycle_simulation.py'
       - '.github/workflows/work-loop-offline-regression.yml'
 
 permissions:
@@ -26,4 +27,4 @@ jobs:
       - name: Install offline test dependencies
         run: python -m pip install -e '.[dev]'
       - name: Run existing coordinator tests (no real Hand)
-        run: python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py
+        run: python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py tests/test_work_loop_model_cycle_simulation.py
