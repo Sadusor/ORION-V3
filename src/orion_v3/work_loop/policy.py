@@ -34,6 +34,31 @@ def _proposal_paths(proposal: Proposal) -> list[str]:
 
 def classify_proposal(proposal: Proposal, frozen_paths: list[str] | None = None) -> PolicyDecision:
     frozen_paths = frozen_paths or []
+    schemas = {
+        "filesystem.read": {"path"}, "filesystem.list": {"path"},
+        "filesystem.search": {"path", "query"},
+        "filesystem.write": {"path", "content"},
+        "filesystem.mkdir": {"path"}, "filesystem.delete": {"path"},
+        "git.status": set(), "git.diff": set(),
+        "git.add": {"paths"}, "git.commit": {"message"},
+    }
+    if proposal.operation in schemas:
+        if set(proposal.args) - schemas[proposal.operation]:
+            return PolicyDecision(RiskClass.RED, False, "unknown argument key")
+        if proposal.operation.startswith("filesystem.") and not isinstance(proposal.args.get("path"), str):
+            return PolicyDecision(RiskClass.RED, False, "required path missing or malformed")
+        if proposal.operation == "filesystem.write" and not isinstance(proposal.args.get("content"), str):
+            return PolicyDecision(RiskClass.RED, False, "required content missing or malformed")
+        if proposal.operation == "git.add" and (
+            not isinstance(proposal.args.get("paths"), list)
+            or not proposal.args["paths"]
+            or any(not isinstance(p, str) for p in proposal.args["paths"])
+        ):
+            return PolicyDecision(RiskClass.RED, False, "required paths missing or malformed")
+        if proposal.operation == "git.commit" and not isinstance(proposal.args.get("message"), str):
+            return PolicyDecision(RiskClass.RED, False, "required message missing or malformed")
+        if proposal.operation == "filesystem.search" and not isinstance(proposal.args.get("query"), str):
+            return PolicyDecision(RiskClass.RED, False, "required query missing or malformed")
 
     if proposal.requested_system_change or proposal.operation in RED_OPERATIONS:
         return PolicyDecision(RiskClass.RED, False, "system/authority operation is RED")
