@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import ast
 
-ROOT = Path(__file__).resolve().parents[3]
+ROOT = Path(__file__).resolve().parents[2]
 checks = {
     "vault": ROOT / "src/orion_v3/work_loop/vault.py",
     "coordinator": ROOT / "src/orion_v3/work_loop/coordinator.py",
