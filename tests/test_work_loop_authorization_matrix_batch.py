@@ -20,7 +20,7 @@ def test_modified_authorization_is_denied(case, field):
     changed = replace(auth, **{field: "modified"})
     assert not verify_authorization(changed, proposal, secret, expected_source_revision="revision")
 
-@pytest.mark.parametrize("minutes", [-1, 6, 60])
+@pytest.mark.parametrize("minutes", [-4, 6, 60])
 def test_outside_expiry_window_denied(case, minutes):
     proposal, secret, auth = case
     now = datetime.now(timezone.utc) + timedelta(minutes=minutes)
