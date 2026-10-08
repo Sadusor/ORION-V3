@@ -45,8 +45,10 @@ def classify_proposal(proposal: Proposal, frozen_paths: list[str] | None = None)
     if proposal.operation in schemas:
         if set(proposal.args) - schemas[proposal.operation]:
             return PolicyDecision(RiskClass.RED, False, "unknown argument key")
-        if proposal.operation.startswith("filesystem.") and not isinstance(proposal.args.get("path"), str):
+        if proposal.operation in {"filesystem.write", "filesystem.mkdir", "filesystem.delete"} and not isinstance(proposal.args.get("path"), str):
             return PolicyDecision(RiskClass.RED, False, "required path missing or malformed")
+        if "path" in proposal.args and not isinstance(proposal.args["path"], str):
+            return PolicyDecision(RiskClass.RED, False, "path must be text")
         if proposal.operation == "filesystem.write" and not isinstance(proposal.args.get("content"), str):
             return PolicyDecision(RiskClass.RED, False, "required content missing or malformed")
         if proposal.operation == "git.add" and (
