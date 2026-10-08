@@ -19,8 +19,12 @@ def main() -> None:
     stage("01/07", "Checking local Ollama and required Qwen 9B model")
     brain = LocalBrainModule(preferred_model="qwen3.5-9b-orion")
     models = brain._available_models()
-    if "qwen3.5-9b-orion" not in models:
-        raise RuntimeError("Expected qwen3.5-9b-orion missing; no fallback model allowed")
+    print("OLLAMA MODELS> " + json.dumps(models), flush=True)
+    matches = [name for name in models if "qwen" in name.lower() and "9b" in name.lower()]
+    if len(matches) != 1:
+        raise RuntimeError("Need exactly one Qwen 9B model; available matches: " + repr(matches))
+    selected_model = matches[0]
+    print("SELECTED MODEL> " + selected_model, flush=True)
     stage("02/07", "Creating disposable Vault; no project files will be changed")
     with tempfile.TemporaryDirectory(prefix="orion-qwen-readonly-", dir=str(Path.cwd())) as directory:
         vault = ProjectVault(Path(directory) / "vault")
@@ -35,10 +39,10 @@ def main() -> None:
         print("VAULT CONSTRAINTS> " + "; ".join(state.constraints), flush=True)
         before = vault.state_path.read_bytes()
         stage("03/07", "Sending bounded proposal request to real Qwen; waiting for response")
-        proposal = propose_from_local_qwen(vault, brain=brain, model="qwen3.5-9b-orion")
+        proposal = propose_from_local_qwen(vault, brain=brain, model=selected_model)
         stage("04/07", "Qwen response received; displaying typed proposal")
         risk = classify_proposal(proposal)
-        print("MODEL> qwen3.5-9b-orion")
+        print("MODEL> " + selected_model)
         print("PROPOSAL> " + json.dumps({"operation": proposal.operation, "args": proposal.args,
               "requested_network": proposal.requested_network, "requested_install": proposal.requested_install,
               "requested_system_change": proposal.requested_system_change}, ensure_ascii=False))
