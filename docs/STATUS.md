@@ -432,3 +432,7 @@ Next bounded product task:
 5. physically qualify each PC+phone slice and freeze it before widening scope.
 
 TheHands remains a separate frozen engineering Remote and is not to be recreated inside the ORION product UI.
+
+## Repository audit result — 2026-10-08
+
+**STEP 1 SOURCE/DOCUMENT AUDIT COMPLETE at pinned tree**: 321 ORION V3 recognized text/source/config files and 73 TheHands recognized text/source/config files fetched and inspected; remaining binary/unrecognized assets inventoried. No runtime tests were run as part of this review. See `docs/audits/2026-10-08-engineering-loop-step1-audit.md`. **Next module:** V3-owned engineering-cycle record/evidence adapter. Distinguish TheHands GitCheck `source_commit` (TheHands revision) from the ORION target revision; a TheHands process exit 0 is not independent ORION acceptance. Previous status paragraph saying 'full repository file-by-file review NOT YET VERIFIED' was true at the time of writing and is superseded for recognized tracked text files by this pinned audit.
