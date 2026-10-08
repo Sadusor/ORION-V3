@@ -1,30 +1,15 @@
-# ORION-V3 Work Loop: manual, owner-approved PC regression.
-# Intended for existing engineering Remote's PowerShell Hand, NOT ORION runtime.
-# No model calls, no real Work Hand, no privileged changes.
-param(
-    [string]$Python = "python"
-)
+# ORION Work Loop bounded PC test, no real executor
 $ErrorActionPreference = "Stop"
-$repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
-Push-Location $repo
+$root = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+Push-Location $root
+$prior = $env:PYTHONPATH
 try {
-    $branch = (& git branch --show-current).Trim()
-    if ($LASTEXITCODE -ne 0 -or $branch -ne "spike/windows-isolation-preflight-20261008") {
-        throw "Wrong ORION branch: $branch"
-    }
-    Write-Host "ORION_WORK_LOOP_TEST START branch=$branch"
-    $oldPythonPath = $env:PYTHONPATH
-    $src = Join-Path $repo "src"
-    $env:PYTHONPATH = if ($oldPythonPath) { "$src$([IO.Path]::PathSeparator)$oldPythonPath" } else { $src }
-    try {
-        & $Python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py tests/test_work_loop_model_cycle_simulation.py
-        $code = $LASTEXITCODE
-    } finally {
-        $env:PYTHONPATH = $oldPythonPath
-    }
-    if ($code -ne 0) { throw "ORION_WORK_LOOP_TEST FAIL exit=$code" }
-    Write-Host "ORION_WORK_LOOP_TEST PASS (offline simulation only; physical qualification NOT RUN)"
-}
-finally {
+    if ((& git branch --show-current).Trim() -ne "spike/windows-isolation-preflight-20261008") { throw "Unexpected branch" }
+    $env:PYTHONPATH = Join-Path $root "src"
+    & python -m pytest -q tests/test_work_loop_coordinator.py tests/test_work_loop_model_proposal.py tests/test_work_loop_model_cycle_simulation.py tests/test_work_loop_local_proposer.py
+    if ($LASTEXITCODE -ne 0) { throw "ORION_WORK_LOOP_TEST FAIL" }
+    Write-Host "ORION_WORK_LOOP_TEST PASS - mock Qwen only; real Qwen and Windows isolation NOT RUN"
+} finally {
+    $env:PYTHONPATH = $prior
     Pop-Location
 }
