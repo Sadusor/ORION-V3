@@ -29,7 +29,7 @@ REQUIRED = (
 )
 
 
-def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_requested) -> dict:
+def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, stop_requested, hold_for_stop_test=False) -> dict:
     """Experimental exact-target child, with trusted coordinator and independent byte check.
 
     STOP is sampled at boundaries; no claim of continuous production STOP.
@@ -71,7 +71,10 @@ def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, 
             raise RuntimeError("STOP before bound native child")
         # Poll a live STOP source while the child runs. Kill on STOP/timeout;
         # this does not yet establish native descendant/Job Object termination.
-        child = subprocess.Popen(["dotnet", str(probe_dll), str(workspace), expected],
+        child_args = ["dotnet", str(probe_dll), str(workspace), expected]
+        if hold_for_stop_test:
+            child_args.append("--hold-for-stop-test")
+        child = subprocess.Popen(child_args,
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         deadline = time.monotonic() + 20
         try:
@@ -86,6 +89,32 @@ def run_bound_experimental_cycle(base: Path, probe_dll: Path, revision: str, *, 
             if child.poll() is None:
                 child.kill()
             child.communicate(timeout=5)
+            if hold_for_stop_test:
+                pid_file = workspace / "stop_child_pid.txt"
+                if not pid_file.is_file():
+                    raise RuntimeError("STOP child PID was never observed")
+                pid = int(pid_file.read_text(encoding="utf-8"))
+                if pid <= 0:
+                    raise RuntimeError("STOP child PID invalid")
+                import os
+                if os.name != "nt":
+                    raise RuntimeError("STOP child liveness check requires Windows")
+                import ctypes
+                kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+                kernel.OpenProcess.argtypes = [ctypes.c_ulong, ctypes.c_int, ctypes.c_ulong]
+                kernel.OpenProcess.restype = ctypes.c_void_p
+                kernel.WaitForSingleObject.argtypes = [ctypes.c_void_p, ctypes.c_ulong]
+                kernel.WaitForSingleObject.restype = ctypes.c_ulong
+                kernel.CloseHandle.argtypes = [ctypes.c_void_p]
+                kernel.CloseHandle.restype = ctypes.c_int
+                handle = kernel.OpenProcess(0x00100000, 0, pid)
+                if handle:
+                    try:
+                        if kernel.WaitForSingleObject(handle, 5000) != 0:
+                            raise RuntimeError("STOP native child remained running")
+                    finally:
+                        kernel.CloseHandle(handle)
+                print("M35_STOP_TREE> NATIVE_CHILD_TERMINATED_AFTER_LAUNCHER_KILL", flush=True)
             raise
         print(stdout, end="", flush=True)
         if stderr:
