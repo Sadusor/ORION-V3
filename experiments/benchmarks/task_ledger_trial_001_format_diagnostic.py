@@ -12,16 +12,16 @@ from task_ledger_cloud_trial_001 import runtime_root
 from task_ledger_trial_001_completeness import check, FENCE, MAX_BYTES
 
 CONTRACT = {
-    "package_entrypoint": r"task_ledger[/\\]__main__\\.py|python\\s+-m\\s+task_ledger",
-    "sqlite": r"\\bsqlite3\\b|\\bSQLite\\b",
+    "package_entrypoint": r"task_ledger[/\]__main__\.py|python\s+-m\s+task_ledger",
+    "sqlite": r"\bsqlite3\b|\bSQLite\b",
     "environment_db": r"TASK_LEDGER_DB",
-    "create_route": r"POST\\s+/tasks|do_POST",
-    "read_route": r"GET\\s+/tasks/\\{?id|/tasks/|do_GET",
-    "list_route": r"GET\\s+/tasks\\b|/tasks",
+    "create_route": r"POST\s+/tasks|do_POST",
+    "read_route": r"GET\s+/tasks/\{?id|/tasks/|do_GET",
+    "list_route": r"GET\s+/tasks\b|/tasks",
     "transition_route": r"/transition",
     "evidence_route": r"/evidence",
     "health_route": r"/health",
-    "concurrency": r"\\b(lock|threading|transaction|BEGIN IMMEDIATE)\\b",
+    "concurrency": r"\b(lock|threading|transaction|BEGIN IMMEDIATE)\b",
 }
 def diagnose(text: str) -> dict:
     basic = check(text)
@@ -44,8 +44,8 @@ def diagnose(text: str) -> dict:
         except SyntaxError:
             syntax, count = "INVALID", 0
         python_blocks.append({"index": index, "tag": tag[:80], "syntax": syntax, "test_functions": count})
-    test_counts["raw_def_signatures"] = len(re.findall(r"(?m)^\\s*(?:async\\s+)?def\\s+test_[A-Za-z0-9_]+\\s*\\(", text))
-    paths = sorted(set(p.replace("\\\\", "/") for p in re.findall(r"(?:task_ledger|tests?)[/\\\\][A-Za-z0-9_./\\\\-]+\\.py", text, re.I)))
+    test_counts["raw_def_signatures"] = len(re.findall(r"(?m)^\s*(?:async\s+)?def\s+test_[A-Za-z0-9_]+\s*\(", text))
+    paths = sorted(set(p.replace("\\", "/") for p in re.findall(r"(?:task_ledger|tests?)[/\\][A-Za-z0-9_./\\-]+\.py", text, re.I)))
     signals = {key: bool(re.search(pattern, text, re.I)) for key, pattern in CONTRACT.items()}
     # Signal presence is never a claim that HTTP semantics are correct.
     if test_counts["raw_def_signatures"] == 0 and test_counts["fenced_python_ast"] == 0:
