@@ -28,6 +28,7 @@ class ProjectVault:
         self.journal_path = self.root / "JOURNAL.md"
         self.repo_path = self.root / "repo"
         self._mutex = threading.RLock()
+        self.pending_path = self.root / "PENDING_TRANSACTION.json"
 
     def initialize(self, state: WorkState) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
@@ -39,6 +40,8 @@ class ProjectVault:
             self.journal_path.write_text("# Work Journal\n\n", encoding="utf-8")
 
     def load(self) -> WorkState:
+        with self._mutex:
+            self._recover_pending()
         text = self.state_path.read_text(encoding="utf-8")
         marker = _STATE_MARKER + "\n"
         if marker not in text:
@@ -66,13 +69,27 @@ class ProjectVault:
             next_action=next_action,
             blocked=(evidence.verdict != "pass") if blocked is None else blocked,
         )
-        self._write_state(updated)
-        self.append_journal(
+        entry = (
             f"{evidence.evidence_type.upper()} {evidence.verdict.upper()} "
             f"task={evidence.task_id} proposal={evidence.proposal_hash[:12]} "
             f"source={evidence.source}@{evidence.source_revision} {evidence.detail}".strip()
         )
+        self.pending_path.write_text(json.dumps({"entry": entry, "state": updated.__dict__ if hasattr(updated, "__dict__") else {k: getattr(updated, k) for k in updated.__dataclass_fields__}}), encoding="utf-8")
+        self._write_state(updated)
+        self.append_journal(entry)
+        self.pending_path.unlink()
         return updated
+
+    def _recover_pending(self) -> None:
+        if not self.pending_path.exists():
+            return
+        transaction = json.loads(self.pending_path.read_text(encoding="utf-8"))
+        state = WorkState(**transaction["state"])
+        self._write_state(state)
+        entry = transaction["entry"]
+        if not self.journal_path.exists() or entry not in self.journal_path.read_text(encoding="utf-8"):
+            self.append_journal(entry)
+        self.pending_path.unlink()
 
     def append_journal(self, entry: str) -> None:
         timestamp = datetime.now(timezone.utc).isoformat()
