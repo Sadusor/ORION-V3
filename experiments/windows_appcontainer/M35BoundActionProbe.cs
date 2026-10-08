@@ -30,7 +30,7 @@ internal static class Program{
  static string Q(string path)=>((char)34)+path+((char)34);
  static int Main(string[] args){
   // Fixed fixture accepts only its exact expected content hash; never a command.
-  if(args.Length!=2 || !System.Text.RegularExpressions.Regex.IsMatch(args[1],@"\A[a-f0-9]{64}\z")){Console.WriteLine("M35_BOUND_INPUT> DENY");return 9;}
+  if((args.Length!=2 && !(args.Length==3 && args[2]=="--hold-for-stop-test")) || !System.Text.RegularExpressions.Regex.IsMatch(args[1],@"\A[a-f0-9]{64}\z")){Console.WriteLine("M35_BOUND_INPUT> DENY");return 9;}
   string bound=Path.GetFullPath(args[0]);
   if(!System.Text.RegularExpressions.Regex.IsMatch(bound,@"\AE:\\ORION-M35-[A-Za-z0-9_-]+\\ORION-M35-workspace\z",System.Text.RegularExpressions.RegexOptions.IgnoreCase) || !Directory.Exists(bound) || (File.GetAttributes(bound)&FileAttributes.ReparsePoint)!=0 || Directory.GetFileSystemEntries(bound).Length!=0){Console.WriteLine("M35_BOUND_SCOPE> DENY");return 9;}
   if(!OperatingSystem.IsWindows())return 2;
@@ -72,6 +72,7 @@ internal static class Program{
    Console.WriteLine("CHILD_CREATED> PASS PID="+child.Pid);
    Check(AssignProcessToJobObject(job,child.Process),"AssignProcessToJobObject");
    Console.WriteLine("JOB_ASSIGN> PASS");
+   if(args.Length==3){File.WriteAllText(Path.Combine(inside,"stop_child_pid.txt"),child.Pid.ToString());Console.Out.Flush();System.Threading.Thread.Sleep(4000);}
    if(ResumeThread(child.Thread)==uint.MaxValue)throw new Win32Exception(Marshal.GetLastWin32Error(),"ResumeThread");
    uint wait=WaitForSingleObject(child.Process,10000);if(wait!=0)throw new Exception("CHILD_WAIT_FAILED_OR_TIMEOUT "+wait);
    Check(GetExitCodeProcess(child.Process,out uint exit),"GetExitCodeProcess");
