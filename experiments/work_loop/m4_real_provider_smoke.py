@@ -79,7 +79,24 @@ try:
     states=[str(x.get("state") or "") for x in reviewers if isinstance(x,dict)]
     print("M4_LIVE_PROVIDER> REVIEWER_STATES",",".join(states)[:150])
     print("M4_LIVE_PROVIDER> MANIFEST_STATE",str(state.get("state") or "")[:60])
+    error_text=" ".join(str(x.get("error") or "") for x in reviewers if isinstance(x,dict))
+    if not error_text: error_text=str(state.get("error") or "")
+    low=error_text.lower()
+    category=("AUTH" if any(x in low for x in ("401","403","unauthorized","forbidden","invalid key"))
+              else "RATE_LIMIT" if any(x in low for x in ("429","rate limit","quota","resource_exhausted"))
+              else "TIMEOUT" if any(x in low for x in ("timeout","timed out"))
+              else "NETWORK" if any(x in low for x in ("connection","dns","ssl","certificate"))
+              else "PROVIDER_ERROR" if error_text else "NONE")
+    print("M4_LIVE_PROVIDER> ERROR_CATEGORY",category)
+    if any(x.lower() in ("error","failed") for x in states) or str(state.get("state") or "").lower() in ("error","failed"):
+        print("M4_LIVE_PROVIDER> PROVIDER_RESPONSE_NOT_QUALIFIED")
+        raise SystemExit(3)
     # Do not print response text, provider IDs, usage details, paths, or secrets.
     print("M4_LIVE_PROVIDER> REQUEST_FINISHED_REVIEW_OUTPUT_NOT_YET_VALIDATED")
 finally:
-    connector.stop()
+    try:
+        if str(connector.view().get("state") or "").lower() not in ("completed","complete","failed","error","stopped"):
+            connector.stop()
+    except RuntimeError as exc:
+        if "No active reviewer run" not in str(exc):
+            raise
