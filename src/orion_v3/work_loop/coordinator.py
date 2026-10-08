@@ -15,6 +15,7 @@ from .nonce_store import NonceStore
 from .engine import WorkLoopEngine
 from .executor import ExecutionRequest
 from .stop import StopSource
+from .commit_coordinator import CommitCoordinator
 
 
 @dataclass(frozen=True, slots=True)
@@ -32,6 +33,7 @@ class WorkLoopCoordinator:
         self.secret = secret
         self.source_revision = source_revision
         self.stop = stop
+        self.commit_coordinator = CommitCoordinator(stop_source=stop)
         self.executor = SimulatedWorkHand(secret=secret, source_revision=source_revision,
                                           nonce_store=NonceStore(engine.vault.root / 'USED_NONCES.sqlite3'))
 
@@ -52,12 +54,15 @@ class WorkLoopCoordinator:
             return CycleOutcome("stopped", "STOP requested before evidence commit", evidence)
         if evidence.verdict != "indeterminate":
             return CycleOutcome("blocked", "dry-run executor returned unexpected verdict", evidence)
+        generation = self.commit_coordinator.snapshot()
         checked = self.engine.apply_evidence(
             proposal, evidence, required_type="execution",
             expected_source_revision=self.source_revision,
             next_action_on_pass="await next task",
             next_action_on_fail="await qualified executor",
             commit_guard=lambda: not self.stop.stop_requested(),
+            commit_coordinator=self.commit_coordinator,
+            expected_generation=generation,
         )
         if not checked.verification.accepted:
             return CycleOutcome("blocked", checked.verification.reason, evidence)
