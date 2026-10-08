@@ -32,3 +32,13 @@ TheHands published session `c8bbdb2b27f6` on `thehands-results`:
 - Evidence: https://github.com/Sadusor/TheHands-/blob/thehands-results/docs/thehands/session-results/c8bbdb2b27f6.json
 
 This qualifies the Python regression/preflight behavior **only**, not Windows OS isolation, cross-process STOP or real execution. Do not merge experiment until independent sandbox review and physical proof. Next: inspect Windows SRT native enforcement and deployment/cleanup, then plan owner-approved disposable fixture tests.
+
+## SRT native Windows implementation inspection — 2026-10-08
+
+Source files directly inspected (GitHub upstream blobs):
+- `anthropics/sandbox-runtime/README.md` `bd044f68f9240c8c27de1fed4b35eaa5aea411d7`: Windows alpha; dedicated `srt-sandbox` local account; machine-wide WFP fence keyed to sandbox SID; `windows-install` requires elevation; process launch uses `CreateProcessWithLogonW` and a restricted token. Installation is an owner-authorized system change, not an automatic development step.
+- `src/sandbox/windows-sandbox-utils.ts` `fe9d63c3ca887cbcca1fc9e0017f4d6ebcfeabbc`: dependency/user/WFP probes, ACL stamp/restore/grant/revoke, sandboxed command wrapper; partial ACL stamp failure explicitly requires restore.
+- `src/sandbox/sandbox-manager.ts` `a35d7285626de6aa1d424730812c0bc5bffddc59`: records stamped access set and sandbox SID for reset; WFP verification once per process. Session reset does NOT remove machine-wide WFP fence. Examine crash and interrupted cleanup physically.
+- `src/sandbox/sandbox-config.ts` `968c82d754f48bc7a6d6dc27f6a628240658b171`: strict filesystem/network configuration schema.
+
+Next bounded action: **read-only host capability inventory through existing TheHands GitCheck** (OS version, Windows edition, Node/npm, SRT helper presence, relevant non-secret account/service/WFP status), without installing SRT or changing ACLs/WFP. No real sandboxed Work Hand yet. Before staging, ensure commands do not expose private account names, credential material or host paths unnecessarily in published evidence. Owner must explicitly approve any elevated install or security-policy change. This remains a Windows alpha candidate, not a qualified sandbox.
