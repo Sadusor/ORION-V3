@@ -116,6 +116,8 @@ class ProjectVault:
         timestamp = datetime.now(timezone.utc).isoformat()
         with self.journal_path.open("a", encoding="utf-8", newline="\n") as handle:
             handle.write(f"- {timestamp} — {entry}\n")
+            handle.flush()
+            os.fsync(handle.fileno())
 
     def _write_state(self, state: WorkState) -> None:
         payload = json.dumps(
@@ -141,5 +143,8 @@ class ProjectVault:
             f"{_STATE_MARKER}\n{payload}\n"
         )
         temporary = self.state_path.with_suffix(".md.tmp")
-        temporary.write_text(rendered, encoding="utf-8", newline="\n")
+        with temporary.open("w", encoding="utf-8", newline="\n") as stream:
+            stream.write(rendered)
+            stream.flush()
+            os.fsync(stream.fileno())
         temporary.replace(self.state_path)
