@@ -9,6 +9,7 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+import threading
 
 from .contracts import EvidenceRecord, WorkState
 
@@ -26,6 +27,7 @@ class ProjectVault:
         self.state_path = self.root / "STATE.md"
         self.journal_path = self.root / "JOURNAL.md"
         self.repo_path = self.root / "repo"
+        self._mutex = threading.RLock()
 
     def initialize(self, state: WorkState) -> None:
         self.root.mkdir(parents=True, exist_ok=True)
