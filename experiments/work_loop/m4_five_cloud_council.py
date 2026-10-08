@@ -34,7 +34,8 @@ connector=ReviewerConnector(runtime/"coding-mode"/"reviewers",
 models=[m for m in connector.refresh_catalog().get("models",[]) if isinstance(m,dict)
         and m.get("available") is True and m.get("reviewer_id")
         and str(m.get("provider") or "").lower() not in ("ollama","local")
-        and "preview" not in str(m.get("model") or "").lower()]
+        and "preview" not in str(m.get("model") or "").lower()
+        and not any(bad in str(m.get("model") or "").lower() for bad in ("orpheus","allam","whisper","tts","speech","guard","transcribe"))]
 def priority(m):
     s=(str(m.get("model") or "")+" "+str(m.get("provider") or "")).lower()
     return next((i for i,k in enumerate(("gpt-oss-120b","grok","deepseek","qwen","gemini")) if k in s),6)
@@ -70,7 +71,7 @@ try:
         time.sleep(.5)
     else:
         print("M4_COUNCIL> TIMEOUT")
-        raise RuntimeError("five-model council timeout")
+        break
     reviewers=state.get("reviewers") or []
     if isinstance(reviewers,dict):reviewers=list(reviewers.values())
     completed=0
