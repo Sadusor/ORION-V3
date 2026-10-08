@@ -12,7 +12,7 @@ from task_ledger_cloud_trial_001 import runtime_root
 from task_ledger_trial_001_completeness import check, FENCE, MAX_BYTES
 
 CONTRACT = {
-    "package_entrypoint": r"task_ledger[/\]__main__\.py|python\s+-m\s+task_ledger",
+    "package_entrypoint": r"task_ledger/__main__\.py|task_ledger\\__main__\.py|python\s+-m\s+task_ledger",
     "sqlite": r"\bsqlite3\b|\bSQLite\b",
     "environment_db": r"TASK_LEDGER_DB",
     "create_route": r"POST\s+/tasks|do_POST",
