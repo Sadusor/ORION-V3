@@ -18,8 +18,8 @@ class Failure:
     model: str
     category: str
 
-RECOVERABLE = frozenset({"RATE_LIMIT", "PROVIDER", "TRANSPORT", "OVERLOADED", "NO_CREDENTIAL"})
-BLOCKING = frozenset({"STOPPED", "REQUEST", "MALFORMED_RESPONSE", "AUTH", "WRONG_ADAPTER"})
+RECOVERABLE = frozenset({"RATE_LIMIT", "PROVIDER", "TRANSPORT", "OVERLOADED", "NO_CREDENTIAL", "MALFORMED_RESPONSE"})
+BLOCKING = frozenset({"STOPPED", "REQUEST", "AUTH", "WRONG_ADAPTER", "PAID_MODEL_BLOCKED"})
 
 def select_next(*, candidates, failures=(), reserved_families=(), cooldown_models=(),
                 max_attempts=4, stop_requested=False):
