@@ -8,6 +8,7 @@ from collections import Counter
 from pathlib import Path
 sys.path.insert(0,str(Path(__file__).resolve().parent))
 from live_two_cloud_architecture_demo import DONOR,runtime_from_existing_source
+from orion_v3.work_loop.donor_catalog_audit import classify
 
 def main():
     sys.path.insert(0,str(DONOR))
@@ -34,6 +35,12 @@ def main():
         print("ORION_CONNECTOR> PROVIDER",provider[:60],"AVAILABLE_MODELS",n,flush=True)
     for (provider,family),n in sorted(families.items()):
         print("ORION_CONNECTOR> FAMILY",provider[:60],family,"COUNT",n,flush=True)
+    report=classify(catalog)
+    for item in report["candidates"]:
+        print("ORION_DONOR_AUDIT> MODEL",item["provider"],item["model"][:100],
+              "FAMILY",item["family"],"AVAILABLE",item["catalog_available"],
+              "CONFIGURED",item["configured"],"FREE",item["free_entitlement"],flush=True)
+    print("ORION_DONOR_AUDIT> VERIFIED_FREE_FAMILIES",len(report["verified_free_families"]),flush=True)
     print("ORION_CONNECTOR> CATALOG_ONLY_NO_SECRETS_NO_INFERENCE",flush=True)
 
 if __name__=="__main__":main()
