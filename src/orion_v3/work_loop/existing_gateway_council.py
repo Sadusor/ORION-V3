@@ -3,9 +3,12 @@ from .four_slot_council import run_four, SLOTS
 from .unified_cloud_adapter import dispatch, DispatchError
 from .existing_reviewer_slot_adapter import ReviewerInvocationError
 from .free_provider_router import Candidate
+import hashlib
+import json
+from pathlib import Path
 
 def run_gateway_council(*, candidates, credentials, connector, reviewer_ids,
-                        task_id, objective, stop_requested, checkpoint_path=None):
+                        task_id, objective, stop_requested, checkpoint_path=None, evidence_path=None):
     """All slots use the existing free router and provider dispatch.
 
     The caller supplies only confirmed-free candidates and explicit reviewer IDs.
@@ -41,5 +44,22 @@ def run_gateway_council(*, candidates, credentials, connector, reviewer_ids,
         answer=result["text"]
         completed[slot]=answer
         return answer
-    return run_four(pools=pools,invoke=invoke,stop_requested=stop_requested,
+    result=run_four(pools=pools,invoke=invoke,stop_requested=stop_requested,
                     task_id=task_id,checkpoint_path=checkpoint_path,max_attempts=4)
+    if evidence_path is not None:
+        entries=result.get("completed",{})
+        evidence={
+            "schema":"orion.v3.council.advisory.v1",
+            "task_id":task_id,"objective":objective,"status":result["status"],
+            "roles":{slot:{"provider":item["provider"],"model":item["model"],
+                           "family":item["family"],"text":item["text"],
+                           "sha256":hashlib.sha256(item["text"].encode("utf-8")).hexdigest()}
+                     for slot,item in entries.items()},
+            "owner_approval":"NOT_GRANTED","execution":"NOT_PERFORMED",
+            "disagreements":"REQUIRES_OWNER_REVIEW",
+        }
+        destination=Path(evidence_path)
+        destination.parent.mkdir(parents=True,exist_ok=True)
+        with destination.open("x",encoding="utf-8") as handle:
+            json.dump(evidence,handle,indent=2,ensure_ascii=False)
+    return result
