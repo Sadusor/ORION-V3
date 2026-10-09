@@ -53,6 +53,18 @@ def main():
         prompt=PROMPT,stop_requested=lambda:False,timeout=75)
  except ReviewerInvocationError as exc:
   print("ORION_LIVE> FAILURE_CATEGORY",exc.category,flush=True)
+  try:
+   state=connector.view()
+   print("ORION_LIVE> CONNECTOR_STATE",str(state.get("state") or "unknown")[:40] if isinstance(state,dict) else "invalid",flush=True)
+   entries=state.get("reviewers") or [] if isinstance(state,dict) else []
+   if isinstance(entries,dict):entries=list(entries.values())
+   if isinstance(entries,list):
+    for entry in entries:
+     if isinstance(entry,dict) and entry.get("reviewer_id")==args.reviewer_id:
+      print("ORION_LIVE> REVIEWER_STATE",str(entry.get("state") or "unknown")[:40],flush=True)
+      print("ORION_LIVE> REVIEWER_FIELD_NAMES",",".join(sorted(k for k in entry if k in {"state","output","error_code","status_code","failure_category","provider","model"})),flush=True)
+  except Exception:
+   print("ORION_LIVE> DIAGNOSTIC_UNAVAILABLE",flush=True)
   raise SystemExit(2)
  except Exception:
   print("ORION_LIVE> UNCLASSIFIED_CONNECTOR_FAILURE",flush=True)
