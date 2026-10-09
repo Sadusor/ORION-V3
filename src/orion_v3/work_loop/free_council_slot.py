@@ -4,11 +4,20 @@ One independent slot per invocation; fallback never substitutes a reserved famil
 No execution, credential storage, approval or implicit retries. Transport is injected.
 """
 from .free_provider_router import Failure, select_next
+from .council_checkpoint import append_checkpoint
 
 def run_slot(*, candidates, invoke, stop_requested, reserved_families=(),
-             cooldown_models=(), max_attempts=4):
+             cooldown_models=(), max_attempts=4, checkpoint_path=None,
+             task_id=None, slot_id=None):
     if not callable(invoke) or not callable(stop_requested):
         raise ValueError("callbacks required")
+    if checkpoint_path is not None and (not task_id or not slot_id):
+        raise ValueError('checkpoint task and slot required')
+    def record(candidate, status):
+        if checkpoint_path is not None:
+            append_checkpoint(path=checkpoint_path, task_id=task_id, slot_id=slot_id,
+                              provider=candidate.provider, model=candidate.model,
+                              family=candidate.family, status=status)
     failures = []
     evidence = []
     while True:
@@ -29,6 +38,7 @@ def run_slot(*, candidates, invoke, stop_requested, reserved_families=(),
             if not isinstance(category, str):
                 category = "UNCLASSIFIED"
             failures.append(Failure(candidate.provider, candidate.model, category))
+            record(candidate, category)
             evidence.append({"provider":candidate.provider,"model":candidate.model,
                              "family":candidate.family,"status":category})
             continue
@@ -36,9 +46,11 @@ def run_slot(*, candidates, invoke, stop_requested, reserved_families=(),
             return {"status":"STOPPED", "result":None, "evidence":tuple(evidence)}
         if not isinstance(result, str) or not result.strip() or len(result) > 16000:
             failures.append(Failure(candidate.provider,candidate.model,"MALFORMED_RESPONSE"))
+            record(candidate, "MALFORMED_RESPONSE")
             evidence.append({"provider":candidate.provider,"model":candidate.model,
                              "family":candidate.family,"status":"MALFORMED_RESPONSE"})
             continue
+        record(candidate, "COMPLETED")
         evidence.append({"provider":candidate.provider,"model":candidate.model,
                          "family":candidate.family,"status":"COMPLETED"})
         return {"status":"COMPLETED", "result":result, "selected":candidate,
