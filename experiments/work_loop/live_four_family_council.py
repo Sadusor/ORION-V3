@@ -212,6 +212,8 @@ def main():
     used_families = set()
     attempted = set()
     completed = {}
+    provider_failures = {}
+    blocked_providers = set()
 
     for slot in SLOTS:
         prompt = make_prompt(slot, completed)
@@ -226,7 +228,8 @@ def main():
             model_family = candidate["family"]
             identity = (provider, model)
 
-            if model_family in used_families or identity in attempted:
+            if (model_family in used_families or identity in attempted
+                    or provider in blocked_providers):
                 continue
 
             attempted.add(identity)
@@ -281,6 +284,9 @@ def main():
                 break
 
             except DispatchError as exc:
+                provider_failures[provider] = provider_failures.get(provider, 0) + 1
+                if exc.category in ("AUTH", "NO_CREDENTIAL", "WRONG_ADAPTER") or provider_failures[provider] >= 2:
+                    blocked_providers.add(provider)
                 print(
                     "COUNCIL> FAILURE",
                     slot, provider, model_family,
@@ -289,6 +295,7 @@ def main():
                 )
 
             except Exception as exc:
+                blocked_providers.add(provider)
                 print(
                     "COUNCIL> FAILURE_CLASS",
                     slot, provider,
