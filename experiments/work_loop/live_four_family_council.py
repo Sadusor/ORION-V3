@@ -111,10 +111,8 @@ def existing_connector_candidates():
     from provider_vault import ProviderVault
     from reviewer_connector import ReviewerConnector
 
-    runtime = Path(os.environ.get(
-        "LOCALAPPDATA",
-        str(Path.home() / "AppData/Local"),
-    )) / "Orion"
+    from live_two_cloud_architecture_demo import runtime_from_existing_source
+    runtime = runtime_from_existing_source()
 
     connector = ReviewerConnector(
         runtime / "coding-mode" / "reviewers",
@@ -294,6 +292,10 @@ def main():
                     flush=True,
                 )
 
+            except FileExistsError:
+                blocked_providers.add(provider)
+                print("COUNCIL> CONNECTOR_STATE_COLLISION", provider, "BLOCKED", flush=True)
+                continue
             except Exception as exc:
                 blocked_providers.add(provider)
                 print(
