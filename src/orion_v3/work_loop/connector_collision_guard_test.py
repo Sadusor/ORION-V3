@@ -1,5 +1,5 @@
 import unittest
-from orion_v3.work_loop.connector_collision_guard import invoke_collision_safe, ConnectorStateCollision
+from orion_v3.work_loop.connector_collision_guard import invoke_collision_safe, ConnectorStateCollision, sanitized_origin
 from orion_v3.work_loop.unified_cloud_adapter import dispatch, DispatchError
 
 class FakeConnector:
@@ -23,6 +23,15 @@ class CollisionTests(unittest.TestCase):
   self.assertNotIn("sensitive-private-path",str(x.exception))
   self.assertEqual(c.starts,1)
   self.assertEqual(c.stops,0)
+ def test_sanitized_traceback_provenance(self):
+  def donor_failure():
+   raise FileExistsError("SECRET_PATH")
+  try:donor_failure()
+  except FileExistsError as exc:
+   origin,line=sanitized_origin(exc)
+  self.assertEqual(origin,"OTHER_MODULE")
+  self.assertGreater(line,0)
+  self.assertNotIn("SECRET",origin)
  def test_unified_fail_closed(self):
   c=FakeConnector(True)
   with self.assertRaises(DispatchError) as x:
