@@ -28,6 +28,25 @@ class PreflightTests(unittest.TestCase):
         r=probe(candidates=candidates(),key="test",invoke=invoke)
         self.assertEqual(r["status"],"INSUFFICIENT_RESPONSIVE_FAMILIES")
         self.assertEqual(len(r["responsive_families"]),0)
+    def test_malformed_first_model_tries_second_same_family(self):
+        pool=[{"family":"gemma","model":"vendor/gemma-one:free"},
+              {"family":"gemma","model":"vendor/gemma-two:free"}]+candidates()[1:]
+        def invoke(**kw):
+            return {"text":"" if "gemma-one" in kw["model"] else "READY"}
+        r=probe(candidates=pool,key="test",invoke=invoke)
+        self.assertEqual(r["status"],"FOUR_FAMILIES_RESPONSIVE")
+        self.assertEqual([a["status"] for a in r["attempts"][:2]],
+                         ["EMPTY","RESPONSIVE"])
+    def test_rate_limit_skips_same_family(self):
+        pool=[{"family":"gemma","model":"vendor/gemma-one:free"},
+              {"family":"gemma","model":"vendor/gemma-two:free"}]+candidates()[1:]
+        from orion_v3.work_loop.unified_cloud_adapter import DispatchError
+        def invoke(**kw):
+            if "gemma" in kw["model"]:
+                raise DispatchError("RATE_LIMIT")
+            return {"text":"READY"}
+        r=probe(candidates=pool,key="test",invoke=invoke)
+        self.assertEqual(sum(a["family"]=="gemma" for a in r["attempts"]),1)
     def test_no_paid_requests(self):
         pool=[{"family":"paid","model":"vendor/paid"}]+candidates()
         calls=[]
