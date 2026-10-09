@@ -1,6 +1,6 @@
 # ORION V3 — Coding workspace UI direction (deferred decision)
 
-Status: DESIGN INTENT ONLY — revisit after the resilient multi-AI coding council passes live end-to-end tests.
+Status: OWNER UI PREFERENCE RECORDED — Codex-style workspace is the primary reference; implementation deferred until resilient council proof.
 
 ## Product direction
 Do not make the Jarvis-like visual shell the entire interface. Build a replaceable AI development workspace inspired by the useful interaction patterns of Codex, Claude Code and Cursor, while retaining ORION's visual identity.
