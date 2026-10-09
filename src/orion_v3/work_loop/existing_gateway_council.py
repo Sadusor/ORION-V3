@@ -57,6 +57,8 @@ def run_gateway_council(*, candidates, credentials, connector, reviewer_ids,
                      for slot,item in entries.items()},
             "owner_approval":"NOT_GRANTED","execution":"NOT_PERFORMED",
             "disagreements":"REQUIRES_OWNER_REVIEW",
+            "failed_slot":result.get("failed_slot"),
+            "failure_evidence":list(result.get("evidence",())),
         }
         destination=Path(evidence_path)
         destination.parent.mkdir(parents=True,exist_ok=True)
