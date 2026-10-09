@@ -12,7 +12,7 @@ class UniqueSessionIdTest(unittest.TestCase):
         now=datetime(2026,10,9,tzinfo=timezone.utc)
         self.assertNotEqual(new_session_id(now,"a"*32),new_session_id(now,"b"*32))
     def test_entropy_uses_crypto_source(self):
-        with patch("src.orion_v3.work_loop.unique_session_id.token_hex",return_value="f"*32) as rng:
+        with patch("orion_v3.work_loop.unique_session_id.token_hex",return_value="f"*32) as rng:
             self.assertTrue(new_session_id().endswith("-"+"f"*32))
             rng.assert_called_once_with(16)
     def test_reject_naive_time(self):
