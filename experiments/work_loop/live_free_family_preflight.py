@@ -1,6 +1,6 @@
 """Bounded, owner-triggered free-model family preflight; never starts council.
 
-One minimal text request per distinct family, max six attempts total.
+At most two distinct models per family and six attempts total.
 Catalog listing is not proof of callability. No keys, prompts or response text
 are saved. A passing probe is momentary, not a future quota guarantee.
 """
@@ -20,15 +20,15 @@ def probe(*, candidates, key, invoke=dispatch, limit=6):
         raise ValueError("invalid probe limit")
     families=set()
     attempted=[]
-    seen=set()
+    family_attempts={}
     for candidate in candidates:
         family=candidate["family"]
         model=candidate["model"]
-        if family in seen or len(attempted)>=limit or len(families)>=4:
+        if family in families or family_attempts.get(family,0)>=2 or len(attempted)>=limit or len(families)>=4:
             continue
-        seen.add(family)
         if not model.endswith(":free"):
             continue
+        family_attempts[family]=family_attempts.get(family,0)+1
         try:
             response=invoke(provider="openrouter",model=model,
                 prompt="Reply with exactly READY.",api_key=key,
@@ -43,6 +43,12 @@ def probe(*, candidates, key, invoke=dispatch, limit=6):
                           "family":family,"status":status})
         if status=="RESPONSIVE":
             families.add(family)
+        elif status in ("AUTH","REQUEST","WRONG_ADAPTER","PAID_MODEL_BLOCKED","NO_CREDENTIAL"):
+            # Do not spend further probes after a provider-wide or unsafe failure.
+            break
+        elif status=="RATE_LIMIT":
+            # Another model of this family likely shares quota; move on to others.
+            family_attempts[family]=2
     return {"schema":"orion.v3.free-family-preflight.v1",
             "status":"FOUR_FAMILIES_RESPONSIVE" if len(families)>=4 else "INSUFFICIENT_RESPONSIVE_FAMILIES",
             "responsive_families":sorted(families),"attempts":attempted,
