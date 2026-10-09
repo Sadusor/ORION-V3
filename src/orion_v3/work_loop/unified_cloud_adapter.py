@@ -1,9 +1,7 @@
 ﻿"""Unified proposal-only cloud adapter. No automatic retries or execution."""
 
-from .existing_reviewer_slot_adapter import (
-    invoke_existing,
-    ReviewerInvocationError,
-)
+from .existing_reviewer_slot_adapter import ReviewerInvocationError
+from .connector_collision_guard import invoke_collision_safe
 from .openrouter_text_adapter import (
     completion,
     CloudRequestError,
@@ -70,7 +68,7 @@ def dispatch(
             raise DispatchError("WRONG_ADAPTER")
 
         try:
-            output = invoke_existing(
+            output = invoke_collision_safe(
                 connector=connector,
                 reviewer_id=reviewer_id,
                 prompt=prompt,
