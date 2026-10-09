@@ -1,4 +1,7 @@
 import unittest
+import tempfile
+import json
+from pathlib import Path
 from orion_v3.work_loop.free_provider_router import Candidate
 from orion_v3.work_loop.free_council_slot import run_slot
 from orion_v3.work_loop.openrouter_text_adapter import CloudRequestError
@@ -44,5 +47,23 @@ class SlotTests(unittest.TestCase):
     def test_invalid_response_halts(self):
         r=run_slot(candidates=POOL,invoke=lambda c:"",stop_requested=lambda:False)
         self.assertEqual(r["status"],"NON_RECOVERABLE")
+
+    def test_checkpoint_records_fallback(self):
+        with tempfile.TemporaryDirectory() as temp:
+            path=Path(temp)/"council.jsonl"
+            def invoke(c):
+                if c.provider=="groq":raise CloudRequestError("RATE_LIMIT")
+                return "proposal"
+            r=run_slot(candidates=POOL,invoke=invoke,stop_requested=lambda:False,
+                       checkpoint_path=path,task_id="task-1",slot_id="author-a")
+            records=[json.loads(line) for line in path.read_text().splitlines()]
+            self.assertEqual(r["status"],"COMPLETED")
+            self.assertEqual([x["status"] for x in records],["RATE_LIMIT","COMPLETED"])
+            self.assertEqual(records[1]["previous"],records[0]["sha256"])
+    def test_checkpoint_requires_scope(self):
+        with tempfile.TemporaryDirectory() as temp:
+            with self.assertRaises(ValueError):
+                run_slot(candidates=POOL,invoke=lambda c:"proposal",
+                         stop_requested=lambda:False,checkpoint_path=Path(temp)/"log")
 
 if __name__=="__main__":unittest.main()
