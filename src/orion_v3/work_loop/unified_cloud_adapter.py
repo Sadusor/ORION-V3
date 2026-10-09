@@ -9,8 +9,10 @@ from .openrouter_text_adapter import (
 
 
 class DispatchError(Exception):
-    def __init__(self, category):
+    def __init__(self, category, origin="UNKNOWN", line=0):
         self.category = category
+        self.origin = origin
+        self.line = line
         super().__init__(category)
 
 
@@ -76,7 +78,7 @@ def dispatch(
                 timeout=timeout,
             )
         except ReviewerInvocationError as exc:
-            raise DispatchError(exc.category) from None
+            raise DispatchError(exc.category, getattr(exc, "origin", "UNKNOWN"), getattr(exc, "line", 0)) from None
 
         return {
             "provider": provider,
