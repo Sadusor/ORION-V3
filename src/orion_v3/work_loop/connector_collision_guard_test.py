@@ -38,6 +38,8 @@ class CollisionTests(unittest.TestCase):
    dispatch(provider="groq",model="m",prompt="plan",stop_requested=lambda:False,connector=c,reviewer_id="r1",timeout=1)
   self.assertEqual(x.exception.category,"CONNECTOR_STATE_COLLISION")
   self.assertEqual(c.starts,1)
+  self.assertEqual(x.exception.origin,"OTHER_MODULE")
+  self.assertGreater(x.exception.line,0)
  def test_success_preserved(self):
   c=FakeConnector()
   r=dispatch(provider="groq",model="m",prompt="plan",stop_requested=lambda:False,connector=c,reviewer_id="r1",timeout=1)
