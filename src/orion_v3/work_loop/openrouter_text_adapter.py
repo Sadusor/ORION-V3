@@ -25,6 +25,10 @@ def classify_status(status):
 def completion(*, model, prompt, api_key, timeout=45, transport=None):
     if not isinstance(model, str) or not model or len(model) > 200 or any(c.isspace() for c in model):
         raise ValueError("invalid model")
+    # Fail closed: this adapter is exclusively for OpenRouter free-model IDs.
+    # A free suffix is necessary, not proof of current quota or zero account spend.
+    if not model.endswith(":free"):
+        raise CloudRequestError("PAID_MODEL_BLOCKED")
     if not isinstance(prompt, str) or not prompt or len(prompt) > 24000:
         raise ValueError("invalid prompt")
     if not isinstance(api_key, str) or not api_key:
