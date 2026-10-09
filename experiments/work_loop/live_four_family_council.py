@@ -283,7 +283,7 @@ def main():
 
             except DispatchError as exc:
                 provider_failures[provider] = provider_failures.get(provider, 0) + 1
-                if exc.category in ("AUTH", "NO_CREDENTIAL", "WRONG_ADAPTER") or provider_failures[provider] >= 2:
+                if exc.category in ("AUTH", "NO_CREDENTIAL", "WRONG_ADAPTER", "CONNECTOR_STATE_COLLISION") or provider_failures[provider] >= 2:
                     blocked_providers.add(provider)
                 print(
                     "COUNCIL> FAILURE",
