@@ -18,6 +18,15 @@ class RouterTests(unittest.TestCase):
     def test_budget(self):
         f=[Failure("groq","gpt-oss","RATE_LIMIT")]*4
         self.assertEqual(select_next(candidates=POOL, failures=f)[1], "ATTEMPT_BUDGET_EXHAUSTED")
+    def test_malformed_model_falls_back(self):
+        selected,reason=select_next(candidates=POOL,
+            failures=[Failure("groq","gpt-oss","MALFORMED_RESPONSE")])
+        self.assertEqual(reason,"SELECTED")
+        self.assertEqual(selected,POOL[1])
+    def test_paid_model_error_halts(self):
+        self.assertEqual(select_next(candidates=POOL,
+            failures=[Failure("groq","gpt-oss","PAID_MODEL_BLOCKED")])[1],
+            "NON_RECOVERABLE")
     def test_auth_halts(self):
         self.assertEqual(select_next(candidates=POOL, failures=[Failure("groq","gpt-oss","AUTH")])[1], "NON_RECOVERABLE")
     def test_cooldown(self):
