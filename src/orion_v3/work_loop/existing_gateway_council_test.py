@@ -48,6 +48,19 @@ class GatewayCouncilTests(unittest.TestCase):
                 with self.assertRaises(FileExistsError):
                     run(evidence_path=path)
 
+    def test_failed_attempts_persist_sanitized_evidence(self):
+        with tempfile.TemporaryDirectory() as d:
+            path=Path(d)/"failure.json"
+            with patch("orion_v3.work_loop.existing_gateway_council.dispatch",
+                       side_effect=DispatchError("REQUEST")):
+                result=run(evidence_path=path)
+            payload=json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(result["status"],"NON_RECOVERABLE")
+            self.assertEqual(payload["failed_slot"],"author_a")
+            self.assertEqual(payload["failure_evidence"][0]["status"],"REQUEST")
+            self.assertEqual(payload["roles"],{})
+            self.assertEqual(payload["execution"],"NOT_PERFORMED")
+
     def test_paid_openrouter_blocked(self):
         with self.assertRaises(ValueError):
             run([Candidate("openrouter","vendor/paid","gemma")])
