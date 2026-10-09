@@ -44,9 +44,17 @@ class SlotTests(unittest.TestCase):
         def invoke(c):raise CloudRequestError("PROVIDER")
         r=run_slot(candidates=POOL,invoke=invoke,stop_requested=lambda:False,max_attempts=2)
         self.assertEqual((r["status"],len(r["evidence"])),("ATTEMPT_BUDGET_EXHAUSTED",2))
-    def test_invalid_response_halts(self):
+    def test_invalid_response_falls_back_until_candidates_exhausted(self):
         r=run_slot(candidates=POOL,invoke=lambda c:"",stop_requested=lambda:False)
-        self.assertEqual(r["status"],"NON_RECOVERABLE")
+        self.assertEqual(r["status"],"NO_ELIGIBLE_FREE_CANDIDATE")
+        self.assertEqual(len(r["evidence"]),len(POOL))
+        self.assertTrue(all(x["status"]=="MALFORMED_RESPONSE" for x in r["evidence"]))
+    def test_invalid_response_falls_back_to_valid_model(self):
+        def invoke(c):
+            return "" if c.provider=="groq" else "proposal"
+        r=run_slot(candidates=POOL,invoke=invoke,stop_requested=lambda:False)
+        self.assertEqual(r["status"],"COMPLETED")
+        self.assertEqual([x["status"] for x in r["evidence"]],["MALFORMED_RESPONSE","COMPLETED"])
 
     def test_checkpoint_records_fallback(self):
         with tempfile.TemporaryDirectory() as temp:
