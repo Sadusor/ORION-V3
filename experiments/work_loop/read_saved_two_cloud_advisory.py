@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 
 SOURCE = Path(r"E:\ORION-WORKLOOP-REMOTE-TEST\artifacts\multi-ai\live-70483bb2c45747e3b58cf4215d0221db.json")
 MAX_FILE = 150_000
@@ -20,6 +21,8 @@ def redact(value):
     return value
 
 def main():
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="backslashreplace")
     if not SOURCE.is_file() or SOURCE.is_symlink() or SOURCE.stat().st_size > MAX_FILE:
         raise RuntimeError("Expected bounded advisory file missing or invalid")
     raw = SOURCE.read_bytes()
