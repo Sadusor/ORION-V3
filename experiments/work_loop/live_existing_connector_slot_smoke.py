@@ -19,7 +19,8 @@ PROMPT=("ADVISORY ONLY. Propose three acceptance tests for a tiny offline Python
 def main():
  parser=argparse.ArgumentParser()
  parser.add_argument("--confirm-live-proposal",action="store_true")
- parser.add_argument("--reviewer-id",required=True)
+ parser.add_argument("--reviewer-id",default=None)
+ parser.add_argument("--auto-gemini-flash",action="store_true")
  args=parser.parse_args()
  if not args.confirm_live_proposal:
   raise SystemExit("ORION_LIVE> NOT_AUTHORIZED")
@@ -32,11 +33,20 @@ def main():
  connector=ReviewerConnector(runtime/"coding-mode"/"reviewers",
      provider_vault=ProviderVault(runtime/"provider-vault"),configured_free_providers=[])
  catalog=connector.refresh_catalog()
- match=[m for m in catalog.get("models",[]) if isinstance(m,dict)
-        and m.get("reviewer_id")==args.reviewer_id and m.get("available") is True
+ models=[m for m in catalog.get("models",[]) if isinstance(m,dict) and m.get("available") is True]
+ if args.auto_gemini_flash and not args.reviewer_id:
+  choices=[m for m in models if str(m.get("provider") or "").lower()=="gemini"
+           and "flash" in str(m.get("model") or "").lower()
+           and not any(x in str(m.get("model") or "").lower()
+                       for x in ("preview","image","tts","audio","live","thinking","lite"))]
+  choices.sort(key=lambda m:(0 if "2.5-flash" in str(m.get("model") or "").lower() else 1,str(m.get("model") or "")))
+  if not choices:raise SystemExit("ORION_LIVE> NO_STABLE_GEMINI_FLASH")
+  args.reviewer_id=choices[0].get("reviewer_id")
+ match=[m for m in models if m.get("reviewer_id")==args.reviewer_id
         and str(m.get("provider") or "").lower() in ("groq","gemini")]
- if len(match)!=1:
-  raise SystemExit("ORION_LIVE> REVIEWER_NOT_AVAILABLE")
+ if len(match)!=1:raise SystemExit("ORION_LIVE> REVIEWER_NOT_AVAILABLE")
+ print("ORION_LIVE> SELECTED_PROVIDER",str(match[0].get("provider") or "")[:30],flush=True)
+ print("ORION_LIVE> SELECTED_MODEL",str(match[0].get("model") or "")[:100],flush=True)
  print("ORION_LIVE> START_PROPOSAL_ONLY",flush=True)
  try:
   output=invoke_existing(connector=connector,reviewer_id=args.reviewer_id,
