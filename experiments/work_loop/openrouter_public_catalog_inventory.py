@@ -15,8 +15,8 @@ def main():
     with urlopen(req, timeout=20) as response:
         if response.status != 200:
             raise RuntimeError("catalog request failed")
-        raw = response.read(3_000_001)
-    if len(raw) > 3_000_000:
+        raw = response.read(15_000_001)
+    if len(raw) > 15_000_000:
         raise RuntimeError("catalog exceeds response bound")
     rows = normalize_catalog(json.loads(raw.decode("utf-8")))
     families = sorted(set(row["family"] for row in rows))
