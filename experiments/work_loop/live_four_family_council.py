@@ -282,6 +282,8 @@ def main():
                 break
 
             except DispatchError as exc:
+                if exc.category == "CONNECTOR_STATE_COLLISION":
+                    print("COUNCIL> COLLISION_ORIGIN", exc.origin, "LINE", exc.line, flush=True)
                 provider_failures[provider] = provider_failures.get(provider, 0) + 1
                 if exc.category in ("AUTH", "NO_CREDENTIAL", "WRONG_ADAPTER", "CONNECTOR_STATE_COLLISION") or provider_failures[provider] >= 2:
                     blocked_providers.add(provider)
