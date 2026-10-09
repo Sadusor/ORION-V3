@@ -28,7 +28,7 @@ def main():
         result=run_gateway_council(candidates=candidates,
             credentials={"openrouter":key},connector=connector,reviewer_ids={},
             task_id="first-task-tracker-advisory",objective=TASK,
-            stop_requested=lambda:False,evidence_path=args.output)
+            stop_requested=lambda:False,evidence_path=args.output,max_attempts=8)
         print("COUNCIL> STATUS",result["status"],"ROLES",len(result.get("completed",{})),flush=True)
         print("COUNCIL> FAILED_SLOT",result.get("failed_slot","NONE"),flush=True)
         for entry in result.get("evidence",()):
