@@ -30,6 +30,9 @@ def main():
             task_id="first-task-tracker-advisory",objective=TASK,
             stop_requested=lambda:False,evidence_path=args.output)
         print("COUNCIL> STATUS",result["status"],"ROLES",len(result.get("completed",{})),flush=True)
+        print("COUNCIL> FAILED_SLOT",result.get("failed_slot","NONE"),flush=True)
+        for entry in result.get("evidence",()):
+            print("COUNCIL> ATTEMPT",entry["provider"],entry["model"],entry["status"],flush=True)
         print("COUNCIL> EVIDENCE",args.output,flush=True)
         print("COUNCIL> OWNER_APPROVAL_NOT_GRANTED NO_EXECUTION",flush=True)
         return 0 if result["status"]=="PROPOSAL_ONLY_COMPLETE" else 2
