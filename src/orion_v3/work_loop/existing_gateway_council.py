@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 
 def run_gateway_council(*, candidates, credentials, connector, reviewer_ids,
-                        task_id, objective, stop_requested, checkpoint_path=None, evidence_path=None):
+                        task_id, objective, stop_requested, checkpoint_path=None, evidence_path=None, max_attempts=4):
     """All slots use the existing free router and provider dispatch.
 
     The caller supplies only confirmed-free candidates and explicit reviewer IDs.
@@ -45,7 +45,7 @@ def run_gateway_council(*, candidates, credentials, connector, reviewer_ids,
         completed[slot]=answer
         return answer
     result=run_four(pools=pools,invoke=invoke,stop_requested=stop_requested,
-                    task_id=task_id,checkpoint_path=checkpoint_path,max_attempts=4)
+                    task_id=task_id,checkpoint_path=checkpoint_path,max_attempts=max_attempts)
     if evidence_path is not None:
         entries=result.get("completed",{})
         evidence={
