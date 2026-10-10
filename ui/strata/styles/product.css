@@ -115,3 +115,8 @@
  .phone #mobile-quick-menu{grid-template-columns:repeat(3,1fr)}
  .phone #mobile-quick-menu button:nth-child(n+4){min-height:48px}
 }
+
+/* Owner-directed reading controls for long streaming Qwen answers. */
+#chat .m.or .orion-copy-response{display:block;float:right;margin:0 0 8px 12px;padding:5px 11px;min-height:28px;border:1px solid rgba(118,207,228,.25);border-radius:9px;background:rgba(18,32,42,.92);color:#9cdce9;font:12px/1.3 sans-serif;cursor:pointer;position:relative;z-index:2}
+#chat .m.or .orion-copy-response:hover{background:rgba(43,80,94,.9)}
+#chat .m.or[data-live-brain] {overflow-wrap:anywhere;user-select:text;-webkit-user-select:text}
