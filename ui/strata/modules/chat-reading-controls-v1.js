@@ -34,7 +34,8 @@
    min.onclick=()=>{
      const collapsed=node.classList.toggle('orion-answer-minimized');
      node.classList.remove('orion-answer-maximized');
-     min.textContent=collapsed?'+':'−';
+     if(collapsed)node.classList.remove('orion-answer-maximized');
+     min.textContent=collapsed?'Restore':'−';
      min.setAttribute('aria-label',collapsed?'Restore answer':'Minimize answer');
    };
    max.onclick=()=>{
@@ -82,7 +83,7 @@
    min.setAttribute('aria-label','Minimize or restore panel');
    max.setAttribute('aria-label','Maximize or restore panel');
    close.setAttribute('aria-label','Close panel in this view');
-   min.onclick=()=>{const collapsed=card.classList.toggle('orion-answer-minimized');card.classList.remove('orion-answer-maximized');min.textContent=collapsed?'+':'−';};
+   min.onclick=()=>{const collapsed=card.classList.toggle('orion-answer-minimized');card.classList.remove('orion-answer-maximized');min.textContent=collapsed?'Restore':'−';};
    max.onclick=()=>{card.classList.remove('orion-answer-minimized');min.textContent='−';max.textContent=card.classList.toggle('orion-answer-maximized')?'▣':'□';};
    close.onclick=()=>{card.style.display='none';};
    tools.append(min,max,close);card.insertBefore(tools,card.firstChild);
