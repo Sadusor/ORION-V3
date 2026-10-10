@@ -91,7 +91,7 @@ const RealBridge=(function(){
   forgetPairing(){LS('orionToken',null);setLink('unpaired')},
   call,
   /* conversation: the real entry is the Local Brain draft route. Text never executes by itself; ORION's backend decides. */
-  async sendGoal(text,turn,model){const r=await call('POST','/api/local-hand/draft',{goal:text,model:model||pickModel()},{label:'Ask ORION'});return{ok:r.ok,cls:r.cls,error:r.ok?'':r.message,turn}},
+  async sendGoal(text,turn,model){const conversationId=String(turn&&turn.conversation_id||'');const r=await call('POST','/api/local-hand/draft',{goal:text,model:model||pickModel(),conversation_id:conversationId},{label:'Ask ORION'});return{ok:r.ok,cls:r.cls,error:r.ok?'':r.message,turn}},
   revise:(gesture)=>call('POST','/api/local-hand/revise',{model:pickModel()},{label:'Revise draft',gesture}),
   /* Approve & Run for generated PowerShell. Requires a trusted click. Sends exactly the script ORION proposed. */
   approveScript:(script,gesture)=>call('POST','/api/local-hand/run',{script,publish_github:false},{label:'Approve & Run',gesture}),
