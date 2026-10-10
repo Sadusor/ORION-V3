@@ -37,3 +37,8 @@
 }
 .phone .orion-lanes-toggle{display:none!important}
 .phone #chat .m.or.orion-answer-maximized{left:8px!important;right:8px!important;top:64px!important;bottom:85px!important}
+
+#rz .card.main>.orion-reading-tools{display:flex;justify-content:flex-end;gap:6px;margin-bottom:12px}
+#rz .orion-reading-tools button{padding:4px 9px;border:1px solid #476075;border-radius:7px;color:#c0dae7;background:#152638;cursor:pointer}
+#rz .card.main.orion-answer-minimized>:not(.orion-reading-tools){display:none}
+#rz .card.main.orion-answer-maximized{max-width:95vw;width:95vw;max-height:75vh;overflow:auto}
