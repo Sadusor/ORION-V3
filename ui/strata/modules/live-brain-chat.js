@@ -40,10 +40,32 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
 
   const tag=document.createElement('div');
   tag.textContent='LIVE · UNVERIFIED';
+  tag.dataset.liveBrainLabel='1';
   tag.style.fontSize='10px';
   tag.style.opacity='.58';
   tag.style.marginBottom='6px';
   tag.style.letterSpacing='.08em';
+
+  const tools=document.createElement('div');
+  tools.className='orion-reading-tools';
+  const min=document.createElement('button');
+  const max=document.createElement('button');
+  min.type=max.type='button';
+  min.textContent='−';max.textContent='□';
+  min.title='Minimize or restore answer';max.title='Maximize or restore answer';
+  min.setAttribute('aria-label','Minimize or restore answer');
+  max.setAttribute('aria-label','Maximize or restore answer');
+  min.addEventListener('click',()=>{
+   const reduced=m.classList.toggle('orion-answer-minimized');
+   m.classList.remove('orion-answer-maximized');
+   min.textContent=reduced?'Restore':'−';max.textContent='□';
+  });
+  max.addEventListener('click',()=>{
+   m.classList.remove('orion-answer-minimized');min.textContent='−';
+   const expanded=m.classList.toggle('orion-answer-maximized');
+   max.textContent=expanded?'▣':'□';
+  });
+  tools.append(min,max);
 
   const body=document.createElement('div');
   body.style.whiteSpace='pre-wrap';
@@ -58,6 +80,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    try{await navigator.clipboard.writeText(value);copy.textContent='Copied';}
    catch(_){const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(body);selection.removeAllRanges();selection.addRange(range);copy.textContent='Select text to copy';}
   });
+  m.appendChild(tools);
   m.appendChild(tag);
   m.appendChild(copy);
   m.appendChild(body);
@@ -97,7 +120,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    }
    ensure(chat,nextKey);
    bubble.dataset.liveBrain='verified';
-   const tag=bubble.firstChild;
+   const tag=bubble.querySelector('[data-live-brain-label]');
    if(tag)tag.textContent='VERIFIED';
    const atBottom=nearBottom(chat);
    cancelReveal();
