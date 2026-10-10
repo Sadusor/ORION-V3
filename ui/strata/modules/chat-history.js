@@ -120,7 +120,11 @@ window.ORION_CHAT_HISTORY=(function(){
    });
    host.scrollTop=host.scrollHeight
   }
-  if(typeof app!=='undefined')app.classList.toggle('has-chat',conversationMessages(id).length>0);
+  if(typeof app!=='undefined'){
+   const hasMessages=conversationMessages(id).length>0;
+   app.classList.toggle('has-chat',hasMessages);
+   app.classList.toggle('chat',hasMessages);
+  }
   closeAction();closeDrawer();renderHistory()
  }
  function newConversation(){
@@ -128,7 +132,7 @@ window.ORION_CHAT_HISTORY=(function(){
   applyLocal({conversations:[{id,title:'New chat',project_id:'',pinned:0,archived:0,deleted:0,created_at_ms:t,updated_at_ms:t}],messages:[]});
   if(chat())chat().textContent='';
   if(window.ORION_LIVE_BRAIN_CHAT&&ORION_LIVE_BRAIN_CHAT.reset)ORION_LIVE_BRAIN_CHAT.reset('');
-  if(typeof app!=='undefined')app.classList.remove('has-chat');
+  if(typeof app!=='undefined')app.classList.remove('has-chat','chat');
   closeDrawer();const i=document.getElementById('inp');if(i)i.focus()
  }
  function patchConversation(id,patch){
