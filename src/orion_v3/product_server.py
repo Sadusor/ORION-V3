@@ -17,6 +17,7 @@ from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.gitea_readonly_v1 import GiteaReadonly
 from modules.gitea_qwen_context_v1 import build_repository_context
 from modules.gitea_chat_brain_v1 import GiteaChatStreamingBrain, gitea_chat_request
+from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
@@ -656,8 +657,12 @@ class Handler(BaseHTTPRequestHandler):
                 # Optional source lookup in ordinary ORION chat; owner directive is preserved.
                 from contextlib import nullcontext
                 owner_text = str(body.get("owner_message") or body.get("memory_query") or body.get("goal") or "")
-                scope = gitea_chat_request(project_id=str(body.get("project_id") or ""),
-                                           owner_text=owner_text,state_dir=STATE_ROOT) if body.get("gitea_search") is True else nullcontext()
+                # An explicit ORION question can retrieve reference documentation in
+                # Personal chat; memory scope remains the original client project.
+                orion_question = is_orion_project_question(owner_text)
+                lookup_project = "orion-v3" if orion_question else str(body.get("project_id") or "")
+                scope = gitea_chat_request(project_id=lookup_project,
+                                           owner_text=owner_text,state_dir=STATE_ROOT) if (orion_question or body.get("gitea_search") is True) else nullcontext()
                 with scope:
                     started = LOCAL_BRAIN.start(
                         str(body.get("goal", "")),
