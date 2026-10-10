@@ -1,0 +1,25 @@
+/* Conversation-scoped controls replace per-answer minimization. */
+#chat>.orion-conversation-tools{
+ position:sticky;top:0;z-index:20;display:flex;justify-content:flex-end;
+ align-items:center;gap:7px;padding:7px 4px 9px;
+ background:rgba(9,19,31,.96);border-bottom:1px solid rgba(140,180,205,.18);
+ margin:0 0 10px;
+}
+#chat>.orion-conversation-tools button{
+ border:1px solid rgba(140,180,205,.32);border-radius:8px;
+ background:#172b3e;color:#cde8f0;min-height:29px;padding:3px 11px;
+ font:12px/1.5 sans-serif;cursor:pointer;
+}
+#chat .m.or>.orion-reading-tools{display:none!important}
+#app.orion-conversation-minimized #chat{max-height:54px!important;min-height:54px!important;overflow:hidden!important}
+#app.orion-conversation-minimized #chat>.m,#app.orion-conversation-minimized #chat>.card{display:none!important}
+#app.orion-conversation-maximized #chat{
+ position:fixed!important;z-index:25!important;left:5vw!important;right:5vw!important;
+ top:6vh!important;bottom:7vh!important;transform:none!important;
+ width:90vw!important;max-width:none!important;max-height:none!important;
+ height:87vh!important;overflow:auto!important;
+ padding:16px!important;background:#091522!important;
+ border:1px solid rgba(140,180,205,.32);border-radius:16px;
+}
+.phone #chat>.orion-conversation-tools{position:sticky;top:0}
+.phone.orion-conversation-maximized #chat{left:2vw!important;right:2vw!important;width:96vw!important}
