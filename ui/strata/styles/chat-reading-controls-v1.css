@@ -1,0 +1,13 @@
+/* ORION chat readability controls V1: presentation only; no execution changes. */
+#app:not(.phone) #stopb{position:fixed;top:72px;right:24px;left:auto;transform:none;z-index:8;margin:0}
+#app:not(.phone) #stopb:disabled{display:none}
+#app:not(.phone) #chat{width:min(920px,calc(100vw - 440px));}
+#app:not(.phone).chat #chat{max-height:56vh}
+#chat .orion-alert-tools{display:flex;justify-content:flex-end;gap:6px;margin:0 0 8px}
+#chat .orion-alert-tools button{border:1px solid rgba(148,174,193,.28);border-radius:7px;background:#152638;color:#c0dae7;padding:3px 9px;font:12px/1.5 sans-serif;cursor:pointer}
+#chat .orion-alert-tools button:hover{background:#28445c}
+#chat .orion-alert-minimized .orion-alert-body{display:none}
+#chat .orion-alert-maximized{position:fixed!important;z-index:20!important;left:clamp(12px,13vw,260px)!important;right:24px!important;top:70px!important;bottom:94px!important;width:auto!important;max-width:none!important;max-height:none!important;overflow:auto!important;background:#0e1927!important;border:1px solid rgba(137,166,189,.4)!important;border-radius:16px!important;padding:20px!important;box-shadow:0 22px 80px rgba(0,0,0,.75)!important}
+.phone #chat .orion-alert-maximized{left:8px!important;right:8px!important;top:64px!important;bottom:85px!important}
+@media(max-width:1100px){#app:not(.phone) #chat{width:min(800px,calc(100vw - 280px))}}
+@media(max-width:760px){#app:not(.phone) #chat{width:94vw}}
