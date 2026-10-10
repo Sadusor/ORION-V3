@@ -4,7 +4,7 @@ window.ORION_CHAT_HISTORY=(function(){
  const SCHEMA='orion.chat-history/1';
  const native=window.ORION_NATIVE_HISTORY||null;
  const nativeApp=window.ORION_NATIVE_APP||null;
- let state={schema:SCHEMA,conversations:[],messages:[]},ready=false,syncTimer=0,actionTarget='';
+ let state={schema:SCHEMA,conversations:[],messages:[]},ready=false,syncTimer=0,actionTarget='',browsingHistory=false;
  const escH=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const now=()=>Date.now(),uid=p=>p+'-'+now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
  const asBool=v=>v===true||v===1||v==='1';
@@ -109,6 +109,7 @@ window.ORION_CHAT_HISTORY=(function(){
 
  function loadConversation(id){
   const c=getConversation(id);if(!c)return;
+  browsingHistory=true;
   setCurrent(id);
   if(window.ORION_LIVE_BRAIN_CHAT&&ORION_LIVE_BRAIN_CHAT.reset)ORION_LIVE_BRAIN_CHAT.reset('');
   const host=chat();if(host){
@@ -128,6 +129,7 @@ window.ORION_CHAT_HISTORY=(function(){
   closeAction();closeDrawer();renderHistory()
  }
  function newConversation(){
+  browsingHistory=false;
   const id=uid('c'),t=now();setCurrent(id);
   applyLocal({conversations:[{id,title:'New chat',project_id:'',pinned:0,archived:0,deleted:0,created_at_ms:t,updated_at_ms:t}],messages:[]});
   if(chat())chat().textContent='';
@@ -230,6 +232,6 @@ window.ORION_CHAT_HISTORY=(function(){
   setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
- return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,get snapshot(){return state}};
+ return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,resumeLive(){browsingHistory=false},get browsing(){return browsingHistory},get snapshot(){return state}};
 })();
 setTimeout(()=>window.ORION_CHAT_HISTORY.init(),0);
