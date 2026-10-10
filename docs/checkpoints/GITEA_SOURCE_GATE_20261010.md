@@ -23,3 +23,6 @@ Live Gitea file-content retrieval, authenticated private repo discovery, complet
 3. Use commit-pinned project-scoped code retrieval as untrusted context to Qwen; no automatic canonical-memory promotion.
 4. Qualify Windows isolation, independent evidence and STOP before any automated file writes/pushes.
 5. Do not edit Gitea SQLite or repository backing directories; use supported REST and Git interfaces.
+
+## Update — live source content PASS
+TheHands PowerShell 1 session `85ba347178fa`, task source commit `9d2f694321304ff549a125bac58793e318e859ae`: overall PASS. All 13 read-only Gitea module tests PASS. Real Gitea `MyGitea/ORION-V3` at commit `be618edb8cd40a7e5da0210ef1b4599a0cfbf220`: 53 Python candidates; successfully retrieved `android/scripts/check_screen.py` (1368 characters), tagged `untrusted_source`. The earlier HTTP 404 was due to assuming the local import contained a newer GitHub path; the second failure was a reused checkout directory. Both diagnostic blockers are resolved. Freeze this proven read-only source access interface as baseline. Next: new project-scoped source-context orchestration module and tests; wiring into Qwen UI is not yet proven. No Gitea writes or direct database access were performed.
