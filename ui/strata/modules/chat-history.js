@@ -84,7 +84,7 @@ window.ORION_CHAT_HISTORY=(function(){
   if(n.dataset.historyLoaded==='1')return null;
   if(n.classList.contains('you'))return{role:'user',text:n.textContent,source:PHONE?'phone-text':'pc-text'};
   if(n.classList.contains('or')){
-   if(n.dataset.liveBrain==='unverified')return null;
+   if(n.dataset.liveBrain&&n.dataset.liveBrain!=='verified')return null;
    const body=n.dataset.liveBrain?n.lastElementChild:null;
    return{role:'assistant',text:body?body.textContent:n.textContent,source:PHONE?'orion-live-phone':'orion-live-pc'}
   }
@@ -232,6 +232,6 @@ window.ORION_CHAT_HISTORY=(function(){
   setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
- return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,resumeLive(){browsingHistory=false},get browsing(){return browsingHistory},get snapshot(){return state}};
+ return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,resumeLive(){browsingHistory=false},recentContext(id){return conversationMessages(id||currentId()).filter(m=>['user','assistant'].includes(m.role)&&String(m.text||'').trim()).slice(-12).map(m=>({role:m.role,text:String(m.text).slice(0,1200)}))},get browsing(){return browsingHistory},get snapshot(){return state}};
 })();
 setTimeout(()=>window.ORION_CHAT_HISTORY.init(),0);
