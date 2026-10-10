@@ -68,6 +68,7 @@ window.ORION_CHAT_HISTORY=(function(){
 
  function record(role,text,source,node){
   text=String(text||'').trim();if(!text||!['user','assistant'].includes(role))return;
+  if(window.ORION_HISTORY_INTEGRITY_V1?.isPlaceholder(role,text))return;
   const cid=currentId()||uid('c');if(!currentId())setCurrent(cid);
   ensureConversation(cid);
   const c=getConversation(cid),t=now();
@@ -116,8 +117,10 @@ window.ORION_CHAT_HISTORY=(function(){
    host.textContent='';
    conversationMessages(id).forEach(m=>{
     if(!['user','assistant'].includes(m.role))return;
-    const el=document.createElement('div');el.className='m '+(m.role==='user'?'you':'or');el.textContent=m.text;
-    el.dataset.historyLoaded='1';el.dataset.historyId=m.id;host.appendChild(el)
+    const integrity=window.ORION_HISTORY_INTEGRITY_V1;
+    const el=integrity?integrity.renderStoredMessage(m):document.createElement('div');
+    if(!integrity){el.className='m '+(m.role==='user'?'you':'or');el.textContent=m.text;el.dataset.historyLoaded='1';el.dataset.historyId=m.id}
+    host.appendChild(el)
    });
    host.scrollTop=host.scrollHeight
   }
@@ -232,6 +235,6 @@ window.ORION_CHAT_HISTORY=(function(){
   setInterval(()=>{if(document.hidden||!nativeApp||typeof nativeApp.openOffline!=='function'||!ORION_BRIDGE.link)return;const l=ORION_BRIDGE.link();if(l&&l.status==='offline')nativeApp.openOffline()},10000);
   ready=true
  }
- return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,resumeLive(){browsingHistory=false},recentContext(id){return conversationMessages(id||currentId()).filter(m=>['user','assistant'].includes(m.role)&&String(m.text||'').trim()).slice(-12).map(m=>({role:m.role,text:String(m.text).slice(0,1200)}))},get browsing(){return browsingHistory},get snapshot(){return state}};
+ return{init,sync:syncNow,newChat:newConversation,open:openDrawer,load:loadConversation,resumeLive(){browsingHistory=false},recentContext(id){return conversationMessages(id||currentId()).filter(m=>['user','assistant'].includes(m.role)&&String(m.text||'').trim()&&!window.ORION_HISTORY_INTEGRITY_V1?.isPlaceholder(m.role,m.text)).slice(-12).map(m=>({role:m.role,text:String(m.text).slice(0,1200)}))},get browsing(){return browsingHistory},get snapshot(){return state}};
 })();
 setTimeout(()=>window.ORION_CHAT_HISTORY.init(),0);
