@@ -7,8 +7,8 @@ from __future__ import annotations
 import re
 from .conversation_verifier_v1 import ConversationVerifierV1, is_information_only
 
-_EXPLAIN = re.compile(r'(?i)^\\s*(?:what|why|how|explain|describe|compare|tell me about|τι|πώς|πως|γιατί|εξήγησε)\\b')
-_REQUEST = re.compile(r'(?i)\\b(?:can you|could you|please|i want you to|θα μπορούσες|μπορείς να)\\s+(?:run|execute|start|stop|install|delete|write|modify|commit|push|pull|merge|deploy|approve|authorize|τρέξεις|εκτελέσεις|διαγράψεις|γράψεις)\\b')
+_EXPLAIN = re.compile(r'(?i)^\s*(?:what|why|how|explain|describe|compare|tell me about|τι|πώς|πως|γιατί|εξήγησε)\b')
+_REQUEST = re.compile(r'(?i)\b(?:can you|could you|please|i want you to|θα μπορούσες|μπορείς να)\s+(?:run|execute|start|stop|install|delete|write|modify|commit|push|pull|merge|deploy|approve|authorize|τρέξεις|εκτελέσεις|διαγράψεις|γράψεις)\b')
 
 
 def is_explanatory_question(goal: str) -> bool:
