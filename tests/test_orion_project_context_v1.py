@@ -19,6 +19,22 @@ class ProjectContextTests(unittest.TestCase):
         prompt=render_project_status_context(obj)
         self.assertIn("docs/ROADMAP.md",prompt)
         self.assertIn(SHA,prompt)
+    def test_oversized_roadmap_skipped_with_checkpoint_preserved(self):
+        from unittest.mock import patch
+        class Api:
+            def branches(self,*args):
+                return [{"name":"orion-checkpoint-20261010","commit_id":SHA}]
+            def tree(self,*args):return {"truncated":False,"tree":[]}
+        mapped={"files":[{"path":"docs/checkpoints/ORION_V3_GITEA_HANDOFF_2026-10-10.md"},
+                         {"path":"docs/ROADMAP.md"}]}
+        def read(api,owner,repo,sha,path):
+            if path.endswith("ROADMAP.md"):
+                raise ValueError("Unsupported or oversized file")
+            return {"text":"verified handoff"}
+        with patch("orion_v3.modules.orion_project_context_v1.create_codebase_map",return_value=mapped),patch("orion_v3.modules.orion_project_context_v1.get_source_context",side_effect=read):
+            result=project_status_context(Api())
+        self.assertEqual(len(result["files"]),1)
+        self.assertIn("verified handoff",result["files"][0]["text"])
     def test_normal_chat_is_unchanged(self):
         with patch("orion_v3.modules.gitea_chat_brain_v1.StreamingBrainPipeline.start",return_value={}) as start:
             GiteaChatStreamingBrain().start("hello")
