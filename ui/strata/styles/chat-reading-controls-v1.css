@@ -1,16 +1,39 @@
-/* ORION chat readability controls V1: presentation only; no execution changes. */
-#app:not(.phone) #stopb{position:fixed;top:72px;right:24px;left:auto;transform:none;z-index:8;margin:0}
-#app:not(.phone) #stopb:disabled{display:none}
-#app:not(.phone) #chat{width:min(920px,calc(100vw - 440px));}
-#app:not(.phone).chat #chat{max-height:56vh}
-#chat .orion-alert-tools{display:flex;justify-content:flex-end;gap:6px;margin:0 0 8px}
-#chat .orion-alert-tools button{border:1px solid rgba(148,174,193,.28);border-radius:7px;background:#152638;color:#c0dae7;padding:3px 9px;font:12px/1.5 sans-serif;cursor:pointer}
-#chat .orion-alert-tools button:hover{background:#28445c}
-#chat .orion-alert-minimized .orion-alert-body{display:none}
-#chat .orion-alert-maximized{position:fixed!important;z-index:20!important;left:clamp(12px,13vw,260px)!important;right:24px!important;top:70px!important;bottom:94px!important;width:auto!important;max-width:none!important;max-height:none!important;overflow:auto!important;background:#0e1927!important;border:1px solid rgba(137,166,189,.4)!important;border-radius:16px!important;padding:20px!important;box-shadow:0 22px 80px rgba(0,0,0,.75)!important}
-.phone #chat .orion-alert-maximized{left:8px!important;right:8px!important;top:64px!important;bottom:85px!important}
-@media(max-width:1100px){#app:not(.phone) #chat{width:min(800px,calc(100vw - 280px))}}
-@media(max-width:760px){#app:not(.phone) #chat{width:94vw}}
-
+/* ORION desktop adaptive reading/layout layer. Frozen chat logic unchanged. */
 #top #stopb{position:static!important;transform:none!important;margin:0!important;flex:none}
 #top #stopb:disabled{display:none}
+#app:not(.phone) #top{display:grid;grid-template-columns:minmax(200px,1fr) auto minmax(0,1.6fr);align-items:center;gap:12px;padding:10px 18px}
+#app:not(.phone) #top>.tl{min-width:0}
+#app:not(.phone) #top>.tl:last-child{grid-column:3;justify-content:flex-end;flex-wrap:wrap;gap:6px}
+#app:not(.phone) #clock{position:static;grid-column:2;grid-row:1;transform:none;white-space:nowrap}
+#app:not(.phone) #top>.tl:first-child{grid-column:1;grid-row:1;overflow:hidden}
+#app:not(.phone) #top>.tl:first-child #proj{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+#app:not(.phone) #chat{width:min(920px,calc(100vw - 90px))}
+#app:not(.phone).chat #chat{max-height:min(64vh,calc(100vh - 190px));overflow:auto}
+#app:not(.phone) #hud{top:88px!important;left:50%;transform:translateX(-50%);width:min(740px,calc(100vw - 100px));z-index:4;pointer-events:none}
+#app:not(.phone) #hud #stl,#app:not(.phone) #hud #act,#app:not(.phone) #hud #chips{background:rgba(5,12,20,.88);border-radius:8px;padding:1px 8px;max-width:100%;text-shadow:0 1px 2px #000}
+#app:not(.phone) #lane-strip{display:none!important;pointer-events:auto}
+#app:not(.phone).orion-show-status #lane-strip{display:grid!important;position:absolute;top:75px;left:18px;width:255px;max-height:min(68vh,560px);overflow:auto;z-index:8;padding:8px;background:rgba(6,13,22,.96);border:1px solid rgba(135,181,202,.2);border-radius:13px;box-shadow:0 15px 40px rgba(0,0,0,.5)}
+#app:not(.phone) .orion-lanes-toggle{flex:none}
+#chat .m.or{position:relative}
+#chat .m.or>.orion-reading-tools{display:flex;justify-content:flex-end;gap:5px;margin-bottom:7px}
+#chat .orion-reading-tools button{border:1px solid rgba(148,174,193,.28);border-radius:7px;background:#152638;color:#c0dae7;padding:2px 9px;font:12px/1.5 sans-serif;cursor:pointer;min-width:29px}
+#chat .orion-reading-tools button:hover{background:#28445c}
+#chat .m.or.orion-answer-minimized{max-height:44px!important;overflow:hidden!important;min-height:36px}
+#chat .m.or.orion-answer-minimized>:not(.orion-reading-tools){display:none!important}
+#chat .m.or.orion-answer-maximized{position:fixed!important;z-index:30!important;left:clamp(12px,12vw,230px)!important;right:20px!important;top:90px!important;bottom:90px!important;max-width:none!important;width:auto!important;max-height:none!important;overflow:auto!important;padding:20px!important;background:#101d2b!important;border:1px solid rgba(135,181,202,.38);border-radius:16px;box-shadow:0 18px 80px rgba(0,0,0,.7)}
+@media(max-width:1250px){
+ #app:not(.phone) #top{grid-template-columns:minmax(130px,1fr) minmax(0,2fr);padding:8px 12px}
+ #app:not(.phone) #clock{grid-column:1;grid-row:2;text-align:left}
+ #app:not(.phone) #top>.tl:last-child{grid-column:2;grid-row:1 / span 2}
+ #app:not(.phone) #top #sch{width:130px}
+ #app:not(.phone) #top #pcPairCode{display:none}
+ #app:not(.phone) #hud{top:95px!important}
+}
+@media(max-width:820px){
+ #app:not(.phone) #top #sch,#app:not(.phone) #top #viewb,#app:not(.phone) #top #ccb{display:none}
+ #app:not(.phone) #chat{width:94vw}
+ #app:not(.phone) #hud{top:105px!important}
+ #chat .m.or.orion-answer-maximized{left:10px!important;right:10px!important}
+}
+.phone .orion-lanes-toggle{display:none!important}
+.phone #chat .m.or.orion-answer-maximized{left:8px!important;right:8px!important;top:64px!important;bottom:85px!important}
