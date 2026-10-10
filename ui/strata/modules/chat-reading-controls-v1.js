@@ -67,4 +67,29 @@
  });
  observer.observe(chat,{childList:true,subtree:false});
  scan();
+
+ // Result and verification cards are rendered in #rz, outside #chat.
+ // Enhance them without modifying the frozen shell renderer.
+ const results=document.getElementById('rz');
+ function decorateResult(card){
+   if(card.querySelector(':scope > .orion-reading-tools'))return;
+   const tools=document.createElement('div');
+   tools.className='orion-reading-tools';
+   const min=document.createElement('button'),max=document.createElement('button'),close=document.createElement('button');
+   min.type=max.type=close.type='button';
+   min.textContent='−';max.textContent='□';close.textContent='×';
+   min.title='Minimize panel';max.title='Maximize panel';close.title='Dismiss panel in this view';
+   min.setAttribute('aria-label','Minimize or restore panel');
+   max.setAttribute('aria-label','Maximize or restore panel');
+   close.setAttribute('aria-label','Close panel in this view');
+   min.onclick=()=>{const collapsed=card.classList.toggle('orion-answer-minimized');card.classList.remove('orion-answer-maximized');min.textContent=collapsed?'+':'−';};
+   max.onclick=()=>{card.classList.remove('orion-answer-minimized');min.textContent='−';max.textContent=card.classList.toggle('orion-answer-maximized')?'▣':'□';};
+   close.onclick=()=>{card.style.display='none';};
+   tools.append(min,max,close);card.insertBefore(tools,card.firstChild);
+ }
+ if(results){
+   const scanResults=()=>results.querySelectorAll('.card.main').forEach(decorateResult);
+   new MutationObserver(scanResults).observe(results,{childList:true});
+   scanResults();
+ }
 })();
