@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 import sqlite3
+from contextlib import closing
 from typing import Iterable
 
 @dataclass(frozen=True)
@@ -40,7 +41,7 @@ class IndexedRetrievalV2:
         return conn
 
     def _create(self):
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             conn.execute("""CREATE VIRTUAL TABLE IF NOT EXISTS indexed_memory USING fts5(
                 memory_id UNINDEXED, project_id UNINDEXED, source_ref UNINDEXED,
                 content, tokenize='unicode61 remove_diacritics 2'
@@ -59,7 +60,7 @@ class IndexedRetrievalV2:
                 raise ValueError("Duplicate canonical memory ID")
             ids.add(r.memory_id)
             validated.append((r.memory_id, r.project_id, r.source_ref, r.content))
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             conn.execute("DELETE FROM indexed_memory")
             conn.executemany(
                 "INSERT INTO indexed_memory(memory_id,project_id,source_ref,content) VALUES (?,?,?,?)",
@@ -76,7 +77,7 @@ class IndexedRetrievalV2:
             return []
         # FTS5 safely quotes individual terms: never interpret caller syntax.
         expression = " OR ".join('"' + token.replace('"', '""') + '"' for token in terms)
-        with self._connect() as conn:
+        with closing(self._connect()) as conn, conn:
             rows = conn.execute(
                 """SELECT memory_id,project_id,source_ref,bm25(indexed_memory)
                    FROM indexed_memory WHERE indexed_memory MATCH ?
