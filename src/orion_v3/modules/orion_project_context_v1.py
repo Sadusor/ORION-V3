@@ -10,6 +10,8 @@ FILES=("docs/checkpoints/ORION_V3_GITEA_HANDOFF_2026-10-10.md",
 
 def is_orion_project_question(text: str) -> bool:
     q=text.casefold()
+    if any(term in q for term in ("thehands", "the hands", "the hand project", "internal hands", "orion hands")):
+        return True
     return ("orion" in q or "οριον" in q or "όριον" in q) and any(
         word in q for word in ("roadmap","project","progress","status",
                               "what is","where","πού","έργο","πρόοδο","σχέδιο"))
