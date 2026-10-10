@@ -660,17 +660,17 @@ class Handler(BaseHTTPRequestHandler):
                                            owner_text=owner_text,state_dir=STATE_ROOT) if body.get("gitea_search") is True else nullcontext()
                 with scope:
                     started = LOCAL_BRAIN.start(
-                    str(body.get("goal", "")),
-                    str(body.get("model", "")),
-                    memory_query=str(body.get("memory_query", "")),
-                    conversation_id=str(body.get("conversation_id", "")),
-                    project_id=(
-                        str(body.get("project_id", ""))
-                        if "project_id" in body
-                        else None
-                    ),
-                    owner_message=str(body.get("owner_message", "")),
-                )
+                        str(body.get("goal", "")),
+                        str(body.get("model", "")),
+                        memory_query=str(body.get("memory_query", "")),
+                        conversation_id=str(body.get("conversation_id", "")),
+                        project_id=(
+                            str(body.get("project_id", ""))
+                            if "project_id" in body
+                            else None
+                        ),
+                        owner_message=str(body.get("owner_message", "")),
+                    )
 
                 # Memory V1.1b is observation-only. Frozen V1 has already made
                 # the shadowing decision and built the prompt at this point.
