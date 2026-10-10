@@ -9,6 +9,10 @@ class ProjectContextTests(unittest.TestCase):
     def test_natural_project_question(self):
         self.assertTrue(is_orion_project_question("Qwen tell me what ORION V3 is and where we stand in our roadmap"))
         self.assertFalse(is_orion_project_question("What's the weather?"))
+    def test_hands_are_separate_from_orion_internal_hands(self):
+        self.assertTrue(is_orion_project_question("Can you explain TheHands project?"))
+        self.assertTrue(is_orion_project_question("What are the internal Hands in ORION?"))
+        self.assertFalse(is_orion_project_question("Tell me about the human hand anatomy"))
     def test_only_pinned_checkpoint(self):
         class Api:
             def branches(self,*a):return [{"name":"main","commit_id":SHA}]
