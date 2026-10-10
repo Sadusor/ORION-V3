@@ -43,7 +43,8 @@ class StreamingLocalBrainModule(LocalBrainModule):
             "keep_alive": "5m",
             "options": {
                 "temperature": 0,
-                "num_predict": 900,
+                "num_predict": 4096,
+                "num_ctx": 16384,
             },
         }
 
@@ -62,7 +63,7 @@ class StreamingLocalBrainModule(LocalBrainModule):
         chunks: list[str] = []
 
         try:
-            with self._opener.open(req, timeout=120.0) as response:
+            with self._opener.open(req, timeout=600.0) as response:
                 while True:
                     raw = response.readline()
                     if not raw:
