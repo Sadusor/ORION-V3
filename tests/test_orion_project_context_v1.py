@@ -35,6 +35,16 @@ class ProjectContextTests(unittest.TestCase):
             result=project_status_context(Api())
         self.assertEqual(len(result["files"]),1)
         self.assertIn("verified handoff",result["files"][0]["text"])
+    def test_large_retrieved_context_fits_brain_request(self):
+        from orion_v3.modules.gitea_chat_brain_v1 import attach_bounded_reference
+        owner_prompt="owner request " + ("memory " * 900)
+        result=attach_bounded_reference(owner_prompt,"document " * 3000)
+        self.assertTrue(result.startswith(owner_prompt))
+        self.assertLessEqual(len(result.encode("utf-8")),15900)
+    def test_greek_context_byte_budget(self):
+        from orion_v3.modules.gitea_chat_brain_v1 import attach_bounded_reference
+        result=attach_bounded_reference("ελληνικά","πληροφορίες " * 3000)
+        self.assertLessEqual(len(result.encode("utf-8")),15900)
     def test_normal_chat_is_unchanged(self):
         with patch("orion_v3.modules.gitea_chat_brain_v1.StreamingBrainPipeline.start",return_value={}) as start:
             GiteaChatStreamingBrain().start("hello")
