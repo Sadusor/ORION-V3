@@ -191,6 +191,7 @@ $('legacy').innerHTML='';$('legacy').hidden=true;
 $('bar').onsubmit=async e=>{e.preventDefault();const t=$('inp').value.trim();if(!t)return;
  if(V.ui.connection.status==='unpaired'){toast('Pair this device first');return}
  $('inp').value='';
+ if(window.ORION_CHAT_HISTORY?.resumeLive)ORION_CHAT_HISTORY.resumeLive();
  const turn={conversation_id:V.convId,turn_id:'t'+Date.now().toString(36),text:t,source:PHONE?'phone-text':'pc-text'};V.turns.push(turn);   // client-side only; the PC-owned turn journal is a later backend slice
  msg('you',t);if(!PHONE)app.classList.add('chat');
  const cur=V.ui.lastResult;if(cur)dispatch({type:'ignoreResult',sig:cur.fingerprint});
@@ -216,15 +217,15 @@ B.subscribe(ev=>{
   dispatch({type:'snapshot',model:ev.model});
   const L=ev.model&&ev.model.local;
   const live=window.ORION_LIVE_BRAIN_CHAT;
-  if(L&&L.conversationId&&window.ORION_CHAT_HISTORY&&ORION_CHAT_HISTORY.load&&L.conversationId!==V.convId){
+  if(L&&L.conversationId&&window.ORION_CHAT_HISTORY&&ORION_CHAT_HISTORY.load&&!ORION_CHAT_HISTORY.browsing&&L.conversationId!==V.convId){
    ORION_CHAT_HISTORY.load(L.conversationId);
   }
-  if(live&&L){
+  if(live&&L&&!window.ORION_CHAT_HISTORY?.browsing){
    live.update(L,$('chat'));
    if((L.brainState==='running'&&L.preview)||L.brainState==='ready'){
     if(!PHONE)app.classList.add('chat');
    }
-  }else{
+  }else if(!window.ORION_CHAT_HISTORY?.browsing){
    const replyKey=L&&L.brainStartedUtc||'';
    if(L&&L.brainState==='ready'&&L.conclusion&&replyKey&&replyKey!==shownBrainReply){
     shownBrainReply=replyKey;
