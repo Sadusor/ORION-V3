@@ -49,3 +49,12 @@ Initial non-execution path: Qwen can inspect and discuss with DeepSeek, but writ
 
 ## Owner correction (2026-10-10)
 Codespace's explicit intended purpose is **to show the changes ORION V3 Hands make and the generated code text**. Qwen is workflow master; DeepSeek Flash generates code; ORION policy authorizes; existing ORION V3 Hands write through a qualified Gitea worktree. Codespace simply renders the actual code, changes, diffs, and evidence. Any earlier reference in this document to Codespace as an autonomous agent, brainstorming engine, or independent writer is superseded by this paragraph.
+
+## Explicit two-Hands / two-Git-forges ownership rule (owner clarification, 2026-10-10)
+
+| Execution path | Product/executor | Repository remote | Role |
+|---|---|---|---|
+| Existing remote engineering path | **TheHands** (separate Windows/Android remote product) | **GitHub** | Owner-triggered GIT CHECK, APPROVE & START, remote engineering and evidence; retain existing functioning setup |
+| New ORION internal coding path | **ORION V3 internal Work Hands** | **Mygitea2 (local Gitea)** | ORION-authorized create/edit/test/commit/push in disposable worktrees after Windows isolation/evidence qualification |
+
+**Never redirect the separate TheHands product to Gitea as part of this roadmap.** Do not merge, rename or reuse the products as though they are the same Hands. ORION internal Hands receive their own scoped Gitea adapter. GitHub can remain an independently controlled backup destination, not an implicit mirror or default for ORION internal coding. Gitea database files are managed solely by Gitea; Hands use supported Git remotes/API, never direct DB writes. Existing ORION V3 modules remain frozen until narrow, explicitly approved interfaces are needed.
