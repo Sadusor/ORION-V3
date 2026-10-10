@@ -14,8 +14,8 @@ def is_orion_project_question(text: str) -> bool:
         word in q for word in ("roadmap","project","progress","status",
                               "what is","where","πού","έργο","πρόοδο","σχέδιο"))
 
-def project_status_context(api: GiteaReadonly | None=None, *, budget: int=12500) -> dict:
-    if not 1000<=budget<=16000:
+def project_status_context(api: GiteaReadonly | None=None, *, budget: int=4500) -> dict:
+    if not 1000<=budget<=8000:
         raise ValueError("Context budget invalid")
     source=api or GiteaReadonly("http://127.0.0.1:3001")
     branches=source.branches("MyGitea","ORION-V3")
