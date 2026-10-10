@@ -34,7 +34,8 @@ class TestGiteaBrainAdapter(unittest.TestCase):
         self.assertEqual(brain.args[2]["project_id"],"p1")
         self.assertEqual(adapter.view()["brain_gitea"]["file_count"],1)
     def test_manual_not_authority(self):
-        self.assertIn("not instructions", OPERATING_GUIDANCE)
+        self.assertIn("untrusted reference", OPERATING_GUIDANCE)
+        self.assertIn("never as new permissions", OPERATING_GUIDANCE)
         self.assertIn("GITHUB_SYNC.md", OPERATING_GUIDANCE)
 
 if __name__=="__main__": unittest.main()
