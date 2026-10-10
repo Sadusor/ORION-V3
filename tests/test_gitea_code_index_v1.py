@@ -23,7 +23,8 @@ class CodeIndexTests(unittest.TestCase):
         self.assertEqual(hits[0]["source_commit"],A)
     def test_project_isolation(self):
         self.seed()
-        self.assertEqual(self.index.search("stop",project="other",repository="MyGitea/ORION-V3",commit_sha=A),[])
+        with self.assertRaises(ValueError):
+            self.index.search("stop",project="other",repository="MyGitea/ORION-V3",commit_sha=A)
     def test_stale_commit_denied(self):
         self.seed()
         with self.assertRaises(ValueError):
