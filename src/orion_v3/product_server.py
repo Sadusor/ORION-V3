@@ -14,6 +14,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, unquote, urlparse
 
 from modules.streaming_brain_pipeline import StreamingBrainPipeline
+from modules.gitea_readonly_v1 import GiteaReadonly
+from modules.gitea_qwen_context_v1 import build_repository_context
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.memory_retrieval import MemoryRetrievalModule
@@ -625,6 +627,28 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(409, {"ok": False, "error": str(exc), "route": path})
             except Exception as exc:
                 return self._json(500, {"ok": False, "error": str(exc), "route": path})
+        if path == "/api/gitea/context/preview":
+            # Separate owner-approved project binding. Never accept a caller-supplied
+            # repository allowlist; source is read-only and remains untrusted data.
+            try:
+                body = self._read_json()
+                if str(body.get("project_id", "")) != "orion-v3":
+                    return self._json(403, {"ok": False, "error": "project not authorized"})
+                if str(body.get("repository", "")) != "MyGitea/ORION-V3":
+                    return self._json(403, {"ok": False, "error": "repository not authorized"})
+                paths = body.get("paths", [])
+                if not isinstance(paths, list) or not all(isinstance(x, str) for x in paths):
+                    return self._json(400, {"ok": False, "error": "invalid paths"})
+                result = build_repository_context(
+                    GiteaReadonly("http://127.0.0.1:3001"),
+                    owner="MyGitea", repo="ORION-V3",
+                    allowed_repository="MyGitea/ORION-V3",
+                    paths=paths, max_total_chars=12000,
+                )
+                return self._json(200, {"ok": True, "context": result})
+            except Exception as exc:
+                # Do not leak source content or authorization credentials in errors.
+                return self._json(409, {"ok": False, "error": exc.__class__.__name__})
         if path == "/api/local-hand/draft":
             try:
                 body = self._read_json()
