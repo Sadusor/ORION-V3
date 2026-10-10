@@ -1,3 +1,19 @@
+## ACTIVE PRIORITY — GITEA SOURCE SEARCH + QWEN APP INTEGRATION (2026-10-10)
+
+This owner-approved priority supersedes the older immediate sequence below; historical decisions remain for context. Complete checkpoint: `docs/checkpoints/GITEA_SOURCE_GATE_20261010.md`. MyGitea2 installation is FROZEN; the ORION V3 repository *hosted on Gitea* can receive authorized Git commits without changing Gitea application internals.
+
+- Authority: ORION controls approvals/STOP/verification/canonical memory. Qwen 9B is the workflow coordinator; DeepSeek Flash is proposed code generator, not yet wired. ORION internal Work Hands eventually perform qualified writes and Git pushes; separate TheHands is merely the engineering remote used for physical qualification. Codespace is display-only.
+- Verified read-only source: Gitea 1.27.1, API localhost:3001, 50 discovered public repos, actual MyGitea/ORION-V3 tree mapped (269 files, local commit `be618edb8cd40a7e5da0210ef1b4599a0cfbf220`), live source file retrieved (TheHands `85ba347178fa`).
+- Isolated qualification grew to **37/37 PASS** (`2537aad3b6e1`, ORION `d6cbcb25`), including Gitea read-only connector, code mapping, source reader, bounded context, brain adapter, backend preview route, FTS5 code index, indexed search context and search service.
+- **Newest LIVE search attempt FAILED** (`e822eb76e79b`): 39 actual source files indexed, query `def` returned 0 FTS5 hits; indexer uses only first ~40 candidate files. This does NOT validate Qwen semantic code search. Diagnose full source coverage/queries before release.
+- Existing `product_server.py` has an opt-in read-only `/api/gitea/context/preview` route in GitHub source but it has not been shown running in the original PC application. The standalone `gitea_brain_adapter_v1.py` is qualified only as a unit; frozen canonical memory pipeline rebuilds the final prompt and can discard naive pre-wrapping. **Do not claim Qwen has live Gitea search until the post-memory prompt boundary is proved.**
+- **Next 1:** publish these audited docs and all existing new ORION module source to `MyGitea/ORION-V3` using supported Git over localhost. Never write Gitea SQLite/storage directly. Avoid force pushes. If local branch diverges, create a new uniquely named sync branch and verify remote commit; do not rewrite main or restart Gitea.
+- **Next 2:** create a broad project-scoped, incremental/rebuildable FTS5 code index from authorized repo source, with correct Git commit pinning, full coverage counters, secret exclusions, bounded source chunks and representative search tests.
+- **Next 3:** qualify an authenticated read-only backend search endpoint; connect source snippets AFTER the frozen canonical-memory composition through a separately tested safe adapter. Preserve normal chat, conversation history, owner message and verifier. No direct automated Qwen execution/write.
+- **Next 4:** stage and verify PC application update through existing update manager; live PC/phone Qwen prompt should cite actual Gitea file path and commit. Roll back on regression.
+- **Next 5:** only after security qualification enable ORION internal Work Hands for approved patches, tests, commits and Git push to owner-authorized Gitea repository. STOP/OS isolation/nonce/evidence remain blockers.
+
+---
 # ORION V3 Roadmap
 
 All milestones are gated by physical evidence.
