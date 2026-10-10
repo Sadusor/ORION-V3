@@ -1,3 +1,18 @@
+## ACTIVE IMPLEMENTATION DIRECTIVE — 2026-10-10 (OWNER CONFIRMED)
+This section supersedes any prior council-centric or Codespace-as-agent interpretations.
+1. The existing ORION V3 PC/Android UI remains the single main user conversation and supervision surface.
+2. Qwen is the workflow master (project selection, repository exploration, task continuity and DeepSeek delegation), but not the authority owner. ORION deterministic policy owns permissions, STOP, memory promotion and verification.
+3. DeepSeek Flash is the ONLY initial paid code-generation model. No cloud council or extra model orchestration. Configure an exact working model identifier later, with explicit token/spend limits.
+4. MyGitea2 at `E:\MyGitea2`, local API `http://127.0.0.1:3001`, stores code and Git history. Existing ORION internal Hands will use supported Git/Gitea interfaces to create and push authorized code. Never touch the Gitea SQLite database directly.
+5. Codespace is a **DISPLAY-ONLY MODULE** showing DeepSeek-generated code, actual internal Hands changes, diffs, test results and verified activity. It is not an agent, code writer or separate workflow engine.
+6. Qwen receives authorized read/search access to relevant repositories. ORION's existing chat/project/task history and approved canonical memory supply continuity. Repositories are source material, not automatically trusted canonical memory. Build bounded indexes/source maps, not one massive Qwen prompt or weight training.
+7. TheHands remains a separate GitHub-based engineering remote and is NOT an ORION internal Hand. Its product/runtime must not be modified. Its designated PowerShell 1 task command may be used to physically GIT CHECK ORION changes.
+8. Module-first. Frozen Memory V1/V1.1 and Indexed V2, UI and authority contracts stay frozen. Gitea write operations remain DISABLED until internal Hand OS confinement, STOP and independent evidence gates physically pass.
+9. Implement in order: Gitea read-only inventory -> project-scoped codebase map -> Qwen read skills -> existing history/context -> DeepSeek Flash adapter -> Codespace display -> safe internal Hand Gitea Git writes -> live phone E2E and recovery tests. No new parallel agent systems.
+
+Read-only Gitea server connectivity already physically PASSED (TheHands session `b7dfc1c51f09`, Gitea v1.27.1, 127.0.0.1:3001). Authenticated repository discovery and codebase indexing are NOT YET VERIFIED. First physical discovery gate must not leak API tokens, touch Gitea DB or start repository imports.
+
+---
 # ORION V3 — Owner-approved Codespace / Qwen / Gitea direction
 Date: 2026-10-10
 Status: ARCHITECTURAL DIRECTION / NOT IMPLEMENTATION PASS
