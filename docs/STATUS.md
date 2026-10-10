@@ -1,3 +1,18 @@
+## Current verified state — 2026-10-10 (supersedes older stage text below)
+
+ACTIVE: Qwen + MyGitea2 code source retrieval and indexed search, followed by ORION PC/phone runtime activation. MyGitea2 forge implementation, canonical memory and TheHands product remain frozen.
+
+**PHYSICAL PASS:** Gitea loopback 1.27.1; first 50 visible repositories; actual local ORION-V3 source tree 269 files and one actual source-content retrieval; Gitea/Qwen 37 isolated tests PASS (TheHands session `2537aad3b6e1`).
+
+**PHYSICAL FAIL / BLOCKER:** most recent live Gitea FTS5 test `e822eb76e79b` indexed 39 files but found 0 hits for query `def`; task failed. It does not establish whether the index contents or FTS query is at fault. Do not state live semantic/code search is working.
+
+**NOT YET IN RUNNING APP:** opt-in Gitea preview endpoint, Qwen prompt integration, full source retrieval, Gitea push via internal ORION Work Hands, DeepSeek Flash and Codespace integration.
+
+**Approved current task:** document and publish ORION-V3 repository source and roadmap into **MyGitea2 Git repository** using normal Git, without mutating Gitea application internals or overwriting divergent `main`. Source-of-truth GitHub checkpoint remains available for backup.
+
+Refer to `docs/ROADMAP.md` current section and `docs/checkpoints/GITEA_SOURCE_GATE_20261010.md`.
+
+---
 # ORION V3 Status
 
 Updated: 2026-10-05
