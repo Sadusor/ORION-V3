@@ -25,6 +25,20 @@ def gitea_chat_request(*, project_id: str, owner_text: str, state_dir):
     finally:
         _requested.reset(token)
 
+def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int = 15900) -> str:
+    """Never truncate owner's composed memory prompt; budget only extra context."""
+    available = max_bytes - len(goal.encode("utf-8")) - 2
+    if available < 240:
+        return goal
+    data = reference.encode("utf-8")
+    if len(data) > available:
+        data = data[:available]
+        reference = data.decode("utf-8", errors="ignore")
+        reference += "\\n[RETRIEVED CONTEXT TRUNCATED TO MODEL REQUEST BUDGET]"
+        # Recheck after adding the marker.
+        reference = reference.encode("utf-8")[:available].decode("utf-8", errors="ignore")
+    return goal + "\\n\\n" + reference
+
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
     """Preserves StreamingBrainPipeline verifier and the original Local Brain."""
 
@@ -35,12 +49,12 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
             try:
                 if is_orion_project_question(query):
                     checkpoint = project_status_context()
-                    goal += "\n\n" + render_project_status_context(checkpoint)
+                    goal = attach_bounded_reference(goal, render_project_status_context(checkpoint))
                     return super().start(goal, model)
                 context = search_live_gitea(query=query,project_id="orion-v3",
                                            state_dir=state_dir)
                 if context["results"]:
-                    goal += ("\n\n" + render_untrusted_code_context(context)
+                    goal = attach_bounded_reference(goal, render_untrusted_code_context(context)
                              + "\n" + OPERATING_GUIDANCE)
                 else:
                     goal += "\n\nGitea code search returned no matches; do not claim repository access was successful."
