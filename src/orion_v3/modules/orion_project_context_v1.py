@@ -5,8 +5,8 @@ from .gitea_codebase_map_v1 import create_codebase_map
 from .gitea_source_context_v1 import get_source_context
 
 CHECKPOINT="orion-checkpoint-20261010"
-FILES=("docs/ROADMAP.md","docs/STATUS.md",
-       "docs/checkpoints/ORION_V3_GITEA_HANDOFF_2026-10-10.md")
+FILES=("docs/checkpoints/ORION_V3_GITEA_HANDOFF_2026-10-10.md",
+       "docs/STATUS.md","docs/ROADMAP.md")
 
 def is_orion_project_question(text: str) -> bool:
     q=text.casefold()
@@ -29,8 +29,13 @@ def project_status_context(api: GiteaReadonly | None=None, *, budget: int=12500)
     text=[]; remaining=budget
     for path in FILES:
         if path not in eligible: continue
-        item=get_source_context(source,"MyGitea","ORION-V3",sha,path)
         if remaining<300: break
+        try:
+            item=get_source_context(source,"MyGitea","ORION-V3",sha,path)
+        except ValueError as exc:
+            if str(exc) in {"Unsupported or oversized file", "File too large"}:
+                continue
+            raise
         excerpt=item["text"][:remaining]
         remaining-=len(excerpt)
         text.append({"path":path,"text":excerpt})
