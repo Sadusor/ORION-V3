@@ -42,3 +42,22 @@
 #rz .orion-reading-tools button{padding:4px 9px;border:1px solid #476075;border-radius:7px;color:#c0dae7;background:#152638;cursor:pointer}
 #rz .card.main.orion-answer-minimized>:not(.orion-reading-tools){display:none}
 #rz .card.main.orion-answer-maximized{max-width:95vw;width:95vw;max-height:75vh;overflow:auto}
+
+/* Minimized cards remain visible, clickable, and free of nested scrollbars. */
+#chat .m.or.orion-answer-minimized,
+#rz .card.main.orion-answer-minimized{
+  display:block!important;position:relative!important;
+  height:auto!important;min-height:48px!important;max-height:64px!important;
+  width:auto!important;overflow:visible!important;
+  padding:8px 12px!important;
+}
+#chat .m.or.orion-answer-minimized>.orion-reading-tools,
+#rz .card.main.orion-answer-minimized>.orion-reading-tools{
+  display:flex!important;position:relative!important;z-index:5;
+  margin:0!important;padding:0!important;align-items:center!important;
+}
+#chat .m.or.orion-answer-minimized>.orion-reading-tools button:first-child,
+#rz .card.main.orion-answer-minimized>.orion-reading-tools button:first-child{
+  min-width:76px!important;white-space:nowrap!important;
+}
+#rz .card.main.orion-answer-minimized{max-width:min(900px,90vw)!important}
