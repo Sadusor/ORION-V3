@@ -27,7 +27,7 @@ def gitea_chat_request(*, project_id: str, owner_text: str, state_dir):
 
 def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int = 15900) -> str:
     """Never truncate owner's composed memory prompt; budget only extra context."""
-    available = max_bytes - len(goal.encode("utf-8")) - 2
+    available = max_bytes - len(goal.encode("utf-8")) - len("\n\n".encode("utf-8"))
     if available < 240:
         return goal
     data = reference.encode("utf-8")
