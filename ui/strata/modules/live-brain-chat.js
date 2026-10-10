@@ -1,12 +1,33 @@
 /* Live Local Brain chat renderer.
    Owns only the progressive chat bubble. It does not authorize or execute anything. */
 window.ORION_LIVE_BRAIN_CHAT=(function(){
- let key='',bubble=null,textNode=null,last='';
+ let key='',bubble=null,textNode=null,last='',target='',frame=0;
+ function cancelReveal(){if(frame){cancelAnimationFrame(frame);frame=0;}}
+ function reveal(chat){
+  frame=0;
+  if(!textNode||!bubble||!bubble.isConnected)return;
+  if(!target.startsWith(last)){last='';textNode.textContent='';}
+  if(last.length>=target.length)return;
+  const atBottom=nearBottom(chat);
+  // Display only text already received; catch up quickly if polling delivers large batches.
+  const pending=target.length-last.length;
+  const step=Math.max(1,Math.ceil(pending/8));
+  last=target.slice(0,last.length+step);
+  textNode.textContent=last;
+  follow(chat,atBottom);
+  if(last.length<target.length)frame=requestAnimationFrame(()=>reveal(chat));
+ }
+ function queueReveal(preview,chat){
+  target=preview;
+  if(!frame&&last!==target)frame=requestAnimationFrame(()=>reveal(chat));
+ }
  function nearBottom(chat){return chat.scrollHeight-chat.scrollTop-chat.clientHeight<100;}
  function follow(chat,shouldFollow){if(shouldFollow)chat.scrollTop=chat.scrollHeight;}
 
  function reset(nextKey){
+  cancelReveal();
   key=nextKey||'';
+  target='';
   bubble=null;
   textNode=null;
   last='';
@@ -33,7 +54,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
   copy.textContent='Copy response';
   copy.title='Copy all response text, including while streaming';
   copy.addEventListener('click',async()=>{
-   const value=body.textContent||'';
+   const value=target||body.textContent||'';
    try{await navigator.clipboard.writeText(value);copy.textContent='Copied';}
    catch(_){const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(body);selection.removeAllRanges();selection.addRange(range);copy.textContent='Select text to copy';}
   });
@@ -61,12 +82,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
 
   if(local.brainState==='running'&&preview){
    ensure(chat,nextKey);
-   if(preview!==last){
-    const atBottom=nearBottom(chat);
-    textNode.textContent=preview;
-    last=preview;
-    follow(chat,atBottom);
-   }
+   if(preview!==target)queueReveal(preview,chat);
    return;
   }
 
@@ -84,6 +100,8 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    const tag=bubble.firstChild;
    if(tag)tag.textContent='VERIFIED';
    const atBottom=nearBottom(chat);
+   cancelReveal();
+   target=conclusion;
    if(conclusion!==last){
     textNode.textContent=conclusion;
     last=conclusion;
@@ -93,6 +111,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
   }
 
   if(local.brainState==='blocked'&&bubble&&nextKey===key){
+   cancelReveal();
    const tag=bubble.firstChild;
    if(tag)tag.textContent='BLOCKED BY VERIFIER';
    bubble.dataset.liveBrain='blocked';
