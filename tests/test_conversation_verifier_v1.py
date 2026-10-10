@@ -29,6 +29,9 @@ class ConversationVerifierTests(unittest.TestCase):
         self.assertEqual(result["preflight"],"blocked")
     def test_command_question_uses_strict_review(self):
         self.assertFalse(is_information_only("Can you run commands for me?"))
+    def test_existing_gitea_chat_wires_conversation_review(self):
+        from orion_v3.modules.gitea_chat_brain_v1 import GiteaChatStreamingBrain
+        self.assertIsInstance(GiteaChatStreamingBrain().verifier, ConversationVerifierV1)
     def test_normal_question_is_informational(self):
         self.assertTrue(is_information_only("Can you explain internal ORION Hands versus TheHands?"))
 if __name__=="__main__":unittest.main()
