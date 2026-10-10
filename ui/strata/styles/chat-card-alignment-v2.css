@@ -1,0 +1,57 @@
+/* ORION chat card alignment repair V2: presentation only. */
+#app:not(.phone) #chat{
+  background:rgba(8,17,29,.76);
+  padding:16px 18px 20px;
+  box-sizing:border-box;
+}
+#chat .m.or{
+  box-sizing:border-box;
+  width:min(100%,780px);
+  max-width:100%;
+  margin:12px auto 16px 0;
+  padding:12px 16px 16px;
+  border:1px solid rgba(125,166,191,.20);
+  border-radius:13px;
+  background:rgba(20,35,51,.94);
+  box-shadow:0 5px 16px rgba(0,0,0,.13);
+  color:#dce9f1;
+  overflow-wrap:anywhere;
+}
+#chat .m.you{
+  width:fit-content;
+  max-width:min(88%,680px);
+  box-sizing:border-box;
+  margin:12px 0 12px auto;
+  padding:10px 15px;
+  border-radius:13px;
+  background:rgba(37,78,102,.62);
+}
+#chat .m.sys{margin:10px 0}
+#chat .m.or>.orion-reading-tools{
+  float:none;
+  width:100%;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:6px;
+  margin:0 0 8px;
+}
+#chat .m.or .orion-copy-response{
+  display:inline-block;
+  float:none;
+  clear:both;
+  margin:0 0 9px;
+}
+#chat .m.or.orion-answer-minimized{
+  max-width:780px!important;
+  min-height:48px!important;
+  height:auto!important;
+  overflow:visible!important;
+}
+#chat .m.or.orion-answer-maximized{
+  width:auto!important;
+  max-width:none!important;
+  box-sizing:border-box;
+}
+.phone #chat .m.or{width:100%;max-width:100%;margin:9px 0 12px;padding:10px 12px}
+.phone #chat .m.you{max-width:92%}
