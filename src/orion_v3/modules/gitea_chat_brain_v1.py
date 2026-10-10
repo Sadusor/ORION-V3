@@ -34,10 +34,10 @@ def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int = 1590
     if len(data) > available:
         data = data[:available]
         reference = data.decode("utf-8", errors="ignore")
-        reference += "\\n[RETRIEVED CONTEXT TRUNCATED TO MODEL REQUEST BUDGET]"
+        reference += "\n[RETRIEVED CONTEXT TRUNCATED TO MODEL REQUEST BUDGET]"
         # Recheck after adding the marker.
         reference = reference.encode("utf-8")[:available].decode("utf-8", errors="ignore")
-    return goal + "\\n\\n" + reference
+    return goal + "\n\\n" + reference
 
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
     """Preserves StreamingBrainPipeline verifier and the original Local Brain."""
