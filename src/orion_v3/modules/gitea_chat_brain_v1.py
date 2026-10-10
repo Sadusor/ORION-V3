@@ -7,6 +7,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from contextvars import ContextVar
 from .streaming_brain_pipeline import StreamingBrainPipeline
+from .conversation_verifier_v1 import ConversationVerifierV1
 from .gitea_search_service_v1 import search_live_gitea
 from .gitea_search_context_v1 import render_untrusted_code_context
 from .gitea_brain_adapter_v1 import OPERATING_GUIDANCE
@@ -40,7 +41,10 @@ def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int = 1590
     return goal + "\n\n" + reference
 
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
-    """Preserves StreamingBrainPipeline verifier and the original Local Brain."""
+    """Keep deterministic preflight and all execution gates; adapt conversational review."""
+
+    def __init__(self, local_brain=None, verifier=None):
+        super().__init__(local_brain=local_brain, verifier=verifier or ConversationVerifierV1())
 
     def start(self, goal: str, model: str = "") -> dict:
         request = _requested.get()
