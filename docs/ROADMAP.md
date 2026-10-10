@@ -1,3 +1,19 @@
+## OWNER-LOCKED PRODUCT DIRECTION — EVERYDAY ASSISTANT AND UNIVERSAL KNOWLEDGE (2026-10-10)
+
+ORION V3 + Qwen is the owner's **everyday multilingual assistant**, not merely a coding agent. The ORIGINAL Windows and Android chat interface is the primary conversational surface. Natural conversation and multi-turn follow-ups must work in **English and Greek**, with cross-language retrieval (for example, a Greek question about an English-language PDF). This includes personal reference documents, practical everyday questions and personal knowledge as well as software development.
+
+**Permanent ingestion rule:** when the owner uploads a supported document through the existing chat, ORION retains the original in an ORION-owned library, extracts bounded text with page references, indexes it, and makes it searchable in future conversations and after restarts. No separate approval is required to *read or discuss* an uploaded document. Only promotion to privileged/canonical owner decisions, executing commands, or writes needs applicable authorization.
+
+**Permanent retrieval rule:** every new ORION knowledge source (canonical memory, chat history, Gitea repositories, documents, and later images/web/user-approved sources) plugs into **one Universal Retrieval Interface**. It performs project/persona scope checking, ranked and bounded retrieval, provenance, deduplication, freshness and truthful citations. Indexes are replaceable sidecars; frozen Memory V1/V1.1/Indexed V2 internals must not change. Documents and repositories are common *retrievable knowledge* with context_only provenance, not silently granted policy authority.
+
+**Languages:** SQLite FTS5 is the fast lexical baseline and supports Unicode/Greek; it does not provide reliable Greek-to-English semantic matching. Add a separately benchmarked multilingual semantic retriever as an optional adapter. Do not claim bilingual semantic retrieval is proven until actual Greek/English cross-language tests pass.
+
+**Build order:** (1) Universal Retrieval Interface V1 contract + tests, (2) persistent document library and restart/rebuild qualification, (3) authenticated document attachment ingestion to existing PC/Android chat, (4) deterministic memory/code/document fan-out and final post-memory prompt assembly, (5) multilingual cross-language retrieval test, (6) actual running app rollout with reversible update, (7) owner's natural-language acceptance test and follow-ups. Code actions remain proposed-only until independently authorized internal Work Hands qualify. Existing proven work is preserved.
+
+**Latest qualification:** 48/48 PASS in TheHands session `037e6eb8b7a8` (41 Gitea/Qwen chat bridge + 7 Document Index tests). Running app not updated. The latest attempted persistent storage module was blocked during publication and is NOT present. Previously successful local Git publication only covered checkpoint branch `orion-checkpoint-20261010` at `76b24da5d5656613a87e41894b7fccfe93af13e7`; subsequent GitHub commits are NOT automatically synced to Gitea.
+
+---
+
 ## ACTIVE PRIORITY — GITEA SOURCE SEARCH + QWEN APP INTEGRATION (2026-10-10)
 
 This owner-approved priority supersedes the older immediate sequence below; historical decisions remain for context. Complete checkpoint: `docs/checkpoints/GITEA_SOURCE_GATE_20261010.md`. MyGitea2 installation is FROZEN; the ORION V3 repository *hosted on Gitea* can receive authorized Git commits without changing Gitea application internals.
