@@ -1,33 +1,70 @@
-/* Chat alert controls V1: DOM-only enhancement; no verifier or authority changes. */
+/* ORION chat presentation controls. No backend, verifier or execution changes. */
 (function(){
  'use strict';
- const stop=document.getElementById('stopb');
- const headerActions=document.querySelector('#top > .tl:last-child');
- if(stop && headerActions)headerActions.insertBefore(stop,headerActions.firstChild);
+ const app=document.getElementById('app');
  const chat=document.getElementById('chat');
- if(!chat)return;
- function isVerification(node){
-  if(node.querySelector('.orion-alert-tools'))return false;
-  const text=(node.textContent||'').slice(0,900).toLowerCase();
-  return text.includes('failed semantic verification') || text.includes('failed verification');
+ const top=document.getElementById('top');
+ if(!app||!chat||!top)return;
+ const stop=document.getElementById('stopb');
+ const actions=top.querySelector('.tl:last-child');
+ if(stop&&actions&&stop.parentElement!==actions)actions.insertBefore(stop,actions.firstChild);
+
+ const lanes=document.getElementById('lane-strip');
+ if(lanes&&actions){
+   const toggle=document.createElement('button');
+   toggle.type='button';toggle.className='ib orion-lanes-toggle';
+   toggle.textContent='Status';toggle.setAttribute('aria-label','Show project status panels');
+   toggle.setAttribute('aria-expanded','false');
+   toggle.addEventListener('click',()=>{
+     const open=app.classList.toggle('orion-show-status');
+     toggle.setAttribute('aria-expanded',String(open));
+   });
+   actions.insertBefore(toggle,actions.firstChild);
  }
- function enhance(node){
-  if(!isVerification(node))return;
-  const body=document.createElement('div');
-  body.className='orion-alert-body';
-  while(node.firstChild)body.appendChild(node.firstChild);
-  const tools=document.createElement('div');tools.className='orion-alert-tools';
-  const min=document.createElement('button');min.type='button';min.textContent='−';min.title='Minimize alert';min.setAttribute('aria-label','Minimize verification alert');
-  const max=document.createElement('button');max.type='button';max.textContent='□';max.title='Expand alert';max.setAttribute('aria-label','Maximize verification alert');
-  const close=document.createElement('button');close.type='button';close.textContent='×';close.title='Dismiss alert';close.setAttribute('aria-label','Close verification alert');
-  min.addEventListener('click',()=>{const state=node.classList.toggle('orion-alert-minimized');min.textContent=state?'+':'−';min.title=state?'Restore alert':'Minimize alert';});
-  max.addEventListener('click',()=>{const state=node.classList.toggle('orion-alert-maximized');max.textContent=state?'▣':'□';max.title=state?'Restore alert size':'Expand alert';});
-  close.addEventListener('click',()=>node.remove());
-  tools.append(min,max,close);node.append(tools,body);
+ function controls(node){
+   if(node.querySelector(':scope > .orion-reading-tools'))return;
+   const tools=document.createElement('div');
+   tools.className='orion-reading-tools';
+   const min=document.createElement('button'), max=document.createElement('button');
+   min.type=max.type='button';
+   min.textContent='−';max.textContent='□';
+   min.title='Minimize answer';max.title='Maximize answer';
+   min.setAttribute('aria-label','Minimize or restore answer');
+   max.setAttribute('aria-label','Maximize or restore answer');
+   min.onclick=()=>{
+     const collapsed=node.classList.toggle('orion-answer-minimized');
+     node.classList.remove('orion-answer-maximized');
+     min.textContent=collapsed?'+':'−';
+     min.setAttribute('aria-label',collapsed?'Restore answer':'Minimize answer');
+   };
+   max.onclick=()=>{
+     node.classList.remove('orion-answer-minimized');
+     min.textContent='−';
+     const expanded=node.classList.toggle('orion-answer-maximized');
+     max.textContent=expanded?'▣':'□';
+     max.setAttribute('aria-label',expanded?'Restore answer size':'Maximize answer');
+   };
+   tools.append(min,max);
+   const value=(node.textContent||'').toLowerCase();
+   if(value.includes('failed semantic verification')||value.includes('failed verification')){
+     const close=document.createElement('button');
+     close.type='button';close.textContent='×';
+     close.title='Dismiss verification alert';
+     close.setAttribute('aria-label','Close verification alert');
+     close.onclick=()=>node.remove();
+     tools.appendChild(close);
+   }
+   node.insertBefore(tools,node.firstChild);
  }
- function scan(){chat.querySelectorAll('.m.or').forEach(enhance);}
- let busy=false;
- new MutationObserver(()=>{if(busy)return;busy=true;try{scan();}finally{busy=false;}})
-  .observe(chat,{subtree:true,childList:true,characterData:true});
+ function scan(){
+   chat.querySelectorAll('.m.or').forEach(controls);
+ }
+ let scheduled=false;
+ const observer=new MutationObserver(()=>{
+   if(scheduled)return;
+   scheduled=true;
+   requestAnimationFrame(()=>{scheduled=false;scan();});
+ });
+ observer.observe(chat,{childList:true,subtree:false});
  scan();
 })();
