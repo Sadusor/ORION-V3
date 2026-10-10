@@ -85,7 +85,7 @@ window.ORION_CHAT_HISTORY=(function(){
   if(n.classList.contains('you'))return{role:'user',text:n.textContent,source:PHONE?'phone-text':'pc-text'};
   if(n.classList.contains('or')){
    if(n.dataset.liveBrain==='unverified')return null;
-   const body=n.dataset.liveBrain?n.children[1]:null;
+   const body=n.dataset.liveBrain?n.lastElementChild:null;
    return{role:'assistant',text:body?body.textContent:n.textContent,source:PHONE?'orion-live-phone':'orion-live-pc'}
   }
   return null
