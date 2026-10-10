@@ -8,10 +8,10 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from .streaming_brain_pipeline import StreamingBrainPipeline
 from .conversation_verifier_v2 import ConversationVerifierV2
-from .gitea_search_service_v1 import search_live_gitea
+from .gitea_auto_index_v2 import search_live_gitea_v2
 from .gitea_search_context_v1 import render_untrusted_code_context
 from .gitea_brain_adapter_v1 import OPERATING_GUIDANCE
-from .orion_project_context_v1 import is_orion_project_question, project_status_context, render_project_status_context
+from .orion_project_context_v1 import is_orion_project_question
 
 _requested = ContextVar("orion_gitea_requested_context", default=None)
 
@@ -51,11 +51,7 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
         if request is not None:
             query,state_dir = request
             try:
-                if is_orion_project_question(query):
-                    checkpoint = project_status_context()
-                    goal = attach_bounded_reference(goal, render_project_status_context(checkpoint))
-                    return super().start(goal, model)
-                context = search_live_gitea(query=query,project_id="orion-v3",
+                context = search_live_gitea_v2(query=query,project_id="orion-v3",
                                            state_dir=state_dir)
                 if context["results"]:
                     goal = attach_bounded_reference(goal, render_untrusted_code_context(context)
