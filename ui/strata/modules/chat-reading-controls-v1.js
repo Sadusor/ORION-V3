@@ -1,6 +1,9 @@
 /* Chat alert controls V1: DOM-only enhancement; no verifier or authority changes. */
 (function(){
  'use strict';
+ const stop=document.getElementById('stopb');
+ const headerActions=document.querySelector('#top > .tl:last-child');
+ if(stop && headerActions)headerActions.insertBefore(stop,headerActions.firstChild);
  const chat=document.getElementById('chat');
  if(!chat)return;
  function isVerification(node){
