@@ -22,6 +22,7 @@ android {
     // The normal ORION package, version and Update button are unchanged.
     defaultConfig {
         manifestPlaceholders["orionAppLabel"] = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "ORION2" else "ORION"
+        manifestPlaceholders["orionArchiveQualificationExported"] = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "true" else "false"
     }
 
     // The offline GGUF is already quantized; do not recompress it in the APK.
