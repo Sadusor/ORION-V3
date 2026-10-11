@@ -1,0 +1,7 @@
+# Stage C backend composition candidate
+
+Prior scoped credential security module: 105/105 PASS, TheHands evidence b7e170c31132, ORION e25a85c05ca4f53bde2b7f6a30495a42c672129b. Freeze previously passing modules.
+
+New isolated, nonproduction factory in history_archive_backend_composition_v1.py connects the previously qualified archive, live SQLite, owner tombstone ledger, guarded ingress, shared SQLite lock, route adapter, scoped credential registry and independent owner capability. One configured project only; both archive sync and owner delete reject foreign projects. It is not imported or routed by product_server, and never provisioned/activated in live ORION. New tests use temporary SQLite files and explicit test-only enrollment, prove disabled default, successful sync/delete/replay, wrong project refusal, ordinary pairing denial and credential revocation.
+
+Limitations remain: product-server route wiring is still absent; Android client still uses bounded legacy chat store; actual mobile network transport and backup/activation not done. After Windows GITCHECK PASS, qualify opt-in server transport and Android changes while protecting existing live chat behavior and frozen V1 systems. Do not mistake this for production activation.
