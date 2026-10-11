@@ -58,7 +58,14 @@ def build_archive_route_fixture(*, root: str | Path, project_id: str, enabled=Fa
     boundary = HistoryArchiveTransactionalBoundaryV1(
         writer_gate=ArchiveWriteGateV1(directory / "archive-writer-gate.sqlite3"),
         reconciled_sync=reconciled, ingress=ingress, enabled=active)
-    return HistoryArchiveRouteAdapterV1(
+    class ProjectBoundAdapter(HistoryArchiveRouteAdapterV1):
+        def dispatch(self, *, path, device_token='', owner_token='', body=None):
+            if path in ('/api/history-archive/device-sync', '/api/history-archive/owner-delete') and isinstance(body, dict) and body.get('project_id') != project_id:
+                return 403, {'ok': False, 'error': 'project outside configured scope'}
+            return super().dispatch(path=path, device_token=device_token,
+                                    owner_token=owner_token, body=body)
+
+    return ProjectBoundAdapter(
         boundary=boundary, enabled=active,
         project_authorized=lambda token, requested: (requested == project_id
                                                      and authorize_project(token, requested)),
