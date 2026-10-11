@@ -33,7 +33,15 @@ class ArchiveQualificationActivity : Activity() {
                     val project = "orion2-usb-qualification"
                     val token = intent.getStringExtra("device_secret") ?: ""
                     check(token.length >= 32)
-                    val store = ChatHistoryStore(this)
+                    val usbContext = object : ContextWrapper(applicationContext) {
+                        override fun getApplicationContext(): Context = this
+                        override fun getDatabasePath(name: String): File {
+                            require(name == "orion_chat_history.db")
+                            return applicationContext.getDatabasePath("orion2_usb_sync_qualification.db")
+                        }
+                    }
+                    check(!usbContext.getDatabasePath("orion_chat_history.db").exists()) { "Prior USB qualification exists" }
+                    val store = ChatHistoryStore(usbContext)
                     try {
                         val payload = JSONObject().put("conversations", JSONArray().put(
                             JSONObject().put("id", "usb-q-1").put("project_id", project)
@@ -69,7 +77,7 @@ class ArchiveQualificationActivity : Activity() {
                         store.merge(payload.toString())
                         check(!store.snapshot().getJSONArray("conversations").toString().contains("usb-q-1"))
                     } finally { store.close() }
-                    val again = ChatHistoryStore(this)
+                    val again = ChatHistoryStore(usbContext)
                     try {
                         check(!again.snapshot().getJSONArray("conversations").toString().contains("usb-q-1"))
                     } finally { again.close() }
