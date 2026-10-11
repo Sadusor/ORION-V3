@@ -180,14 +180,10 @@ class OrionPcBridge(
                                     .put("error", "Archive sync rejected: HTTP $code")
                             } else {
                                 val removed = ArchiveDeviceReconcileV1.removedIds(response)
-                                // Never claim success if phone tombstones cannot be
-                                // applied atomically. Legacy store is untouched.
-                                if (removed.isNotEmpty()) {
-                                    JSONObject().put("ok", false)
-                                        .put("error", "Device tombstone application not activated")
-                                } else {
-                                    JSONObject().put("ok", true)
-                                }
+                                // Commit durable device tombstones and delete local rows atomically.
+                                historyStore.applyArchiveTombstones(projectId, removed)
+                                JSONObject().put("ok", true)
+                                    .put("removed_conversation_count", removed.size)
                             }
                         } finally {
                             conn.disconnect()
