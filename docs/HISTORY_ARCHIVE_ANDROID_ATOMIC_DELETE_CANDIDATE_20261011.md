@@ -1,0 +1,7 @@
+# Android archive deletion qualification
+
+TheHands prior session `65d4cbf53745` printed 119 Python tests OK and Gradle Kotlin compilation PASS, but evidence wrapper classified overall FAIL. Investigate result status separately; do not relabel it without root-cause confirmation.
+
+New Android ChatHistoryStore schema V2 adds durable device archive tombstones and migrates in place without dropping existing history. `applyArchiveTombstones(projectId, ids)` validates project and identifiers, checks project identity for local and prior tombstones, then records tombstones and deletes local messages/conversations in one SQLite transaction. Existing merge paths skip tombstoned conversations and their messages so legacy sync cannot resurrect deleted history. New opt-in archive bridge consumes authenticated acknowledgement and applies tombstones before returning success. Existing ordinary chat sync endpoint remains default. Android version migration must be confirmed via Gradle compilation and real device before rollout.
+
+Still OFF by default. Next gates: source contracts + all Python regressions + Android Kotlin compile via cached Gradle. Then real device migration/backup and transport enrollment. No installation, credentials or production flags modified.
