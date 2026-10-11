@@ -28,6 +28,8 @@ from modules.history_archive_v1 import HistoryArchiveV1
 from modules.history_archive_sync_v1 import archive_first_sync
 from modules.history_archive_delete_guard_v1 import OwnerDeleteLedgerV1
 from modules.history_archive_owner_capability_v1 import OwnerCapabilityV1
+from modules.history_archive_backend_composition_v1 import build_archive_route_fixture
+from modules.history_archive_route_adapter_v1 import SYNC_PATH, DELETE_PATH
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.canonical_memory_retrieval_foundation import (
     CanonicalMemoryRetrievalFoundation,
@@ -508,6 +510,26 @@ class Handler(BaseHTTPRequestHandler):
                 return self._json(200, {"ok": True, "token": token})
             except Exception as exc:
                 return self._json(400, {"ok": False, "error": str(exc)})
+
+        if path in (SYNC_PATH, DELETE_PATH):
+            if os.environ.get("ORION_ARCHIVE_HTTP_OPT_IN") != "1":
+                return self._json(404, {"ok": False, "error": "disabled"})
+            root = os.environ.get("ORION_ARCHIVE_TEST_ROOT", "")
+            project = os.environ.get("ORION_ARCHIVE_TEST_PROJECT", "")
+            if not root or not project or not pathlib.Path(root).is_dir():
+                return self._json(503, {"ok": False, "error": "not configured"})
+            try:
+                size = int(self.headers.get("Content-Length", "0"))
+                if size < 1 or size > 2800000:
+                    return self._json(413, {"ok": False, "error": "request too large"})
+                adapter = build_archive_route_fixture(root=root, project_id=project, enabled=True)
+                code, result = adapter.dispatch(
+                    path=path, body=self._read_json(),
+                    device_token=self.headers.get("X-Orion-Archive-Device", ""),
+                    owner_token=self.headers.get("X-Orion-Archive-Owner", ""))
+                return self._json(code, result)
+            except Exception:
+                return self._json(503, {"ok": False, "error": "archive request failed"})
 
         # Canonical-memory review is a durable write boundary. Unlike ordinary
         # V3 routes, loopback is not implicitly trusted here.
