@@ -1,5 +1,6 @@
 """Single-batch disabled archive write gate qualification."""
 import sqlite3
+from contextlib import closing
 import tempfile
 import threading
 import time
@@ -88,7 +89,7 @@ class WriterGateTests(unittest.TestCase):
 
     def test_second_writer_lock_timeout_fails_closed(self):
         second = ArchiveWriteGateV1(self.dbpath, timeout_seconds=.1)
-        with sqlite3.connect(str(self.dbpath), isolation_level=None) as held:
+        with closing(sqlite3.connect(str(self.dbpath), isolation_level=None)) as held:
             held.execute("BEGIN IMMEDIATE")
             with self.assertRaises(sqlite3.OperationalError):
                 second.run_exclusive(lambda: "not allowed")
