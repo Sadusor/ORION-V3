@@ -14,6 +14,7 @@ import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import androidx.core.content.FileProvider
 import com.sadusor.orionv3.history.ChatHistoryStore
+import com.sadusor.orionv3.history.ArchiveDeviceReconcileV1
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -140,6 +141,64 @@ class OrionPcBridge(
         val payload = JSONObject().put("ok", true)
         emit("ORION_PC_ACTION_RESULT", id, payload)
         refresh("auto")
+        return id
+    }
+
+    // Candidate archive sync path. No UI toggle or credential enrollment exists:
+    // disabled by default, and legacy syncHistory remains unchanged.
+    @JavascriptInterface
+    fun syncArchiveHistory(requestId: String, projectId: String): String {
+        val id = requestId.ifBlank { UUID.randomUUID().toString() }
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                try {
+                    if (!prefs.getBoolean("archive_sync_opt_in", false)) {
+                        JSONObject().put("ok", false).put("error", "Archive sync disabled")
+                    } else {
+                        val secret = prefs.getString("archive_device_capability", "") ?: ""
+                        require(secret.length >= 32) { "Independent device credential missing" }
+                        val prepared = ArchiveDeviceReconcileV1.prepare(
+                            projectId, historyStore.snapshot())
+                        val conn = URL(ORION_BASE_URL + "/api/history-archive/device-sync")
+                            .openConnection() as HttpURLConnection
+                        try {
+                            conn.requestMethod = "POST"
+                            conn.connectTimeout = 8000
+                            conn.readTimeout = 8000
+                            conn.doOutput = true
+                            conn.setRequestProperty("Content-Type", "application/json")
+                            conn.setRequestProperty("X-Orion-Archive-Device", secret)
+                            conn.outputStream.use {
+                                it.write(prepared.toString().toByteArray(Charsets.UTF_8))
+                            }
+                            val code = conn.responseCode
+                            val stream = if (code in 200..299) conn.inputStream else conn.errorStream
+                            val response = JSONObject(
+                                stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() } ?: "{}")
+                            if (code !in 200..299 || !response.optBoolean("ok", false)) {
+                                JSONObject().put("ok", false)
+                                    .put("error", "Archive sync rejected: HTTP $code")
+                            } else {
+                                val removed = ArchiveDeviceReconcileV1.removedIds(response)
+                                // Never claim success if phone tombstones cannot be
+                                // applied atomically. Legacy store is untouched.
+                                if (removed.isNotEmpty()) {
+                                    JSONObject().put("ok", false)
+                                        .put("error", "Device tombstone application not activated")
+                                } else {
+                                    JSONObject().put("ok", true)
+                                }
+                            }
+                        } finally {
+                            conn.disconnect()
+                        }
+                    }
+                } catch (_: Throwable) {
+                    JSONObject().put("ok", false).put("error", "Archive sync unavailable")
+                }
+            }
+            emit("ORION_PC_HISTORY_RESULT", id, result)
+        }
         return id
     }
 
