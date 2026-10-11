@@ -16,7 +16,9 @@ class AndroidArchiveSourceContract(unittest.TestCase):
     def test_legacy_bridge_not_rerouted_implicitly(self):
         source = BRIDGE.read_text(encoding="utf-8")
         self.assertIn('"/api/chat-history/sync"', source)
-        self.assertNotIn('"/api/history-archive/device-sync"', source)
+        self.assertIn('fun syncArchiveHistory(', source)
+        self.assertIn('archive_sync_opt_in', source)
+        self.assertIn('Device tombstone application not activated', source)
 
 
 if __name__ == "__main__":
