@@ -16,6 +16,13 @@ class MultiRepoChatTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             a=named_repo_scope("How many repositories in MyGitea2?",state_dir=d)
             self.assertEqual(a["kind"],"inventory")
+    def test_count_followup_without_gitea_word(self):
+        with tempfile.TemporaryDirectory() as d:
+            a=named_repo_scope("how many repos we have in there?",state_dir=d)
+            self.assertEqual(a["kind"],"inventory")
+    def test_other_host_does_not_route(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(named_repo_scope("how many repos on GitHub?",state_dir=d))
     def test_unknown(self):
         with tempfile.TemporaryDirectory() as d:
             self.assertIsNone(named_repo_scope("Find unknown repo",state_dir=d))
