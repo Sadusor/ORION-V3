@@ -37,9 +37,14 @@ try {
   if($LASTEXITCODE -ne 0){throw 'Production Git history diverged'}
   & git -C $prod merge --ff-only origin/main
   if($LASTEXITCODE -ne 0){throw 'Production Git fast-forward failed'}
-  if($previous -eq $ExpectedCommit){
-    $steps.pc_update='ALREADY_CURRENT';Persist
-    Write-Host 'ORION_PC_UPDATE> ALREADY_CURRENT'
+  $runningCommit = ''
+  try {
+    $health = Invoke-RestMethod -Uri 'http://127.0.0.1:8890/api/health' -TimeoutSec 3
+    if ($health.ok) { $runningCommit = [string]$health.running_commit }
+  } catch {}
+  if($previous -eq $ExpectedCommit -and $runningCommit -eq $ExpectedCommit){
+    $steps.pc_update='ALREADY_CURRENT_AND_RUNNING';Persist
+    Write-Host 'ORION_PC_UPDATE> ALREADY_CURRENT_AND_RUNNING'
   } else {
     $updater=Join-Path $prod 'scripts\apply_orion_update.ps1'
     & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $updater -ExpectedCommit $ExpectedCommit -PreviousCommit $previous
