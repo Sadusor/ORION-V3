@@ -5,6 +5,8 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.OpenableColumns
+import android.util.Base64
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
@@ -38,6 +40,52 @@ class OrionPcBridge(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val prefs = activity.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+
+
+    fun indexSelectedDocument(uri: Uri) {
+        scope.launch {
+            val payload = withContext(Dispatchers.IO) {
+                try {
+                    var name = "document.txt"
+                    activity.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
+                        if (cursor.moveToFirst()) name = cursor.getString(0) ?: name
+                    }
+                    val ext = name.substringAfterLast('.', "").lowercase()
+                    require(ext in setOf("txt", "md", "csv", "json", "log")) { "Supported files: txt, md, csv, json, log" }
+                    val bytes = activity.contentResolver.openInputStream(uri)?.use { input ->
+                        val buffer = java.io.ByteArrayOutputStream()
+                        val chunk = ByteArray(8192)
+                        while (true) {
+                            val count = input.read(chunk)
+                            if (count < 0) break
+                            require(buffer.size() + count <= 2_000_000) { "Document exceeds 2 MB" }
+                            buffer.write(chunk, 0, count)
+                        }
+                        buffer.toByteArray()
+                    } ?: throw IllegalStateException("Cannot open document")
+                    require(bytes.isNotEmpty()) { "Document is empty" }
+                    val requestBody = JSONObject()
+                        .put("project_id", "orion-v3")
+                        .put("filename", name)
+                        .put("data_base64", Base64.encodeToString(bytes, Base64.NO_WRAP))
+                    val response = request("POST", "/api/documents/index", requestBody,
+                        authenticated = true, timeoutMs = 20000)
+                    JSONObject().put("ok", response.ok)
+                        .put("message", if (response.ok) "Indexed " + name + ". Ask ORION about it."
+                            else response.error.ifBlank { "Document indexing failed" })
+                } catch (exc: Exception) {
+                    JSONObject().put("ok", false).put("message", exc.message ?: "Document indexing failed")
+                }
+            }
+            activity.runOnUiThread {
+                webView.evaluateJavascript(
+                    "window.ORION_PHONE_DOCUMENT_RESULT&&window.ORION_PHONE_DOCUMENT_RESULT(" +
+                        payload.optBoolean("ok") + "," +
+                        JSONObject.quote(payload.optString("message")) + ")", null
+                )
+            }
+        }
+    }
 
     @JavascriptInterface
     fun refresh(requestId: String): String {
