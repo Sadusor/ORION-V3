@@ -8,9 +8,9 @@ function stubEl(){const store={};return new Proxy(function(){},{get:(t,k)=>{if(k
  set:(t,k,v)=>{store[k]=v;return true},apply:()=>stubEl()})}
 const scriptsOf=html=>[...fs.readFileSync(path.join(ROOT,html),'utf8').matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
 function makeContext(o){o=o||{};const ids={};
- const doc={getElementById:id=>ids[id]||(ids[id]=stubEl()),createElement:()=>stubEl(),addEventListener(){},hidden:false,body:stubEl()};
+ const doc={getElementById:id=>ids[id]||(ids[id]=stubEl()),createElement:()=>stubEl(),addEventListener(){},hidden:false,body:stubEl(),head:stubEl()};
  const ls=Object.assign({},o.storage||{});
- const ctx={console,document:doc,matchMedia:()=>({matches:false}),
+ const ctx={console,document:doc,MutationObserver:class{observe(){}disconnect(){}},Option:function(text,value){return {text,value}},matchMedia:()=>({matches:false}),
   localStorage:{getItem:k=>ls[k]||'',setItem:(k,v)=>{ls[k]=String(v)},removeItem:k=>{delete ls[k]}},
   performance,setTimeout:o.setTimeout||setTimeout,clearTimeout,setInterval:()=>0,requestAnimationFrame:()=>0,addEventListener(){},innerWidth:1280,devicePixelRatio:1,
   location:{search:''},URLSearchParams,URL,AbortController,Date,JSON,Math,Promise,getComputedStyle:()=>({getPropertyValue:()=>''}),confirm:()=>true,
