@@ -18,7 +18,7 @@ class AndroidArchiveSourceContract(unittest.TestCase):
         self.assertIn('"/api/chat-history/sync"', source)
         self.assertIn('fun syncArchiveHistory(', source)
         self.assertIn('archive_sync_opt_in', source)
-        self.assertIn('Device tombstone application not activated', source)
+        self.assertIn('applyArchiveTombstones(projectId, removed)', source)
 
 
 if __name__ == "__main__":
