@@ -28,7 +28,7 @@ class ArchiveProjectionTests(unittest.TestCase):
             projection.refresh()
             self.assertEqual(projection.search(project_id="one",query="heliosphere"),[])
             self.assertEqual(len(projection.search(project_id="two",query="heliosphere")),1)
-            with sqlite3.connect(root/"source.sqlite3") as db:
+            with closing(sqlite3.connect(root/"source.sqlite3")) as db:
                 self.assertEqual(db.execute("SELECT COUNT(*) FROM messages").fetchone()[0],2)
 
 if __name__=="__main__":
