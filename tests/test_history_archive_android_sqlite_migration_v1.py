@@ -1,6 +1,7 @@
 """Host-side SQLite qualification of the *literal* Android history schema/migration.
 Not an Android runtime or device test. Never opens a live database.
 """
+import contextlib
 import pathlib
 import re
 import sqlite3
@@ -47,25 +48,25 @@ class AndroidHistoryMigrationSQLiteQualification(unittest.TestCase):
         con.commit()
 
     def test_real_sqlite_upgrade_preserves_history_across_restart(self):
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.v1(con)
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.migrate(con)
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.assertEqual(con.execute("PRAGMA user_version").fetchone()[0], 2)
             self.assertEqual(con.execute("SELECT title FROM conversations WHERE id='a'").fetchone()[0], "Greek Ελληνικά")
             self.assertEqual(con.execute("SELECT text FROM messages WHERE id='m'").fetchone()[0], "original chat")
             self.assertEqual(con.execute("SELECT COUNT(*) FROM deleted_archive_conversations").fetchone()[0], 0)
 
     def test_transactional_delete_and_replay_after_restart(self):
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.v1(con)
             self.migrate(con)
             with con:
                 con.execute("INSERT INTO deleted_archive_conversations VALUES('a','project-a')")
                 con.execute("DELETE FROM messages WHERE conversation_id='a'")
                 con.execute("DELETE FROM conversations WHERE id='a'")
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.assertEqual(con.execute("SELECT COUNT(*) FROM conversations").fetchone()[0], 0)
             self.assertEqual(con.execute("SELECT COUNT(*) FROM messages").fetchone()[0], 0)
             self.assertEqual(con.execute("SELECT project_id FROM deleted_archive_conversations WHERE id='a'").fetchone()[0], "project-a")
@@ -76,7 +77,7 @@ class AndroidHistoryMigrationSQLiteQualification(unittest.TestCase):
         self.assertIn("tombstoned(db, id)", self.source)
 
     def test_transaction_rollback_keeps_rows_when_delete_fails(self):
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.v1(con)
             self.migrate(con)
             with self.assertRaises(sqlite3.IntegrityError):
@@ -84,14 +85,14 @@ class AndroidHistoryMigrationSQLiteQualification(unittest.TestCase):
                     con.execute("INSERT INTO deleted_archive_conversations VALUES('a','project-a')")
                     con.execute("DELETE FROM messages WHERE conversation_id='a'")
                     con.execute("INSERT INTO deleted_archive_conversations VALUES('a','project-b')")
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             self.assertEqual(con.execute("SELECT COUNT(*) FROM deleted_archive_conversations").fetchone()[0], 0)
             self.assertEqual(con.execute("SELECT COUNT(*) FROM messages").fetchone()[0], 1)
 
     def test_source_schema_is_compatible_with_v1_fixture(self):
         stmts = statements(self.source, "override fun onCreate")
         self.assertGreaterEqual(len(stmts), 5)
-        with sqlite3.connect(self.path) as con:
+        with contextlib.closing(sqlite3.connect(self.path)) as con, con:
             for multi, single in stmts:
                 con.execute((multi or single).strip())
             self.assertEqual(con.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name IN ('conversations','messages','deleted_archive_conversations')").fetchone()[0], 3)
