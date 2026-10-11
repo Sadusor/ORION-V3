@@ -1,0 +1,5 @@
+# ORION isolated archive APK qualification
+
+Optional Gradle `-PorionIsolatedArchiveTest=true` changes only the APK application ID to `com.sadusor.orionv3.archivequal` and label to `ORION Archive Test`; normal build keeps `com.sadusor.orionv3` and the existing Update button (`/api/update/main`, `/apk`). Android FileProvider authority expands from the application ID to prevent clashes. All PC networking is blocked in the qualification app by an app-ID check; thus it cannot update the PC or accidentally sync against live data. It can coexist with the production app and maintains independent app storage. This is an **isolated APK build-only verification**, not yet a test of PC-to-phone archive networking. Do not install it automatically.
+
+GITCHECK must run the full prior regressions, verify both Kotlin builds, and build `:app:assembleDebug -PorionIsolatedArchiveTest=true`. It must not run `adb install`, change env flags or push an update through the production Update button. The next step needs a test-only PC URL / endpoint configuration, device credential enrollment, database migration data tests and explicit installation approval.
