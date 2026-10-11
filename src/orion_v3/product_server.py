@@ -17,6 +17,7 @@ from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.gitea_readonly_v1 import GiteaReadonly
 from modules.gitea_qwen_context_v1 import build_repository_context
 from modules.document_chat_connector_v1 import DocumentAwareGiteaChatBrain, indexed_chat_request
+from modules.verifier_reliability_v1 import VerifierReliabilityV1
 from modules.document_intake_v1 import import_indexed_document
 from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
@@ -88,7 +89,7 @@ MEMORY_SHADOW_AUDIT = MemoryShadowAudit(
     MEMORY_CONSOLIDATION,
 )
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
-    brain=DocumentAwareGiteaChatBrain(),
+    brain=DocumentAwareGiteaChatBrain(verifier=VerifierReliabilityV1()),
     recall=MEMORY_RETRIEVAL,
     durable=MEMORY_CONSOLIDATION,
     history=MEMORY_HISTORY,
