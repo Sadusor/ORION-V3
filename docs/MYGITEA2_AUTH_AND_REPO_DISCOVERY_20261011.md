@@ -39,3 +39,21 @@ The endpoint `/api/v1/user/repos` does not by itself prove an instance-wide inve
 - Windows DPAPI credentials are tied to the encryption account; different Windows services/accounts cannot simply decrypt them.
 - Never ask owner to paste a token in chat, GitHub, screenshot, test output, or Gitea URL.
 - TheHands is a **separate frozen remote product**. Use it as a test carrier only; don't couple its runtime to ORION.
+
+
+## Verified correction — owner manual PowerShell results (2026-10-11)
+
+A prior PowerShell use of `@(Invoke-RestMethod ...)` wrapped an entire JSON repository array as one object. This yielded the **false** totals `USER=1`, `ACCOUNT=1`, and `UNIQUE=2`; the displayed giant strings of repository names demonstrated that parsing was wrong. This was a **PowerShell diagnostic issue**, not evidence of a defect in Python `GiteaReadonly.list_repositories()`, which parses JSON with `json.loads` and returns a list.
+
+Owner then retested with `Invoke-WebRequest` + `ConvertFrom-Json` and explicit array handling, authenticated using the existing locally stored DPAPI token. Reported results:
+- `USER COUNT> 50`
+- `ACCOUNT COUNT> 50`
+- `UNIQUE_REPOSITORIES> 81`
+- `PAYDAY_FOUND> True`
+- `ORION_FOUND> True`
+- `GITEA_INVENTORY_CORRECTED> PASS`
+- Organization endpoint remained unavailable in the earlier test; ownership/organization distinction is not yet resolved.
+
+**Critical qualification:** 81 is the observed **deduplicated union** of the two endpoints under current request settings, **not** verified as the complete instance-wide repository total. Both listings returning exactly 50 is suspicious for page-size/default pagination caps; the PowerShell script's `COMPLETE=True` when the result is <100 does not prove completeness if server limits are lower than requested. Verify effective page limit and page 2 before claiming a full count.
+
+**Code consequence:** Do not 'fix' Python JSON array parsing based on the old PowerShell bug. Keep existing `GiteaReadonly` untouched. Investigate page boundaries/limits and determine whether inventory should be the authorized-catalog count or authenticated visible count. DPAPI runtime wiring is still not implemented/verified.
