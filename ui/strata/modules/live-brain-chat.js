@@ -88,10 +88,12 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
   revise.hidden=true;
   revise.addEventListener('click',async(event)=>{
    if(m.dataset.liveBrain!=='verified'||!window.ORION_BRIDGE?.revise)return;
+   const identity={conversationId:m.dataset.conversationId||'',turnId:m.dataset.turnId||''};
+   if(!identity.conversationId||!identity.turnId){revise.textContent='Unavailable';return;}
    revise.disabled=true;
    revise.textContent='Revising…';
    try{
-    const response=await window.ORION_BRIDGE.revise(event);
+    const response=await window.ORION_BRIDGE.revise(identity,event);
     if(!response?.ok){
      revise.textContent='Revise failed';
      revise.title=String(response?.message||response?.error||'Revision unavailable');
@@ -144,9 +146,11 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    }
    ensure(chat,nextKey);
    bubble.dataset.liveBrain='verified';
+   bubble.dataset.conversationId=String(local.conversationId||'');
+   bubble.dataset.turnId=String(nextKey);
    const revise=bubble.querySelector('.orion-revise-response');if(revise)revise.hidden=false;
    const tag=bubble.querySelector('[data-live-brain-label]');
-   if(tag)tag.textContent='VERIFIED';
+   if(tag)tag.textContent='REVIEWED · FACTS UNVERIFIED';
    const atBottom=nearBottom(chat);
    cancelReveal();
    target=conclusion;
