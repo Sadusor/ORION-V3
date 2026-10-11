@@ -1,3 +1,5 @@
+> **Module ownership and freeze map:** [ORION Module Catalog](../../../docs/ORION_MODULE_CATALOG.md). Categorize new modules there first; do not move or merge frozen files solely for housekeeping.
+
 # ORION V3 Modules
 
 This directory contains replaceable, bounded product modules built under the **FREEZE RULE**.
