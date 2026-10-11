@@ -1,0 +1,5 @@
+# Production archive final safety batch
+
+TheHands PowerShell 1 runs existing regression/build/device checks, SQLite **online backup** from `%LOCALAPPDATA%\\ORION-V3\\chat_history.sqlite3` into persistent `%LOCALAPPDATA%\\ORION-V3\\history-archive-backups`, then restores the backup into a separate temporary SQLite copy and runs `PRAGMA quick_check`, byte-compare, removes only the rehearsal copy and retains timestamped backup plus SHA-256 manifest. Backups contain private conversation data and must not be committed/uploaded. SQLite online backup handles ordinary WAL changes without stopping ORION. Does not restore into the production location. A read-only local backend reachability probe checks TCP port 8890 but is **not** proof of normal phone connectivity or archive enrollment.
+
+**Remaining hard gates:** phone private-history backup/restore, independent production archive credential enrollment, and normal-network archive synchronization. The release remains blocked until these are genuinely qualified; no live archive feature flag or Update button activation. All existing frozen modules remain unchanged.
