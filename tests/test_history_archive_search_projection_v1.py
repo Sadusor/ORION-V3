@@ -24,6 +24,7 @@ class ArchiveProjectionTests(unittest.TestCase):
             import sqlite3
             with closing(sqlite3.connect(root/"source.sqlite3")) as db:
                 db.execute("UPDATE conversations SET deleted_at_ms=10 WHERE id='c1'")
+                db.commit()
             projection.refresh()
             self.assertEqual(projection.search(project_id="one",query="heliosphere"),[])
             self.assertEqual(len(projection.search(project_id="two",query="heliosphere")),1)
