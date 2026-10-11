@@ -9,10 +9,14 @@ CATALOG=(
     AuthorizedRepo("payday","MyGitea","PayDay","payday"),
 )
 class Fake:
-    def list_repositories(self,*,page,limit):
-        assert limit == 100
-        return [{"owner":"MyGitea","name":"ORION-V3"},
-                {"owner":"MyGitea","name":"PayDay"}] if page == 1 else []
+    def _get(self,path):
+        from urllib.parse import parse_qs, urlsplit
+        q=parse_qs(urlsplit(path).query)
+        page=int(q["page"][0])
+        size=int(q["limit"][0])
+        assert size == 25
+        names=["ORION-V3","PayDay"]
+        return [{"owner":{"login":"MyGitea"},"name":name} for name in names[(page-1)*size:page*size]]
 class Tests(unittest.TestCase):
     def setUp(self):
         self.tmp=tempfile.TemporaryDirectory()
@@ -27,7 +31,7 @@ class Tests(unittest.TestCase):
     def test_inventory(self):
         data=self.adapter.visible_inventory()
         self.assertEqual(data["count"],2)
-        self.assertTrue(data["complete"])
+        self.assertTrue(data["complete"])\n        self.assertEqual(data["scopes"]["owner_account"]["count"],2)
         self.assertEqual(len(self.adapter.authorized_inventory()),2)
     def test_duplicate(self):
         with self.assertRaises(ValueError):
