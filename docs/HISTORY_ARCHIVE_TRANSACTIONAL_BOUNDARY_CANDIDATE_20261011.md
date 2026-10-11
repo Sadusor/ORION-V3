@@ -1,0 +1,5 @@
+# ORION Stage C shared transactional boundary
+
+Owner reported PASS for ORION `abb6dbd69c2e096886f682eb4d871748d21f7dbf` with TheHands Hand 1; freeze prior tested lock module. New optional standalone `history_archive_transactional_boundary_v1.py` and tests. It wraps the entire existing reconciled sync adapter call or owner delete ingress call in the same cooperating SQLite write gate. Disabled unless enabled by explicit caller. Tests qualify disabled behavior, sync, owner credential denial, owner operation, and contention across both routes. No edits to frozen modules, production `product_server.py`, Android, current credentials or live database.
+
+**Still pending:** integration into *all* live server paths; ensure stronger project-bound device authentication and owner-only capability, test real PC/Android offline reconnection, back up live DB, then explicit activation. A test PASS here cannot be described as complete Stage C deployment. No Qwen injection.
