@@ -5,7 +5,7 @@ import sqlite3
 from contextlib import closing
 from .gitea_readonly_v1 import GiteaReadonly
 from .gitea_codebase_map_v1 import create_codebase_map
-from .gitea_source_context_v1 import get_source_context
+from .gitea_source_context_v2 import get_source_context_v2
 from .gitea_code_index_v1 import GiteaCodeIndex
 from .gitea_search_context_v1 import search_code_context
 
@@ -42,7 +42,7 @@ def refresh_current_index(*, state_dir, api=None):
     skipped=[]
     for name in candidates:
         try:
-            entry = get_source_context(gitea, owner, repo, commit, name)
+            entry = get_source_context_v2(gitea, owner, repo, commit, name)
         except (ValueError, UnicodeError):
             skipped.append(name)
             continue
