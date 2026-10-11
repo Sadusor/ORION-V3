@@ -67,9 +67,10 @@ class TransactionalBoundaryTests(unittest.TestCase):
             held.execute("BEGIN IMMEDIATE")
             with self.assertRaises(sqlite3.OperationalError):
                 self.boundary.sync(device_token="project-scoped", body={})
-            with self.assertRaises(sqlite3.OperationalError):
-                self.boundary.owner_delete(
-                    owner_token="owner-only", conversation_id="c", project_id="p")
+            status, response = self.boundary.owner_delete(
+                owner_token="owner-only", conversation_id="c", project_id="p")
+            self.assertEqual(status, 409)
+            self.assertFalse(response["ok"])
             held.execute("ROLLBACK")
         self.assertFalse(self.syncer.calls)
         self.assertFalse(self.ingress.deleted)
