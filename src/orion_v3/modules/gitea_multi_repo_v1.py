@@ -58,21 +58,46 @@ class GiteaMultiRepoV1:
     def authorized_inventory(self):
         return tuple(sorted(self.by_alias.values(),key=lambda r:r.alias.casefold()))
 
-    def visible_inventory(self, *, max_pages=5, page_size=100):
-        """Exact count only when final partial page seen. Never imply completeness at cap."""
-        items=[]; seen=set()
-        for page in range(1,max_pages+1):
-            chunk=self.api.list_repositories(page=page,limit=page_size)
-            if not isinstance(chunk,list):
-                raise ValueError("Gitea inventory invalid")
-            for item in chunk:
-                key=(item["owner"],item["name"])
-                if key in seen:
-                    raise ValueError("Duplicated repository in inventory pages")
-                seen.add(key); items.append(item)
-            if len(chunk)<page_size:
-                return {"count":len(items),"complete":True,"repositories":items}
-        return {"count":len(items),"complete":False,"repositories":items}
+    def visible_inventory(self, *, max_pages=40, page_size=25, owner="MyGitea"):
+        """Bounded authenticated inventory; do not confuse user and owner scopes.
+
+        A small requested page size avoids a Gitea maximum-response cap being
+        mistaken for the final page. No automatic source authorization.
+        """
+        if not 1 <= max_pages <= 100 or not 1 <= page_size <= 25:
+            raise ValueError("Unsafe inventory pagination")
+        paths = {
+            "authenticated_user": lambda p: f"user/repos?page={p}&limit={page_size}",
+            "owner_account": lambda p: f"users/{owner}/repos?page={p}&limit={page_size}",
+        }
+        scopes = {}
+        union = {}
+        for label, endpoint in paths.items():
+            seen = set()
+            count = 0
+            complete = False
+            error = None
+            try:
+                for page in range(1, max_pages + 1):
+                    raw = self.api._get(endpoint(page))
+                    if not isinstance(raw, list):
+                        raise ValueError("Unexpected repository response")
+                    for item in raw:
+                        key = (item["owner"]["login"], item["name"])
+                        if key in seen:
+                            raise ValueError("Duplicate repository within scope")
+                        seen.add(key)
+                        union[key] = {"owner": key[0], "name": key[1]}
+                        count += 1
+                    if len(raw) < page_size:
+                        complete = True
+                        break
+            except (OSError, ValueError, RuntimeError, KeyError, TypeError):
+                error = "listing_unavailable"
+            scopes[label] = {"count": count, "complete": complete, "error": error}
+        return {"count": len(union), "complete": all(v["complete"] for v in scopes.values()),
+                "repositories": sorted(union.values(), key=lambda x: (x["owner"], x["name"])),
+                "scopes": scopes, "scope": "authenticated user and owner account; not instance-wide"}
 
     def refresh(self, repo):
         """Refresh only explicitly authorized repository at exact live default-branch SHA."""
