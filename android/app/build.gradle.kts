@@ -21,7 +21,7 @@ android {
     // Archive qualification uses a distinct install identity and private app data.
     // The normal ORION package, version and Update button are unchanged.
     defaultConfig {
-        manifestPlaceholders["orionAppLabel"] = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "ORION Archive Test" else "ORION"
+        manifestPlaceholders["orionAppLabel"] = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "ORION2" else "ORION"
     }
 
     // The offline GGUF is already quantized; do not recompress it in the APK.
