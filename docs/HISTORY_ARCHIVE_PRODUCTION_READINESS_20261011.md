@@ -1,0 +1,7 @@
+# ORION HistoryArchive production update readiness (non-activating)
+
+Last full USB evidence: TheHands session `d5048a07eb79`, actual Android `SYNC_PASS`, `DELETE_REPLAY_PASS`, final `PASS`, temporary server and Android test package. This proves isolated test transport, **not production network or device enrollment**.
+
+The production ORION Update button remains its existing workflow (`/api/update/main` for PC and `/apk` for APK); no live update is requested here. Production application ID remains `com.sadusor.orionv3`; `ORION2` qualification ID is separate. Both archive server features (`ORION_HISTORY_ARCHIVE_V1_EXPERIMENTAL`, `ORION_ARCHIVE_HTTP_OPT_IN`) and Android `archive_sync_opt_in` are off by default.
+
+Before an owner-approved production update, resolve: secure separate device credential enrollment and persistence, correct archive root/project configuration, actual normal-network transport qualification (not just USB loopback), backup and restore rehearsal of the installed PC conversation SQLite and on-device local history, archive completeness relative to legacy bounded chat history, conflict-free cutover and owner deletion endpoint authorization. Do not infer permanent original-history retention from isolated qualification alone. No changes to live service or production APK, no environment variables set, no secrets provisioned. This document is a readiness gate, not an activation authorization.
