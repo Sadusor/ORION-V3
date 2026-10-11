@@ -2,6 +2,8 @@ package com.sadusor.orionv3
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.content.Intent
+import android.webkit.JavascriptInterface
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
@@ -32,6 +34,34 @@ class MainActivity : Activity() {
     private lateinit var historyBridge: ChatHistoryBridge
     private var offlineChatBridge: OfflineChatBridge? = null
     private var pcBridge: OrionPcBridge? = null
+    private val documentPickerCode = 7421
+
+    @JavascriptInterface
+    fun openDocumentPicker() {
+        runOnUiThread {
+            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                addCategory(Intent.CATEGORY_OPENABLE)
+                type = "*/*"
+            }
+            try {
+                startActivityForResult(intent, documentPickerCode)
+            } catch (exc: Exception) {
+                webView.evaluateJavascript(
+                    "window.ORION_PHONE_DOCUMENT_RESULT&&window.ORION_PHONE_DOCUMENT_RESULT(false,'Document picker unavailable')",
+                    null,
+                )
+            }
+        }
+    }
+
+    @Deprecated("Android document picker callback")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != documentPickerCode) return
+        val uri = if (resultCode == RESULT_OK) data?.data else null
+        if (uri != null) pcBridge?.indexSelectedDocument(uri)
+    }
+
 
     @SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +93,7 @@ class MainActivity : Activity() {
             settings.mediaPlaybackRequiresUserGesture = true
 
             addJavascriptInterface(historyBridge, "ORION_NATIVE_HISTORY")
+            addJavascriptInterface(this@MainActivity, "ORION_NATIVE_DOCUMENT")
             WebView.setWebContentsDebuggingEnabled(true)
 
             webChromeClient = object : WebChromeClient() {
