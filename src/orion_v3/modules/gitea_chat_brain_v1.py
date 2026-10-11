@@ -6,6 +6,9 @@ untrusted code context only after the final memory prompt is composed.
 from __future__ import annotations
 from contextlib import contextmanager
 from contextvars import ContextVar
+from pathlib import Path
+import hashlib
+import json
 from .streaming_brain_pipeline import StreamingBrainPipeline
 from .conversation_verifier_v2 import ConversationVerifierV2
 from .gitea_auto_index_v2 import search_live_gitea_v2
@@ -43,6 +46,8 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
 
     def start(self, goal: str, model: str = "") -> dict:
         request = _requested.get()
+        trace = {"schema": "orion.chat-source-trace/1", "lookup": "not_requested",
+                 "source_ids": [], "injected": False}
         if request is not None:
             query, state_dir = request
 
@@ -65,6 +70,13 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
             retriever = UniversalRetrievalV1()
             retriever.register("mygitea2", gitea_source)
             found = retriever.retrieve(query, project="orion-v3", max_chars=12000)
+            trace["lookup"] = "error" if found["source_errors"] else (
+                "hit" if found["results"] else "miss"
+            )
+            trace["source_ids"] = [hit["identifier"] for hit in found["results"]]
+            trace["source_errors"] = [
+                item["source"] + ":" + item["error"] for item in found["source_errors"]
+            ]
             if found["results"]:
                 lines = [
                     "<ORION_INDEXED_SOURCES trust='untrusted_source' authority='context_only'>",
@@ -74,9 +86,22 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
                     lines.append(hit["snippet"] + "\\nCitation: " + hit["citation"])
                 lines.append("</ORION_INDEXED_SOURCES>")
                 goal = attach_bounded_reference(goal, "\\n".join(lines))
+                trace["injected"] = True
             elif found["source_errors"]:
                 goal = attach_bounded_reference(
                     goal,
                     "MyGitea2 indexed search failed; disclose missing source evidence rather than inventing it.",
                 )
-        return super().start(goal, model)
+        trace["prompt_bytes"] = len(goal.encode("utf-8"))
+        trace["prompt_sha256"] = hashlib.sha256(goal.encode("utf-8")).hexdigest()
+        started = super().start(goal, model)
+        trace["brain_started_utc"] = str(started.get("brain_started_utc") or "")
+        if request is not None:
+            # Diagnostic sidecar: metadata only, never canonical memory.
+            try:
+                output = Path(request[1]) / "chat-source-trace.jsonl"
+                with output.open("a", encoding="utf-8") as stream:
+                    stream.write(json.dumps(trace, sort_keys=True) + "\n")
+            except OSError:
+                pass
+        return started
