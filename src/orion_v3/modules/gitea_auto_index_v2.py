@@ -7,7 +7,7 @@ from .gitea_readonly_v1 import GiteaReadonly
 from .gitea_codebase_map_v1 import create_codebase_map
 from .gitea_source_context_v2 import get_source_context_v2
 from .gitea_code_index_v1 import GiteaCodeIndex
-from .gitea_search_context_v1 import search_code_context
+from .gitea_relevance_v2 import search_relevant_context
 
 PROJECT = "orion-v3"
 REPOSITORY = "MyGitea/ORION-V3"
@@ -59,7 +59,7 @@ def search_live_gitea_v2(*, query, project_id, state_dir, api=None):
     if not query or len(query)>300:
         raise ValueError("Invalid query")
     info=refresh_current_index(state_dir=state_dir,api=api)
-    response=search_code_context(info["path"],query=query,project=PROJECT,
+    response=search_relevant_context(info["path"],query=query,project=PROJECT,
                                  repository=REPOSITORY,commit_sha=info["commit"],max_chars=6000)
     response.update({k:v for k,v in info.items() if k not in {"path"}})
     return response
