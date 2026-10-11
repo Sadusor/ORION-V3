@@ -28,7 +28,7 @@ const B=run(ctx,'window.ORION_BRIDGE');
  calls.length=0;await B.sendGoal('Open Chrome and search Google for x');
  ok(calls.length===1&&calls[0].url.endsWith('/api/local-hand/draft')&&JSON.parse(calls[0].body).goal==='Open Chrome and search Google for x','sendGoal => exactly ONE request, to /api/local-hand/draft');
  ok(!calls.some(c=>/\/run|\/start/.test(c.url)),'conversation text never triggers run/start (ORION decides; Approve & Run stays human)');
- ok(Object.keys(JSON.parse(calls[0].body)).sort().join()==='goal,model','draft body is exactly {goal, model}');
+ ok(['goal','model','owner_message','memory_query','conversation_id'].every(k=>Object.prototype.hasOwnProperty.call(JSON.parse(calls[0].body),k)),'draft retains required context and model fields');
  ok(calls[0].url.indexOf('tok')<0,'the token is never placed in a URL');
  /* descriptors only reference registered routes */
  const c=H.coreCtx();c.__ids=[];
