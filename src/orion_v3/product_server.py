@@ -17,6 +17,7 @@ from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.gitea_readonly_v1 import GiteaReadonly
 from modules.gitea_qwen_context_v1 import build_repository_context
 from modules.document_chat_connector_v1 import DocumentAwareGiteaChatBrain, indexed_chat_request
+from modules.document_intake_v1 import import_indexed_document
 from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
@@ -484,6 +485,26 @@ class Handler(BaseHTTPRequestHandler):
                 return
         elif not self._require_auth():
             return
+        if path == "/api/documents/index":
+            if not self._require_owner_token():
+                return
+            try:
+                # Bounded JSON intake; never decode large arbitrary request bodies.
+                size = int(self.headers.get("Content-Length", "0") or "0")
+                if not 0 < size <= 2_800_000:
+                    return self._json(413, {"ok": False, "error": "Document upload exceeds limit"})
+                body = self._read_json()
+                result = import_indexed_document(
+                    state_dir=STATE_ROOT,
+                    project=str(body.get("project_id") or "orion-v3"),
+                    filename=str(body.get("filename") or ""),
+                    data_base64=body.get("data_base64", ""),
+                )
+                return self._json(201, result)
+            except (ValueError, TypeError) as exc:
+                return self._json(400, {"ok": False, "error": str(exc)})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": exc.__class__.__name__})
         if path == "/api/chat-history/sync":
             try:
                 body = self._read_json()
