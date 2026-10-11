@@ -26,6 +26,7 @@ from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
 from modules.history_archive_v1 import HistoryArchiveV1
 from modules.history_archive_sync_v1 import archive_first_sync
+from modules.history_archive_delete_guard_v1 import OwnerDeleteLedgerV1
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.canonical_memory_retrieval_foundation import (
     CanonicalMemoryRetrievalFoundation,
@@ -378,6 +379,26 @@ class Handler(BaseHTTPRequestHandler):
             return
         if not self._require_auth():
             return
+        if path == "/api/history-archive/search":
+            if os.environ.get("ORION_HISTORY_ARCHIVE_V1_EXPERIMENTAL") != "1":
+                return self._json(404, {"ok": False, "error": "archive disabled"})
+            try:
+                project = str(query.get("project_id", [""])[0]).strip()
+                if not project:
+                    return self._json(400, {"ok": False, "error": "project_id required"})
+                rows = HistoryArchiveV1(
+                    STATE_ROOT / "history_archive.sqlite3"
+                ).query(
+                    project_id=project,
+                    conversation_id=str(query.get("conversation_id", [""])[0]),
+                    contains=str(query.get("contains", [""])[0]),
+                    limit=min(20, max(1, int(query.get("limit", ["12"])[0]))),
+                )
+                return self._json(200, {"ok": True, "messages": rows})
+            except (ValueError, TypeError) as exc:
+                return self._json(400, {"ok": False, "error": str(exc)})
+            except Exception:
+                return self._json(500, {"ok": False, "error": "archive unavailable"})
         if path == "/api/status":
             return self._json(200, STATE.view())
         if path == "/api/models":
@@ -520,6 +541,10 @@ class Handler(BaseHTTPRequestHandler):
                 # in an isolated qualification environment. NEVER change this
                 # flag on the owner's production PC before deletion/sync E2E.
                 if os.environ.get("ORION_HISTORY_ARCHIVE_V1_EXPERIMENTAL") == "1":
+                    # Experimental sync is fail-closed on owner-deleted replay.
+                    OwnerDeleteLedgerV1(
+                        STATE_ROOT / "owner_delete_ledger.sqlite3"
+                    ).reject_replays(body)
                     synced = archive_first_sync(
                         body,
                         archive=HistoryArchiveV1(
