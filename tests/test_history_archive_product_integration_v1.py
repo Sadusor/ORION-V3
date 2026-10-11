@@ -21,7 +21,7 @@ class ProductionIntegrationSourceChecks(unittest.TestCase):
         self.assertIn('"/api/chat-history/sync"', s)
         self.assertIn('fun syncArchiveHistory(', s)
         self.assertIn('prefs.getBoolean("archive_sync_opt_in", false)', s)
-        self.assertIn('Device tombstone application not activated', s)
+        self.assertIn('applyArchiveTombstones(projectId, removed)', s)
         self.assertIn('X-Orion-Archive-Device', s)
 
 if __name__ == "__main__":
