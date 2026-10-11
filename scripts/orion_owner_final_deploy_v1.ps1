@@ -106,7 +106,25 @@ try {
   if($LASTEXITCODE -ne 0){throw 'Android updated but app launch failed; ORION2 preserved'}
   Start-Sleep -Seconds 2
   $orionPid=@(& $adb -s $serial shell pidof com.sadusor.orionv3)
-  if($LASTEXITCODE -ne 0 -or !$orionPid -or -not (($orionPid -join ' ').Trim() -match '^\\d+')){throw 'Android app process not verified; ORION2 preserved'}
+  if($LASTEXITCODE -ne 0 -or !$orionPid -or -not (($orionPid -join ' ').Trim() -match '^[0-9]+)){throw 'Android app process not verified; ORION2 preserved'}
+  $steps.android_update='PASS';Persist
+  Write-Host 'ORION_ANDROID_IN_PLACE_UPDATE> PASS'
+  $orion2=@(& $adb -s $serial shell pm list packages com.sadusor.orionv3.archivequal)
+  if($orion2 -match '^package:com\.sadusor\.orionv3\.archivequal$'){
+    & $adb -s $serial uninstall com.sadusor.orionv3.archivequal
+    if($LASTEXITCODE -ne 0){throw 'ORION2 uninstall failed'}
+    $steps.orion2_removal='PASS';Persist
+    Write-Host 'ORION2_REMOVAL> PASS'
+  }else{$steps.orion2_removal='ALREADY_ABSENT';Persist;Write-Host 'ORION2_REMOVAL> ALREADY_ABSENT'}
+  $steps.result='PASS_WITH_ARCHIVE_NETWORK_NOT_ACTIVATED';Persist
+  Write-Host "FINAL_OWNER_DEPLOYMENT> PASS"
+  Write-Host "FINAL_DEPLOYMENT_REPORT> $report"
+}catch{
+  $steps.result='BLOCKED: '+$_.Exception.Message;Persist
+  Write-Host ('FINAL_OWNER_DEPLOYMENT> BLOCKED '+$_.Exception.Message)
+  throw
+}
+)){throw 'Android app process not verified; ORION2 preserved'}
   $steps.android_update='PASS';Persist
   Write-Host 'ORION_ANDROID_IN_PLACE_UPDATE> PASS'
   $orion2=@(& $adb -s $serial shell pm list packages com.sadusor.orionv3.archivequal)
