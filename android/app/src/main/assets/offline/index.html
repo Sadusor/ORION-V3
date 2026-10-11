@@ -158,6 +158,11 @@ button{touch-action:manipulation}
       <p>App-private SQLite · up to 50 chats / 100 messages per chat · phone ↔ PC sync when connected.</p>
     </div>
     <div class="settingRow">
+      <b>Chat backup</b>
+      <p>Export a verified copy of your phone conversations to a location you choose. No automatic sharing.</p>
+      <button id="exportChatBackupBtn">Export chat backup</button>
+    </div>
+    <div class="settingRow">
       <b>App version</b>
       <p>ORION 0.5.4 · Memory Hierarchy V1</p>
     </div>
@@ -378,7 +383,8 @@ button{touch-action:manipulation}
  chat.addEventListener('touchmove',()=>clearTimeout(msgHold),{passive:true});
  document.getElementById('model').onclick=()=>{renderModels();showSheet('modelSheet')};
  document.getElementById('modelList').onclick=e=>{const b=e.target.closest('[data-model]');if(!b)return;selected=b.dataset.model;localStorage.setItem('orion.selectedModel',selected);renderModels();closeSheets()};
- document.getElementById('plus').onclick=()=>showSheet('toolsSheet');document.getElementById('settingsBtn').onclick=()=>showSheet('settingsSheet');document.getElementById('toolSettings').onclick=()=>showSheet('settingsSheet');
+ document.getElementById('plus').onclick=()=>showSheet('toolsSheet');document.getElementById('exportChatBackupBtn').onclick=()=>{try{if(!window.ORION_NATIVE_BACKUP){toast('Chat backup unavailable');return;}window.ORION_NATIVE_BACKUP.openChatBackup();}catch(_){toast('Unable to open chat backup');}};
+ document.getElementById('settingsBtn').onclick=()=>showSheet('settingsSheet');document.getElementById('toolSettings').onclick=()=>showSheet('settingsSheet');
  document.getElementById('toolSync').onclick=()=>{syncHistory();toast(pc.connected?'Sync requested':'PC not connected');closeSheets()};
  document.getElementById('sheetShade').onclick=closeSheets;document.querySelectorAll('[data-close-sheet]').forEach(b=>b.onclick=closeSheets);
  document.getElementById('conn').onclick=()=>showSheet('settingsSheet');
