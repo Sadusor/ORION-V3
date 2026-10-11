@@ -39,6 +39,14 @@ class MainActivity : Activity() {
     private val documentPickerCode = 7421
 
     @JavascriptInterface
+    fun openChatBackup() {
+        if (packageName != "com.sadusor.orionv3") return
+        runOnUiThread {
+            startActivity(Intent(this, com.sadusor.orionv3.history.OwnerChatBackupActivityV1::class.java))
+        }
+    }
+
+    @JavascriptInterface
     fun openDocumentPicker() {
         runOnUiThread {
             val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -96,6 +104,7 @@ class MainActivity : Activity() {
 
             addJavascriptInterface(historyBridge, "ORION_NATIVE_HISTORY")
             addJavascriptInterface(this@MainActivity, "ORION_NATIVE_DOCUMENT")
+            addJavascriptInterface(this@MainActivity, "ORION_NATIVE_BACKUP")
             WebView.setWebContentsDebuggingEnabled(true)
 
             webChromeClient = object : WebChromeClient() {
