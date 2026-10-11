@@ -8,7 +8,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 private const val DB_NAME = "orion_chat_history.db"
-private const val DB_VERSION = 1
+private const val DB_VERSION = 2
 private const val MAX_CONVERSATIONS = 50
 private const val MAX_MESSAGES_PER_CONVERSATION = 100
 private const val MAX_TEXT_CHARS = 8_000
@@ -44,11 +44,43 @@ class ChatHistoryStore(context: Context) :
             )
             """.trimIndent(),
         )
+        db.execSQL("CREATE TABLE deleted_archive_conversations(id TEXT PRIMARY KEY, project_id TEXT NOT NULL)")
         db.execSQL("CREATE INDEX idx_conv_updated ON conversations(updated_at_ms DESC)")
         db.execSQL("CREATE INDEX idx_msg_conv_created ON messages(conversation_id, created_at_ms ASC)")
     }
 
-    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = Unit
+    override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
+        if (oldVersion < 2) db.execSQL("CREATE TABLE IF NOT EXISTS deleted_archive_conversations(id TEXT PRIMARY KEY, project_id TEXT NOT NULL)")
+    }
+
+    @Synchronized
+    fun applyArchiveTombstones(projectId: String, ids: Set<String>) {
+        require(projectId.isNotBlank() && projectId.length <= 160)
+        require(ids.size <= 100)
+        require(ids.all { it.isNotBlank() && it.length <= 120 })
+        val db = writableDatabase
+        db.beginTransaction()
+        try {
+            ids.forEach { id ->
+                val existing = db.rawQuery("SELECT project_id FROM conversations WHERE id=?", arrayOf(id))
+                    .use { if (it.moveToFirst()) it.getString(0) else null }
+                require(existing == null || existing == projectId) { "Cross-project tombstone" }
+                val prior = db.rawQuery("SELECT project_id FROM deleted_archive_conversations WHERE id=?", arrayOf(id))
+                    .use { if (it.moveToFirst()) it.getString(0) else null }
+                require(prior == null || prior == projectId) { "Cross-project prior tombstone" }
+                db.execSQL("INSERT OR IGNORE INTO deleted_archive_conversations(id,project_id) VALUES(?,?)", arrayOf(id, projectId))
+                db.delete("messages", "conversation_id=?", arrayOf(id))
+                db.delete("conversations", "id=?", arrayOf(id))
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    private fun tombstoned(db: SQLiteDatabase, id: String): Boolean =
+        db.rawQuery("SELECT 1 FROM deleted_archive_conversations WHERE id=?", arrayOf(id))
+            .use { it.moveToFirst() }
 
     @Synchronized
     fun merge(payloadJson: String): JSONObject {
@@ -82,7 +114,7 @@ class ChatHistoryStore(context: Context) :
 
     private fun mergeConversation(db: SQLiteDatabase, raw: JSONObject) {
         val id = clean(raw.optString("id"), 120)
-        if (id.isEmpty()) return
+        if (id.isEmpty() || tombstoned(db, id)) return
         val now = System.currentTimeMillis()
         val created = raw.optLong("created_at_ms", now)
         val updated = raw.optLong("updated_at_ms", created)
@@ -125,7 +157,7 @@ class ChatHistoryStore(context: Context) :
         val conversationId = clean(raw.optString("conversation_id"), 120)
         val role = clean(raw.optString("role"), 20).lowercase()
         val text = clean(raw.optString("text"), MAX_TEXT_CHARS)
-        if (id.isEmpty() || conversationId.isEmpty() || text.isEmpty()) return
+        if (id.isEmpty() || conversationId.isEmpty() || text.isEmpty() || tombstoned(db, conversationId)) return
         if (role !in setOf("user", "assistant", "system")) return
 
         val created = raw.optLong("created_at_ms", System.currentTimeMillis())
