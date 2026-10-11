@@ -11,3 +11,6 @@ Qualification target: **50 tests** (44 previous + 6 new) in ONE TheHands PowerSh
 Remaining hold: Android local SQLite and PC live store can truncate at 8,000 characters; full original text is available only when captured before that boundary. This batch demonstrates server-side original-text retention from a raw payload, not an end-to-end Android transport proof. Real owner credential enrollment and operating-system protection still unqualified.
 
 After physical PASS, freeze this additive module and proceed to actual clients in one bounded subsequent batch rather than repeated small module tests.
+
+## Correction (2026-10-11)
+The C6 test formerly asserted that the legacy live ChatHistoryStore truncated text to 8,000 characters. That assertion was removed: it is not an acceptance criterion for permanent history. The test now checks only complete original-message preservation by the archive. This test does not certify the full current PC/Android text ingestion path, which must be verified against the previously implemented unlimited-chat behavior before production activation.
