@@ -93,7 +93,7 @@ button{touch-action:manipulation}
     <div class="actionGrid">
       <button disabled>📷<br>Camera<small>planned</small></button>
       <button disabled>🖼<br>Photo<small>planned</small></button>
-      <button disabled>📎<br>Document<small>planned</small></button>
+      <button id="toolDocument">📎<br>Document<small>Index on PC</small></button>
       <button id="toolSettings">⚙<br>Settings</button>
       <button id="toolSync">↻<br>Sync history</button>
       <button disabled>◎<br>View PC<small>planned</small></button>
@@ -207,6 +207,18 @@ button{touch-action:manipulation}
 (function(){
  const app=document.getElementById('app'),chat=document.getElementById('chat'),inp=document.getElementById('inp');
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
+ window.ORION_PHONE_DOCUMENT_RESULT=function(ok,message){
+   const el=document.getElementById('toast');
+   if(el){el.textContent=String(message|| (ok?'Document indexed':'Document import failed'));el.classList.add('show');
+     setTimeout(()=>el.classList.remove('show'),4500);}
+ };
+ document.getElementById('toolDocument')?.addEventListener('click',()=>{
+   document.getElementById('toolsSheet')?.classList.remove('open');
+   if(!window.ORION_NATIVE_DOCUMENT?.openDocumentPicker){
+     window.ORION_PHONE_DOCUMENT_RESULT(false,'Android picker unavailable');return;
+   }
+   window.ORION_NATIVE_DOCUMENT.openDocumentPicker();
+ });
  let data={conversations:[],messages:[]},current='',menuTarget='',messageTarget='',toastTimer=0;
  let selected=localStorage.getItem('orion.selectedModel')||'local:qwen3-0.6b';
  let pc={reachable:false,paired:false,connected:false,models:[],default_model:'',update:null,memory_retrieval:null,memory_candidates:null,memory_canonical:null,memory_conflicts:null};
