@@ -16,7 +16,7 @@ from urllib.parse import parse_qs, unquote, urlparse
 from modules.streaming_brain_pipeline import StreamingBrainPipeline
 from modules.gitea_readonly_v1 import GiteaReadonly
 from modules.gitea_qwen_context_v1 import build_repository_context
-from modules.gitea_chat_brain_v1 import GiteaChatStreamingBrain, gitea_chat_request
+from modules.document_chat_connector_v1 import DocumentAwareGiteaChatBrain, indexed_chat_request
 from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
@@ -87,7 +87,7 @@ MEMORY_SHADOW_AUDIT = MemoryShadowAudit(
     MEMORY_CONSOLIDATION,
 )
 LOCAL_BRAIN = CanonicalMemoryIntegratedBrainPipeline(
-    brain=GiteaChatStreamingBrain(),
+    brain=DocumentAwareGiteaChatBrain(),
     recall=MEMORY_RETRIEVAL,
     durable=MEMORY_CONSOLIDATION,
     history=MEMORY_HISTORY,
@@ -693,14 +693,10 @@ class Handler(BaseHTTPRequestHandler):
                 from contextlib import nullcontext
                 owner_text = str(body.get("owner_message") or body.get("memory_query") or body.get("goal") or "")
                 source_project = str(body.get("project_id") or "orion-v3")
-                scope = (
-                    gitea_chat_request(
-                        project_id=source_project,
-                        owner_text=owner_text,
-                        state_dir=STATE_ROOT,
-                    )
-                    if source_project == "orion-v3"
-                    else nullcontext()
+                scope = indexed_chat_request(
+                    project_id=source_project,
+                    owner_text=owner_text,
+                    state_dir=STATE_ROOT,
                 )
                 with scope:
                     started = LOCAL_BRAIN.start(
