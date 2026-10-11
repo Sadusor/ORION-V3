@@ -722,7 +722,7 @@ class Handler(BaseHTTPRequestHandler):
                 named_repo = named_repo_scope(owner_text, state_dir=STATE_ROOT,
                     token=os.environ.get('ORION_GITEA_TOKEN', '')) if source_project == 'orion-v3' else None
                 scope = indexed_chat_request(
-                    project_id='payday' if named_repo else source_project,
+                    project_id=(named_repo['project'] if named_repo and named_repo['kind'] == 'repository' else ('gitea-inventory' if named_repo and named_repo['kind'] == 'inventory' else ('gitea-ambiguous' if named_repo and named_repo['kind'] == 'ambiguous' else source_project))),
                     owner_text=owner_text,
                     state_dir=STATE_ROOT,
                 )
