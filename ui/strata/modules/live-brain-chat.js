@@ -80,9 +80,33 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    try{await navigator.clipboard.writeText(value);copy.textContent='Copied';}
    catch(_){const selection=window.getSelection();const range=document.createRange();range.selectNodeContents(body);selection.removeAllRanges();selection.addRange(range);copy.textContent='Select text to copy';}
   });
+  const revise=document.createElement('button');
+  revise.type='button';
+  revise.className='orion-copy-response orion-revise-response';
+  revise.textContent='Revise';
+  revise.title='Ask Local Brain to revise this completed answer; no actions executed';
+  revise.hidden=true;
+  revise.addEventListener('click',async(event)=>{
+   if(m.dataset.liveBrain!=='verified'||!window.ORION_BRIDGE?.revise)return;
+   revise.disabled=true;
+   revise.textContent='Revising…';
+   try{
+    const response=await window.ORION_BRIDGE.revise(event);
+    if(!response?.ok){
+     revise.textContent='Revise failed';
+     revise.title=String(response?.message||response?.error||'Revision unavailable');
+    }else{
+     revise.textContent='Revision requested';
+    }
+   }catch(error){
+    revise.textContent='Revise failed';
+    revise.title=String(error?.message||'Revision unavailable');
+   }finally{revise.disabled=false}
+  });
   m.appendChild(tools);
   m.appendChild(tag);
   m.appendChild(copy);
+  m.appendChild(revise);
   m.appendChild(body);
   chat.appendChild(m);
   bubble=m;
@@ -120,6 +144,7 @@ window.ORION_LIVE_BRAIN_CHAT=(function(){
    }
    ensure(chat,nextKey);
    bubble.dataset.liveBrain='verified';
+   const revise=bubble.querySelector('.orion-revise-response');if(revise)revise.hidden=false;
    const tag=bubble.querySelector('[data-live-brain-label]');
    if(tag)tag.textContent='VERIFIED';
    const atBottom=nearBottom(chat);
