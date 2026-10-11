@@ -688,25 +688,20 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/local-hand/draft":
             try:
                 body = self._read_json()
-                # Optional source lookup in ordinary ORION chat; owner directive is preserved.
+                # Index lookup is a normal stage for the default ORION chat.
+                # An explicitly selected other project must not receive ORION sources.
                 from contextlib import nullcontext
                 owner_text = str(body.get("owner_message") or body.get("memory_query") or body.get("goal") or "")
-                # An explicit ORION question can retrieve reference documentation in
-                # Personal chat; memory scope remains the original client project.
-                orion_question = (
-                    is_orion_project_question(owner_text)
-                    or (
-                        "orion" in owner_text.casefold()
-                        and any(term in owner_text.casefold() for term in (
-                            "history integrity", "memory v1", "memory v2",
-                            "chat history", "source file", "source code",
-                            "module", "implementation", "what exactly",
-                        ))
+                source_project = str(body.get("project_id") or "orion-v3")
+                scope = (
+                    gitea_chat_request(
+                        project_id=source_project,
+                        owner_text=owner_text,
+                        state_dir=STATE_ROOT,
                     )
+                    if source_project == "orion-v3"
+                    else nullcontext()
                 )
-                lookup_project = "orion-v3" if orion_question else str(body.get("project_id") or "")
-                scope = gitea_chat_request(project_id=lookup_project,
-                                           owner_text=owner_text,state_dir=STATE_ROOT) if (orion_question or body.get("gitea_search") is True) else nullcontext()
                 with scope:
                     started = LOCAL_BRAIN.start(
                         str(body.get("goal", "")),
