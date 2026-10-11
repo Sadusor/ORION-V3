@@ -24,6 +24,8 @@ from modules.document_intake_v1 import import_indexed_document
 from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
 from modules.chat_history import ChatHistoryStore
+from modules.history_archive_v1 import HistoryArchiveV1
+from modules.history_archive_sync_v1 import archive_first_sync
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.canonical_memory_retrieval_foundation import (
     CanonicalMemoryRetrievalFoundation,
@@ -514,7 +516,19 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/chat-history/sync":
             try:
                 body = self._read_json()
-                synced = CHAT_HISTORY.sync(body)
+                # HistoryArchive Stage B remains OFF unless explicitly enabled
+                # in an isolated qualification environment. NEVER change this
+                # flag on the owner's production PC before deletion/sync E2E.
+                if os.environ.get("ORION_HISTORY_ARCHIVE_V1_EXPERIMENTAL") == "1":
+                    synced = archive_first_sync(
+                        body,
+                        archive=HistoryArchiveV1(
+                            STATE_ROOT / "history_archive.sqlite3"
+                        ),
+                        live_sync=CHAT_HISTORY.sync,
+                    )
+                else:
+                    synced = CHAT_HISTORY.sync(body)
                 # Automatic memory selection is advisory intake only. A selector
                 # failure must never break chat sync or write canonical memory.
                 try:
