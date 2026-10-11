@@ -20,7 +20,7 @@ console.log('boot');
  ok(run(l,'typeof MockBridge')==='undefined'&&run(l,'window.ORION_BRIDGE.mode')==='live'&&run(l,'V.mode')==='live','index.html: LIVE bridge only; MockBridge does not exist');
  await new Promise(r=>setTimeout(r,150));
  eq(run(l,'V.ui.orion.state'),'thinking','live page: valid backend response => state THINKING from the backend');
- ok(calls.every(u=>u.endsWith('/api/status')),'live page: only GET /api/status was requested at boot (no commands)');
+ ok(calls.every(u=>u.endsWith('/api/status')||u.endsWith('/api/models')),'live page: only read-only status/model discovery requested at boot (no commands)');
  run(l,'ORION_BRIDGE.stop()');
  /* ---- malformed backend responses never crash and never become "idle" ---- */
  for(const [name,resp] of [['HTML page',{ok:true,status:200,json:async()=>{throw new SyntaxError('x')}}],['array',{ok:true,status:200,json:async()=>[]}],['partial object',{ok:true,status:200,json:async()=>({run_state:'idle'})}],['HTTP 500',{ok:false,status:500,json:async()=>({error:'boom'})}],['null',{ok:true,status:200,json:async()=>null}]]){
