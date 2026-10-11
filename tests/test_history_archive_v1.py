@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from orion_v3.modules.history_archive_v1 import HistoryArchiveV1, ArchiveConflict
+from src.orion_v3.modules.history_archive_v1 import HistoryArchiveV1, ArchiveConflict
 
 
 class HistoryArchiveV1Tests(unittest.TestCase):
