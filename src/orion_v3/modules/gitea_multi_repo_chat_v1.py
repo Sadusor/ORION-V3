@@ -52,6 +52,17 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
     """Only the owner's current text selects a catalog-approved source, never the model."""
     text = str(owner_text or "")[:500]
     catalog = load_catalog(state_dir)
+    # Repository-count follow-ups such as "how many repos in there?" may
+    # omit the Gitea name. This is our only wired repository inventory,
+    # but explicit references to another host must not be rerouted.
+    asks_count = bool(re.search(
+        r"\\b(?:how many|count|number of|list|show)\\b.{0,90}\\b(?:repos(?:itories)?)\\b",
+        text, re.I,
+    ))
+    other_host = bool(re.search(r"\\b(?:github|gitlab|bitbucket)\\b", text, re.I))
+    if asks_count and not other_host:
+        return {"kind":"inventory","state_dir":Path(state_dir),"token":token,
+                "catalog":catalog}
     matches = _matches(text, catalog)
     if len(matches) > 1:
         return {"kind":"ambiguous", "names":[r.alias for r in matches]}
