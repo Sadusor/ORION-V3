@@ -14,7 +14,7 @@
    /api/session/* beyond start/stop. Add a route here only when a V3 screen genuinely needs it.
    ====================================================================== */
 const ROUTES={
- 'GET /api/status':{kind:'read'},'GET /api/models':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
+ 'GET /api/status':{kind:'read'},'GET /api/models':{kind:'read'},'GET /api/update/check':{kind:'read'},'GET /api/update/status':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
  'GET /api/memory/candidates':{kind:'read'},'GET /api/memory/search':{kind:'read'},'GET /api/memory/canonical':{kind:'read'},'GET /api/memory/decisions':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
  'POST /api/pair':{kind:'auth'},
  'POST /api/memory/candidate':{kind:'approval',note:'Owner-selected exact chat message enters candidate queue only; never canonical Memory.'},
@@ -23,6 +23,7 @@ const ROUTES={
  'POST /api/chat-history/sync':{kind:'storage'},
  'POST /api/local-hand/draft':{kind:'request',note:'Local Brain proposes. ORION preflight, semantic verifier and original-request authorization decide whether a registered capability starts.'},
  'POST /api/local-hand/revise':{kind:'request'},
+ 'POST /api/update/main':{kind:'high',note:'Owner-confirmed PC update via existing Windows worker; may restart ORION.'},
  'POST /api/local-hand/run':{kind:'approval',note:'Approve & Run for generated PowerShell. The server re-checks the approved script hash.'},
  'POST /api/run/start':{kind:'approval',note:'Approve & Run for the exact pending SHA (GitHub developer loop).'},
  'POST /api/local-hand/stop':{kind:'stop'},'POST /api/manual/stop':{kind:'stop'},'POST /api/run/stop':{kind:'stop'},
