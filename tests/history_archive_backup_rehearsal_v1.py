@@ -4,6 +4,7 @@ Never modifies the source database. Uses SQLite online backup API for WAL safety
 """
 import argparse
 import datetime
+from contextlib import closing
 import hashlib
 import json
 import pathlib
@@ -36,16 +37,16 @@ def main():
         raise FileExistsError(dest)
     src=sqlite3.connect("file:"+str(source).replace("\\","/")+"?mode=ro",uri=True,timeout=20)
     try:
-        with sqlite3.connect(str(dest)) as backup:
+        with closing(sqlite3.connect(str(dest))) as backup:
             src.backup(backup)
         # Rehearse restoration into a *second* independent temporary database.
         restored=base/("orion-restore-rehearsal-"+stamp+".sqlite3")
         if restored.exists():
             raise FileExistsError(restored)
-        with sqlite3.connect(str(dest)) as saved:
-            with sqlite3.connect(str(restored)) as check:
+        with closing(sqlite3.connect(str(dest))) as saved:
+            with closing(sqlite3.connect(str(restored))) as check:
                 saved.backup(check)
-        with sqlite3.connect("file:"+str(restored).replace("\\","/")+"?mode=ro",uri=True) as check:
+        with closing(sqlite3.connect("file:"+str(restored).replace("\\","/")+"?mode=ro",uri=True)) as check:
             status=check.execute("PRAGMA quick_check").fetchone()[0]
             if status!="ok":
                 raise RuntimeError("Restore rehearsal integrity check failed: "+status)
