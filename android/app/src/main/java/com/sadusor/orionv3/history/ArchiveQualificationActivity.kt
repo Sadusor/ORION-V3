@@ -33,11 +33,12 @@ class ArchiveQualificationActivity : Activity() {
                     val project = "orion2-usb-qualification"
                     val token = intent.getStringExtra("device_secret") ?: ""
                     check(token.length >= 32)
-                    val usbContext = object : ContextWrapper(applicationContext) {
+                    val usbBase = applicationContext
+                    val usbContext = object : ContextWrapper(usbBase) {
                         override fun getApplicationContext(): Context = this
                         override fun getDatabasePath(name: String): File {
                             require(name == "orion_chat_history.db")
-                            return applicationContext.getDatabasePath("orion2_usb_sync_qualification.db")
+                            return usbBase.getDatabasePath("orion2_usb_sync_qualification.db")
                         }
                     }
                     check(!usbContext.getDatabasePath("orion_chat_history.db").exists()) { "Prior USB qualification exists" }
