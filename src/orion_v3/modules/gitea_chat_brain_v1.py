@@ -1,7 +1,7 @@
 """Post-memory, opt-in read-only Gitea search for the EXISTING ORION Qwen chat.
 
 Owner text goes through frozen canonical memory unchanged. This wrapper attaches
-bounded untrusted code context only after the final memory prompt is composed.
+untrusted code context only after the final memory prompt is composed.
 """
 from __future__ import annotations
 from contextlib import contextmanager
@@ -26,19 +26,16 @@ def gitea_chat_request(*, project_id: str, owner_text: str, state_dir):
     finally:
         _requested.reset(token)
 
-def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int = 15900) -> str:
-    """Never truncate owner's composed memory prompt; budget only extra context."""
-    available = max_bytes - len(goal.encode("utf-8")) - len("\n\n".encode("utf-8"))
-    if available < 240:
+def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int | None = None) -> str:
+    """Include all retrieved bounded search excerpts without a second artificial cap.
+
+    The search provider already enforces its independent, read-only source limit.
+    Model runtime context limits remain in effect; this does not change memory.
+    """
+    if not reference.strip():
         return goal
-    data = reference.encode("utf-8")
-    if len(data) > available:
-        data = data[:available]
-        reference = data.decode("utf-8", errors="ignore")
-        reference += "\n[RETRIEVED CONTEXT TRUNCATED TO MODEL REQUEST BUDGET]"
-        # Recheck after adding the marker.
-        reference = reference.encode("utf-8")[:available].decode("utf-8", errors="ignore")
     return goal + "\n\n" + reference
+
 
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
     """Keep deterministic preflight and all execution gates; adapt conversational review."""
