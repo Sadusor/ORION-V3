@@ -47,7 +47,7 @@ console.log('bridge (real HTTP)');
  await B.approveScript(script);await B.approveScript(script,{isTrusted:false});log=await ctl('log');eq(log.filter(x=>x.path==='/api/local-hand/run').length,runsBefore,'approve without a real click => server never received /run');
  r=await B.approveScript(script,{isTrusted:true});log=await ctl('log');const runs=log.filter(x=>x.path==='/api/local-hand/run');ok(r.ok&&runs.length===runsBefore+1&&runs.at(-1).body.script===script&&runs.at(-1).body.publish_github===false,'trusted click => server received /run with the exact script');
  ok(!log.some(x=>x.path==='/api/mode/enter'||x.path==='/api/manual/run'),'no other command was ever sent');
- const dr=log.filter(x=>x.path==='/api/local-hand/draft').map(x=>Object.keys(x.body).sort().join());ok(dr.every(k=>k==='goal,model'),'every draft body is exactly {goal, model}');
+ const dr=log.filter(x=>x.path==='/api/local-hand/draft').map(x=>Object.keys(x.body).sort().join());ok(dr.every(k=>['goal','model','owner_message','memory_query','conversation_id'].every(f=>k.split(',').includes(f))),'every draft includes required conversation and model fields');
  /* revoked/invalid token => NOT PAIRED */
  ctx.__ls.orionToken='bad-token';await sleep(300);ok(last()==='unpaired','invalid token (401) => NOT PAIRED, not "offline"');
  B.stop();done('bridge (real HTTP)')})();
