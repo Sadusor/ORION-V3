@@ -79,12 +79,18 @@ def _inventory_evidence(adapter):
     authorized = adapter.authorized_inventory()
     try:
         visible = adapter.visible_inventory()
-        count = visible["count"]
-        qualifier = "exact" if visible["complete"] else "lower bound (pagination limit reached)"
-        summary = f"Gitea repositories visible to authenticated identity: {count} ({qualifier})."
+        scopes = visible["scopes"]
+        lines = []
+        for name, data in scopes.items():
+            label = "exact within returned pages" if data["complete"] else "incomplete or unavailable"
+            lines.append(f"{name}: {data['count']} ({label}).")
+        qualifier = "complete within queried scopes" if visible["complete"] else "partial; do not claim full count"
+        lines.append(f"Distinct repositories across queried scopes: {visible['count']} ({qualifier}).")
+        lines.append("Not an instance-wide total.")
+        summary = " ".join(lines)
     except Exception:
-        summary = "Live Gitea inventory unavailable or not authenticated; visible repository count unknown."
-    summary += f" Authorized source catalog entries: {len(authorized)}."
+        summary = "Live Gitea inventory unavailable; repository count unknown."
+    summary += f" Owner-authorized retrieval entries: {len(authorized)}."
     summary += " Authorized aliases: " + ", ".join(r.alias for r in authorized) + "."
     return summary
 
