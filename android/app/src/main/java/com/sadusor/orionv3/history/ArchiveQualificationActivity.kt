@@ -27,6 +27,60 @@ class ArchiveQualificationActivity : Activity() {
                 return base.getDatabasePath("orion2_disposable_qualification.db")
             }
         }
+        if (intent.getBooleanExtra("usb_sync_qualification", false)) {
+            Thread {
+                try {
+                    val project = "orion2-usb-qualification"
+                    val token = intent.getStringExtra("device_secret") ?: ""
+                    check(token.length >= 32)
+                    val store = ChatHistoryStore(this)
+                    try {
+                        val payload = JSONObject().put("conversations", JSONArray().put(
+                            JSONObject().put("id", "usb-q-1").put("project_id", project)
+                                .put("title", "USB qualification").put("created_at_ms", 1)
+                                .put("updated_at_ms", 2))).put("messages", JSONArray().put(
+                            JSONObject().put("id", "usb-m-1").put("conversation_id", "usb-q-1")
+                                .put("role", "user").put("text", "hello").put("created_at_ms", 2)))
+                        store.merge(payload.toString())
+                        fun sync(): JSONObject {
+                            val body = ArchiveDeviceReconcileV1.prepare(project, store.snapshot())
+                            val conn = java.net.URL("http://127.0.0.1:18765/api/history-archive/device-sync")
+                                .openConnection() as java.net.HttpURLConnection
+                            try {
+                                conn.requestMethod = "POST"
+                                conn.connectTimeout = 5000
+                                conn.readTimeout = 5000
+                                conn.doOutput = true
+                                conn.setRequestProperty("Content-Type", "application/json")
+                                conn.setRequestProperty("X-Orion-Archive-Device", token)
+                                conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
+                                check(conn.responseCode == 200)
+                                return JSONObject(conn.inputStream.bufferedReader().use { it.readText() })
+                            } finally { conn.disconnect() }
+                        }
+                        val first = sync()
+                        check(first.optBoolean("ok"))
+                        check(ArchiveDeviceReconcileV1.removedIds(first).isEmpty())
+                        Log.i("ORION2_USB_QUAL", "SYNC_PASS")
+                        val second = sync()
+                        val removed = ArchiveDeviceReconcileV1.removedIds(second)
+                        check("usb-q-1" in removed)
+                        store.applyArchiveTombstones(project, removed)
+                        store.merge(payload.toString())
+                        check(!store.snapshot().getJSONArray("conversations").toString().contains("usb-q-1"))
+                    } finally { store.close() }
+                    val again = ChatHistoryStore(this)
+                    try {
+                        check(!again.snapshot().getJSONArray("conversations").toString().contains("usb-q-1"))
+                    } finally { again.close() }
+                    Log.i("ORION2_USB_QUAL", "DELETE_REPLAY_PASS")
+                    Log.i("ORION2_USB_QUAL", "PASS")
+                } catch (t: Throwable) {
+                    Log.e("ORION2_USB_QUAL", "FAIL " + (t.message ?: t.javaClass.simpleName), t)
+                } finally { runOnUiThread { finish() } }
+            }.start()
+            return
+        }
         Thread {
             val file = base.getDatabasePath("orion2_disposable_qualification.db")
             try {
