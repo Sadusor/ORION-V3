@@ -1,0 +1,5 @@
+# ORION HistoryArchive Stage C checkpoint — 2026-10-11
+
+Owner reported PASS for Stage C offline device reconciliation GITCHECK at ORION commit `53a5cf3f62878d1823bde2789f26bb208d83353c` via TheHands PowerShell 1. Freeze `history_archive_device_reconcile_v1.py` and its tests. Owner PASS is reported; a result JSON was not independently inspected in this update.
+
+Next independent candidate: `history_archive_device_http_gate_v1.py`. Adapter-only, NOT registered in product_server or Android, OFF by default. Requires a project-specific device authorization callback separate from generic pairing; denies cross-project reconciliation and does not provide deletion authority. Previous tested sync/owner-delete boundary remains untouched. Tests qualify disabled behavior, pairing-token denial, project authorization, stale rows, and malformed snapshots. This is NOT production activation. Do not restart live ORION. Preserve unlimited chat behavior. After Windows GITCHECK PASS, freeze adapter and proceed with carefully gated ingress wiring; do not enroll owner credentials or wire Qwen context until deletion and sync correctness qualify.
