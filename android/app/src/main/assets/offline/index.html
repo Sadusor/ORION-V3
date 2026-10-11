@@ -209,11 +209,12 @@ button{touch-action:manipulation}
  const nativeHistory=window.ORION_NATIVE_HISTORY,nativeLocal=window.ORION_NATIVE_CHAT,nativePc=window.ORION_NATIVE_PC;
  window.ORION_PHONE_DOCUMENT_RESULT=function(ok,message){
    const el=document.getElementById('toast');
-   if(el){el.textContent=String(message|| (ok?'Document indexed':'Document import failed'));el.classList.add('show');
-     setTimeout(()=>el.classList.remove('show'),4500);}
+   if(el){el.textContent=String(message|| (ok?'Document indexed':'Document import failed'));el.classList.add('on');
+     setTimeout(()=>el.classList.remove('on'),4500);}
  };
  document.getElementById('toolDocument')?.addEventListener('click',()=>{
-   document.getElementById('toolsSheet')?.classList.remove('open');
+   document.getElementById('toolsSheet')?.classList.remove('on');
+   document.getElementById('sheetShade')?.classList.remove('on');
    if(!window.ORION_NATIVE_DOCUMENT?.openDocumentPicker){
      window.ORION_PHONE_DOCUMENT_RESULT(false,'Android picker unavailable');return;
    }
