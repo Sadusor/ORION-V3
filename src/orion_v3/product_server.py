@@ -27,6 +27,7 @@ from modules.chat_history import ChatHistoryStore
 from modules.history_archive_v1 import HistoryArchiveV1
 from modules.history_archive_sync_v1 import archive_first_sync
 from modules.history_archive_delete_guard_v1 import OwnerDeleteLedgerV1
+from modules.history_archive_owner_capability_v1 import OwnerCapabilityV1
 from modules.memory_retrieval import MemoryRetrievalModule
 from modules.canonical_memory_retrieval_foundation import (
     CanonicalMemoryRetrievalFoundation,
@@ -382,6 +383,13 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/history-archive/search":
             if os.environ.get("ORION_HISTORY_ARCHIVE_V1_EXPERIMENTAL") != "1":
                 return self._json(404, {"ok": False, "error": "archive disabled"})
+            # Separate unprovisioned owner capability prevents disclosure to
+            # ordinary paired devices and local loopback by default.
+            capability = self.headers.get("X-Orion-Archive-Owner", "")
+            if not OwnerCapabilityV1(
+                STATE_ROOT / "archive_owner_capability"
+            ).verify(capability):
+                return self._json(403, {"ok": False, "error": "archive owner proof required"})
             try:
                 project = str(query.get("project_id", [""])[0]).strip()
                 if not project:
