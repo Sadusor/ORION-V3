@@ -8,11 +8,13 @@ const selector=document.createElement('select');
 selector.id='orion-pc-model-choice';
 selector.setAttribute('aria-label','Select ORION chat model');
 selector.title='Model for the next message';
-selector.style.cssText='max-width:210px;min-width:110px;flex:0 1 210px;background:#132434;color:#c3e8f4;border:1px solid #456073;border-radius:20px;padding:9px;font:13px sans-serif';
+selector.style.cssText='width:116px;max-width:22vw;min-width:76px;flex:0 0 auto;background:#132434;color:#c3e8f4;border:1px solid #456073;border-radius:20px;padding:8px 5px;font:12px sans-serif;white-space:nowrap;text-overflow:ellipsis;cursor:pointer';
 const label=document.createElement('label');
 label.htmlFor=selector.id;label.textContent='Model';
 label.style.cssText='position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)';
-bar.insertBefore(label,bar.firstChild);bar.insertBefore(selector,bar.firstChild);
+const sendButton=document.getElementById('send');
+bar.insertBefore(label,sendButton||null);
+bar.insertBefore(selector,sendButton||null);
 let selected='',available=[],loading=null;
 function render(models,defaultModel){
  if(!Array.isArray(models))models=[];
@@ -21,7 +23,7 @@ function render(models,defaultModel){
   selector.replaceChildren(new Option('PC models unavailable',''));selector.disabled=true;selected='';return;
  }
  const preferred=available.includes(selected)?selected:available.includes(defaultModel)?defaultModel:available[0];
- selector.replaceChildren(...available.map(x=>new Option('Local · '+x,x)));
+ selector.replaceChildren(...available.map(x=>new Option(x,x)));
  selector.disabled=false;selector.value=preferred;selected=preferred;
 }
 async function refresh(){
