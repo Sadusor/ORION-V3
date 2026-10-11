@@ -1,4 +1,5 @@
 import tempfile
+from contextlib import closing
 import unittest
 from pathlib import Path
 from src.orion_v3.modules.history_archive_v1 import HistoryArchiveV1
@@ -21,7 +22,7 @@ class ArchiveProjectionTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 projection.search(project_id="",query="heliosphere")
             import sqlite3
-            with sqlite3.connect(root/"source.sqlite3") as db:
+            with closing(sqlite3.connect(root/"source.sqlite3")) as db:
                 db.execute("UPDATE conversations SET deleted_at_ms=10 WHERE id='c1'")
             projection.refresh()
             self.assertEqual(projection.search(project_id="one",query="heliosphere"),[])
