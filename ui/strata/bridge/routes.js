@@ -14,7 +14,7 @@
    /api/session/* beyond start/stop. Add a route here only when a V3 screen genuinely needs it.
    ====================================================================== */
 const ROUTES={
- 'GET /api/status':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
+ 'GET /api/status':{kind:'read'},'GET /api/models':{kind:'read'},'GET /api/project-links':{kind:'read'},'GET /api/work-exchange/latest':{kind:'read'},
  'GET /api/memory/candidates':{kind:'read'},'GET /api/memory/search':{kind:'read'},'GET /api/memory/canonical':{kind:'read'},'GET /api/memory/decisions':{kind:'read'},'GET /api/reviewers/latest':{kind:'read'},'GET /api/providers':{kind:'read'},'GET /api/chat-history':{kind:'read'},
  'POST /api/pair':{kind:'auth'},
  'POST /api/memory/candidate':{kind:'approval',note:'Owner-selected exact chat message enters candidate queue only; never canonical Memory.'},
