@@ -1,0 +1,5 @@
+# HistoryArchive Stage C — Offline Device Reconciliation Qualification
+
+Status: code candidate, NOT YET GITCHECK PASS. New isolated module `history_archive_device_reconcile_v1.py` and tests. Requires strictly scoped project snapshot, reads server deletion ledger, rejects cross-project IDs and orphan messages, filters stale deleted conversations and messages, avoids exposing unrelated deleted identities. No changes to frozen implementations.
+
+No HTTP route, Android changes, owner credential enrollment, runtime restart, or live activation. Existing Stage B 54-test seam remains disabled and frozen. GITCHECK should run prior nine test modules plus `tests.test_history_archive_device_reconcile_v1` and compile both new module and existing reconciliation helper. If PASS, freeze. After PASS, next integration step is planning opt-in authenticated device reconciliation before upload, then qualified owner delete; Qwen prompt retrieval last. Never interpret client payload as authority to delete, never activate by default, and preserve unlimited chat history.
