@@ -26,7 +26,7 @@ def refresh_current_index(*, state_dir, api=None):
     if len(matches) != 1:
         raise ValueError("Gitea default branch unavailable")
     commit = matches[0]["commit_id"]
-    path = root / "gitea-code-index-v2.sqlite3"
+    path = root / "gitea-code-index-v2-full.sqlite3"
     index = GiteaCodeIndex(path)
     with closing(sqlite3.connect(path)) as db:
         revision = db.execute("SELECT commit_sha FROM code_revision WHERE project=? AND repository=?",
