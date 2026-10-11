@@ -8,6 +8,8 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
@@ -209,6 +211,21 @@ class MainActivity : Activity() {
             "utf-8",
             null,
         )
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        if (packageName == "com.sadusor.orionv3") {
+            menu.add(0, 39021, 0, "Export chat backup")
+        }
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == 39021 && packageName == "com.sadusor.orionv3") {
+            startActivity(Intent(this, com.sadusor.orionv3.history.OwnerChatBackupActivityV1::class.java))
+            return true
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onBackPressed() {
