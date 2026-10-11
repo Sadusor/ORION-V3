@@ -34,7 +34,7 @@ class DocumentIntakeTests(unittest.TestCase):
         for kwargs in ({"filename":"../bad.txt"},{"filename":"malware.exe"},
                        {"project":""},{"data_base64":"invalid##"}):
             with self.subTest(kwargs=kwargs), self.assertRaises(ValueError):
-                import_indexed_document(**dict(state_dir=self.root,project="orion-v3",
-                    filename="sample.txt",data_base64="YWJj",**kwargs))
+                import_indexed_document(**({ "state_dir": self.root, "project": "orion-v3",
+                    "filename": "sample.txt", "data_base64": "YWJj" } | kwargs))
 
 if __name__=="__main__":unittest.main()
