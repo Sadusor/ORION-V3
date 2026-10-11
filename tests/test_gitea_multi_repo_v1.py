@@ -31,7 +31,8 @@ class Tests(unittest.TestCase):
     def test_inventory(self):
         data=self.adapter.visible_inventory()
         self.assertEqual(data["count"],2)
-        self.assertTrue(data["complete"])\n        self.assertEqual(data["scopes"]["owner_account"]["count"],2)
+        self.assertTrue(data["complete"])
+        self.assertEqual(data["scopes"]["owner_account"]["count"],2)
         self.assertEqual(len(self.adapter.authorized_inventory()),2)
     def test_duplicate(self):
         with self.assertRaises(ValueError):
