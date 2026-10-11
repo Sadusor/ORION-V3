@@ -28,7 +28,12 @@ try {
   $originUrl=(& git -C $prod remote get-url origin).Trim()
   if($LASTEXITCODE -ne 0 -or $originUrl -notmatch 'Sadusor/ORION-V3(\.git)?$'){throw 'Unexpected production Git origin; refusing cross-repo update'}
   $dirty=@(& git -C $prod status --porcelain)
-  if($LASTEXITCODE -ne 0 -or $dirty.Count){throw 'Production source dirty; stopping to preserve uncommitted files'}
+  if($LASTEXITCODE -ne 0){throw 'Production git status check failed'}
+  if($dirty.Count){
+    Write-Host "PRODUCTION_CHECKOUT> $prod"
+    foreach($item in $dirty){ Write-Host "PRODUCTION_DIRTY_ENTRY> $item" }
+    throw 'Production source dirty; review listed entries before update; nothing overwritten'
+  }
   $previous=(& git -C $prod rev-parse HEAD).Trim()
   & git -C $prod fetch origin main --quiet
   if($LASTEXITCODE -ne 0){throw 'Production Git fetch failed'}
