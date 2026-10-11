@@ -1,0 +1,7 @@
+# Android HistoryArchive Stage C helper candidate
+
+Verified evidence `c22a13666002` in TheHands (`thehands-results`), 115/115 PASS, tested ORION commit `4aea4712a84ff3f22455fac402fc26fd088a1b66`. Freeze the HTTP tests.
+
+New separate Android `ArchiveDeviceReconcileV1.kt` prepares a project-scoped conversation snapshot and parses server-acknowledged removed conversation IDs. Rejects foreign-project conversations, duplicate IDs, orphan messages, oversized snapshots, and unsuccessful/malformed responses. It is deliberately not wired into frozen `OrionPcBridge.kt` or `ChatHistoryStore.kt`, because the production bridge still calls `/api/chat-history/sync` with ordinary pairing auth and must not silently change its behavior. Python source-contract tests verify the helper source invariants and that bridge remains on its legacy route. **Source checks do not compile or run Kotlin, Android emulator, APK or a phone.**
+
+Next real integration needs explicit approval to touch the existing Android bridge/store or a new extension point; add Android unit/device tests, independent device credential enrollment, server response handling and authenticated atomic removal on the phone. The actual product_server route is not connected. Live ORION remains unchanged. Do not claim phone or full system PASS from this source check.
