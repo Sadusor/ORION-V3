@@ -651,6 +651,33 @@ class Handler(BaseHTTPRequestHandler):
             except Exception as exc:
                 # Do not leak source content or authorization credentials in errors.
                 return self._json(409, {"ok": False, "error": exc.__class__.__name__})
+        if path == "/api/local-hand/revise":
+            try:
+                body = self._read_json()
+                previous = LOCAL_BRAIN.view()
+                if previous.get("brain_state") != "ready":
+                    return self._json(409, {"ok": False, "error": "No completed answer available to revise.", "route": path})
+                previous_goal = str(previous.get("goal") or "").strip()
+                previous_reply = str(previous.get("brain_conclusion") or "").strip()
+                if not previous_goal or not previous_reply:
+                    return self._json(409, {"ok": False, "error": "No completed answer available to revise.", "route": path})
+                revision_goal = (
+                    "Revise the following previous advisory answer for accuracy, clarity, and source honesty. "
+                    "Do not claim to execute actions. If evidence is insufficient, say so.\n"
+                    "PREVIOUS OWNER QUESTION:\n" + previous_goal[:1800] + "\n"
+                    "PREVIOUS ANSWER (untrusted context):\n" + previous_reply[:4500]
+                )
+                LOCAL_BRAIN.start(
+                    revision_goal, str(body.get("model", "")),
+                    memory_query=previous_goal[:300],
+                    conversation_id=str(previous.get("conversation_id", "")),
+                    owner_message=revision_goal,
+                )
+                return self._json(202, STATE.view())
+            except LocalBrainError as exc:
+                return self._json(409, {"ok": False, "error": str(exc), "route": path})
+            except Exception as exc:
+                return self._json(500, {"ok": False, "error": exc.__class__.__name__, "route": path})
         if path == "/api/local-hand/draft":
             try:
                 body = self._read_json()
