@@ -1,0 +1,7 @@
+# Stage C integrated SQLite qualification
+
+Earlier transaction boundary: verified 88/88 Windows PASS, evidence `07f311205dbb`. This candidate adds `tests/test_history_archive_sqlite_integration_v1.py`, exercising actual temporary SQLite live/archive/tombstone/gate files and previously frozen modules together. Scenarios: archive keeps complete text when live projection is truncated; authorized deletion removes both stores; stale offline replay is filtered without resurrection; ordinary paired token cannot delete or reconcile; disabled mode and cross-project snapshot fail closed.
+
+Android `ChatHistoryStore.kt` was inspected: it retains 50 conversations, 100 messages each and 8000 characters per text; it does not currently consume a tombstone reconciliation response before uploading, nor does this batch modify the APK. The existing server sync route still does not route through the shared transactional boundary. Therefore this batch is **integration qualification on real temporary SQLite**, not Android execution, not backend route activation, and not final live E2E verification.
+
+Frozen source unchanged. Next qualified work: add a carefully feature-gated product-server integration in a new adapter, bind project access credentials and stronger owner capability, implement mobile reconciliation on the Android side, then perform PC-Android device test with backup and STOP. No restart until activation is explicitly accepted.
