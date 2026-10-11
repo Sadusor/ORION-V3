@@ -9,7 +9,7 @@
 
     <application
         android:allowBackup="false"
-        android:label="ORION"
+        android:label="${orionAppLabel}"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:usesCleartextTraffic="true"
