@@ -863,6 +863,10 @@ class OrionPcBridge(
         timeoutMs: Int,
         body: JSONObject? = null,
     ): RawResponse {
+        // Qualification APK cannot access the production PC, update or APK endpoints.
+        require(activity.packageName == "com.sadusor.orionv3") {
+            "Isolated archive APK: production PC connectivity disabled"
+        }
         val conn = URL(ORION_BASE_URL + path).openConnection() as HttpURLConnection
         conn.connectTimeout = timeoutMs
         conn.readTimeout = timeoutMs
