@@ -9,7 +9,7 @@ android {
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.sadusor.orionv3"
+        applicationId = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "com.sadusor.orionv3.archivequal" else "com.sadusor.orionv3"
         minSdk = 26
         targetSdk = 35
         versionCode = 9
@@ -17,6 +17,12 @@ android {
     }
 
     buildFeatures { compose = true }
+
+    // Archive qualification uses a distinct install identity and private app data.
+    // The normal ORION package, version and Update button are unchanged.
+    defaultConfig {
+        manifestPlaceholders["orionAppLabel"] = if (providers.gradleProperty("orionIsolatedArchiveTest").orNull == "true") "ORION Archive Test" else "ORION"
+    }
 
     // The offline GGUF is already quantized; do not recompress it in the APK.
     androidResources { noCompress += "gguf" }
