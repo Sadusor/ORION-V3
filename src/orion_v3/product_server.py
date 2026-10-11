@@ -19,6 +19,7 @@ from modules.gitea_qwen_context_v1 import build_repository_context
 from modules.document_chat_connector_v1 import DocumentAwareGiteaChatBrain, indexed_chat_request
 from modules.verifier_reliability_v1 import VerifierReliabilityV1
 from modules.gitea_multi_repo_chat_v1 import MultiRepoDocumentChatBrain, named_repo_scope, multi_repo_chat_request
+from modules.gitea_dpapi_credential_v1 import read_gitea_token
 from modules.document_intake_v1 import import_indexed_document
 from modules.orion_project_context_v1 import is_orion_project_question
 from modules.local_brain import LocalBrainError
@@ -720,7 +721,7 @@ class Handler(BaseHTTPRequestHandler):
                 owner_text = str(body.get("owner_message") or body.get("memory_query") or body.get("goal") or "")
                 source_project = str(body.get("project_id") or "orion-v3")
                 named_repo = named_repo_scope(owner_text, state_dir=STATE_ROOT,
-                    token=os.environ.get('ORION_GITEA_TOKEN', '')) if source_project == 'orion-v3' else None
+                    token=read_gitea_token()) if source_project == 'orion-v3' else None
                 scope = indexed_chat_request(
                     project_id=(named_repo['project'] if named_repo and named_repo['kind'] == 'repository' else ('gitea-inventory' if named_repo and named_repo['kind'] == 'inventory' else ('gitea-ambiguous' if named_repo and named_repo['kind'] == 'ambiguous' else source_project))),
                     owner_text=owner_text,
