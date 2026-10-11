@@ -655,6 +655,13 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 body = self._read_json()
                 previous = LOCAL_BRAIN.view()
+                requested_conversation = str(body.get("conversation_id") or "")
+                requested_turn = str(body.get("target_turn_id") or "")
+                if not requested_conversation or not requested_turn:
+                    return self._json(400, {"ok": False, "error": "Revision requires conversation and turn identity.", "route": path})
+                if (requested_conversation != str(previous.get("conversation_id") or "")
+                        or requested_turn != str(previous.get("brain_started_utc") or "")):
+                    return self._json(409, {"ok": False, "error": "Revision target is no longer current.", "route": path})
                 if previous.get("brain_state") != "ready":
                     return self._json(409, {"ok": False, "error": "No completed answer available to revise.", "route": path})
                 previous_goal = str(previous.get("goal") or "").strip()
