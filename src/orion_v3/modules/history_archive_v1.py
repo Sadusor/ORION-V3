@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import closing
 import threading
 import time
 from pathlib import Path
@@ -27,7 +28,7 @@ class HistoryArchiveV1:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS conversations(
                     id TEXT PRIMARY KEY,
@@ -103,7 +104,7 @@ class HistoryArchiveV1:
                                self._key(raw.get("model_id"), 160)))
         inserted = 0
         now = int(time.time() * 1000)
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             for cid, project in projects.items():
                 existing = db.execute(
                     "SELECT project_id FROM conversations WHERE id=?", (cid,)
@@ -157,7 +158,7 @@ class HistoryArchiveV1:
         cid = self._key(conversation_id, 120)
         if not cid or int(deleted_at_ms) <= 0:
             raise ValueError("Conversation id and delete timestamp required")
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             db.execute("INSERT OR IGNORE INTO conversations VALUES(?,?,?)",
                        (cid, "", deleted_at_ms))
             db.execute("UPDATE conversations SET deleted_at_ms=? WHERE id=?",
@@ -183,7 +184,7 @@ class HistoryArchiveV1:
             params.append(str(contains)[:2000])
         sql += " ORDER BY m.created_at_ms DESC,m.message_id DESC LIMIT ?"
         params.append(limit)
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             return [dict(row) for row in db.execute(sql, params).fetchall()]
 
     def export_conversation(self, *, project_id: str, conversation_id: str) -> bytes:
@@ -191,7 +192,7 @@ class HistoryArchiveV1:
         project = self._key(project_id, 160)
         if not cid or not project:
             raise ValueError("Explicit project and conversation required")
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             rows = [dict(r) for r in db.execute(
                 "SELECT m.* FROM messages m JOIN conversations c "
                 "ON c.id=m.conversation_id WHERE c.deleted_at_ms IS NULL "
