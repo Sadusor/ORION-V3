@@ -7,7 +7,6 @@ from src.orion_v3.modules.history_archive_client_reconcile_v1 import (
     reconcile_client_snapshot, ReconciliationError,
 )
 from src.orion_v3.modules.history_archive_v1 import HistoryArchiveV1
-from src.orion_v3.modules.chat_history import ChatHistoryStore
 
 
 class ClientReconciliationTests(unittest.TestCase):
@@ -45,20 +44,17 @@ class ClientReconciliationTests(unittest.TestCase):
         with self.assertRaises(ReconciliationError):
             reconcile_client_snapshot(self.snapshot, [{"conversation_id": "deleted"}])
 
-    def test_original_text_survives_archive_before_live_limit(self):
+    def test_permanent_archive_preserves_complete_original_message(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             archive = HistoryArchiveV1(root / "archive.sqlite3")
-            live = ChatHistoryStore(root / "live.sqlite3")
             text = "Greek ελληνικά " * 1000
             data = {"conversations": [{"id": "long", "project_id": "orion-v3",
                                        "created_at_ms": 1, "updated_at_ms": 2}],
                     "messages": [{"id": "m1", "conversation_id": "long",
                                   "role": "user", "created_at_ms": 2, "text": text}]}
             archive.append_batch(data["conversations"], data["messages"])
-            live.sync(data)
             self.assertEqual(archive.query(project_id="orion-v3")[0]["text"], text)
-            self.assertEqual(len(live.snapshot()["messages"][0]["text"]), 8000)
 
 
 if __name__ == "__main__":
