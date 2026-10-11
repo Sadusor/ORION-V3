@@ -27,7 +27,9 @@ try {
   if((Resolve-Path $prod).Path -ieq (Resolve-Path $QualifiedCheckout).Path){throw 'Qualification and production trees overlap'}
   $originUrl=(& git -C $prod remote get-url origin).Trim()
   if($LASTEXITCODE -ne 0 -or $originUrl -notmatch 'Sadusor/ORION-V3(\.git)?$'){throw 'Unexpected production Git origin; refusing cross-repo update'}
-  $dirty=@(& git -C $prod status --porcelain)
+  $allDirty=@(& git -C $prod status --porcelain)
+  $dirty=@($allDirty | Where-Object { $_ -ne '?? android/.gradle/' -and $_ -ne '?? android/local.properties' })
+  if($allDirty.Count -ne $dirty.Count){Write-Host 'LOCAL_ANDROID_BUILD_ARTIFACTS> PRESERVED_UNTRACKED'}
   if($LASTEXITCODE -ne 0){throw 'Production git status check failed'}
   if($dirty.Count){
     Write-Host "PRODUCTION_CHECKOUT> $prod"
