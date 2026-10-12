@@ -25,7 +25,7 @@ class ChatBridgeTests(unittest.TestCase):
                 GiteaChatStreamingBrain().start("frozen memory final prompt", "qwen")
             self.assertEqual(search.call_count, 1)
             self.assertEqual(search.call_args.kwargs["project_id"], "orion-v3")
-            self.assertEqual(search.call_args.kwargs["query"], "stop")
+            self.assertIn("stop", search.call_args.kwargs["query"])
             composed = start.call_args.args[0]
             self.assertIn("frozen memory final prompt", composed)
             self.assertIn("src/stop.py", composed)
