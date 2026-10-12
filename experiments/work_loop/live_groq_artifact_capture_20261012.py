@@ -61,7 +61,7 @@ def main():
         except SyntaxError:
             syntax_ok = False
         # A new exclusive file; never overwrite an existing artifact.
-        output = Path("groq_artifact_trial_20261012.json")
+        output = Path.cwd().parent / "groq_artifact_trial_20261012.json"
         artifact = {"schema": "orion.groq.artifact_trial.v1",
             "created_utc": datetime.now(timezone.utc).isoformat(),
             "provider": "groq", "model": str(model.get("model", "")),
