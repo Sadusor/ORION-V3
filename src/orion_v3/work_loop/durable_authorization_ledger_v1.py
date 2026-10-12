@@ -7,6 +7,7 @@ before attempting a side effect; never roll it back on failed execution.
 from __future__ import annotations
 
 import re
+from contextlib import closing
 import sqlite3
 from pathlib import Path
 
@@ -21,7 +22,7 @@ class DurableAuthorizationLedger:
             raise ValueError("in-memory ledger is not durable")
         if not self._path.parent.is_dir():
             raise ValueError("ledger directory must already exist")
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             db.execute("""CREATE TABLE IF NOT EXISTS used_authorizations (
                 nonce TEXT PRIMARY KEY,
                 proposal_hash TEXT NOT NULL,
@@ -42,7 +43,7 @@ class DurableAuthorizationLedger:
             raise ValueError("invalid proposal hash")
         if not isinstance(source_revision, str) or not re.fullmatch(r"[0-9a-f]{40}", source_revision):
             raise ValueError("invalid source revision")
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             db.execute("BEGIN IMMEDIATE")
             try:
                 db.execute(
@@ -61,5 +62,5 @@ class DurableAuthorizationLedger:
     def contains(self, nonce: str) -> bool:
         if not isinstance(nonce, str) or not _NONCE.fullmatch(nonce):
             raise ValueError("invalid authorization nonce")
-        with self._connect() as db:
+        with closing(self._connect()) as db:
             return db.execute("SELECT 1 FROM used_authorizations WHERE nonce=?", (nonce,)).fetchone() is not None
