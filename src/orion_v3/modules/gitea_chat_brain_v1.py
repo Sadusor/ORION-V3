@@ -29,28 +29,14 @@ def gitea_chat_request(*, project_id: str, owner_text: str, state_dir):
         _requested.reset(token)
 
 def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int | None = None) -> str:
-    """Bound optional evidence without truncating the owner's original request.
+    """Preserve the existing no-second-cap behavior for retrieved evidence.
 
-    A composed request must stay below the Local Brain 16 KiB ingress limit.
-    When the existing request is already too large, leave it untouched so the
-    canonical guard can reject it rather than silently rewriting owner text.
+    The source provider enforces its own read-only bounds. Request-size failures
+    must be diagnosed at their actual ingress guard, not masked by a new cap.
     """
     if not reference.strip():
         return goal
-    limit = min(15360, max_bytes if max_bytes is not None else 15360)
-    separator = "\n\n"
-    remaining = limit - len(goal.encode("utf-8")) - len(separator.encode("utf-8"))
-    if remaining <= 0:
-        return goal
-    raw = reference.encode("utf-8")
-    if len(raw) > remaining:
-        marker = "\n[Evidence truncated to respect Local Brain request budget]"
-        marker_bytes = marker.encode("utf-8")
-        if remaining <= len(marker_bytes):
-            return goal
-        clipped = raw[:remaining - len(marker_bytes)].decode("utf-8", errors="ignore")
-        reference = clipped + marker
-    return goal + separator + reference
+    return goal + "\n\n" + reference
 
 
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
