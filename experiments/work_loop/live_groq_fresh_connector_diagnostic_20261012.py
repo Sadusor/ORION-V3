@@ -57,7 +57,7 @@ def main():
         print("GROQ_FRESH> DISTINCT_RESPONSES PASS_NO_EXECUTION", flush=True)
         return 0
     except Exception as exc:
-        print("GROQ_FRESH> FAILED", type(exc).__name__, flush=True)
+        print("GROQ_FRESH> FAILED", type(exc).__name__, "CATEGORY", getattr(exc, "category", "UNCLASSIFIED"), flush=True)
         return 2
 
 if __name__ == "__main__":
