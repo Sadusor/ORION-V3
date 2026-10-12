@@ -70,7 +70,7 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
 
             retriever = UniversalRetrievalV1()
             retriever.register("mygitea2", gitea_source)
-            found = retriever.retrieve(interpret(query).search_query, project="orion-v3", max_chars=12000)
+            found = retriever.retrieve(query, project="orion-v3", max_chars=12000)
             trace["lookup"] = "error" if found["source_errors"] else (
                 "hit" if found["results"] else "miss"
             )
