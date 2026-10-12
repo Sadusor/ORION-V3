@@ -30,4 +30,4 @@ def authorize_generated_execution(evidence, *, owner_approved=False):
     if owner_approved is not True:
         return {"authorized": False, "reason": "OWNER_APPROVAL_REQUIRED"}
     # Deliberately no execution function or runner in this module.
-    return {"authorized": True, "reason": "BOUNDARY_PREREQUISITES_DECLARED_ONLY"}
+    return {"authorized": False, "reason": "TRUSTED_ATTESTATION_VERIFIER_NOT_IMPLEMENTED"}
