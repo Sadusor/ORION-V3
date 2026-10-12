@@ -33,7 +33,7 @@ def search_relevant_context(index_path, *, query, project, repository, commit_sh
               for _,_,path,part,body in candidates[:8]]
     output=[]
     remaining=max_chars
-    for item in selected+base["results"]:
+    for item in base["results"]+selected:
         if any(x["path"]==item["path"] and x["part"]==item["part"] for x in output):
             continue
         if len(item["text"])>remaining:
