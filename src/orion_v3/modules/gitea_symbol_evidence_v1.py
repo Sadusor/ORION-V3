@@ -58,7 +58,11 @@ def enrich_symbol_evidence(index_path, response, *, query, project, repository,
     for path in ranked[:3]:
         matches = sorted(candidates[path], key=lambda x: (-x[0], x[1]))
         parts = [n for _, n, _ in matches[:5]]
-        ordered = parts + [neighbor for n in parts for neighbor in (n - 1, n + 1)]
+        # Preserve distant UI definitions in the same implementation file.
+        # A symbol may occur many fixed-size chunks after its handler.
+        all_parts = sorted(n for p, n in by_key if p == path)
+        ordered = parts + [n for n in all_parts if n not in parts]
+        ordered += [neighbor for n in parts for neighbor in (n - 1, n + 1)]
         for n in ordered:
             key = (path, n)
             chunk = by_key.get(key)
