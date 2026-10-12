@@ -68,7 +68,8 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
     # omit the Gitea name. This is our only wired repository inventory,
     # but explicit references to another host must not be rerouted.
     asks_count = bool(
-        re.search(r"\b(?:how many|count|number of|list|show)\b.{0,120}\brepos(?:itories)?\b", text, re.I)
+        re.search(r"\b(?:how many|count|number of)\b.{0,120}\brepos(?:itories)?\b", text, re.I)
+        or re.search(r"\b(?:list|show)\s+(?:my\s+|the\s+|all\s+)?repos(?:itories)?\b", text, re.I)
         or re.search(r"\brepos(?:itories)?\b.{0,120}\b(?:count|how many|number of)\b", text, re.I)
     )
     other_host = bool(re.search(r"\b(?:github|gitlab|bitbucket)\b", text, re.I))
