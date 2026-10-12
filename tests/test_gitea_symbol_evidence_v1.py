@@ -27,6 +27,7 @@ class SymbolEvidenceTests(unittest.TestCase):
                     ("orion-v3","MyGitea/ORION-V3",commit,"docs/sync.md","0",
                      "Historical notes about sync"),
                 ])
+                db.commit()
             result = enrich_symbol_evidence(path, {"results": []},
                 query="Which file implements the sync button in MyGitea2?",
                 project="orion-v3", repository="MyGitea/ORION-V3",
@@ -41,10 +42,11 @@ class SymbolEvidenceTests(unittest.TestCase):
     def test_stale_commit_rejected(self):
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "index.sqlite3"
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db:
                 db.execute("CREATE TABLE code_revision(project TEXT,repository TEXT,commit_sha TEXT)")
                 db.execute("CREATE TABLE code_fts(project TEXT,repository TEXT,commit_sha TEXT,path TEXT,part TEXT,text TEXT)")
                 db.execute("INSERT INTO code_revision VALUES('orion-v3','MyGitea/ORION-V3',?)", ("a"*40,))
+                db.commit()
             with self.assertRaises(ValueError):
                 enrich_symbol_evidence(path, {"results":[]}, query="find sync button",
                     project="orion-v3",repository="MyGitea/ORION-V3",
