@@ -7,10 +7,15 @@ def test_default_chat_uses_interpreter():
     source = Path(__file__).resolve().parents[1] / "src/orion_v3/modules/gitea_chat_brain_v1.py"
     tree = ast.parse(source.read_text(encoding="utf-8"))
     calls = [n for n in ast.walk(tree) if isinstance(n, ast.Call)]
-    assert any(isinstance(c.func, ast.Attribute) and c.func.attr == "retrieve"
-               and c.args and isinstance(c.args[0], ast.Call)
-               and isinstance(c.args[0].func, ast.Attribute)
-               and c.args[0].func.attr == "interpret" for c in calls)
+    assert any(
+        isinstance(c.func, ast.Attribute) and c.func.attr == "retrieve"
+        and c.args and isinstance(c.args[0], ast.Attribute)
+        and c.args[0].attr == "search_query"
+        and isinstance(c.args[0].value, ast.Call)
+        and isinstance(c.args[0].value.func, ast.Name)
+        and c.args[0].value.func.id == "interpret"
+        for c in calls
+    )
 
 
 def test_previously_lifted_evidence_cap_is_preserved():
