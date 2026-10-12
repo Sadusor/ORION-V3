@@ -30,3 +30,16 @@ Inspected fork sources: Haystack InMemoryBM25Retriever delegates to InMemoryDocu
 - TheHands 23/23 tests and three-file deployment to Windows candidate were recorded PASS (session 1b6c6808dc1a). This does NOT demonstrate live Qwen success.
 - Live user recording showed 16 KiB rejection and missing authorized evidence; root causes need controlled tracing.
 - This checkpoint is documentation only. No code fix, DB scope expansion, runtime restart, or donor integration has been performed by this commit.
+
+## Cursor follow-up audit — conflicting live/legacy wiring (owner-provided)
+These are Cursor's inspection findings; independently confirm the relevant calls before changing code.
+- Live ORION chat calls `search_live_gitea_v2` (`gitea_auto_index_v2.py`, up to 500 files, `gitea-code-index-v2-full.sqlite3`). Legacy `search_live_gitea` (`gitea_search_service_v1.py`, 40 .py/.md/.js files, separate v1 index) is not the live path. `tests/test_gitea_chat_brain_v1.py` reportedly patches the old name: replace stale mocks with tests that exercise actual V2 retrieval, without deleting frozen V1.
+- `_focused_code_query` in `gitea_multi_repo_chat_v1.py` reportedly unused; `interpret` used for named/cross-repo; default ORION path was raw. CR-1 repair branch now calls `interpret` in default lookup (not deployed).
+- `gitea_relevance_v2.py` reportedly prepends filename/path hits before content FTS for multi-term queries, risking displacement of substantive evidence. Test real ranking and budget before altering scoring.
+- `orion_project_context_v1.py` reportedly pins stale 2026-10-10 checkpoint; live Gitea chat no longer injects it. `product_server.py` imports but does not use `is_orion_project_question`; old project-context tests reportedly patch a removed `project_status_context` symbol. Prefer live SHA-cited evidence and repair stale tests; do not re-enable checkpoint injection.
+- `named_repo_scope` already matches repo inventory; duplicate `_INVENTORY` branch reportedly uses literal escaped `\\b` and never matches. Verify and fix the dead duplicate only if needed; preserve owner scope gate.
+- Document attachment JS reportedly works, while mobile `workspace.js` displays a disabled planned-upload control. Reconcile UI after verifying real upload behavior, without adding a second upload path.
+- Preserve intentionally stacked modules: source context v1/v2, FTS snippets vs explicit path preview, Gitea brain adapter not live, verifier wrappers, history sync layers, and `RepoAwareChatBrain` mixin composition.
+- Rollback directory and backup files are non-live safety artifacts. Do not delete them in a chat repair. Unused imports may be cleaned only in a separately approved, low-risk change.
+
+**Acceptance addition:** Tests must patch/call the same V2 functions the deployed `/api/local-hand/draft` route actually invokes. Synthetic PASS on legacy symbols is not sufficient. Add regression cases for content-over-filename relevance, default vs named repo routing, authorized inventory, and absence of stale checkpoint injection.
