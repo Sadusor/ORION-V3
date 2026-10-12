@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Forge</title>
+<style>
+:root{color-scheme:dark;--bg:#060d24;--card:#0b1635;--raise:#13224d;--line:#1f3170;--text:#e7edff;--mute:#8697c9;--acc:#ffb224;--ink:#1d1300;--ring:#ffb224;--at:#ffb224;--free:#4de3b5;--paid:#ff8f7a;--loc:#b9a2ff;--bad:#ff6f8a;--code:#070f27;--add:rgba(77,227,181,.15);--del:rgba(255,111,138,.16);--grid:rgba(130,160,255,.055);--sh:0 18px 50px rgba(0,5,25,.55)}
+@media(prefers-color-scheme:light){:root{color-scheme:light;--bg:#d9e2fb;--card:#f5f8ff;--raise:#e6edff;--line:#c3d0f2;--text:#0c1a48;--mute:#5a6a9b;--acc:#f5a300;--ink:#1d1300;--ring:#2748d4;--at:#2748d4;--free:#0c8a62;--paid:#c2492f;--loc:#6b44c8;--bad:#c4264a;--code:#edf1fd;--add:rgba(12,138,98,.13);--del:rgba(196,38,74,.12);--grid:rgba(40,70,180,.06);--sh:0 18px 50px rgba(40,60,140,.18)}}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font:14.5px/1.6 "Segoe UI Variable Text","SF Pro Text","Avenir Next","Inter",ui-sans-serif,system-ui,sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{background:none;border:0;cursor:pointer;border-radius:10px}
+:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
+[hidden]{display:none!important}
+.mono,code,pre{font-family:ui-monospace,"Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace}
+.ic{padding:6px 12px;color:var(--mute);white-space:nowrap;border:1px solid transparent}.ic:hover{background:var(--raise);color:var(--text)}
+.btn{padding:5px 12px;background:var(--raise);font-size:13px;white-space:nowrap;border:1px solid var(--line)}.btn:hover{border-color:var(--ring)}
+.btn.p{background:var(--acc);color:var(--ink);border-color:var(--acc);font-weight:600}.btn.x{color:var(--mute)}.btn.g{color:var(--free)}.btn.r{color:var(--bad)}
+.tag{font-size:11px;padding:0 7px;border-radius:99px;border:1px solid currentColor;line-height:17px;flex:none}
+.tag.free{color:var(--free)}.tag.paid{color:var(--paid)}.tag.local{color:var(--loc)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:none}.dot.ok,.dot.done{background:var(--free)}.dot.err{background:var(--bad)}.dot.run{background:var(--acc);animation:pu 1s infinite}
+@keyframes pu{50%{opacity:.3}}
+@keyframes pin{from{opacity:0;transform:translateY(6px)}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+#app{display:flex;gap:10px;padding:10px;height:100vh}
+/* dock */
+#dock{width:64px;flex:none;background:var(--card);border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;padding:10px 8px;transition:width .2s;overflow:hidden}
+#dock.wide{width:250px}
+.lbl{display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}#dock.wide .lbl{display:block}
+.dbtn,.tn{display:flex;align-items:center;gap:10px;padding:7px;border-radius:12px;color:var(--mute);width:100%;text-align:left;cursor:pointer;min-height:46px}
+#dock:not(.wide) .dbtn,#dock:not(.wide) .tn{justify-content:center}
+.dbtn:hover,.tn:hover,.tn.on{background:var(--raise);color:var(--text)}
+.logo{display:flex;align-items:center;gap:10px;padding:4px 7px 12px;color:var(--text);font-weight:650;font-size:18px;letter-spacing:.01em}
+#dock:not(.wide) .logo{justify-content:center}
+#dtog{margin-left:auto}#dock:not(.wide) #dtog{display:none}
+.plus{width:32px;height:32px;border-radius:10px;border:1px dashed var(--mute);display:grid;place-items:center;font-size:18px;flex:none;color:var(--text)}
+#tl{flex:1;overflow:auto;margin:8px 0}
+.av{width:32px;height:32px;border-radius:10px;background:var(--raise);display:grid;place-items:center;font-weight:650;position:relative;flex:none;color:var(--text)}
+.av .dot{position:absolute;right:-3px;bottom:-3px;width:12px;height:12px;border:2px solid var(--card)}
+.tn.on .av{box-shadow:0 0 0 2px var(--acc)}
+.tn b{font-weight:400;opacity:0;padding:0 4px}.tn:hover b{opacity:1}#dock:not(.wide) .tn b{display:none}
+/* stage */
+#stage{flex:1;min-width:0;display:flex;flex-direction:column;background-color:var(--card);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:40px 40px;border:1px solid var(--line);border-radius:20px;position:relative}
+#top{display:flex;align-items:center;gap:10px;padding:12px 16px}
+#top .sp{flex:1}
+#wsb{display:flex;align-items:center;gap:8px;padding:6px 14px;background:var(--card);border:1px solid var(--line);border-radius:99px;max-width:50vw}
+#wsb:hover{border-color:var(--ring)}#wsb span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#tele{color:var(--mute);font-size:12.5px}
+#thread{flex:1;overflow:auto;padding:6px 24px 20px}
+.col{max-width:820px;margin:0 auto}
+/* hero */
+.hero{padding-top:7vh;text-align:center}
+.hero h1{font-size:clamp(30px,5vw,54px);font-weight:650;letter-spacing:-.035em;line-height:1.05;margin:0 0 14px}
+.hero p{color:var(--mute);margin:0 auto 26px;max-width:470px}
+.pre{display:grid;gap:10px;max-width:520px;margin:0 auto 22px;text-align:left}
+.pr{display:flex;align-items:center;gap:14px;padding:13px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card);width:100%;text-align:left}
+.pr:hover{border-color:var(--ring)}.pr>span:nth-child(2){flex:1;min-width:0}
+.pr b{display:block;font-weight:600}.pr small{color:var(--mute);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pr em{font-style:normal;color:var(--at);font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{padding:8px 14px;background:var(--card);border:1px solid var(--line);border-radius:99px;color:var(--mute);font-size:13px}.chip:hover{color:var(--text);border-color:var(--ring)}
+/* timeline */
+.tlw{position:relative;padding-left:30px;padding-top:6px}
+.tlw::before{content:"";position:absolute;left:9px;top:14px;bottom:14px;width:1px;background:var(--line)}
+.ev{position:relative;margin:0 0 12px}
+.nd{position:absolute;left:-26px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--card);border:2px solid var(--mute)}
+.ev.user .nd{background:var(--acc);border-color:var(--acc);box-shadow:0 0 0 4px color-mix(in srgb,var(--acc) 22%,transparent)}
+.ev.a .nd{border-color:var(--ring)}
+.ev.s .nd{width:7px;height:7px;left:-24.5px;top:12px;border-width:1.5px}
+.ev.bad .nd{border-color:var(--bad)}
+.ev.s{margin-bottom:0}.ev.s .st{padding:4px 0}
+.ev.user{margin-top:22px}.ev.user:first-child{margin-top:0}
+.ev.user .b{background:var(--raise);border:1px solid var(--line);border-radius:14px;padding:10px 14px;white-space:pre-wrap}
+.txt{white-space:pre-wrap;margin:0 0 8px}
+.txt code{background:var(--raise);padding:1px 6px;border-radius:5px;font-size:12.5px}
+.blk{background:var(--code);border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden}
+.blk header{padding:6px 14px;border-bottom:1px solid var(--line);color:var(--mute);font-size:12px}
+.blk pre{margin:0;padding:12px 14px;overflow-x:auto;font-size:12.5px;line-height:1.6}
+.st{display:inline-flex;align-items:center;gap:8px;padding:3px 0;font-size:13px;color:var(--mute);max-width:100%}
+.st .v{color:var(--text);font-weight:600}.st code{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text);background:var(--raise);padding:1px 8px;border-radius:6px}
+.st .a{color:var(--free)}.st .d{color:var(--bad)}
+.sum{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:12px 14px;border:1px solid var(--line);border-radius:16px;background:var(--card)}
+.err{color:var(--bad)}
+.think{display:inline-flex;gap:4px;padding:8px 0}.think i{width:6px;height:6px;border-radius:50%;background:var(--mute);animation:pu 1s infinite}.think i:nth-child(2){animation-delay:.15s}.think i:nth-child(3){animation-delay:.3s}
+/* command bar */
+#comp{padding:0 24px 16px}
+#cw{position:relative;max-width:820px;margin:0 auto}
+#box{position:relative;background:color-mix(in srgb,var(--card) 84%,transparent);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:22px;padding:14px 14px 10px 18px;box-shadow:var(--sh)}
+#box:focus-within{border-color:var(--ring)}
+#box.running::after{content:"";position:absolute;inset:-1px;border-radius:23px;padding:1px;background:linear-gradient(100deg,transparent 30%,var(--acc) 50%,transparent 70%) 0 0/250% 100%;-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;animation:sw 1.6s linear infinite;pointer-events:none}
+@keyframes sw{to{background-position:-250% 0}}
+#in{display:block;width:100%;background:none;border:0;resize:none;outline:none;max-height:200px;min-height:28px;padding:2px 0}
+#in::placeholder{color:var(--mute)}
+.crow{display:flex;align-items:center;gap:8px;margin-top:10px}
+.cb{display:flex;align-items:center;gap:8px;padding:6px 12px;border:1px solid var(--line);border-radius:99px;font-size:13px;background:var(--raise);max-width:60%}
+.cb:hover,.cb[aria-expanded=true]{border-color:var(--ring)}
+.cb span.n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cb .car{color:var(--mute);font-size:11px}
+.led{width:8px;height:8px;border-radius:50%;background:var(--mute);flex:none}.led.ok{background:var(--free);box-shadow:0 0 8px var(--free)}.led.run{background:var(--acc);animation:pu 1s infinite}
+.crow .sp{flex:1}
+#send,#stop{width:36px;height:36px;border-radius:50%;flex:none;display:grid;place-items:center}
+#send{background:var(--acc);color:var(--ink)}#send:hover{filter:brightness(1.1)}
+#stop{background:var(--raise);border:1px solid var(--line)}
+#hint{max-width:820px;margin:6px auto 0;color:var(--mute);font-size:12px;text-align:center;min-height:18px}
+/* popovers */
+.pop{position:absolute;bottom:calc(100% + 10px);left:0;width:min(470px,100%);background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);overflow:hidden;z-index:30;animation:pin .14s ease-out}
+#epop{width:330px;padding:6px}
+.pop input{width:100%;background:none;border:0;border-bottom:1px solid var(--line);padding:13px 16px;outline:none}
+.tabs{display:flex;gap:4px;padding:8px 10px}
+.tabs button{padding:3px 12px;color:var(--mute);font-size:13px;border-radius:99px;border:1px solid transparent}.tabs .on{background:var(--raise);color:var(--text);border-color:var(--line)}
+#ml{max-height:min(360px,48vh);overflow:auto;padding:0 6px 6px}
+.gh{display:flex;align-items:center;gap:8px;padding:10px 10px 4px;color:var(--mute);font-size:12.5px;position:sticky;top:0;background:var(--card);z-index:1}
+.gh .cnt{margin-left:auto}
+.mi{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:8px 10px;text-align:left}
+.mi:hover,.mi.hi{background:var(--raise)}
+.mi .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mi.on .nm::after{content:"  ✓";color:var(--acc)}
+.mi small{display:block;color:var(--mute);font-size:12px;line-height:1.3}
+.more,.none{padding:10px;color:var(--mute);font-size:12.5px;text-align:center}.none{padding:22px}
+.none .btn{margin-top:10px}
+.pf{display:flex;justify-content:space-between;padding:8px 10px;border-top:1px solid var(--line)}
+/* panel */
+#hdl{width:4px;cursor:col-resize;flex:none;border-radius:4px;margin:0 -7px;z-index:2}#hdl:hover{background:var(--acc)}
+#panel{width:440px;flex:none;background:var(--card);border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;min-width:280px;overflow:hidden}
+body:not(.po) #panel,body:not(.po) #hdl{display:none}
+#ptabs{display:flex;gap:2px;padding:10px 12px 0;border-bottom:1px solid var(--line)}
+#ptabs button{padding:7px 12px;color:var(--mute);border-radius:8px 8px 0 0;font-size:13.5px;border-bottom:2px solid transparent}
+#ptabs .on{color:var(--text);border-bottom-color:var(--acc)}
+#ptabs em{font-style:normal;background:var(--acc);color:var(--ink);border-radius:99px;font-size:11px;padding:0 6px;margin-left:5px;font-weight:600}
+#pb{flex:1;overflow:auto;padding:12px}
+.fc{background:var(--raise);border:1px solid var(--line);border-radius:14px;margin-bottom:10px;overflow:hidden}
+.fc>summary{display:flex;align-items:center;gap:8px;padding:9px 12px;cursor:pointer;list-style:none;font-size:12.5px}
+.fc>summary::-webkit-details-marker{display:none}
+.fc .pa{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fc .acts{display:flex;gap:6px;padding:0 10px 10px}
+.df{font-size:12px;line-height:1.5;overflow-x:auto;border-top:1px solid var(--line);background:var(--code)}
+.df div{padding:0 10px;white-space:pre;min-width:max-content}
+.df .p{background:var(--add)}.df .m{background:var(--del)}.df .c{color:var(--mute);padding:2px 10px;font-style:italic}
+.tr{display:flex;align-items:center;gap:6px;padding:3px 8px;border-radius:6px;font-size:12.5px;cursor:pointer;color:var(--mute)}
+.tr:hover{background:var(--raise);color:var(--text)}.tr.d{cursor:default;color:var(--text);font-weight:600}.tr.d:hover{background:none}
+.vw{font-size:12px;line-height:1.55;background:var(--code);border:1px solid var(--line);border-radius:10px;overflow:auto}
+.vw div{white-space:pre;padding:0 10px}.vw i{display:inline-block;width:34px;color:var(--mute);font-style:normal;user-select:none}
+#pv{width:100%;height:100%;min-height:420px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.emp{color:var(--mute);text-align:center;padding:30px 12px}.emp .btn{margin-top:10px}
+/* dialog */
+dialog{background:var(--card);color:var(--text);border:1px solid var(--line);border-radius:20px;padding:0;width:min(560px,94vw);box-shadow:var(--sh)}
+dialog::backdrop{background:rgba(3,7,22,.65);backdrop-filter:blur(3px)}
+dialog header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--line)}
+dialog header h2{margin:0;font-size:16px}
+#cl{padding:8px 12px 14px;max-height:70vh;overflow:auto}
+.cr{padding:12px 8px;border-bottom:1px solid var(--line)}.cr:last-child{border:0}
+.cr .l{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.cr .n{display:flex;align-items:center;gap:8px;font-weight:600}
+.cr .s{color:var(--mute);font-size:12.5px;margin-top:2px;padding-left:16px}
+.cr .a{display:flex;gap:6px;align-items:center}
+.mask{font-size:12px;color:var(--mute)}
+.ad{display:flex;gap:6px;margin:10px 0 0 16px;align-items:center;flex-wrap:wrap}
+.ad input{flex:1;min-width:160px;background:var(--code);border:1px solid var(--line);border-radius:8px;padding:6px 10px;color:var(--text)}
+.ad a{color:var(--at);font-size:13px}
+@media(max-width:900px){#dock{display:none}#panel{position:absolute;right:10px;top:10px;bottom:10px;z-index:15;box-shadow:var(--sh)}#hdl{display:none}}
+</style>
+</head>
+<body>
+<div id="app">
+<nav id="dock" aria-label="Tasks">
+  <div class="logo"><svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l9 5v10l-9 5-9-5V7z" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7l4 2.3v4.6L12 16.2 8 13.9V9.3z" fill="var(--acc)"/></svg><span class="lbl">forge</span><button class="ic" id="dtog" aria-label="Collapse dock">‹</button></div>
+  <button class="dbtn" id="new"><span class="plus">+</span><span class="lbl">New task</span></button>
+  <div id="tl"></div>
+  <button class="dbtn" id="connbtn"><span class="dot" id="cdot"></span><span class="lbl" id="ctext">Connections</span></button>
+  <button class="dbtn" id="dexp" aria-label="Expand dock" title="Expand"><span class="plus" style="border-style:solid">›</span></button>
+</nav>
+
+<main id="stage">
+  <header id="top">
+    <button id="wsb"><span class="dot" id="wsd"></span><span id="wsn">Dock a project</span></button>
+    <div class="sp"></div>
+    <div id="tele" class="mono"></div>
+    <button class="ic" id="ptog">Workspace</button>
+  </header>
+  <div id="thread"><div class="col" id="msgs"></div></div>
+  <div id="comp">
+    <div id="cw">
+      <div class="pop" id="mpop" hidden role="listbox" aria-label="Models">
+        <input id="q" placeholder="Search models  (Ctrl+K)" aria-label="Search models" autocomplete="off">
+        <div class="tabs" id="tabs"><button class="on" data-t="all">All</button><button data-t="local">On this computer</button><button data-t="free">Free cloud</button><button data-t="paid">Paid cloud</button></div>
+        <div id="ml"></div>
+        <div class="pf"><button class="btn x" data-act="conn">Manage connections</button><button class="btn x" data-act="scan">Rescan</button></div>
+      </div>
+      <div class="pop" id="epop" hidden></div>
+      <div id="box">
+        <textarea id="in" rows="1" aria-label="Task"></textarea>
+        <div class="crow">
+          <button class="cb" id="mbtn" aria-haspopup="listbox" aria-expanded="false"><span class="led" id="mled"></span><span class="n" id="mname">Select model</span><span id="mtier"></span><span class="car">▾</span></button>
+          <button class="cb" id="ebtn" aria-haspopup="true"><span class="n" id="ename">Review edits</span><span class="car">▾</span></button>
+          <span class="sp"></span>
+          <button id="send" aria-label="Run task"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M8 13V3M3.5 7.5L8 3l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <button id="stop" aria-label="Stop" hidden><svg width="12" height="12" viewBox="0 0 12 12"><rect width="12" height="12" rx="2" fill="currentColor"/></svg></button>
+        </div>
+      </div>
+      <div id="hint"></div>
+    </div>
+  </div>
+</main>
+
+<div id="hdl"></div>
+<aside id="panel">
+  <div id="ptabs"><button data-p="changes" class="on">Changes<em id="cc" hidden>0</em></button><button data-p="files">Files</button><button data-p="preview">Preview</button></div>
+  <div id="pb"></div>
+</aside>
+</div>
+
+<dialog id="dlg">
+  <header><h2>Connections</h2><button class="ic" id="dx" aria-label="Close">✕</button></header>
+  <div id="cl"></div>
+</dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const P=[
+ {id:'ollama',name:'Ollama',sub:'Models running on this computer',base:'http://localhost:11434/v1',tags:'http://localhost:11434/api/tags',nokey:true,tier:'local',help:'Start Ollama with OLLAMA_ORIGINS="*" so this page can connect. Pick a model that supports tools (e.g. qwen2.5-coder, llama3.1).'},
+ {id:'openrouter',name:'OpenRouter',sub:'Many free models, plus paid',base:'https://openrouter.ai/api/v1',keyUrl:'https://openrouter.ai/keys',tier:'free',pub:true},
+ {id:'gemini',name:'Google AI Studio',sub:'Free Gemini tier',base:'https://generativelanguage.googleapis.com/v1beta/openai',keyUrl:'https://aistudio.google.com/apikey',tier:'free'},
+ {id:'groq',name:'Groq',sub:'Free tier, very fast',base:'https://api.groq.com/openai/v1',keyUrl:'https://console.groq.com/keys',tier:'free'},
+ {id:'cerebras',name:'Cerebras',sub:'Free tier, very fast',base:'https://api.cerebras.ai/v1',keyUrl:'https://cloud.cerebras.ai/platform',tier:'free'},
+ {id:'mistral',name:'Mistral',sub:'Free Experiment plan',base:'https://api.mistral.ai/v1',keyUrl:'https://console.mistral.ai/api-keys',tier:'free'},
+ {id:'openai',name:'OpenAI',sub:'Paid, billed per token',base:'https://api.openai.com/v1',keyUrl:'https://platform.openai.com/api-keys',tier:'paid'}
+];
+const pv=id=>P.find(p=>p.id===id);
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=s=>esc(s).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');
+let keys={},sel=store.get('forge.sel',null),mode='review'; // session-only credentials, staging enforced
+let models=[],status={},adding={},tab='all',ptab='changes',viewing=null,cur=null,raf=0;
+let tasks=store.get('forge.tasks',[]).map(t=>({...t,status:'',ctrl:null}));
+let pvLast=null;
+let ws={name:'',handle:null,base:new Map(),orig:new Map(),staged:new Map(),agents:''};
+
+/* ================= workspace ================= */
+const SKIP_DIR=/^(node_modules|\.git|dist|build|\.next|\.venv|venv|__pycache__|target|\.idea|\.cache|coverage)$/;
+const SKIP_FILE=/\.(png|jpe?g|gif|webp|ico|pdf|zip|gz|tar|mp[34]|mov|woff2?|ttf|otf|eot|exe|dll|so|dylib|bin|lock|wasm|class|jar|psd|svgz)$|^package-lock\.json$/i;
+const norm=p=>{p=String(p||'').replace(/\\/g,'/');if(!p||p.startsWith('/')||p.startsWith('./')||p.split('/').some(s=>!s||s==='..'||s==='.')||/^[a-zA-Z]:/.test(p))throw Error('Invalid path: '+p);return p};
+const eff=p=>ws.staged.has(p)?ws.staged.get(p):ws.base.get(p);
+const paths=()=>[...new Set([...ws.base.keys(),...ws.staged.keys()])].sort();
+async function walk(dir,pre,out,cnt){
+  for await(const [n,h] of dir.entries()){
+    if(cnt.n>1500)return;
+    if(h.kind==='directory'){if(!SKIP_DIR.test(n))await walk(h,pre+n+'/',out,cnt)}
+    else if(!SKIP_FILE.test(n)){
+      const f=await h.getFile();if(f.size>300000)continue;
+      const t=await f.text();if(t.includes('\u0000'))continue;
+      out.set(pre+n,t);cnt.n++;
+    }
+  }
+}
+async function openFolder(){
+  if(!window.showDirectoryPicker){note('Your browser can’t open folders. Use Chrome, Edge or Brave. You can still work in the scratch workspace.');return}
+  try{
+    const h=await showDirectoryPicker({mode:'read'});note('Reading '+h.name+'…');
+    const base=new Map();await walk(h,'',base,{n:0});
+    ws={name:h.name,handle:h,base,orig:new Map(),staged:new Map(),agents:base.get('AGENTS.md')||base.get('agents.md')||''};
+    note(base.size+' files loaded from '+h.name);viewing=null;ptab='files';renderAll();
+  }catch(e){if(e.name!=='AbortError')note('Could not open folder: '+e.message)}
+}
+async function dirFor(parts,create){let d=ws.handle;for(const s of parts)d=await d.getDirectoryHandle(s,{create});return d}
+async function diskWrite(p,c){throw Error('ORION: disk writes disabled in coding workspace')}
+async function diskDelete(p){throw Error('ORION: disk deletion disabled in coding workspace')}
+function recordOrig(p){if(!ws.orig.has(p))ws.orig.set(p,ws.base.has(p)?ws.base.get(p):null)}
+async function commit(p,c){throw Error('ORION: accepting writes requires external approval')}
+async function writeFile(p,c){recordOrig(p);ws.staged.set(p,c)}
+function changes(){
+  const out=[];
+  for(const [p,o] of ws.orig){const c=eff(p)??null;if(c===o)continue;out.push({p,o,c,pending:ws.staged.has(p)})}
+  return out;
+}
+async function accept(p){note('ORION approval required; change remains staged')}
+async function reject(p){ws.staged.delete(p);if((eff(p)??null)===ws.orig.get(p))ws.orig.delete(p)}
+async function revert(p){ws.staged.delete(p);ws.orig.delete(p);note('Staged change discarded')}
+
+/* ================= diff ================= */
+function diff(a,b){
+  const A=a==null?[]:a.split('\n'),B=b==null?[]:b.split('\n');
+  let s=0;while(s<A.length&&s<B.length&&A[s]===B[s])s++;
+  let ea=A.length,eb=B.length;while(ea>s&&eb>s&&A[ea-1]===B[eb-1]){ea--;eb--}
+  const X=A.slice(s,ea),Y=B.slice(s,eb),mid=[];
+  if(X.length*Y.length>3e6){X.forEach(l=>mid.push(['-',l]));Y.forEach(l=>mid.push(['+',l]))}
+  else{
+    const n=X.length,m=Y.length,W=m+1,L=new Uint32Array((n+1)*W);
+    for(let i=n-1;i>=0;i--)for(let j=m-1;j>=0;j--)L[i*W+j]=X[i]===Y[j]?L[(i+1)*W+j+1]+1:Math.max(L[(i+1)*W+j],L[i*W+j+1]);
+    let i=0,j=0;
+    while(i<n&&j<m){if(X[i]===Y[j]){mid.push([' ',X[i]]);i++;j++}else if(L[(i+1)*W+j]>=L[i*W+j+1]){mid.push(['-',X[i++]])}else mid.push(['+',Y[j++]])}
+    while(i<n)mid.push(['-',X[i++]]);while(j<m)mid.push(['+',Y[j++]]);
+  }
+  return[...A.slice(0,s).map(l=>[' ',l]),...mid,...A.slice(ea).map(l=>[' ',l])];
+}
+const stat=ops=>({a:ops.filter(o=>o[0]==='+').length,d:ops.filter(o=>o[0]==='-').length});
+function diffHTML(ops){
+  const keep=new Array(ops.length).fill(false);
+  ops.forEach((o,i)=>{if(o[0]!==' ')for(let k=Math.max(0,i-3);k<=Math.min(ops.length-1,i+3);k++)keep[k]=true});
+  let h='',skip=0;
+  ops.forEach((o,i)=>{
+    if(!keep[i]){skip++;return}
+    if(skip){h+=`<div class="c">⋯ ${skip} unchanged lines</div>`;skip=0}
+    h+=`<div class="${o[0]==='+'?'p':o[0]==='-'?'m':''}">${o[0]===' '?'&nbsp;':o[0]} ${esc(o[1])||' '}</div>`;
+  });
+  if(skip)h+=`<div class="c">⋯ ${skip} unchanged lines</div>`;
+  return h;
+}
+
+/* ================= tools ================= */
+const TOOLS=[
+ {name:'list_files',description:'List all files in the project.',parameters:{type:'object',properties:{}}},
+ {name:'read_file',description:'Read a file. Optionally a 1-based inclusive line range.',parameters:{type:'object',properties:{path:{type:'string'},start_line:{type:'integer'},end_line:{type:'integer'}},required:['path']}},
+ {name:'search',description:'Search all files for a regex or text (case-insensitive). Returns path:line: text.',parameters:{type:'object',properties:{query:{type:'string'}},required:['query']}},
+ {name:'edit_file',description:'Replace exactly one occurrence of `find` with `replace` in a file. Prefer this for changes to existing files.',parameters:{type:'object',properties:{path:{type:'string'},find:{type:'string'},replace:{type:'string'}},required:['path','find','replace']}},
+ {name:'write_file',description:'Create a file or overwrite it with full content.',parameters:{type:'object',properties:{path:{type:'string'},content:{type:'string'}},required:['path','content']}},
+ {name:'delete_file',description:'Delete a file.',parameters:{type:'object',properties:{path:{type:'string'}},required:['path']}}
+].map(f=>({type:'function',function:f}));
+
+async function execTool(t,c){
+  let a={};try{a=c.args?JSON.parse(c.args):{}}catch{return 'Error: arguments were not valid JSON.'}
+  const st={k:'step',verb:c.name,path:'',detail:'',run:true};t.items.push(st);refresh();
+  const done=(verb,path,detail,out,bad)=>{Object.assign(st,{verb,path,detail,run:false,bad:!!bad});refresh();return out};
+  try{
+    switch(c.name){
+      case'list_files':{const l=paths();return done('Listed','', l.length+' files',l.slice(0,400).join('\n')||'(empty project)')}
+      case'read_file':{
+        const p=norm(a.path),txt=eff(p);if(txt==null)return done('Read',p,'not found','Error: file not found: '+p,1);
+        let lines=txt.split('\n'),s=a.start_line||1,e=a.end_line||lines.length;
+        const out=lines.slice(s-1,e).map((l,i)=>(s+i)+'\t'+l).join('\n');
+        return done('Read',p,(a.start_line?`lines ${s}–${Math.min(e,lines.length)}`:lines.length+' lines'),out.length>24000?out.slice(0,24000)+'\n…(truncated, use a line range)':out)}
+      case'search':{
+        let re;try{re=new RegExp(a.query,'i')}catch{re=new RegExp(String(a.query).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i')}
+        const hits=[];for(const p of paths()){const l=(eff(p)||'').split('\n');for(let i=0;i<l.length&&hits.length<60;i++)if(re.test(l[i]))hits.push(`${p}:${i+1}: ${l[i].trim().slice(0,160)}`)}
+        return done('Searched','“'+a.query+'”',hits.length+' matches',hits.join('\n')||'No matches.')}
+      case'edit_file':{
+        const p=norm(a.path),txt=eff(p);if(txt==null)return done('Edit',p,'not found','Error: file not found: '+p,1);
+        const n=txt.split(a.find).length-1;
+        if(n===0)return done('Edit',p,'text not found','Error: `find` text not found. Read the file again and copy it exactly.',1);
+        if(n>1)return done('Edit',p,'ambiguous','Error: `find` matches '+n+' places. Include more surrounding lines.',1);
+        const nw=txt.replace(a.find,()=>a.replace);await writeFile(p,nw);const s=stat(diff(txt,nw));
+        return done('Edited',p,`+${s.a} −${s.d}`,'Edit staged. ORION approval required.')}
+      case'write_file':{
+        const p=norm(a.path),old=eff(p);await writeFile(p,a.content);const s=stat(diff(old,a.content));
+        return done(old===undefined?'Created':'Wrote',p,`+${s.a} −${s.d}`,'File staged. ORION approval required.')}
+      case'delete_file':{
+        const p=norm(a.path);if(eff(p)==null)return done('Delete',p,'not found','Error: not found',1);
+        recordOrig(p);ws.staged.set(p,null);return done('Staged deletion',p,'','Deletion staged; ORION approval required.')}
+      default:return done(c.name,'','unknown tool','Error: unknown tool',1);
+    }
+  }catch(e){return done(c.name,a.path||'',e.message,'Error: '+e.message,1)}
+}
+
+/* ================= agent loop ================= */
+function sysPrompt(t){
+  const l=paths(),list=l.slice(0,120).join('\n')+(l.length>120?`\n…and ${l.length-120} more`:'');
+  const ag=ws.agents?`\n\nProject instructions (AGENTS.md):\n${ws.agents.slice(0,4000)}`:'';
+  const where=ws.handle?`the user's project "${ws.name}"`:'a scratch workspace (files exist only in this session until the user downloads them)';
+  if(t.noTools){
+    let ctx='',budget=30000;for(const p of l){const c=eff(p)||'';if(c.length>budget)continue;budget-=c.length;ctx+=`\n=== ${p} ===\n${c}\n`}
+    return `You are Forge, a coding agent working in ${where}. You cannot call tools. Briefly plan, then output every created or changed file IN FULL as a fenced code block whose first line is a comment containing "file: path/to/file.ext". End with a short summary.${ag}\n\nCurrent files:${ctx||' (none)'}`;
+  }
+  return `You are Forge, a coding agent working in ${where}. Work like a careful engineer: state a one or two line plan, inspect relevant files with tools before changing them, make minimal focused changes (edit_file for existing files, write_file for new files or full rewrites), then finish with a short summary of what changed and how to verify it. Never guess file contents you haven't read. Paths are relative to the project root.${ag}\n\nFiles (${l.length}):\n${list||'(empty)'}`;
+}
+async function callModel(t){
+  const m=t.model,p=pv(m.p),calls=[];let text='',item=null;
+  const body={model:m.id,stream:true,messages:[{role:'system',content:sysPrompt(t)},...t.api]};
+  if(!t.noTools)body.tools=TOOLS;
+  const r=await fetch(p.base+'/chat/completions',{method:'POST',signal:t.ctrl.signal,headers:{'Content-Type':'application/json',...(keys[p.id]?{Authorization:'Bearer '+keys[p.id]}:{})},body:JSON.stringify(body)});
+  if(!r.ok){
+    const tx=await r.text();
+    if(!t.noTools&&r.status>=400&&r.status<500&&/tool|function/i.test(tx)){t.noTools=true;t.items.push({k:'step',verb:'Switched',path:'',detail:'this model has no tool support, using file-block mode'});return callModel(t)}
+    throw Error(`${p.name} returned ${r.status}. ${tx.slice(0,200)}`);
+  }
+  const rd=r.body.getReader(),dec=new TextDecoder();let buf='';
+  for(;;){
+    const {done,value}=await rd.read();if(done)break;
+    buf+=dec.decode(value,{stream:true});const ls=buf.split('\n');buf=ls.pop();
+    for(const l of ls){
+      if(!l.startsWith('data:'))continue;const d=l.slice(5).trim();if(d==='[DONE]')continue;
+      let j;try{j=JSON.parse(d)}catch{continue}
+      const dl=j.choices&&j.choices[0]&&j.choices[0].delta;if(!dl)continue;
+      if(dl.content){text+=dl.content;if(!item){item={k:'text',text:''};t.items.push(item)}item.text=text;refresh()}
+      if(dl.tool_calls)for(const tc of dl.tool_calls){
+        let i=tc.index??0;if(tc.id&&calls[i]&&calls[i].id&&calls[i].id!==tc.id)i=calls.length;
+        const c=calls[i]||(calls[i]={id:'',name:'',args:''});
+        if(tc.id)c.id=tc.id;
+        if(tc.function){if(tc.function.name)c.name=tc.function.name;const g=tc.function.arguments;if(g!=null)c.args+=typeof g==='string'?g:JSON.stringify(g)}
+      }
+    }
+  }
+  return{content:text,toolCalls:calls.filter(c=>c&&c.name).map((c,i)=>({...c,id:c.id||'call_'+Date.now()+i}))};
+}
+async function applyBlocks(t,txt){
+  const parts=txt.split('```');
+  for(let i=1;i<parts.length;i+=2){
+    const p=parts[i],nl=p.indexOf('\n');if(nl<0)continue;
+    let code=p.slice(nl+1).replace(/\n$/,''),first=code.split('\n')[0],mm=first.match(/file:\s*([^\s*]+)/);
+    if(!mm)continue;code=code.split('\n').slice(1).join('\n');
+    const path=norm(mm[1]),old=eff(path);await writeFile(path,code);const s=stat(diff(old,code));
+    t.items.push({k:'step',verb:old===undefined?'Created':'Wrote',path,detail:`+${s.a} −${s.d}`});
+  }
+}
+async function runTask(t,text){
+  t.items.push({k:'user',text});t.api.push({role:'user',content:text});
+  t.status='run';t.ctrl=new AbortController();t.model={...sel};t.started=Date.now();t.ended=0;t.steps=0;
+  if(!tasks.includes(t))tasks.unshift(t);refresh();
+  const before=changes().length;
+  try{
+    let steps=0;
+    for(;;){
+      t.steps=++steps;if(steps>24){t.items.push({k:'err',text:'Stopped after 24 steps. Reply to continue.'});break}
+      const res=await callModel(t);
+      if(res.toolCalls.length){
+        t.api.push({role:'assistant',content:res.content||null,tool_calls:res.toolCalls.map(c=>({id:c.id,type:'function',function:{name:c.name,arguments:c.args||'{}'}}))});
+        for(const c of res.toolCalls)t.api.push({role:'tool',tool_call_id:c.id,content:await execTool(t,c)});
+      }else{t.api.push({role:'assistant',content:res.content});if(t.noTools)await applyBlocks(t,res.content);break}
+    }
+    t.status='done';
+  }catch(e){
+    t.status=e.name==='AbortError'?'':'err';
+    if(e.name!=='AbortError')t.items.push({k:'err',text:e instanceof TypeError?'Couldn’t reach the provider. Check your connection and key.':e.message});
+  }
+  t.ctrl=null;t.ended=Date.now();
+  if(changes().length)t.items.push({k:'sum'});
+  if(t===cur&&changes().length){ptab='changes';showPanel(true)}
+  persist();refresh();
+}
+function persist(){store.set('forge.tasks',tasks.slice(0,20).map(t=>({id:t.id,title:t.title,model:t.model,noTools:t.noTools,items:t.items.filter(i=>i.k!=='sum').slice(-100).map(i=>({...i,run:false})),api:t.api.slice(-50).map(m=>m.role==='tool'?{...m,content:String(m.content).slice(0,1500)}:m)})))}
+
+/* ================= render ================= */
+const refresh=()=>{if(raf)return;raf=requestAnimationFrame(()=>{raf=0;renderAll()})};
+function renderAll(){renderThread();renderRail();renderPanel();renderTop()}
+function renderTop(){
+  const c=sel&&models.find(m=>m.p===sel.p&&m.id===sel.id),run=cur&&cur.status==='run';
+  $('#wsn').textContent=ws.handle?ws.name:'Dock a project';
+  $('#wsd').className='dot'+(ws.handle?' ok':'');
+  $('#in').placeholder=ws.handle?`Ask Forge to change something in ${ws.name}`:'Describe what you want to build';
+  $('#send').hidden=!!run;$('#stop').hidden=!run;
+  $('#box').classList.toggle('running',!!run);
+  $('#mled').className='led'+(run?' run':c?' ok':'');
+  $('#mname').textContent=c?sel.id:'Select model';
+  $('#mtier').innerHTML=c?`<span class="tag ${c.tier}">${c.tier}</span>`:'';
+  $('#ename').textContent=mode==='auto'?'Auto-apply':'Review edits';
+  let tele='';
+  if(cur&&cur.started){const sec=Math.round(((cur.ended||Date.now())-cur.started)/1000);tele=cur.status==='run'?`step ${cur.steps||1} · ${sec}s`:`${cur.status==='err'?'failed':cur.status==='done'?'done':'stopped'} · ${cur.steps||0} steps · ${sec}s`}
+  $('#tele').textContent=tele;
+}
+const SUG_WS=['Explain how this codebase is structured','Find and fix bugs in the main entry point','Add unit tests for the core logic'];
+const SUG_NEW=['Build a todo app in a single index.html','Create a Python CLI that renames photos by EXIF date','Make a landing page with a pricing table'];
+function renderThread(){
+  const box=$('#msgs'),th=$('#thread');
+  if(!cur||!cur.items.length){
+    const c=sel&&models.find(m=>m.p===sel.p&&m.id===sel.id);
+    box.innerHTML=`<div class="hero"><h1>Point Forge at a codebase.</h1><p>It plans, edits through tools, and shows every change as a diff for you to approve.</p>
+    <div class="pre">
+      <button class="pr" data-act="model"><span class="dot ${c?'ok':''}"></span><span><b>${c?'Model ready':'Connect a model'}</b><small>${c?esc(sel.id):'Ollama on this machine, or a free or paid cloud key'}</small></span><em>${c?'Change':'Connect'}</em></button>
+      <button class="pr" data-act="open"><span class="dot ${ws.handle?'ok':''}"></span><span><b>${ws.handle?'Project docked':'Dock a project folder'}</b><small>${ws.handle?esc(ws.name)+' · '+ws.base.size+' files':'Optional. Without one, Forge works in a scratch space'}</small></span><em>${ws.handle?'Switch':'Open'}</em></button>
+    </div>
+    <div class="chips">${(ws.handle?SUG_WS:SUG_NEW).map(x=>`<button class="chip">${x}</button>`).join('')}</div></div>`;return}
+  const near=th.scrollHeight-th.scrollTop-th.clientHeight<120;
+  const evs=cur.items.map(it=>{
+    if(it.k==='user')return`<div class="ev user"><i class="nd"></i><div class="b">${esc(it.text)}</div></div>`;
+    if(it.k==='text')return`<div class="ev a"><i class="nd"></i>${body(it.text)}</div>`;
+    if(it.k==='err')return`<div class="ev bad"><i class="nd"></i><div class="err">${esc(it.text)}</div></div>`;
+    if(it.k==='sum'){const c=changes();if(!c.length)return'';const t=c.reduce((a,x)=>{const q=stat(diff(x.o,x.c));a.a+=q.a;a.d+=q.d;return a},{a:0,d:0}),pend=c.filter(x=>x.pending).length;
+      return`<div class="ev a"><i class="nd"></i><div class="sum"><span><b>${c.length} file${c.length>1?'s':''} changed</b> <span class="mono" style="font-size:12.5px"><span style="color:var(--free)">+${t.a}</span> <span style="color:var(--bad)">−${t.d}</span></span>${pend?` <small style="color:var(--mute)">· ${pend} awaiting review</small>`:''}</span><button class="btn p" data-act="review">Review changes</button></div></div>`}
+    return`<div class="ev s${it.bad?' bad':''}"><i class="nd"></i><div class="st">${it.run?'<span class="dot run"></span>':''}<span class="v">${esc(it.verb)}</span>${it.path?`<code>${esc(it.path)}</code>`:''}${it.detail?`<span>${stepDetail(it.detail)}</span>`:''}</div></div>`}).join('');
+  const think=cur.status==='run'&&!cur.items.some(i=>i.run)&&cur.items[cur.items.length-1].k!=='text'?'<div class="ev"><i class="nd"></i><div class="think"><i></i><i></i><i></i></div></div>':'';
+  box.innerHTML=`<div class="tlw">${evs}${think}</div>`;
+  if(near)th.scrollTop=th.scrollHeight;
+}
+const stepDetail=d=>esc(d).replace(/^\+(\d+) −(\d+)$/,'<span class="a">+$1</span> <span class="d">−$2</span>');
+function body(s){
+  return s.split('```').map((p,i)=>{
+    if(i%2===0)return p.trim()?`<div class="txt">${fmt(p.trim())}</div>`:'';
+    const nl=p.indexOf('\n');if(nl<0)return'';
+    return`<div class="blk"><header><span>${esc(p.slice(0,nl).trim()||'code')}</span></header><pre>${esc(p.slice(nl+1).replace(/\n$/,''))}</pre></div>`}).join('');
+}
+function renderRail(){
+  $('#tl').innerHTML=tasks.map(t=>`<div class="tn ${t===cur?'on':''}" data-t="${t.id}" tabindex="0" title="${esc(t.title)}"><span class="av">${esc((t.title.match(/[A-Za-z0-9]/)||['•'])[0].toUpperCase())}<span class="dot ${t.status}"></span></span><span class="lbl">${esc(t.title)}</span><b data-x="${t.id}" title="Delete">✕</b></div>`).join('');
+  const w=$('#dock').classList.contains('wide');$('#dexp').hidden=w;
+}
+function renderPanel(){
+  const c=changes();$('#cc').hidden=!c.length;$('#cc').textContent=c.length;
+  document.querySelectorAll('#ptabs button').forEach(b=>b.classList.toggle('on',b.dataset.p===ptab));
+  const pb=$('#pb');
+  if(ptab!=='preview')pvLast=null;
+  if(ptab==='changes'){
+    if(!c.length){pb.innerHTML='<div class="emp">No changes yet.<br>Edits the agent makes will appear here as diffs.</div>';return}
+    const pend=c.filter(x=>x.pending).length;
+    const open=new Set([...pb.querySelectorAll('details[open]')].map(d=>d.dataset.p));
+    pb.innerHTML=`<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">${pend?`<span class="tag paid">${pend} awaiting ORION approval</span>`:''}${ws.handle?'':'<button class="btn" data-act="dlall">Download all</button>'}</div>`+c.map(x=>{
+      const ops=diff(x.o,x.c),s=stat(ops),tg=x.o===null?'new':x.c===null?'deleted':'';
+      return`<details class="fc" data-p="${esc(x.p)}" ${open.size?(open.has(x.p)?'open':''):'open'}><summary><span class="pa mono" title="${esc(x.p)}">${esc(x.p)}</span>${tg?`<span class="tag free">${tg}</span>`:''}<span class="mono" style="color:var(--free)">+${s.a}</span><span class="mono" style="color:var(--bad)">−${s.d}</span><span class="tag ${x.pending?'paid':'free'}">${x.pending?'staged':'unchanged'}</span></summary><div class="acts">${x.pending?`<span class="tag paid">ORION approval required</span><button class="btn r" data-rej="${esc(x.p)}">Reject</button>`:`<button class="btn" data-rev="${esc(x.p)}">Revert</button>`}${ws.handle?'':`<button class="btn" data-dl="${esc(x.p)}">Download</button>`}</div><div class="df mono">${diffHTML(ops)}</div></details>`}).join('');
+  }else if(ptab==='files'){
+    if(viewing!=null){
+      const t=eff(viewing);
+      pb.innerHTML=`<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><button class="btn" data-act="back">← Files</button><span class="mono" style="font-size:12px;overflow:hidden;text-overflow:ellipsis">${esc(viewing)}</span></div><div class="vw mono">${(t||'').split('\n').slice(0,3000).map((l,i)=>`<div><i>${i+1}</i>${esc(l)||' '}</div>`).join('')}</div>`;return}
+    const l=paths();
+    if(!l.length){pb.innerHTML=`<div class="emp">${ws.handle?'This folder has no readable text files.':'No project open. Open a folder so Forge can read and edit your real files.'}<br><button class="btn p" data-act="open">Open folder</button></div>`;return}
+    let last=[],h='';
+    for(const p of l){
+      const parts=p.split('/'),dirs=parts.slice(0,-1);
+      for(let i=0;i<dirs.length;i++)if(last[i]!==dirs[i]){h+=`<div class="tr d" style="padding-left:${8+i*14}px">▸ ${esc(dirs[i])}</div>`;last=last.slice(0,i);last[i]=dirs[i]}
+      last=dirs;
+      const ch=ws.orig.has(p)&&(eff(p)??null)!==ws.orig.get(p);
+      h+=`<div class="tr" data-v="${esc(p)}" style="padding-left:${8+dirs.length*14}px">${esc(parts[parts.length-1])}${ch?' <span class="dot ok"></span>':''}</div>`;
+    }
+    pb.innerHTML=h;
+  }else{
+    pvLast=null;pb.innerHTML='<div class="emp">Live preview disabled. Use Files and Changes to inspect staged code; no generated JavaScript is executed.</div>';return;
+  }
+}
+/* ================= events ================= */
+$('#pb').addEventListener('click',async e=>{
+  const d=e.target.closest('[data-acc],[data-rej],[data-rev],[data-dl],[data-act],[data-v]');if(!d)return;
+  const D=d.dataset;
+  if(D.acc)note('ORION approval required');
+  else if(D.rej)await reject(D.rej);
+  else if(D.rev)await revert(D.rev);
+  else if(D.dl)download(D.dl,eff(D.dl)||'');
+  else if(D.v){viewing=D.v}
+  else if(D.act==='back')viewing=null;
+  else if(D.act==='open')return openFolder();
+  else if(D.act==='accall')note('ORION approval required');
+  else if(D.act==='dlall')changes().forEach((x,i)=>setTimeout(()=>download(x.p,x.c||''),i*250));
+  else if(D.act==='reprev'){pvLast=null}
+  renderAll();
+});
+$('#msgs').addEventListener('click',e=>{
+  if(e.target.classList.contains('chip')){$('#in').value=e.target.textContent;$('#in').focus();return}
+  const d=e.target.closest('[data-act]');if(!d)return;const a=d.dataset.act;
+  if(a==='open')openFolder();
+  if(a==='model')models.length?openModelPop():openConn();
+  if(a==='review'){ptab='changes';showPanel(true)}
+});
+function download(p,c){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([c],{type:'text/plain'}));a.download=p.split('/').pop();a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)}
+$('#ptabs').addEventListener('click',e=>{const p=e.target.closest('button');if(p){ptab=p.dataset.p;renderPanel()}});
+$('#wsb').onclick=openFolder;
+function showPanel(v){document.body.classList.toggle('po',v);if(v)renderPanel()}
+$('#ptog').onclick=()=>showPanel(!document.body.classList.contains('po'));
+function setWide(w){$('#dock').classList.toggle('wide',w);store.set('forge.wide',w);renderRail()}
+$('#dtog').onclick=()=>setWide(false);$('#dexp').onclick=()=>setWide(true);
+if(store.get('forge.wide',false))$('#dock').classList.add('wide');
+let _n;function note(s){$('#hint').textContent=s;clearTimeout(_n);_n=setTimeout(()=>$('#hint').textContent='',6000)}
+(()=>{const h=$('#hdl');let on=0;h.onmousedown=e=>{on=1;e.preventDefault()};addEventListener('mouseup',()=>on=0);addEventListener('mousemove',e=>{if(on)$('#panel').style.width=Math.max(280,Math.min(innerWidth-520,innerWidth-e.clientX-10))+'px'})})();
+
+// tasks
+function newTask(){cur=null;renderAll();$('#in').focus()}
+$('#new').onclick=newTask;
+$('#tl').addEventListener('click',e=>{
+  const x=e.target.dataset.x;
+  if(x){const t=tasks.find(k=>k.id===x);t&&t.ctrl&&t.ctrl.abort();tasks=tasks.filter(k=>k.id!==x);if(cur&&cur.id===x)cur=null;persist();renderAll();return}
+  const el=e.target.closest('.task');if(el){cur=tasks.find(k=>k.id===el.dataset.t);renderAll();$('#thread').scrollTop=1e9}
+});
+function send(){
+  const text=$('#in').value.trim();if(!text)return;
+  if(cur&&cur.status==='run')return;
+  if(!sel||!models.some(m=>m.p===sel.p&&m.id===sel.id)){openModelPop();note('Choose a model first.');return}
+  const p=pv(sel.p);if(!p.nokey&&!keys[p.id]){adding[p.id]=true;openConn();return}
+  if(!cur){cur={id:'t'+Date.now(),title:text.slice(0,44),items:[],api:[],status:'',ctrl:null,noTools:false}}
+  $('#in').value='';$('#in').style.height='auto';
+  runTask(cur,text);
+}
+$('#send').onclick=send;$('#stop').onclick=()=>cur&&cur.ctrl&&cur.ctrl.abort();
+$('#in').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+$('#in').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,200)+'px'});
+
+/* ================= models + connections ================= */
+async function discover(id){
+  const p=pv(id);status[id]={msg:'Looking for models…'};renderConn();
+  try{
+    let list;
+    if(id==='ollama'){
+      const r=await fetch(p.tags);if(!r.ok)throw Error('HTTP '+r.status);
+      list=(await r.json()).models.map(m=>({id:m.name,tier:'local'}));
+      if(!list.length)throw Error('Ollama is running but has no models. Try: ollama pull qwen2.5-coder');
+    }else{
+      if(!p.pub&&!keys[id])throw Error('Add a key to list models.');
+      const r=await fetch(p.base+'/models',{headers:keys[id]?{Authorization:'Bearer '+keys[id]}:{}});
+      if(r.status===401||r.status===403)throw Error('This key was rejected.');
+      if(!r.ok)throw Error('Provider returned '+r.status);
+      const j=await r.json();
+      list=(j.data||j.models||[]).map(m=>{
+        const mid=(m.id||m.name||'').replace(/^models\//,'');let tier=p.tier;
+        if(id==='openrouter')tier=(m.pricing&&+m.pricing.prompt===0&&+m.pricing.completion===0)?'free':'paid';
+        return{id:mid,tier};
+      }).filter(m=>m.id&&!/embed|whisper|tts|moderation|guard|dall|image|audio|imagen|veo|transcribe/i.test(m.id));
+    }
+    models=models.filter(m=>m.p!==id).concat(list.map(m=>({...m,p:id})));
+    status[id]={ok:true,msg:`${list.length} models available`};
+  }catch(e){
+    status[id]={err:true,msg:e instanceof TypeError?(id==='ollama'?'Can’t reach Ollama. Is it running with OLLAMA_ORIGINS="*"?':'Network blocked. Open this file directly from your computer.'):e.message};
+    models=models.filter(m=>m.p!==id);
+  }
+  autoPick();renderConn();renderModels();
+}
+function autoPick(){
+  if(sel&&models.some(m=>m.p===sel.p&&m.id===sel.id))return;
+  const u=models.filter(m=>pv(m.p).nokey||keys[m.p]),pickTool=a=>a.find(m=>/coder|qwen|llama-?3|gemini|gpt|mistral|deepseek/i.test(m.id))||a[0];
+  const m=pickTool(u.filter(m=>m.tier==='local'))||pickTool(u.filter(m=>m.tier==='free'))||u[0];
+  if(m){sel={p:m.p,id:m.id};store.set('forge.sel',sel)}
+}
+function renderConn(){
+  $('#cl').innerHTML=P.map(p=>{
+    const st=status[p.id]||{},has=!!keys[p.id];let act='';
+    if(p.nokey)act=`<button class="btn p" data-d="${p.id}">${st.ok?'Refresh':'Detect'}</button>`;
+    else if(has)act=`<span class="mask mono">••••${esc(keys[p.id].slice(-4))}</span><button class="btn" data-d="${p.id}">Refresh</button><button class="btn x" data-rm="${p.id}">Remove</button>`;
+    else act=`<button class="btn p" data-add="${p.id}">Add key</button>`;
+    const form=(!p.nokey&&!has&&adding[p.id])?`<div class="ad"><input type="password" autocomplete="off" placeholder="Paste API key" data-in="${p.id}" aria-label="${p.name} API key"><button class="btn p" data-save="${p.id}">Save</button><a href="${p.keyUrl}" target="_blank" rel="noopener">${p.tier==='paid'?'Get a key':'Get a free key'} ↗</a></div>`:'';
+    return`<div class="cr"><div class="l"><div class="n"><span class="dot ${st.ok?'ok':st.err?'err':''}"></span>${p.name}<span class="tag ${p.tier}">${p.tier==='local'?'local':p.tier==='paid'?'paid':'free tier'}</span></div><div class="a">${act}</div></div><div class="s">${esc(st.msg||(p.nokey?p.help:p.sub))}</div>${form}</div>`}).join('');
+  const n=Object.values(status).filter(s=>s.ok).length;
+  $('#cdot').className='dot'+(n?' ok':'');$('#ctext').textContent=n?`${n} connected`:'Connections';
+  const i=document.querySelector('[data-in]');if(i&&!i.dataset.f){i.dataset.f=1;i.focus()}
+}
+$('#cl').addEventListener('click',e=>{
+  const t=e.target.dataset;
+  if(t.d)discover(t.d);
+  if(t.add){adding[t.add]=true;renderConn()}
+  if(t.rm){delete keys[t.rm];/* credentials intentionally not persisted */models=models.filter(m=>m.p!==t.rm);status[t.rm]={};renderConn();renderModels()}
+  if(t.save)saveKey(t.save);
+});
+$('#cl').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.dataset.in)saveKey(e.target.dataset.in)});
+function saveKey(id){const v=document.querySelector(`[data-in="${id}"]`).value.trim();if(!v)return;keys[id]=v;/* credentials intentionally not persisted */delete adding[id];discover(id)}
+const dlg=$('#dlg'),openConn=()=>{closePops();renderConn();dlg.showModal()};
+$('#connbtn').onclick=openConn;$('#dx').onclick=()=>dlg.close();
+dlg.addEventListener('click',e=>{if(e.target===dlg)dlg.close()});
+let hi=-1;
+function closePops(){$('#mpop').hidden=true;$('#epop').hidden=true;$('#mbtn').setAttribute('aria-expanded','false')}
+function openModelPop(){closePops();$('#mpop').hidden=false;$('#mbtn').setAttribute('aria-expanded','true');$('#q').value='';renderModelList();$('#q').focus()}
+function renderModels(){renderTop();if(!$('#mpop').hidden)renderModelList()}
+function renderModelList(){
+  const q=$('#q').value.toLowerCase(),order={local:0,free:1,paid:2};
+  const f=models.filter(m=>(tab==='all'||m.tier===tab)&&(m.id+pv(m.p).name).toLowerCase().includes(q));
+  let h='';
+  for(const p of P){
+    const l=f.filter(m=>m.p===p.id).sort((a,b)=>order[a.tier]-order[b.tier]||a.id.localeCompare(b.id));
+    if(!l.length)continue;
+    h+=`<div class="gh"><span class="dot ok"></span>${p.name}<span class="cnt">${l.length}</span></div>`;
+    for(const m of l.slice(0,120))h+=`<button class="mi${sel&&sel.p===m.p&&sel.id===m.id?' on':''}" role="option" data-p="${m.p}" data-id="${esc(m.id)}"><span class="nm">${esc(m.id)}</span><span class="tag ${m.tier}">${m.tier}</span></button>`;
+    if(l.length>120)h+=`<div class="more">${l.length-120} more. Search to narrow.</div>`;
+  }
+  $('#ml').innerHTML=h||`<div class="none">${models.length?'No models match.':'No models found yet.<br>Start Ollama or add a cloud key.'}<br><button class="btn p" data-act="conn">Connect a provider</button></div>`;
+  hi=-1;
+}
+function pickModel(b){sel={p:b.dataset.p,id:b.dataset.id};store.set('forge.sel',sel);closePops();renderTop();$('#in').focus()}
+$('#mbtn').onclick=e=>{e.stopPropagation();$('#mpop').hidden?openModelPop():closePops()};
+$('#mpop').addEventListener('click',e=>{
+  e.stopPropagation();
+  const b=e.target.closest('.mi');if(b){pickModel(b);return}
+  const t=e.target.closest('[data-t]');if(t){tab=t.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===t));renderModelList();return}
+  const a=e.target.closest('[data-act]');if(!a)return;
+  if(a.dataset.act==='conn'){closePops();openConn()}
+  if(a.dataset.act==='scan')P.forEach(p=>{if(p.nokey||p.pub||keys[p.id])discover(p.id)});
+});
+$('#q').addEventListener('input',renderModelList);
+$('#q').addEventListener('keydown',e=>{
+  const it=[...$('#ml').querySelectorAll('.mi')];if(!it.length)return;
+  if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();hi=(hi+(e.key==='ArrowDown'?1:-1)+it.length)%it.length;it.forEach((x,i)=>x.classList.toggle('hi',i===hi));it[hi].scrollIntoView({block:'nearest'})}
+  if(e.key==='Enter'&&hi>=0){e.preventDefault();pickModel(it[hi])}
+});
+function renderEpop(){
+  $('#epop').innerHTML=[['review','Stage edits','All changes remain staged until ORION approval.']].map(([m,t,d])=>`<button class="mi${mode===m?' on':''}" data-m="${m}"><span class="nm" style="white-space:normal"><b>${t}</b><small>${d}</small></span></button>`).join('');
+}
+$('#ebtn').onclick=e=>{
+  e.stopPropagation();const was=$('#epop').hidden;closePops();
+  if(was){const r=$('#ebtn').getBoundingClientRect(),c=$('#cw').getBoundingClientRect();$('#epop').style.left=(r.left-c.left)+'px';renderEpop();$('#epop').hidden=false}
+};
+$('#epop').addEventListener('click',e=>{
+  e.stopPropagation();const b=e.target.closest('[data-m]');
+  if(b){mode='review';closePops();renderTop();note('All changes remain staged; ORION controls approval.')}
+});
+document.addEventListener('click',closePops);
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')closePops();
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openModelPop()}
+});
+
+/* ================= boot ================= */
+renderAll();renderModels();renderConn();setInterval(()=>{if(cur&&cur.status==='run')renderTop()},1000);
+discover('ollama');discover('openrouter');
+P.filter(p=>keys[p.id]&&!p.nokey&&p.id!=='openrouter').forEach(p=>discover(p.id));
+</script>
+</body>
+</html>
