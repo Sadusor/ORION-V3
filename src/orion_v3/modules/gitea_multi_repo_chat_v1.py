@@ -108,10 +108,10 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
     # Explicit MyGitea2 source questions should not require the owner to
     # memorize an imperative keyword pattern. Repository scope remains catalog-only.
     asks_source = bool(re.search(
-        r"\\b(?:code|source|implementation|buttons?|ui|components?|functions?|"
-        r"classes?|files?|where|which|how|built|works|implemented)\\b", text, re.I
+        r"\b(?:code|source|implementation|buttons?|ui|components?|functions?|"
+        r"classes?|files?|where|which|how|built|works|implemented)\b", text, re.I
     ))
-    names_gitea = bool(re.search(r"\\b(?:mygitea2|gitea)\\b", text, re.I))
+    names_gitea = bool(re.search(r"\b(?:mygitea2|gitea)\b", text, re.I))
     matches = _matches(text, catalog)
     if len(matches) > 1:
         return {"kind":"ambiguous", "names":[r.alias for r in matches]}
