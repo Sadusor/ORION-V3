@@ -21,13 +21,13 @@ _CATALOG_FILE = "authorized-gitea-repositories.json"
 _INVENTORY = re.compile(r"\b(?:how many|count|list|show|which)\b.{0,90}\b(?:repos(?:itories)?|projects)\b|\b(?:repos(?:itories)?|projects)\b.{0,90}\b(?:in|on)\s+(?:mygitea2|gitea)\b", re.I)
 
 _CROSS_REPO = re.compile(
-    r"\\b(?:search|find|locate|look\\s+for|show|identify)\\b.{0,160}"
-    r"\\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\\b"
-    r".{0,160}\\b(?:across|in|throughout|among)\\s+(?:my\\s+|the\\s+|all\\s+|authorized\\s+)?"
-    r"(?:repositories|repos|projects)\\b"
-    r"|\\b(?:across|throughout)\\s+(?:my\\s+|the\\s+|all\\s+|authorized\\s+)?"
-    r"(?:repositories|repos|projects)\\b.{0,160}"
-    r"\\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\\b",
+    r"\b(?:search|find|locate|look\s+for|show|identify)\b.{0,160}"
+    r"\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\b"
+    r".{0,160}\b(?:across|in|throughout|among)\s+(?:my\s+|the\s+|all\s+|authorized\s+)?"
+    r"(?:repositories|repos|projects)\b"
+    r"|\b(?:across|throughout)\s+(?:my\s+|the\s+|all\s+|authorized\s+)?"
+    r"(?:repositories|repos|projects)\b.{0,160}"
+    r"\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\b",
     re.I,
 )
 _MAX_CROSS_REPOS = 8
@@ -156,7 +156,7 @@ class MultiRepoDocumentChatBrain:
                                     )
                                     for hit in found["results"]:
                                         excerpts.append(
-                                            hit["snippet"] + "\\nCitation: " + hit["citation"]
+                                            hit["snippet"] + "\nCitation: " + hit["citation"]
                                         )
                                     for error in found["source_errors"]:
                                         failures.append(repo.owner + "/" + repo.name)
@@ -166,7 +166,7 @@ class MultiRepoDocumentChatBrain:
                                 "Read-only search across " + str(len(approved)) +
                                 " owner-authorized repositories. Only cited excerpts are evidence; "
                                 "do not infer content from repository names.\\n" +
-                                ("\\n".join(excerpts) if excerpts else "No matching authorized source excerpts.")
+                                ("\n".join(excerpts) if excerpts else "No matching authorized source excerpts.")
                             )
                             if failures:
                                 evidence += (
