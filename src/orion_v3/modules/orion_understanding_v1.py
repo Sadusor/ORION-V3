@@ -17,6 +17,7 @@ _CONCEPTS = (
     (frozenset(("history", "conversation", "conversations", "chats")), ("history", "chat")),
     (frozenset(("android", "mobile", "phone", "apk")), ("android", "mobile")),
     (frozenset(("windows", "desktop", "pc", "wpf")), ("windows", "desktop")),
+    (frozenset(("database", "databases", "db", "sqlite", "sql", "schema", "table", "tables", "column", "columns")), ("sql", "schema", "database", "table")),
 )
 
 @dataclass(frozen=True)
@@ -47,6 +48,7 @@ def interpret(owner_request: str) -> Understanding:
     intent = "source_lookup" if any(t in tokens for t in (
         "code", "source", "implemented", "implementation", "built", "where",
         "files", "file", "functions", "function", "controls", "buttons",
+        "database", "databases", "sql", "schema", "table", "tables", "sqlite",
     )) else "general"
     return Understanding(request, query, tuple(concepts), intent)
 
@@ -59,7 +61,7 @@ def rank_source_path(path: str, *, concepts: tuple[str, ...]) -> int:
         score -= 25
     if p.startswith("docs/") or p.endswith(".md"):
         score -= 15
-    if p.endswith((".js", ".ts", ".tsx", ".kt", ".cs", ".html", ".css")):
+    if p.endswith((".js", ".ts", ".tsx", ".kt", ".cs", ".html", ".css", ".sql")):
         score += 2
     ui_intent = any(t in concepts for t in ("ui", "interface", "controls"))
     button_intent = any(t in concepts for t in ("button", "onclick", "click"))
@@ -68,13 +70,19 @@ def rank_source_path(path: str, *, concepts: tuple[str, ...]) -> int:
             score += 18
         elif p.startswith("android/"):
             score += 3
-    if button_intent:
+    database_intent = any(t in concepts for t in ("sql", "schema", "database", "table"))
+    if button_intent and not database_intent:
         if any(t in p for t in ("button", "control", "action", "workspace")):
             score += 12
         if any(t in p for t in ("history", "chat")):
             score += 2
         if any(t in p for t in ("store", "storage", "database", "bridge")):
             score -= 8
+    if database_intent:
+        if p.endswith(".sql") or any(t in p for t in ("schema", "database", "sqlite", "sql", "store")):
+            score += 18
+        if p.endswith(".md"):
+            score -= 6
     return score
 
 
