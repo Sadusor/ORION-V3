@@ -19,6 +19,21 @@ class SingleChatCrossRepositoryTests(unittest.TestCase):
             self.assertEqual(request["kind"], "cross_repository")
             self.assertEqual(len(request["catalog"]), 2)
 
+    def test_show_source_code_is_not_inventory(self):
+        with tempfile.TemporaryDirectory() as d:
+            request = named_repo_scope(
+                "Show UI button code across my repositories",
+                state_dir=d,
+            )
+            self.assertIsNotNone(request)
+            self.assertEqual(request["kind"], "cross_repository")
+
+    def test_cross_repo_does_not_route_other_host(self):
+        with tempfile.TemporaryDirectory() as d:
+            self.assertIsNone(named_repo_scope(
+                "Find button code across my GitHub repositories", state_dir=d
+            ))
+
     def test_named_repo_and_inventory_keep_existing_behavior(self):
         with tempfile.TemporaryDirectory() as d:
             self.assertEqual(named_repo_scope("Show PayDay roadmap", state_dir=d)["kind"], "repository")
