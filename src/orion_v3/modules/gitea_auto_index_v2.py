@@ -35,7 +35,7 @@ def refresh_current_index(*, state_dir, api=None):
         return {"commit":commit,"refreshed":False,"path":path}
     mapping = create_codebase_map(gitea.tree(owner, repo, commit),
                                    owner=owner, repository=repo, commit_sha=commit)
-    candidates = [f["path"] for f in mapping["files"] if f["extension"] in {".md",".py",".js",".ts",".tsx",".cs",".kt",".json",".yaml",".yml",".ps1",".html",".css"}]
+    candidates = [f["path"] for f in mapping["files"] if f["extension"] in {".md",".py",".js",".ts",".tsx",".cs",".kt",".json",".yaml",".yml",".ps1",".html",".css",".sql"}]
     if len(candidates) > MAX_FILES:
         raise ValueError("Too many searchable files for bounded V2 index; preserve previous revision")
     files=[]
