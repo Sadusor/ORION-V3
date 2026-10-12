@@ -1,12 +1,13 @@
 """Cursor's Repair: FTS content must outrank filename-only matches."""
 from unittest.mock import patch
+from contextlib import closing
 from orion_v3.modules.gitea_relevance_v2 import search_relevant_context
 
 
 def test_content_evidence_first_when_filename_matches_compete(tmp_path):
     import sqlite3
     db = tmp_path / "index.sqlite3"
-    with sqlite3.connect(db) as conn:
+    with closing(sqlite3.connect(db)) as conn, conn:
         conn.execute("create table code_revision(project text, repository text, commit_sha text)")
         conn.execute("create table code_fts(project text, repository text, commit_sha text, path text, part text, text text)")
         conn.execute("insert into code_revision values ('orion-v3','MyGitea/ORION-V3',?)", ("a" * 40,))
@@ -24,7 +25,7 @@ def test_content_evidence_first_when_filename_matches_compete(tmp_path):
 def test_index_revision_mismatch_fails_closed(tmp_path):
     import sqlite3
     db = tmp_path / "index.sqlite3"
-    with sqlite3.connect(db) as conn:
+    with closing(sqlite3.connect(db)) as conn, conn:
         conn.execute("create table code_revision(project text, repository text, commit_sha text)")
         conn.execute("create table code_fts(project text, repository text, commit_sha text, path text, part text, text text)")
         conn.execute("insert into code_revision values ('orion-v3','MyGitea/ORION-V3',?)", ("b" * 40,))
