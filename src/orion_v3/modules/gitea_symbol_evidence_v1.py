@@ -45,7 +45,7 @@ def enrich_symbol_evidence(index_path, response, *, query, project, repository,
         source_code = p.endswith((".py", ".js", ".ts", ".tsx", ".kt", ".cs", ".ps1"))
         symbol_hits = sum(bool(re.search(r"(?<![a-z0-9])" + re.escape(t) +
                                          r"[a-z0-9_]*", b)) for t in terms)
-        score = 8 * path_matches + 4 * code_matches + 2 * symbol_hits + (3 if source_code else 0)
+        score = 8 * path_matches + 4 * code_matches + 2 * symbol_hits + (12 if source_code else 0)
         candidates.append((score, path, int(part), body))
     candidates.sort(key=lambda x: (-x[0], x[1], x[2]))
     by_key = {(p, int(n)): body for p, n, body in rows}
