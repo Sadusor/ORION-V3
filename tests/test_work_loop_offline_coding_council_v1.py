@@ -13,57 +13,57 @@ class OfflineCouncilTests(unittest.TestCase):
         self.calls.append((role, system, question))
         return {Role.GOVERNOR: "PLAN", Role.CODER: "PATCH", Role.REVIEWER: "REVIEW"}[role]
 
-    def run(self, **kwargs):
+    def execute_council(self, **kwargs):
         args = dict(bindings=self.bindings, objective="Add isolated test feature",
             invoke=self.invoke, stop_requested=lambda: self.stopped)
         args.update(kwargs)
         return run_offline_council(**args)
 
     def test_full_four_turn_cycle(self):
-        result = self.run()
+        result = self.execute_council()
         self.assertEqual([x[0] for x in self.calls],
             [Role.GOVERNOR, Role.CODER, Role.REVIEWER, Role.GOVERNOR])
         self.assertEqual(result.status, "REVIEWED_NOT_EXECUTED")
         self.assertEqual(result.coder_patch, "PATCH")
 
     def test_scope_in_every_prompt(self):
-        self.run()
+        self.execute_council()
         for _, system, _ in self.calls:
             self.assertIn("src/frozen.py", system)
             self.assertIn("orion", system)
 
     def test_reviewer_sees_patch(self):
-        self.run()
+        self.execute_council()
         self.assertIn("PATCH", self.calls[2][2])
 
     def test_governor_receives_review(self):
-        self.run()
+        self.execute_council()
         self.assertIn("REVIEW", self.calls[3][2])
 
     def test_stop_before_start(self):
         self.stopped = True
-        with self.assertRaises(ValueError): self.run()
+        with self.assertRaises(ValueError): self.execute_council()
         self.assertFalse(self.calls)
 
     def test_stop_during_model(self):
         def invoke(*args):
             self.stopped = True
             return "PLAN"
-        with self.assertRaises(ValueError): self.run(invoke=invoke)
+        with self.assertRaises(ValueError): self.execute_council(invoke=invoke)
         self.assertEqual(len(self.calls), 0)
 
     def test_empty_model_output_denied(self):
         with self.assertRaises(ValueError):
-            self.run(invoke=lambda *args: "")
+            self.execute_council(invoke=lambda *args: "")
 
     def test_oversized_output_denied(self):
         with self.assertRaises(ValueError):
-            self.run(invoke=lambda *args: "x"*12001)
+            self.execute_council(invoke=lambda *args: "x"*12001)
 
     def test_invalid_objective_denied(self):
-        with self.assertRaises(ValueError): self.run(objective="")
+        with self.assertRaises(ValueError): self.execute_council(objective="")
 
     def test_no_executor_or_approval_claim(self):
-        self.assertEqual(self.run().status, "REVIEWED_NOT_EXECUTED")
+        self.assertEqual(self.execute_council().status, "REVIEWED_NOT_EXECUTED")
 
 if __name__ == "__main__": unittest.main()
