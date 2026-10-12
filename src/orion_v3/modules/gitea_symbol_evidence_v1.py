@@ -34,10 +34,12 @@ def enrich_symbol_evidence(index_path, response, *, query, project, repository,
             "AND commit_sha=? ORDER BY path,cast(part AS INTEGER)",
             (project, repository, commit_sha)).fetchall()
     # Exact indexed source only; score source filenames and code, not prose claims.
-    candidates = []
+    # Group matching chunks by file before packing: the source file, not a
+    # disconnected excerpt, is the answer to an implementation lookup.
+    candidates = {}
+    by_key = {(p, int(n)): body for p, n, body in rows}
     for path, part, body in rows:
-        p = path.casefold()
-        b = body.casefold()
+        p, b = path.casefold(), body.casefold()
         path_matches = sum(t in p for t in terms)
         code_matches = sum(t in b for t in terms)
         if not (path_matches or code_matches):
@@ -46,14 +48,18 @@ def enrich_symbol_evidence(index_path, response, *, query, project, repository,
         symbol_hits = sum(bool(re.search(r"(?<![a-z0-9])" + re.escape(t) +
                                          r"[a-z0-9_]*", b)) for t in terms)
         score = 8 * path_matches + 4 * code_matches + 2 * symbol_hits + (12 if source_code else 0)
-        candidates.append((score, path, int(part), body))
-    candidates.sort(key=lambda x: (-x[0], x[1], x[2]))
-    by_key = {(p, int(n)): body for p, n, body in rows}
-    chosen = []
-    seen = set()
-    remaining = max_chars
-    for score, path, part, body in candidates[:20]:
-        for n in (part, part - 1, part + 1):
+        candidates.setdefault(path, []).append((score, int(part), body))
+    ranked = sorted(candidates, key=lambda p: (
+        -max(x[0] for x in candidates[p]),
+        -len(candidates[p]), p))
+    chosen, seen, remaining = [], set(), max_chars
+    # Reserve the budget for a small number of high-ranking files; gather
+    # matching chunks even when they are far apart, then their neighbors.
+    for path in ranked[:3]:
+        matches = sorted(candidates[path], key=lambda x: (-x[0], x[1]))
+        parts = [n for _, n, _ in matches[:5]]
+        ordered = parts + [neighbor for n in parts for neighbor in (n - 1, n + 1)]
+        for n in ordered:
             key = (path, n)
             chunk = by_key.get(key)
             if chunk is None or key in seen or len(chunk) > remaining:
