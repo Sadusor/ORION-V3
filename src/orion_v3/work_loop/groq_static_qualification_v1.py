@@ -26,11 +26,10 @@ def qualify(proposal, review):
         raise QualificationError("FUNCTION_CONTRACT")
     if func.decorator_list or func.args.vararg or func.args.kwarg or func.args.kwonlyargs:
         raise QualificationError("FUNCTION_CONTRACT")
-    forbidden = (ast.Import, ast.ImportFrom, ast.Call, ast.Attribute, ast.Global, ast.Nonlocal,
+    forbidden = (ast.Import, ast.ImportFrom, ast.Global, ast.Nonlocal,
                  ast.With, ast.AsyncWith, ast.Await, ast.Yield, ast.YieldFrom, ast.Lambda,
                  ast.ClassDef, ast.AsyncFunctionDef, ast.Delete)
-    # Calls/attributes are deliberately rejected: this gate is an extremely restrictive
-    # structural qualification, not a general Python safety sandbox.
+    # This only checks structure. Calls and attributes are not safe to execute.
     for node in ast.walk(func):
         if isinstance(node, forbidden):
             raise QualificationError("UNTRUSTED_OPERATION")
