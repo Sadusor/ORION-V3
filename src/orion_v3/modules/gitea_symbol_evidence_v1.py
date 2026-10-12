@@ -103,9 +103,14 @@ def enrich_symbol_evidence(
         )
 
         code = path.casefold().endswith(_CODE_EXT)
+        source_terms = {"sync", "button"}
+        coverage = sum(any(term in _words(line) for line in lines) for term in source_terms)
+        path_relevance = 8 if any(word in _words(path) for word in terms) else 0
 
         return (
-            (20 if code else 0)
+            (80 if code else -40)
+            + coverage * 35
+            + path_relevance
             + declarations * 3
             + (12 if endpoint else 0)
             + (12 if ui else 0)
