@@ -19,8 +19,10 @@ class SymbolEvidenceTests(unittest.TestCase):
                 db.executemany("INSERT INTO code_fts VALUES(?,?,?,?,?,?)", [
                     ("orion-v3","MyGitea/ORION-V3",commit,"ui/strata/modules/chat-history.js","0",
                      "function syncNow() { return bridge.call('/api/chat-history/sync'); }"),
-                    ("orion-v3","MyGitea/ORION-V3",commit,"ui/strata/modules/chat-history.js","1",
+                    ("orion-v3","MyGitea/ORION-V3",commit,"ui/strata/modules/chat-history.js","7",
                      "<button id='orionHistoryRefresh' title='Refresh history'>"),
+                    ("orion-v3","MyGitea/ORION-V3",commit,"ui/strata/modules/chat-history.js","9",
+                     "<button id='orionHistoryDesktopRefresh' title='Refresh history'>"),
                     ("orion-v3","MyGitea/ORION-V3",commit,"docs/sync.md","0",
                      "Historical notes about sync"),
                 ])
@@ -30,7 +32,9 @@ class SymbolEvidenceTests(unittest.TestCase):
                 commit_sha=commit, max_chars=6000)
             paths = [r["path"] for r in result["results"]]
             self.assertEqual(paths[0], "ui/strata/modules/chat-history.js")
-            self.assertIn("orionHistoryRefresh", " ".join(r["text"] for r in result["results"]))
+            evidence = " ".join(r["text"] for r in result["results"])
+            for expected in ("orionHistoryRefresh", "orionHistoryDesktopRefresh", "syncNow", "/api/chat-history/sync"):
+                self.assertIn(expected, evidence)
             self.assertTrue(all(r["source_commit"] == commit for r in result["results"]))
 
     def test_stale_commit_rejected(self):
