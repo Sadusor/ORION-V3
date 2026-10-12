@@ -33,6 +33,19 @@ class SingleChatCrossRepositoryTests(unittest.TestCase):
         focused = _focused_code_query("Find StopAllButton in my repositories")
         self.assertIn("stopallbutton", focused.split())
 
+    def test_natural_language_gitea_source_question(self):
+        with tempfile.TemporaryDirectory() as d:
+            for question in (
+                "What controls have we built in MyGitea2?",
+                "Where is the interface implemented in MyGitea2?",
+                "How does the UI work in Gitea?",
+            ):
+                with self.subTest(question=question):
+                    self.assertEqual(
+                        named_repo_scope(question, state_dir=d)["kind"],
+                        "cross_repository",
+                    )
+
     def test_show_source_code_is_not_inventory(self):
         with tempfile.TemporaryDirectory() as d:
             request = named_repo_scope(
