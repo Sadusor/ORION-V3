@@ -1,5 +1,6 @@
 """Offline regression for read-only symbol evidence enrichment."""
 import sqlite3
+from contextlib import closing
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,7 +13,7 @@ class SymbolEvidenceTests(unittest.TestCase):
         commit = "a" * 40
         with tempfile.TemporaryDirectory() as td:
             path = Path(td) / "index.sqlite3"
-            with sqlite3.connect(path) as db:
+            with closing(sqlite3.connect(path)) as db:
                 db.execute("CREATE TABLE code_revision(project TEXT,repository TEXT,commit_sha TEXT)")
                 db.execute("CREATE TABLE code_fts(project TEXT,repository TEXT,commit_sha TEXT,path TEXT,part TEXT,text TEXT)")
                 db.execute("INSERT INTO code_revision VALUES(?,?,?)", ("orion-v3", "MyGitea/ORION-V3", commit))
