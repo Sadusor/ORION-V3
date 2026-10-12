@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.orion_v3.modules.gitea_multi_repo_chat_v1 import (
-    named_repo_scope, multi_repo_chat_request, MultiRepoDocumentChatBrain,
+    named_repo_scope, multi_repo_chat_request, MultiRepoDocumentChatBrain, _focused_code_query,
 )
 
 
@@ -18,6 +18,20 @@ class SingleChatCrossRepositoryTests(unittest.TestCase):
             )
             self.assertEqual(request["kind"], "cross_repository")
             self.assertEqual(len(request["catalog"]), 2)
+
+    def test_owner_question_focuses_ui_code_search(self):
+        focused = _focused_code_query(
+            "Search MyGitea2 and tell me what UI button code exists in my repositories. "
+            "Include repository names, file paths, and source references."
+        )
+        self.assertIn("button", focused.split())
+        self.assertIn("onclick", focused.split())
+        self.assertNotIn("tell", focused.split())
+        self.assertNotIn("repositories", focused.split())
+
+    def test_identifier_survives_query_focus(self):
+        focused = _focused_code_query("Find StopAllButton in my repositories")
+        self.assertIn("stopallbutton", focused.split())
 
     def test_show_source_code_is_not_inventory(self):
         with tempfile.TemporaryDirectory() as d:
