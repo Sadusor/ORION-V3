@@ -13,7 +13,7 @@ def test_default_chat_uses_interpreter():
                and c.args[0].func.attr == "interpret" for c in calls)
 
 
-def test_optional_evidence_budget_and_original_goal():
+def test_previously_lifted_evidence_cap_is_preserved():
     source = Path(__file__).resolve().parents[1] / "src/orion_v3/modules/gitea_chat_brain_v1.py"
     tree = ast.parse(source.read_text(encoding="utf-8"))
     fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef)
@@ -22,10 +22,7 @@ def test_optional_evidence_budget_and_original_goal():
     exec(compile(ast.Module(body=[fn], type_ignores=[]), str(source), "exec"), ns)
     attach = ns["attach_bounded_reference"]
     goal = "My latest question about SQL tables and schemas"
-    out = attach(goal, "Δοκιμή" * 4000)
-    assert out.startswith(goal + "\n\n")
-    assert len(out.encode("utf-8")) <= 15360
-    assert "Evidence truncated" in out
-    assert attach("x" * 15400, "evidence") == "x" * 15400
+    evidence = "Δοκιμή" * 4000
+    assert attach(goal, evidence) == goal + "\\n\\n" + evidence
+    assert len(attach(goal, evidence).encode("utf-8")) > 16384
     assert attach(goal, "") == goal
-    assert attach(goal, "short evidence").endswith("short evidence")
