@@ -15,6 +15,7 @@
 
 **Roadmap execution order (no unrelated feature work):**
 - **CR-1: Chat reliability.** Locate the 16 KiB guard, bound composed conversation + cited evidence, preserve current question and essential context. Connect natural-language interpretation to default ORION retrieval without expanding authorization. No magic phrases.
+- **CR-1b: Test the actual live path.** Replace stale legacy-search mocks with tests for `search_live_gitea_v2`, confirm default/named routing, and verify path-name relevance does not displace stronger content matches. Keep frozen v1 modules and rollback backups. Confirm no stale checkpoint injection; distinguish working document attachment from disabled mobile control.
 - **CR-2: Evidence coverage.** Add `.sql` to existing bounded source index allowlists and reindex authorized repositories only; verify actual schema retrieval, repository path and commit citation. Distinguish Git schema files from live database contents.
 - **CR-3: Scope and freshness.** Keep inventory vs authorized search distinct; use explicit owner catalog for other repos. Verify live branch SHA and prevent stale checkpoint answers being presented as current.
 - **CR-4: Verifier fidelity.** Check answers against evidence Qwen received and the owner's question, not guessed autonomy or fabricated evidence.
