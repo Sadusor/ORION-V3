@@ -105,6 +105,13 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
     if asks_count and not other_host:
         return {"kind":"inventory","state_dir":Path(state_dir),"token":token,
                 "catalog":catalog}
+    # Explicit MyGitea2 source questions should not require the owner to
+    # memorize an imperative keyword pattern. Repository scope remains catalog-only.
+    asks_source = bool(re.search(
+        r"\\b(?:code|source|implementation|buttons?|ui|components?|functions?|"
+        r"classes?|files?|where|which|how|built|works|implemented)\\b", text, re.I
+    ))
+    names_gitea = bool(re.search(r"\\b(?:mygitea2|gitea)\\b", text, re.I))
     matches = _matches(text, catalog)
     if len(matches) > 1:
         return {"kind":"ambiguous", "names":[r.alias for r in matches]}
@@ -115,7 +122,7 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
         return {"kind":"repository", "project":r.project,"query":text[:300],
                 "state_dir":Path(state_dir),"token":token,"catalog":catalog,
                 "repository":r.owner + "/" + r.name}
-    if _CROSS_REPO.search(text) and not other_host:
+    if (_CROSS_REPO.search(text) or (names_gitea and asks_source)) and not other_host:
         return {"kind": "cross_repository", "query": text[:300],
                 "state_dir": Path(state_dir), "token": token, "catalog": catalog}
     if _INVENTORY.search(text) and re.search(r"\\b(?:mygitea2|gitea)\\b",text,re.I):
