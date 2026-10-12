@@ -1,0 +1,1 @@
+Forge HTML adapter V1: TheHands evidence 6ca98b3a80e1, seven tests passed, ORION commit 12307773a542236f2ac577e67ce9dcb39f785a26. Module and tests frozen. No production UI integration or installation.
