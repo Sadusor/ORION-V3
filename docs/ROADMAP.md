@@ -1,3 +1,34 @@
+## CURRENT REPAIR LOCK — CURSOR'S REPAIR (2026-10-12; planned, not implemented)
+
+**Authority and source:** Owner-provided Cursor inspect-only audit, 2026-10-12. Name this workstream **Cursor's Repair** in all subsequent handoffs. This section records proposed repairs, not completed gates. It supersedes older chat-fix priorities, not frozen owner rules.
+
+**Product lock:** Everyday PC/Android chat; Qwen proposes, ORION authorizes/STOPs/remembers; MyGitea2 is read-only authorized knowledge; GitHub is backup. TheHands is a separate frozen engineering remote; ORION internal Work Hands remain execution-disabled and are not part of this repair. ONE canonical chat path; natural owner language; no new chat subsystem.
+
+**Cursor-reported diagnosis (inspection, not runtime proof):**
+1. `/api/local-hand/draft` routes by `named_repo_scope` on the current message; default ORION-V3 lookup in `gitea_chat_brain_v1.py` uses raw question text and bypasses `orion_understanding_v1.interpret`. Named/cross-repo paths use interpret. Recognition and evidence access are separate.
+2. Authorized default catalog is only `MyGitea/ORION-V3` and `MyGitea/PayDay`, despite Cursor counting 109 visible repos. Visibility NEVER implies authorization.
+3. `.sql` is recognized by `gitea_codebase_map_v1.py` but omitted from `gitea_auto_index_v2.py` and `gitea_multi_repo_v1.py` indexing allowlists. No live SQL database reader exists in chat. Never open MyGitea's own SQLite database.
+4. Stale Gitea checkpoint/source evidence can mislead roadmap answers; retrieve live default-branch SHA and identify evidence commit/freshness.
+5. Verifier needs to judge the owner's question against the excerpts actually delivered to Qwen; allow evidence-absent answers. Avoid confusing TheHands remote with unproven internal autonomous Hands.
+6. Documentation drift: module catalog and STATUS have older claims inconsistent with source; reconcile only after physical PASS.
+7. Separate **observed live regression**: Local Brain rejects oversized requests with `16 KiB` error; guard location/root cause still unverified. Must fix request composition/budget without blindly removing safety limits.
+
+**Roadmap execution order (no unrelated feature work):**
+- **CR-1: Chat reliability.** Locate the 16 KiB guard, bound composed conversation + cited evidence, preserve current question and essential context. Connect natural-language interpretation to default ORION retrieval without expanding authorization. No magic phrases.
+- **CR-2: Evidence coverage.** Add `.sql` to existing bounded source index allowlists and reindex authorized repositories only; verify actual schema retrieval, repository path and commit citation. Distinguish Git schema files from live database contents.
+- **CR-3: Scope and freshness.** Keep inventory vs authorized search distinct; use explicit owner catalog for other repos. Verify live branch SHA and prevent stale checkpoint answers being presented as current.
+- **CR-4: Verifier fidelity.** Check answers against evidence Qwen received and the owner's question, not guessed autonomy or fabricated evidence.
+- **CR-5: Document library lane.** Persistent library through restart -> chat upload -> fan-out -> Greek/English semantic test -> live update; disabled Document UI control requires evidence before claiming operational.
+- **CR-6: Physical acceptance.** One combined TheHands GITCHECK, controlled Windows candidate restart, natural owner-language PC + Android conversation, long chat/scroll/copy, cited repo file+commit, and revise after a real turn. Update catalog/STATUS only after PASS.
+
+**Donor decision:** Haystack BM25 uses InMemoryDocumentStore and cannot directly read existing SQLite FTS without adaptation; Zoekt is a Go code-search index; Ragas faithfulness needs an evaluator model; DSPy and Semantic Router are not drop-in repairs for bypassed routing. Do not install donor frameworks to mask wiring faults. Reuse only measured, compatible donor components after the current defects are isolated. Understanding V1 is *not frozen*: retain temporarily or replace/rollback safely after baseline proof; no Understanding V2.
+
+**Hard exclusions:** No modifications to frozen Memory V1/V1.1/Indexed V2, MyGitea2 data/forge, TheHands runtime/product, Gitea SQLite, Work Loop isolation, V1 Remote, OpenJarvis, vision/voice/Soup, or broad historical docs. Existing candidate had three-file Understanding V1 deployment with rollback directory `E:\ORION-V3-UPDATE-CANDIDATE-20261010\_orion_understanding_rollback_7a40b840`; file deployment evidence PASS session `1b6c6808dc1a` does not prove live chat acceptance.
+
+**Current state:** Repair NOT implemented. Do not claim chat fixed, DB readable, donor integrated, or live acceptance PASS.
+
+---
+
 ## CURRENT VERIFIED HANDOFF — 2026-10-10 evening (read this before historical entries)
 
 **Purpose.** ORION V3 is the owner's local Windows/Android everyday assistant and controlled development environment. Qwen local 9B provides chat and proposals; ORION deterministic code remains responsible for authorizations, STOP, verification and canonical memory. Original PC/phone chat remains the interaction surface. MyGitea2 is the owner's local forge and read-only knowledge source for Qwen; GitHub is a separate upstream/backup. Cloud specialist DeepSeek Flash is a future integration, not operational today.
