@@ -5,11 +5,25 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.orion_v3.modules.gitea_multi_repo_chat_v1 import (
-    named_repo_scope, multi_repo_chat_request, MultiRepoDocumentChatBrain, _focused_code_query,
+    named_repo_scope, multi_repo_chat_request, MultiRepoDocumentChatBrain, _focused_code_query, _rank_evidence_hits,
 )
 
 
 class SingleChatCrossRepositoryTests(unittest.TestCase):
+    def test_evidence_rank_preserves_citations_and_deduplicates(self):
+        def hit(path, part):
+            return {"snippet": f"Repository: MyGitea/ORION-V3\\nFile: {path}\\nCommit: abc\\nsource",
+                    "identifier": f"MyGitea/ORION-V3:abc:{path}:{part}",
+                    "citation": f"MyGitea2 MyGitea/ORION-V3 abc {path} part {part}",
+                    "project": "orion-v3", "trust": "context_only"}
+        hits = [hit("android/app/src/main/java/ChatHistoryStore.kt", i) for i in range(8)]
+        hits += [hit("ui/strata/modules/chat-reading-controls-v1.js", 0),
+                 hit("ui/strata/modules/conversation-controls-v2.js", 0)]
+        selected = _rank_evidence_hits(hits, "Where did we build the UI controls?", limit=3)
+        self.assertTrue(selected[0]["identifier"].endswith("chat-reading-controls-v1.js:0"))
+        self.assertEqual(len({x["identifier"].rsplit(":", 1)[0] for x in selected}), 3)
+        self.assertTrue(all(x["citation"].startswith("MyGitea2 ") for x in selected))
+
     def test_original_owner_question_routes_to_authorized_cross_repo(self):
         with tempfile.TemporaryDirectory() as d:
             request = named_repo_scope(
