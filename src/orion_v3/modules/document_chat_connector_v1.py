@@ -13,6 +13,7 @@ from pathlib import Path
 from .document_universal_adapter_v1 import document_knowledge_source
 from .gitea_chat_brain_v1 import GiteaChatStreamingBrain, gitea_chat_request
 from .universal_retrieval_v1 import UniversalRetrievalV1
+from .orion_understanding_v1 import interpret
 
 _document_request = ContextVar("orion_indexed_document_chat_request", default=None)
 
@@ -40,7 +41,8 @@ class DocumentAwareGiteaChatBrain(GiteaChatStreamingBrain):
             if project and query.strip() and index_path.is_file():
                 retriever = UniversalRetrievalV1()
                 retriever.register("documents", document_knowledge_source(index_path))
-                found = retriever.retrieve(query, project=project, max_hits=6, max_chars=6000)
+                lookup = interpret(query).search_query[:300] or query[:300]
+                found = retriever.retrieve(lookup, project=project, max_hits=6, max_chars=6000)
                 if found["results"]:
                     lines = [
                         "<ORION_INDEXED_DOCUMENTS authority='context_only' trust='untrusted_document'>",
