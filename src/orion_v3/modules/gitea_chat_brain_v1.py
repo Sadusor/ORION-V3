@@ -13,6 +13,7 @@ from .streaming_brain_pipeline import StreamingBrainPipeline
 from .conversation_verifier_v2 import ConversationVerifierV2
 from .gitea_auto_index_v2 import search_live_gitea_v2
 from .universal_retrieval_v1 import UniversalRetrievalV1, KnowledgeHit
+from .orion_understanding_v1 import interpret
 
 _requested = ContextVar("orion_gitea_requested_context", default=None)
 
@@ -28,14 +29,28 @@ def gitea_chat_request(*, project_id: str, owner_text: str, state_dir):
         _requested.reset(token)
 
 def attach_bounded_reference(goal: str, reference: str, *, max_bytes: int | None = None) -> str:
-    """Include all retrieved bounded search excerpts without a second artificial cap.
+    """Bound optional evidence without truncating the owner's original request.
 
-    The search provider already enforces its independent, read-only source limit.
-    Model runtime context limits remain in effect; this does not change memory.
+    A composed request must stay below the Local Brain 16 KiB ingress limit.
+    When the existing request is already too large, leave it untouched so the
+    canonical guard can reject it rather than silently rewriting owner text.
     """
     if not reference.strip():
         return goal
-    return goal + "\n\n" + reference
+    limit = min(15360, max_bytes if max_bytes is not None else 15360)
+    separator = "\n\n"
+    remaining = limit - len(goal.encode("utf-8")) - len(separator.encode("utf-8"))
+    if remaining <= 0:
+        return goal
+    raw = reference.encode("utf-8")
+    if len(raw) > remaining:
+        marker = "\n[Evidence truncated to respect Local Brain request budget]"
+        marker_bytes = marker.encode("utf-8")
+        if remaining <= len(marker_bytes):
+            return goal
+        clipped = raw[:remaining - len(marker_bytes)].decode("utf-8", errors="ignore")
+        reference = clipped + marker
+    return goal + separator + reference
 
 
 class GiteaChatStreamingBrain(StreamingBrainPipeline):
@@ -69,7 +84,7 @@ class GiteaChatStreamingBrain(StreamingBrainPipeline):
 
             retriever = UniversalRetrievalV1()
             retriever.register("mygitea2", gitea_source)
-            found = retriever.retrieve(query, project="orion-v3", max_chars=12000)
+            found = retriever.retrieve(interpret(query).search_query, project="orion-v3", max_chars=12000)
             trace["lookup"] = "error" if found["source_errors"] else (
                 "hit" if found["results"] else "miss"
             )
