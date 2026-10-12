@@ -14,6 +14,9 @@ TRUSTED_FIXTURE = """def normalize_task_title(value):
     return result
 """
 TRUSTED_TESTS = """import unittest
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from title_normalizer import normalize_task_title
 class Checks(unittest.TestCase):
     def test_trim(self):
