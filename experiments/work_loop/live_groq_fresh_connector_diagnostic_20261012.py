@@ -45,6 +45,7 @@ def main():
             "normalize_task_title(value) using split and join, rejecting empty strings. "
             "Only source code; no execution.")
         reviewer = new_connector("reviewer")
+        reviewer.refresh_catalog()
         review = ask(reviewer, "REVIEWER TASK 20261012-B: Critique this Python function "
             "for edge cases and give two tests. Respond in prose, not code. "
             "Untrusted source follows:\n" + proposal[:2000])
