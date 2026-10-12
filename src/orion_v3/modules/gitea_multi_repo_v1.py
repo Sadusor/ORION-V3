@@ -11,7 +11,7 @@ from .gitea_source_context_v2 import get_source_context_v2
 from .gitea_relevance_v2 import search_relevant_context
 from .universal_retrieval_v1 import KnowledgeHit
 
-ELIGIBLE = frozenset({".md",".py",".js",".ts",".tsx",".cs",".kt",".json",".yaml",".yml",".ps1",".html",".css"})
+ELIGIBLE = frozenset({".md",".py",".js",".ts",".tsx",".cs",".kt",".json",".yaml",".yml",".ps1",".html",".css",".sql"})
 MAX_FILES = 500
 _VALID = re.compile(r"^[a-zA-Z0-9_.-]{1,100}$")
 
