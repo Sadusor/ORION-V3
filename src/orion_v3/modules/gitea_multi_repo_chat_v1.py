@@ -20,6 +20,18 @@ DEFAULT_CATALOG = (
 _CATALOG_FILE = "authorized-gitea-repositories.json"
 _INVENTORY = re.compile(r"\b(?:how many|count|list|show|which)\b.{0,90}\b(?:repos(?:itories)?|projects)\b|\b(?:repos(?:itories)?|projects)\b.{0,90}\b(?:in|on)\s+(?:mygitea2|gitea)\b", re.I)
 
+_CROSS_REPO = re.compile(
+    r"\\b(?:search|find|locate|look\\s+for|show|identify)\\b.{0,160}"
+    r"\\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\\b"
+    r".{0,160}\\b(?:across|in|throughout|among)\\s+(?:my\\s+|the\\s+|all\\s+|authorized\\s+)?"
+    r"(?:repositories|repos|projects)\\b"
+    r"|\\b(?:across|throughout)\\s+(?:my\\s+|the\\s+|all\\s+|authorized\\s+)?"
+    r"(?:repositories|repos|projects)\\b.{0,160}"
+    r"\\b(?:code|implementation|files?|functions?|classes?|buttons?|ui|components?)\\b",
+    re.I,
+)
+_MAX_CROSS_REPOS = 8
+
 def load_catalog(state_dir):
     """Optional owner-maintained catalog outside Git; invalid catalog fails closed."""
     path = Path(state_dir) / _CATALOG_FILE
@@ -73,7 +85,10 @@ def named_repo_scope(owner_text: str, *, state_dir, token: str = ""):
         return {"kind":"repository", "project":r.project,"query":text[:300],
                 "state_dir":Path(state_dir),"token":token,"catalog":catalog,
                 "repository":r.owner + "/" + r.name}
-    if _INVENTORY.search(text) and re.search(r"\b(?:mygitea2|gitea)\b",text,re.I):
+    if _CROSS_REPO.search(text) and not other_host:
+        return {"kind": "cross_repository", "query": text[:300],
+                "state_dir": Path(state_dir), "token": token, "catalog": catalog}
+    if _INVENTORY.search(text) and re.search(r"\\b(?:mygitea2|gitea)\\b",text,re.I):
         return {"kind":"inventory","state_dir":Path(state_dir),"token":token,
                 "catalog":catalog}
     return None
@@ -118,6 +133,47 @@ class MultiRepoDocumentChatBrain:
                     adapter = GiteaMultiRepoV1(api=api, state_dir=request["state_dir"],catalog=request["catalog"])
                     if request["kind"] == "inventory":
                         evidence = _inventory_evidence(adapter)
+                    elif request["kind"] == "cross_repository":
+                        approved = adapter.authorized_inventory()
+                        if len(approved) > _MAX_CROSS_REPOS:
+                            evidence = (
+                                "Cross-repository search requires a narrower owner-approved "
+                                "scope: more than 8 repositories are authorized. Ask the owner "
+                                "to name repositories; do not silently search a subset."
+                            )
+                        else:
+                            retriever = UniversalRetrievalV1()
+                            retriever.register("mygitea2", adapter.search)
+                            excerpts = []
+                            failures = []
+                            # Each repository is separately authorized and project-scoped.
+                            # Do not search the visible inventory or expand permissions.
+                            for repo in approved:
+                                try:
+                                    found = retriever.retrieve(
+                                        request["query"], project=repo.project,
+                                        max_hits=3, max_chars=2200
+                                    )
+                                    for hit in found["results"]:
+                                        excerpts.append(
+                                            hit["snippet"] + "\\nCitation: " + hit["citation"]
+                                        )
+                                    for error in found["source_errors"]:
+                                        failures.append(repo.owner + "/" + repo.name)
+                                except (OSError, ValueError, RuntimeError):
+                                    failures.append(repo.owner + "/" + repo.name)
+                            evidence = (
+                                "Read-only search across " + str(len(approved)) +
+                                " owner-authorized repositories. Only cited excerpts are evidence; "
+                                "do not infer content from repository names.\\n" +
+                                ("\\n".join(excerpts) if excerpts else "No matching authorized source excerpts.")
+                            )
+                            if failures:
+                                evidence += (
+                                    "\\nSearch unavailable for: " +
+                                    ", ".join(sorted(set(failures))) +
+                                    ". Results may be incomplete."
+                                )
                     else:
                         retriever = UniversalRetrievalV1()
                         retriever.register("mygitea2", adapter.search)
