@@ -52,19 +52,33 @@ def interpret(owner_request: str) -> Understanding:
 
 
 def rank_source_path(path: str, *, concepts: tuple[str, ...]) -> int:
-    """Advisory relevance only; cannot override authorized retrieval boundaries."""
-    p = str(path or "").replace("\\", "/").casefold()
+    """Advisory path relevance; prioritize requested implementation over generic storage."""
+    p = str(path or "").replace("\\\\", "/").casefold()
     score = 0
-    if "/tests/" in "/" + p or p.startswith("tests/") or "_test." in p or ".test." in p:
-        score -= 12
+    if p.startswith("tests/") or "/tests/" in p or "_test." in p or ".test." in p:
+        score -= 25
     if p.startswith("docs/") or p.endswith(".md"):
-        score -= 5
+        score -= 15
     if p.endswith((".js", ".ts", ".tsx", ".kt", ".cs", ".html", ".css")):
-        score += 3
-    if any(t in concepts for t in ("ui", "interface", "controls")):
-        if p.startswith(("ui/", "android/", "app/")) or "/ui/" in p:
-            score += 8
-    if any(t in concepts for t in ("button", "onclick", "click")):
-        if any(t in p for t in ("button", "control", "action", "chat", "workspace")):
-            score += 5
+        score += 2
+    ui_intent = any(t in concepts for t in ("ui", "interface", "controls"))
+    button_intent = any(t in concepts for t in ("button", "onclick", "click"))
+    if ui_intent:
+        if p.startswith("ui/") or "/ui/" in p:
+            score += 18
+        elif p.startswith("android/"):
+            score += 3
+    if button_intent:
+        if any(t in p for t in ("button", "control", "action", "workspace")):
+            score += 12
+        if any(t in p for t in ("history", "chat")):
+            score += 2
+        if any(t in p for t in ("store", "storage", "database", "bridge")):
+            score -= 8
     return score
+
+
+def rank_unique_paths(paths: list[str], *, concepts: tuple[str, ...], limit: int = 10) -> list[str]:
+    """Avoid one chunked source file monopolizing the evidence budget."""
+    unique = set(paths)
+    return sorted(unique, key=lambda p: (-rank_source_path(p, concepts=concepts), p))[:limit]
