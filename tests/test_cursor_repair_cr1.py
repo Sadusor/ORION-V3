@@ -23,6 +23,6 @@ def test_previously_lifted_evidence_cap_is_preserved():
     attach = ns["attach_bounded_reference"]
     goal = "My latest question about SQL tables and schemas"
     evidence = "Δοκιμή" * 4000
-    assert attach(goal, evidence) == goal + "\n\n" + evidence
+    assert attach(goal, evidence) == goal + chr(10) * 2 + evidence
     assert len(attach(goal, evidence).encode("utf-8")) > 16384
     assert attach(goal, "") == goal
