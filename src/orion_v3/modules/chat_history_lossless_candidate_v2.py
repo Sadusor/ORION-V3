@@ -6,6 +6,7 @@ module before a reviewed migration/activation gate.
 from __future__ import annotations
 
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from threading import RLock
 
@@ -17,7 +18,7 @@ class LosslessHistoryCandidate:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = RLock()
-        with self._connect() as db:
+        with closing(self._connect()) as db, db:
             db.executescript("""
                 CREATE TABLE IF NOT EXISTS conversations (
                   id TEXT PRIMARY KEY, title TEXT NOT NULL DEFAULT '',
@@ -47,7 +48,7 @@ class LosslessHistoryCandidate:
         conversations, messages = payload.get("conversations", []), payload.get("messages", [])
         if not isinstance(conversations, list) or not isinstance(messages, list):
             raise ValueError("conversations/messages must be arrays")
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db, db:
             for c in conversations:
                 if not isinstance(c, dict) or not isinstance(c.get("id"), str) or not c["id"]:
                     raise ValueError("invalid conversation")
@@ -91,7 +92,7 @@ class LosslessHistoryCandidate:
         return self.snapshot()
 
     def snapshot(self) -> dict:
-        with self._lock, self._connect() as db:
+        with self._lock, closing(self._connect()) as db:
             db.row_factory = sqlite3.Row
             return {
                 "schema": SCHEMA,
