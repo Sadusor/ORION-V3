@@ -99,7 +99,7 @@ class ChatHistoryStore:
         mid = _clean_text(raw.get("id"), 160)
         cid = _clean_text(raw.get("conversation_id"), 120)
         role = _clean_text(raw.get("role"), 20).lower()
-        text = _clean_text(raw.get("text"), MAX_TEXT_CHARS)
+        text = str(raw.get("text") or "").strip()
         if not mid or not cid or role not in {"user", "assistant", "system"} or not text:
             return None
         return {
@@ -116,7 +116,7 @@ class ChatHistoryStore:
         conversations = payload.get("conversations") if isinstance(payload.get("conversations"), list) else []
         messages = payload.get("messages") if isinstance(payload.get("messages"), list) else []
         with self._lock, closing(self._connect()) as con, con:
-            for raw in conversations[:MAX_CONVERSATIONS * 2]:
+            for raw in conversations:
                 if not isinstance(raw, dict):
                     continue
                 c = self._normalize_conversation(raw)
@@ -129,12 +129,13 @@ class ChatHistoryStore:
                         tuple(c[k] for k in ("id", "title", "project_id", "pinned", "archived", "deleted", "created_at_ms", "updated_at_ms")),
                     )
                 elif c["updated_at_ms"] >= int(row["updated_at_ms"]):
+                    c["deleted"] = int(bool(con.execute("SELECT deleted FROM conversations WHERE id=?", (c["id"],)).fetchone()["deleted"] or c["deleted"]))
                     con.execute(
                         "UPDATE conversations SET title=?,project_id=?,pinned=?,archived=?,deleted=?,created_at_ms=min(created_at_ms,?),updated_at_ms=? WHERE id=?",
                         (c["title"], c["project_id"], c["pinned"], c["archived"], c["deleted"], c["created_at_ms"], c["updated_at_ms"], c["id"]),
                     )
 
-            for raw in messages[: MAX_CONVERSATIONS * MAX_MESSAGES_PER_CONVERSATION * 2]:
+            for raw in messages:
                 if not isinstance(raw, dict):
                     continue
                 m = self._normalize_message(raw)
@@ -142,11 +143,7 @@ class ChatHistoryStore:
                     continue
                 exists = con.execute("SELECT 1 FROM conversations WHERE id=?", (m["conversation_id"],)).fetchone()
                 if exists is None:
-                    ts = m["created_at_ms"]
-                    con.execute(
-                        "INSERT OR IGNORE INTO conversations(id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms) VALUES(?,?,?,?,?,?,?,?)",
-                        (m["conversation_id"], "", "", 0, 0, 0, ts, ts),
-                    )
+                    continue  # Orphan messages must not recreate conversations.
                 # CHAT_SYNC_V1: phone and desktop may observe the same completed
                 # Qwen reply and assign different local message ids. Keep user turns
                 # strictly id-based, but collapse duplicate ORION assistant writes
@@ -174,24 +171,8 @@ class ChatHistoryStore:
                     "UPDATE conversations SET updated_at_ms=max(updated_at_ms,?) WHERE id=?",
                     (m["created_at_ms"], m["conversation_id"]),
                 )
-            self._prune(con)
+            # Do not destroy saved chat history during synchronization.
         return self.snapshot()
-
-    def _prune(self, con: sqlite3.Connection) -> None:
-        rows = con.execute(
-            "SELECT id FROM conversations ORDER BY pinned DESC, updated_at_ms DESC"
-        ).fetchall()
-        for row in rows[MAX_CONVERSATIONS:]:
-            con.execute("DELETE FROM messages WHERE conversation_id=?", (row["id"],))
-            con.execute("DELETE FROM conversations WHERE id=?", (row["id"],))
-
-        for row in con.execute("SELECT id FROM conversations").fetchall():
-            ids = con.execute(
-                "SELECT id FROM messages WHERE conversation_id=? ORDER BY created_at_ms DESC LIMIT -1 OFFSET ?",
-                (row["id"], MAX_MESSAGES_PER_CONVERSATION),
-            ).fetchall()
-            if ids:
-                con.executemany("DELETE FROM messages WHERE id=?", [(x["id"],) for x in ids])
 
     def snapshot(self) -> dict[str, Any]:
         with self._lock, closing(self._connect()) as con, con:
