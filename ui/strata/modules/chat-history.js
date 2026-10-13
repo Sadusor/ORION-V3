@@ -58,7 +58,7 @@ window.ORION_CHAT_HISTORY=(function(){
   try{
    const r=await ORION_BRIDGE.call('POST','/api/chat-history/sync',state,{label:'Chat history sync',silent:true});
    if(r&&r.ok&&r.data){
-    state=normalize(r.data);
+    state=mergeMemory(state,r.data);
     const merged=nativeMerge(state);if(merged)state=merged;
     renderHistory()
    }
