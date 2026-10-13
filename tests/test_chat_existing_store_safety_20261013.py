@@ -51,6 +51,28 @@ class ExistingChatSafety(unittest.TestCase):
             deleted=db.execute("select deleted from conversations where id='c1'").fetchone()[0]
         self.assertEqual(deleted,1)
 
+    def test_snapshot_returns_all_saved_conversations_and_messages(self):
+        conversations=[conv(i) for i in range(65)]
+        messages=[{"id":f"m{i}","conversation_id":"c1","role":"user",
+                   "text":f"msg {i}","source":"pc","created_at_ms":2000+i}
+                  for i in range(150)]
+        result=self.store.sync({"conversations":conversations,"messages":messages})
+        self.assertEqual(len(result["conversations"]),65)
+        self.assertEqual(len(result["messages"]),150)
+        self.assertEqual(len(self.store.snapshot()["messages"]),150)
+
+    def test_browser_does_not_replace_state_with_server_subset(self):
+        source=(ROOT/"ui/strata/modules/chat-history.js").read_text(encoding="utf-8")
+        self.assertNotIn("state=normalize(r.data);",source)
+        self.assertIn("state=mergeMemory(state,r.data);",source)
+
+    def test_android_snapshot_no_longer_has_fifty_chat_cap(self):
+        source=(ROOT/"android/app/src/main/java/com/sadusor/orionv3/history/ChatHistoryStore.kt").read_text(encoding="utf-8")
+        start=source.index("fun snapshot(): JSONObject")
+        end=source.index("fun contextFor(",start)
+        block=source[start:end]
+        self.assertNotIn("arrayOf(MAX_CONVERSATIONS.toString())",block)
+
     def test_android_no_destructive_prune_or_truncation(self):
         src=(ROOT/"android/app/src/main/java/com/sadusor/orionv3/history/ChatHistoryStore.kt").read_text(encoding="utf-8")
         self.assertNotIn("prune(db)",src)
