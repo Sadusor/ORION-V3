@@ -1,5 +1,6 @@
 """Focused regression for existing ORION chat store. All databases disposable."""
 import sqlite3
+from contextlib import closing
 import sys
 import tempfile
 import unittest
@@ -24,7 +25,7 @@ class ExistingChatSafety(unittest.TestCase):
 
     def test_retention_is_not_destruction(self):
         self.store.sync({"conversations":[conv(i) for i in range(65)]})
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             self.assertEqual(db.execute("select count(*) from conversations").fetchone()[0],65)
 
     def test_long_message_saved_exactly(self):
@@ -32,7 +33,7 @@ class ExistingChatSafety(unittest.TestCase):
         self.store.sync({"conversations":[conv(1)],"messages":[{
             "id":"long1","conversation_id":"c1","role":"assistant",
             "text":original,"source":"orion","created_at_ms":2000}]})
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             actual=db.execute("select text from messages where id='long1'").fetchone()[0]
         self.assertEqual(actual,original)
 
@@ -40,13 +41,13 @@ class ExistingChatSafety(unittest.TestCase):
         self.store.sync({"messages":[{
             "id":"orphan","conversation_id":"missing","role":"user",
             "text":"hello","source":"phone","created_at_ms":2000}]})
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             self.assertEqual(db.execute("select count(*) from conversations").fetchone()[0],0)
 
     def test_deleted_bit_not_cleared_by_newer_metadata(self):
         self.store.sync({"conversations":[conv(1,deleted=1,ts=2000)]})
         self.store.sync({"conversations":[conv(1,deleted=0,ts=3000)]})
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db:
             deleted=db.execute("select deleted from conversations where id='c1'").fetchone()[0]
         self.assertEqual(deleted,1)
 
