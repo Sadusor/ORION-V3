@@ -177,8 +177,7 @@ class ChatHistoryStore:
     def snapshot(self) -> dict[str, Any]:
         with self._lock, closing(self._connect()) as con, con:
             conversations = [dict(row) for row in con.execute(
-                "SELECT id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms FROM conversations ORDER BY pinned DESC, updated_at_ms DESC LIMIT ?",
-                (MAX_CONVERSATIONS,),
+                "SELECT id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms FROM conversations ORDER BY pinned DESC, updated_at_ms DESC, id ASC",
             ).fetchall()]
             ids = [c["id"] for c in conversations]
             messages: list[dict[str, Any]] = []
