@@ -230,10 +230,9 @@ class ChatHistoryStore(context: Context) :
             """
             SELECT id,title,project_id,pinned,archived,deleted,created_at_ms,updated_at_ms
             FROM conversations
-            ORDER BY pinned DESC, updated_at_ms DESC
-            LIMIT ?
+            ORDER BY pinned DESC, updated_at_ms DESC, id ASC
             """.trimIndent(),
-            arrayOf(MAX_CONVERSATIONS.toString()),
+            null,
         ).use { cursor ->
             while (cursor.moveToNext()) {
                 conversations.put(
