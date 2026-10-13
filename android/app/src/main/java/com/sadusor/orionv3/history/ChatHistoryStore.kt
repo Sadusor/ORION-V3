@@ -93,18 +93,18 @@ class ChatHistoryStore(context: Context) :
         db.beginTransaction()
         try {
             val conversations = payload.optJSONArray("conversations") ?: JSONArray()
-            for (i in 0 until minOf(conversations.length(), MAX_CONVERSATIONS * 2)) {
+            for (i in 0 until conversations.length()) {
                 val c = conversations.optJSONObject(i) ?: continue
                 mergeConversation(db, c)
             }
 
             val messages = payload.optJSONArray("messages") ?: JSONArray()
             val messageLimit = MAX_CONVERSATIONS * MAX_MESSAGES_PER_CONVERSATION * 2
-            for (i in 0 until minOf(messages.length(), messageLimit)) {
+            for (i in 0 until messages.length()) {
                 val m = messages.optJSONObject(i) ?: continue
                 mergeMessage(db, m)
             }
-            prune(db)
+            // Preserve saved records; never destructively prune during sync.
             db.setTransactionSuccessful()
         } finally {
             db.endTransaction()
@@ -129,7 +129,7 @@ class ChatHistoryStore(context: Context) :
         val projectId = clean(raw.optString("project_id"), 160)
         val pinned = boolInt(raw, "pinned")
         val archived = boolInt(raw, "archived")
-        val deleted = boolInt(raw, "deleted")
+        val deleted = if (tombstoned(db, id)) 1 else boolInt(raw, "deleted")
 
         if (current == null) {
             db.execSQL(
@@ -156,7 +156,7 @@ class ChatHistoryStore(context: Context) :
         val id = clean(raw.optString("id"), 160)
         val conversationId = clean(raw.optString("conversation_id"), 120)
         val role = clean(raw.optString("role"), 20).lowercase()
-        val text = clean(raw.optString("text"), MAX_TEXT_CHARS)
+        val text = raw.optString("text").trim()
         if (id.isEmpty() || conversationId.isEmpty() || text.isEmpty() || tombstoned(db, conversationId)) return
         if (role !in setOf("user", "assistant", "system")) return
 
@@ -216,45 +216,6 @@ class ChatHistoryStore(context: Context) :
             """.trimIndent(),
             arrayOf(id, "", "", 0, 0, 0, timestamp, timestamp),
         )
-    }
-
-    private fun prune(db: SQLiteDatabase) {
-        val removeConversations = mutableListOf<String>()
-        db.rawQuery(
-            """
-            SELECT id FROM conversations
-            ORDER BY pinned DESC, updated_at_ms DESC
-            LIMIT -1 OFFSET ?
-            """.trimIndent(),
-            arrayOf(MAX_CONVERSATIONS.toString()),
-        ).use { cursor ->
-            while (cursor.moveToNext()) removeConversations += cursor.getString(0)
-        }
-        removeConversations.forEach { id ->
-            db.delete("messages", "conversation_id=?", arrayOf(id))
-            db.delete("conversations", "id=?", arrayOf(id))
-        }
-
-        val ids = mutableListOf<String>()
-        db.rawQuery("SELECT id FROM conversations", null).use { cursor ->
-            while (cursor.moveToNext()) ids += cursor.getString(0)
-        }
-        ids.forEach { conversationId ->
-            val oldMessages = mutableListOf<String>()
-            db.rawQuery(
-                """
-                SELECT id FROM messages WHERE conversation_id=?
-                ORDER BY created_at_ms DESC
-                LIMIT -1 OFFSET ?
-                """.trimIndent(),
-                arrayOf(conversationId, MAX_MESSAGES_PER_CONVERSATION.toString()),
-            ).use { cursor ->
-                while (cursor.moveToNext()) oldMessages += cursor.getString(0)
-            }
-            oldMessages.forEach { messageId ->
-                db.delete("messages", "id=?", arrayOf(messageId))
-            }
-        }
     }
 
     @Synchronized
