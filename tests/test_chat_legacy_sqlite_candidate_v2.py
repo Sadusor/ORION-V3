@@ -4,6 +4,7 @@ Checks that an existing schema-v1 SQLite file can be opened by the isolated
 candidate without rewriting or losing pre-existing records. No real user data.
 """
 import sqlite3
+from contextlib import closing
 import sys
 import tempfile
 import unittest
@@ -18,7 +19,7 @@ class LegacyChatMigrationQualification(unittest.TestCase):
         self.tmp = tempfile.TemporaryDirectory(prefix="orion-legacy-copy-")
         self.addCleanup(self.tmp.cleanup)
         self.path = Path(self.tmp.name) / "synthetic-legacy.sqlite3"
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db, db:
             db.executescript("""
                 CREATE TABLE conversations (
                     id TEXT PRIMARY KEY, title TEXT NOT NULL DEFAULT '',
@@ -45,7 +46,7 @@ class LegacyChatMigrationQualification(unittest.TestCase):
                             "Γειά σου " + str(i), "phone", 1000 + i))
 
     def test_open_existing_db_preserves_all_records(self):
-        with sqlite3.connect(self.path) as db:
+        with closing(sqlite3.connect(self.path)) as db, db:
             before = tuple(db.execute("SELECT COUNT(*) FROM conversations").fetchone())[0], (
                 db.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
             )
