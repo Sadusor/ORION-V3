@@ -1,6 +1,6 @@
 # Myownqwen — Combined ChatGPT + Gitea Training and Memory Roadmap
 Date: 2026-10-17
-Status: **PLANNED / DONOR COPY ONLY. NO INTEGRATION, NO TRAINING CHANGES.**
+Status: **OWNER ORDER CONFIRMED: GITEA TRAINING BEFORE ALL-DATABASE MEMORY. PLANNED; NO INTEGRATION OR TRAINING CHANGES.**
 Destination: Standalone `E:\QWEN-TRAINING-PIPELINE`. ORION-V3, TheHands and TheLoop are independent and remain frozen/unmodified.
 
 ## Current facts and guardrails
@@ -10,37 +10,40 @@ Destination: Standalone `E:\QWEN-TRAINING-PIPELINE`. ORION-V3, TheHands and TheL
 - **Data policy:** private ChatGPT exports and Gitea database stay on local Windows machine; do not upload chat content, repositories, credentials or trained adapters to GitHub. This branch holds only pre-existing ORION code donor files and plans.
 - **Freeze:** ORION canonical memory, V1/V1.1, integrity, promotion/supersession and the indexed V2 source remain untouched. Copied code is reference only, not permission to overwrite frozen modules.
 
-## Milestones (in required order)
-### M1 — Finish and qualify existing ChatGPT adapter
-1. Wait for completion; verify saved LoRA files, trainer metadata, train/eval evidence, and hash outputs.
-2. Merge, GGUF export, quantization and new separate Ollama tag using proven procedure only.
-3. Baseline-vs-trained test including coding, Greek/English, conversation quality, hallucination, security and negative regressions.
-4. Freeze successful adapter and test evidence; retain held-out evaluation questions.
+## Milestones — owner-confirmed order (2026-10-17)
+**Sequence: complete existing ChatGPT run → train using curated Gitea projects → connect memory to ALL eligible databases.** Do NOT build or activate the combined memory pipeline before the Gitea-training milestone. Read-only source discovery, dataset preparation and testing are allowed prerequisites for training, not a deployment of the future memory service.
 
-### M2 — Read-only combined-source inventory
-1. Map ChatGPT SQLite/message index and local Gitea bare repositories; identify correct paths and repository HEADs. No mutation.
-2. Record repository, project ownership, default branch, commit SHA, language, tests, license, size and status (finished/unfinished/unknown).
-3. Do not label unfinished code as successful; do not train on unreviewed secrets or materials without sufficient rights.
-4. Separate sources by project and provenance; never assume a ChatGPT assistant claim or PASS string is verified.
+### M1 — Finish and freeze the current ChatGPT-trained model
+1. Verify V2.1 completion and full saved adapter, logs, held-out evaluation and baseline comparison.
+2. Preserve/qualify the output under a distinct model ID without touching original Qwen/Ollama models; record a rollback point.
+3. Do not interrupt or reconfigure training in progress.
 
-### M3 — Local memory / retrieval V1 (FIRST use donor references)
-1. **Chat history index:** SQLite FTS5 over approved conversation excerpts. Preserve conversation IDs, author roles, timestamps, provenance, and project scope; exclude current conversation when appropriate.
-2. **Gitea code index:** index read-only files at exact repository/commit/path/part coordinates with source identity; maintain revision and reject stale index on commit change.
-3. **Candidate revalidation:** FTS sidecar results are non-authoritative candidates. Re-check permissions, project, active/revoked/superseded records, provenance, current Git revision, confidence and context budget before injecting snippets.
-4. SQLite-first: measure precision/recall and p50/p95 against realistic queries; add embeddings only when measured lexical misses justify them. Never mistake ORION's 1M synthetic FTS5 lookup test for integrated production performance.
-5. No cross-project/wildcard recall by default. Bounded snippets, token budget, safe query parsing, no code execution from retrieved text. Treat repo code and old messages as untrusted content.
+### M2 — Read-only Gitea inventory and training dataset
+1. Enumerate all local Gitea repositories from actual repository storage, not solely application database metadata; record project/repository IDs, commit SHA, branch, languages, license, tests, source paths and whether completed/unfinished/unknown.
+2. Inventory full project structure, cross-file dependencies, documentation, test suite, meaningful commits and fixes. Preserve source and execution evidence; do not modify original Gitea data.
+3. Build a **project-aware Gitea training corpus** using architecture explanations, verified bug→fix patches, feature→implementation, tests, and vetted code examples. Use unfinished projects as context/tasks, **not** assumed-correct answers.
+4. Screen credentials, private material, rights/licensing, generated noise, duplicates and token truncation; separate train/validation/test by projects or commits to prevent leakage.
+5. Preserve representative ChatGPT examples if necessary to avoid behavioral forgetting. Repository size is not a measure of training quality.
 
-### M4 — Whole-project learning corpus and fine-tuning V3 (separate experiment)
-1. Build project maps: tree, APIs, symbols, imports, docs, tests, version/commit pointers, dependency links; retain retrieval to retrieve full exact source.
-2. Extract instruction/correction pairs from reviewed commits and independently passing tests; focus on bug->fix, feature->patch, code->test, architecture explanations.
-3. Include representative ChatGPT conversational cases to reduce skill regression; deduplicate and keep test cases project-disjoint where possible.
-4. Prompt-completion/token-budget validation before training; reject wholly masked/truncated answers. Never treat arbitrary raw repository snapshots as correct labels.
-5. Train a NEW isolated adapter; compare original, V2.1 and V3 on held-out code tasks, cross-file integration, test correctness and conversation retention. No automatic promotion.
+### M3 — Train and evaluate Myownqwen on Gitea (BEFORE memory pipeline)
+1. Train a **new isolated Gitea-specialization adapter** on the curated dataset, using measured GPU budgets and resumable checkpoints. No in-place edits to frozen V2.1 adapter.
+2. Benchmark base Qwen, ChatGPT-trained V2.1 and Gitea-trained candidate on held-out multi-file coding tasks, bugs, project architecture understanding, test correctness, Greek/English responses and conversation regression.
+3. If a stage fails, retain prior working model and artifacts. Promote/freeze only after a verified PASS and owner acceptance.
+4. Training learns patterns and conventions, **not guaranteed literal recall of entire repositories**; exact files are handled by M4.
 
-### M5 — Controlled completion of unfinished projects
-1. Qwen selects a project, retrieves exact latest files and accepted prior decisions, builds a bounded change proposal.
-2. Runs only inside isolated checkout with owner-approved scope and deterministic GITCHECK/test evidence; STOP and approval gates remain external to model.
-3. Save only verified corrections as future candidates; never let a model-generated PASS establish its own success.
+### M4 — Connect a unified, LOCAL, read-only memory pipeline to ALL user's eligible databases (AFTER Gitea training)
+1. Begin with a read-only inventory and owner-approved connector matrix; distinguish database engines, storage paths, schemas, access rights, freshness and source-of-truth. **ALL** means all discovered and authorized compatible data sources, not unrestricted database access.
+2. Include ChatGPT conversations and code-index SQLite, local Gitea repositories/metadata/history, relevant standalone Myownqwen memory/training/evaluation stores, and any other databases explicitly discovered and approved. ORION's canonical memory may be *referenced* by an allowed read-only adapter, never modified or silently merged. Do not assume all stores reside in the same engine or directory.
+3. Introduce **separate read-only adapters** per source; use consistent provenance fields: source database, project, conversation/repository/file identifier, commit/version, author/trust level, timestamp, active/superseded status and permission scope.
+4. Adapt frozen ORION FTS5 indexed-retrieval and Gitea-index DONOR code into *new Myownqwen modules*, without modifying upstream modules, policies, or original DBs. Derived indexes must be disposable and rebuildable.
+5. Enforce project isolation, permissions, source freshness, revocation/supersession, bounded context/token budgets, prompt-injection resistance and cited snippets. No default wildcard cross-database retrieval. If multiple projects must be searched, owner-authorized explicit selection is required.
+6. Evaluate cross-source queries (past ChatGPT decision → current Gitea implementation → verified tests), end-to-end precision/recall, realistic p50/p95, update/rebuild, corrupted index recovery and negative tests. Add embeddings only after measured FTS5 misses.
+7. Provide model-facing retrieval/search, not direct write access. No cloud uploads of private DBs, code, secrets or embeddings.
+
+### M5 — Controlled continuation of unfinished projects
+1. Qwen retrieves approved current files and relevant historical decisions, then proposes bounded edits.
+2. Execute in isolated checkouts with external permissions, STOP, tests/GITCHECK and canonical verification — never treat model assertions as PASS.
+3. Review and store verified lessons as future training candidates; preserve module-only freeze discipline.
 
 ## ORION V3 donor material — copied verbatim into this BRANCH ONLY
 Source repository: `Sadusor/ORION-V3`, main commit `612944632126f2d83b0cc76258fddc957ba61e99`.
